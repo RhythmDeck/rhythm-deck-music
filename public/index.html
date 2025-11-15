@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    a:hover { color: #0000FF; }
+    #videoModal { display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 50; align-items: center; justify-content: center; }
+    #videoModal.active { display: flex; }
+    .cursor-pointer { cursor: pointer; }
+  .style1 {color: #FFFFFF}
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-900"><br><br>
+
+<!-- Triggering new deployment for Vercel -->
+
+  <!-- HEADER -->
+  <header class="bg-black text-white p-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <img src="Images/logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
+      <div>
+        <h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+        <p class="text-sm text-gray-300">Unleash Your Beat</p>
+      </div>
+    </div>
+    <nav class="space-x-4">
+    <a href="index.html" class="hover:underline">Home</a>
+    <a href="about.html" class="hover:underline">About</a>
+    <a href="benefits.html" class="hover:underline">Benefits</a>
+    <a href="pricing.html" class="hover:underline text-green-400">Pricing</a>
+    <a href="contact.html" class="hover:underline">Contact</a>
+    <a href="login.html" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300">Login</a>
+    <a href="signup.html" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
+  </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative h-[500px] bg-cover bg-center flex items-center justify-center"
+           style="background-image: url('Images/banner-cropped.jpg');">
+    <div class="bg-black bg-opacity-60 p-10 rounded-lg text-center">
+      <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">Where Music Meets Imagination</h2>
+      <p class="text-white text-lg max-w-2xl mx-auto">
+        Generate, share, and showcase your sound — all in one creative space<br><br>
+        <a href="signup.html" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-400">Create Account</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ABOUT + MAIN STAGE FEATURE -->
+  <section class="max-w-6xl mx-auto py-16 px-6 grid md:grid-cols-2 gap-8 items-start">
+    <!-- ABOUT -->
+    <div>
+      <h3 class="text-3xl font-bold mb-4">About Rhythm Deck</h3>
+      <p class="text-gray-700 leading-relaxed mb-4">
+        Rhythm Deck is a brand-new, user-friendly social media hub built for musicians of all genres. 
+        From songwriters and beatmakers, vocalists and bands to producers and distributors — 
+        we provide a simple way to generate visuals, promote your sound, and connect with other creators.
+      </p>
+      <p class="text-gray-700 leading-relaxed mb-4">
+        We offer an intuitive space where you can showcase your latest tracks, build a distinctive brand, and connect directly with your fans. 
+        With easy-to-navigate features, you can upload music, share performances, and engage with a growing community, 
+        all while establishing your presence in the music world.
+      </p>
+      <p class="text-gray-700">
+        Explore innovative Rhythm Deck features and tools, grow your audience, and turn your tracks into dynamic visual experiences that stand out.<br>
+        Check out our <a href="benefits.html"><u>Benefits</u></a> page to see the cool things we are doing to showcase your music and help you build your brand and presence.
+      </p>
+    </div>
+
+    <!-- MAIN STAGE FEATURE -->
+    <div>
+      <h3 class="text-3xl font-bold mb-4 text-left">Main Stage Feature</h3>
+      <div class="relative w-full overflow-hidden rounded-lg shadow-lg cursor-pointer" data-video="Videos/Back-in-59.mp4">
+        <img src="Images/back-in-59.png" alt="Main Stage Video" class="w-full object-cover" style="aspect-ratio:19/9; height:400px;">
+        <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="bg-white text-center py-3 rounded-b-lg shadow">
+        <p class="font-semibold text-gray-800 text-lg">RetroRock Music</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED CREATORS -->
+  <section class="bg-gray-200 py-12">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <h3 class="text-3xl font-bold mb-8">Featured Artists</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+
+        <!-- Creator 1 -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+          <div class="relative group cursor-pointer" data-video="Videos/Chrome-and-Gasoline.mp4">
+            <img src="Images/chrome-gasoline.jpg" alt="The Sound Makers" class="w-full object-cover" style="aspect-ratio:19/9; height:220px;">
+            <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="bg-white text-center py-2">
+            <p class="font-semibold text-gray-800">Silver Spoon</p>
+          </div>
+        </div>
+
+        <!-- Creator 2 -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+          <div class="relative group cursor-pointer" data-video="Videos/Midnight-Highway-Roar.mp4">
+            <img src="Images/Midnight-Highway-Roar-thumbnail.jpg" alt="Electric Avenue" class="w-full object-cover" style="aspect-ratio:19/9; height:220px;">
+            <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="bg-white text-center py-2">
+            <p class="font-semibold text-gray-800">Ricci Moore - Song Writer</p>
+          </div>
+        </div>
+
+        <!-- Creator 3 -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+          <div class="relative group cursor-pointer" data-video="Videos/The-Killer-Lives-On.mp4">
+            <img src="Images/the-killer-lives-on.jpg" alt="Vibe Studio" class="w-full object-cover" style="aspect-ratio:19/9; height:220px;">
+            <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="bg-white text-center py-2">
+            <p class="font-semibold text-gray-800">Vibe Studio</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FREE vs PRO PLAN SECTION -->
+<section class="max-w-6xl mx-auto py-16 px-6">
+  <h3 class="text-3xl font-bold mb-8 text-center">Plans & Features</h3>
+  <div class="grid md:grid-cols-2 gap-6 items-center">
+    <!-- IMAGE PLACEHOLDER -->
+    <div class="rounded-lg overflow-hidden h-64">
+      <img src="Images/image-13-cropped.jpg" alt="Free vs Pro Plans" class="w-full h-full object-cover">
+    </div>
+
+    <!-- PLANS -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Free Plan -->
+      <div class="bg-white rounded-lg shadow p-6 border-2 border-green-400">
+        <h4 class="text-2xl font-bold mb-4 text-center">Free Plan</h4>
+        <ul class="space-y-2 text-gray-700">
+          <li>🎵 Upload & Share Unlimited Videos</li>
+          <li>👤 Personalized Profile Page. Add your own banner, logo, bio and upload your video content you want to showcase on your personal public feed.</li>
+          <li>and much more</li>
+        </ul>
+        <div class="text-center mt-4">
+          <a href="pricing.html" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-400">Compare Plans</a>
+        </div>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="bg-white rounded-lg shadow p-6 border-2 border-yellow-400">
+        <h4 class="text-2xl font-bold mb-4 text-center text-yellow-500">Pro Plan</h4>
+        <ul class="space-y-2 text-gray-700">
+          <li>🌟 All Free Features +</li>
+          <li>📡 Live Streaming</li>
+          <li>🔗 Cross-Platform Sharing (Facebook, YouTube, X and more coming)</li>
+          <li>🏆 Eligibility for Featured & Main Stage</li>
+          <li>and much more</li>
+        </ul>
+        <div class="text-center mt-4">
+          <a href="pricing.html" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-400">Compare Plans</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section><br>
+
+  <!-- Q&A SECTION -->
+  <section class="bg-neutral-950 py-16 px-6">
+    <div class="max-w-6xl mx-auto">
+      <h3 class="text-3xl font-bold mb-8 text-center style1">Q&A</h3>
+      <div class="grid md:grid-cols-2 gap-6">
+
+        <!-- LEFT SIDE Q&A -->
+        <div class="space-y-4">
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">What is Rhythm Deck?</summary>
+            <p class="text-gray-400 mt-2">An AI-powered platform for music creators to generate lyrics, videos, and engage fans.</p>
+          </details>
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">Is it really free?</summary>
+            <p class="text-gray-400 mt-2">Yes! The Free Plan includes unlimited creative tools and public uploads.</p>
+          </details>
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">What do I get with Pro?</summary>
+            <p class="text-gray-400 mt-2">Pro unlocks sharing tools, fan polls, live streaming, and eligibility for Main Stage & Featured Artist slots.</p>
+          </details>
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">How do I upgrade?</summary>
+            <p class="text-gray-400 mt-2">You can upgrade anytime from your profile admin page or during signup.</p>
+          </details>
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">How do I get on the Main Stage or Featured artist?</summary>
+            <p class="text-gray-400 mt-2">Artists can apply or be nominated. Criteria: originality, quality, engagement, and visuals. Final approval by staff. Updated monthly.</p>
+          </details>
+        </div>
+
+        <!-- RIGHT SIDE Q&A -->
+        <div class="space-y-4">
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">Can I collaborate with other artists?</summary>
+            <p class="text-gray-400 mt-2">Yes! Connect with others in the Rhythm Deck community to collaborate on music and visuals.</p>
+          </details>
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">Can fans interact with my music?</summary>
+            <p class="text-gray-400 mt-2">Pro users can host polls, Q&A, and fan shoutouts directly from their artist page.</p>
+          </details>
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">Are there limits to uploads?</summary>
+            <p class="text-gray-400 mt-2">Free users have limited file sizes, while Pro users get higher storage and priority uploads.</p>
+          </details>
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">When are new features added?</summary>
+            <p class="text-gray-400 mt-2">We release new AI and community features monthly based on user feedback.</p>
+          </details>
+          <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+            <summary class="font-semibold text-green-400">Can I monetize my content?</summary>
+            <p class="text-gray-400 mt-2">Pro users will soon be able to earn from fan tips and sponsorship integrations.</p>
+          </details>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <!-- VIDEO MODAL -->
+  <div id="videoModal" class="fixed inset-0 bg-black bg-opacity-80 items-center justify-center z-50">
+    <div class="relative w-full max-w-3xl">
+      <video id="videoPlayer" class="w-full rounded-lg" controls preload="auto" playsinline webkit-playsinline>
+        <source id="videoSourceMp4" src="" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <button id="closeVideoBtn" class="absolute top-2 right-2 bg-white text-black px-3 py-1 rounded-full font-bold">✕</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-black text-white mt-10 p-4 text-center text-sm">
+    <nav class="mb-2 space-x-4">
+      <a href="contact.html" class="hover:underline">Contact Us</a>
+      <a href="privacy.html" class="hover:underline">Privacy Policy</a>
+      <a href="terms.html" class="hover:underline">Terms & Conditions</a>
+    </nav>
+    <p>&copy; 2025 Rhythm Deck Music. All rights reserved.</p>
+  </footer>
+
+  <!-- VIDEO SCRIPT -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const modal = document.getElementById("videoModal");
+      const videoPlayer = document.getElementById("videoPlayer");
+      const videoSourceMp4 = document.getElementById("videoSourceMp4");
+      const closeBtn = document.getElementById("closeVideoBtn");
+
+      function openVideo(mp4Path) {
+        videoSourceMp4.src = mp4Path;
+        videoPlayer.load();
+        modal.classList.add("active");
+        videoPlayer.play().catch(err => console.warn("Autoplay blocked", err));
+      }
+
+      function closeVideo() {
+        videoPlayer.pause();
+        videoPlayer.currentTime = 0;
+        videoSourceMp4.src = "";
+        modal.classList.remove("active");
+      }
+
+      modal.addEventListener("click", e => {
+        if (e.target === modal) closeVideo();
+      });
+
+      closeBtn.addEventListener("click", closeVideo);
+
+      document.querySelectorAll("[data-video]").forEach(el => {
+        el.addEventListener("click", () => openVideo(el.dataset.video));
+      });
+    });
+  </script>
+
+</body>
+</html>
+
