@@ -13,7 +13,6 @@
     </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
-
 <!-- CENTERED TOAST -->
 <div id="toastContainer"></div>
 
@@ -74,7 +73,7 @@
                             <input type="password" id="password" required
                                    class="w-full border border-gray-300 rounded-lg p-3 pr-12 input-focus focus:outline-none focus:ring-2 focus:ring-green-400">
                             <span id="togglePassword" class="absolute right-3 top-3.5 cursor-pointer text-gray-500 text-sm select-none">
-                                👁️
+                                Show
                             </span>
                         </div>
                     </div>
@@ -87,25 +86,18 @@
                         </div>
                         <div id="subdomainStatus" class="mt-2 text-sm h-5 font-medium"></div>
                     </div>
+
+                    <!-- PLAN DURATION SELECT -->
                     <div>
-                        <label class="block text-gray-700 font-semibold mb-1">Select Plan</label>
-                        <select id="plan" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-400">
-                            <option value="Free">Free Plan</option>
-                            <option value="Pro">Pro Plan</option>
+                        <label class="block text-gray-700 font-semibold mb-1">Select Pro Plan Duration</label>
+                        <select id="planDuration" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-400">
+                            <option value="" disabled selected>Select duration</option>
+                            <option value="1year">1 Year - $140.26</option>
+                            <option value="2year">2 Years - $265.28</option>
+                            <option value="3year">3 Years - $374.11</option>
                         </select>
                     </div>
-                    <div id="termContainer" class="hidden mt-3">
-                        <label class="block text-gray-700 font-semibold mb-1">Select Term</label>
-                        <select id="term" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-400">
-                            <option value="1">1 Year - 10% Discount ($140.26)</option>
-                            <option value="2">2 Years - 15% Discount ($265.28)</option>
-                            <option value="3">3 Years - 20% Discount ($374.11)</option>
-                        </select>
-                    </div>
-                    <div id="priceContainer" class="hidden mt-2 pt-2 border-t border-gray-200">
-                        <p class="text-gray-700 font-semibold text-lg">Total at Checkout: <span id="price" class="text-green-600 font-bold">$0.00</span></p>
-                        <p class="text-gray-600 text-xs mt-1">Full price after discount applied</p>
-                    </div>
+
                     <div class="flex items-center space-x-2">
                         <input type="checkbox" id="terms" required class="rounded text-green-500 focus:ring-green-400 h-4 w-4">
                         <label for="terms" class="text-gray-700 text-sm">
@@ -113,6 +105,7 @@
                             <a href="privacy.html" class="text-green-500 hover:underline font-medium">Privacy Policy</a>.
                         </label>
                     </div>
+
                     <button type="submit" id="submitButton"
                             class="w-full bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition shadow-lg">
                         Create Account
@@ -136,7 +129,7 @@
 </footer>
 
 <script>
-    // CENTERED TOAST
+    // TOAST MESSAGE
     function showMessage(title, body, colorClass = 'bg-green-600') {
         const container = document.getElementById('toastContainer');
         const id = 'toast-' + Date.now();
@@ -169,46 +162,23 @@
 
         const passwordInput = document.getElementById('password');
         const togglePassword = document.getElementById('togglePassword');
-        const planSelect = document.getElementById('plan');
-        const termContainer = document.getElementById('termContainer');
-        const priceContainer = document.getElementById('priceContainer');
-        const termSelect = document.getElementById('term');
-        const priceDisplay = document.getElementById('price');
         const subdomainInput = document.getElementById('subdomain');
         const subdomainStatus = document.getElementById('subdomainStatus');
+        const planDurationSelect = document.getElementById('planDuration');
         const signupForm = document.getElementById('signupForm');
         const submitButton = document.getElementById('submitButton');
 
         let isSubdomainAvailable = false;
         let subdomainTimeout;
 
-        const prices = { '1': '140.26', '2': '265.28', '3': '374.11' };
-
-        // PASSWORD TOGGLE — FIXED
+        // Toggle password visibility
         togglePassword.addEventListener('click', () => {
             const isPassword = passwordInput.type === 'password';
             passwordInput.type = isPassword ? 'text' : 'password';
             togglePassword.textContent = isPassword ? 'Hide' : 'Show';
         });
 
-        function updatePrice() {
-            const term = termSelect.value;
-            priceDisplay.textContent = `$${prices[term] || '0.00'}`;
-        }
-
-        function toggleProFields() {
-            const isPro = planSelect.value === 'Pro';
-            termContainer.classList.toggle('hidden', !isPro);
-            priceContainer.classList.toggle('hidden', !isPro);
-            if (isPro) updatePrice();
-            else priceDisplay.textContent = '$0.00';
-        }
-
-        planSelect.addEventListener('change', toggleProFields);
-        termSelect.addEventListener('change', updatePrice);
-        toggleProFields();
-
-        // SUBDOMAIN CHECK
+        // Check subdomain availability
         async function checkSubdomain(subdomain) {
             subdomain = subdomain.trim().toLowerCase();
             if (subdomain.length < 3) {
@@ -247,7 +217,7 @@
             subdomainTimeout = setTimeout(() => checkSubdomain(val), 800);
         });
 
-        // FORM SUBMIT — FIXED: GOES TO STRIPE
+        // FORM SUBMIT
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -255,45 +225,44 @@
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             const subdomain = subdomainInput.value.trim().toLowerCase();
-            const plan = planSelect.value;
-            const term = termSelect.value;
+            const planDuration = planDurationSelect.value;
 
             if (!isSubdomainAvailable) {
                 showMessage('Error', 'Subdomain not available.', 'bg-red-600');
                 return;
             }
+            if (!planDuration) {
+                showMessage('Error', 'Please select a plan duration.', 'bg-red-600');
+                return;
+            }
 
             submitButton.disabled = true;
-            submitButton.textContent = 'Creating...';
+            submitButton.textContent = 'Creating Account...';
 
             try {
                 const response = await fetch('/signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, subdomain, name, plan, term })
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        name,
+                        subdomain,
+                        planDuration
+                    })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Signup failed');
+                    throw new Error(data.message || data.error || 'Signup failed');
                 }
 
-                if (plan === 'Free') {
-                    showMessage('Success!', 'Free account created.', 'bg-green-600');
-                    setTimeout(() => {
-                        window.location.href = `/profile-admin-pro.html?user_id=${data.user_id}`;
-                    }, 1500);
-                    return;
-                }
-
-                // PRO PLAN: REDIRECT TO STRIPE
                 if (data.url) {
-                    window.location.href = data.url;  // This goes to Stripe
+                    window.location.href = data.url; // Go to Stripe
                 } else {
                     throw new Error('No checkout URL');
                 }
-
             } catch (err) {
                 showMessage('Error', err.message, 'bg-red-600');
                 submitButton.disabled = false;
