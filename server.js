@@ -1,32 +1,32 @@
 const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
 
 const app = express();
-app.use(express.json());
-app.use(express.static('public')); // serves your signup.html, profile-admin-pro.html, etc.
 
-// Supabase client (use your own keys from Render env vars)
+// Middleware
+app.use(express.json());
+app.use(express.static('public')); // This serves signup.html, index.html, etc.
+
+// Supabase client
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
 
-// Your Stripe Price IDs (replace with your real ones or keep these if they match)
+// Your real Stripe Price IDs (replace these with yours!)
 const PRO_PRICE_IDS = {
-  '1year': 'price_1XXXXXX', // ← put your real 1-year price ID here
-  '2year': 'price_1XXXXXX', // ← put your real 2-year price ID here
-  '3year': 'price_1XXXXXX'  // ← put your real 3-year price ID here
+  '1year': 'price_1SLX0IFV6v4usVQ1xsTaeCGk',
+  '2year': 'price_1SLWy5FV6v4usVQ12KvuIFim',
+  '3year': 'price_1SLKLEFV6v4usVQ1aUro0ZbP'
 };
 
-// ========================
-// SIGNUP ROUTE (FINAL VERSION)
-// ========================
+// SIGNUP ROUTE — FINAL WORKING VERSION
 app.post('/signup', async (req, res) => {
   const { email, password, name, subdomain, planDuration } = req.body;
 
   try {
-    // 1. Create user + pass data to trigger via metadata
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -40,16 +40,15 @@ app.post('/signup', async (req, res) => {
     });
 
     if (error) throw error;
-    const user = data.user;
 
-    // Profile is automatically created by the handle_new_user() trigger → no manual insert!
+    // Profile is auto-created by the trigger → we do NOTHING here
 
-    // Free plan = immediate success
+    // Free plan = instant success
     if (!planDuration || planDuration === 'free') {
       return res.json({ success: true });
     }
 
-    // Pro plan → send to Stripe
+    // Pro plan → go to Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -59,9 +58,9 @@ app.post('/signup', async (req, res) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${req.headers.origin}/profile-admin-pro.html?user_id=${user.id}`,
+      success_url: `${req.headers.origin}/profile-admin-pro.html?user_id=${data.user.id}`,
       cancel_url: `${req.headers.origin}/signup.html`,
-      client_reference_id: user.id,
+      client_reference_id: data.user.id,
       customer_email: email,
     });
 
@@ -72,10 +71,13 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-// Optional: simple health check
-app.get('/', (req, res) => {
-  res.send('Rhythm Deck server is running!');
+// Fallback for all other routes (so /signup, /login, etc. work)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
