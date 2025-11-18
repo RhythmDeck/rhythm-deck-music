@@ -185,7 +185,7 @@
             togglePassword.textContent = type === 'password' ? 'Show' : 'Hide';
         });
 
-        // Subdomain check (unchanged)
+        // Subdomain check
         async function checkSubdomain(subdomain) {
             subdomain = subdomain.trim().toLowerCase();
             if (subdomain.length < 3) {
@@ -199,18 +199,26 @@
             try {
                 const { data } = await supabase.from('profiles').select('id').eq('subdomain', subdomain).maybeSingle();
                 if (data) {
-                    subdomainStatus.textContent = 'Taken!'; subdomainStatus.className = 'mt-2 text-sm h-5 font-medium text-red-500'; isSubdomainAvailable = false;
+                    subdomainStatus.textContent = 'Taken!';
+                    subdomainStatus.className = 'mt-2 text-sm h-5 font-medium text-red-500';
+                    isSubdomainAvailable = false;
                 } else {
-                    subdomainStatus.textContent = 'Available!'; subdomainStatus.className = 'mt-2 text-sm h-5 font-medium text-green-500'; isSubdomainAvailable = true;
+                    subdomainStatus.textContent = 'Available!';
+                    subdomainStatus.className = 'mt-2 text-sm h-5 font-medium text-green-500';
+                    isSubdomainAvailable = true;
                 }
-            } catch { subdomainStatus.textContent = 'Available!'; subdomainStatus.className = 'mt-2 text-sm h-5 font-medium text-green-500'; isSubdomainAvailable = true; }
+            } catch {
+                subdomainStatus.textContent = 'Available!';
+                subdomainStatus.className = 'mt-2 text-sm h-5 font-medium text-green-500';
+                isSubdomainAvailable = true;
+            }
         }
         subdomainInput.addEventListener('input', () => {
             clearTimeout(subdomainTimeout);
             subdomainTimeout = setTimeout(() => checkSubdomain(subdomainInput.value.trim()), 800);
         });
 
-        // Show/hide Pro options + update price
+        // Show/hide Pro options + price display
         planType.addEventListener('change', () => {
             if (planType.value === 'pro') {
                 proOptions.classList.remove('hidden');
@@ -243,7 +251,7 @@
 
             if (planType.value === 'pro') {
                 if (!planDuration.value) return showMessage('Error', 'Please select a Pro duration.', 'bg-red-600');
-                payload.planDuration = planDuration.value; // 1year / 2year / 3year
+                payload.planDuration = planDuration.value; // This now sends exactly "1year", "2year", "3year"
             } else {
                 payload.planDuration = 'free';
             }
