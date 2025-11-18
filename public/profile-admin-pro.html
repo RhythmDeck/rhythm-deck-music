@@ -160,14 +160,20 @@
     if (!user) return window.location.href = '/login.html';
     currentUser = user;
 
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('subdomain, name, bio, banner_url, logo_url')
       .eq('id', user.id)
       .single();
 
+    if (error) {
+      console.error('Profile load error:', error);
+      alert('Could not load profile. Please log out and log in again.');
+      return;
+    }
+
     // Set public URL
-    document.getElementById('publicUrl').textContent = `${profile.subdomain}.rhythmdeckmusic.com`;
+    document.getElementById('publicUrl').textContent = `${profile.subdomain || user.id}.rhythmdeckmusic.com`;
 
     // Load existing data
     if (profile.name) document.getElementById('artistNameInput').value = profile.name;
@@ -175,16 +181,16 @@
 
     // Load banner
     if (profile.banner_url) {
-      const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
-      document.getElementById('bannerPreview').src = data.publicUrl + '?t=' + Date.now();
+      const { data: bannerData } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
+      document.getElementById('bannerPreview').src = bannerData.publicUrl + '?t=' + Date.now();
       document.getElementById('bannerPreview').classList.remove('hidden');
       document.getElementById('bannerPlaceholder').style.display = 'none';
     }
 
     // Load logo
     if (profile.logo_url) {
-      const { data } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
-      document.getElementById('logoPreview').src = data.publicUrl + '?t=' + Date.now();
+      const { data: logoData } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
+      document.getElementById('logoPreview').src = logoData.publicUrl + '?t=' + Date.now();
     }
 
     await loadVideos();
@@ -207,6 +213,7 @@
     document.getElementById('bannerPreview').src = data.publicUrl + '?t=' + Date.now();
     document.getElementById('bannerPreview').classList.remove('hidden');
     document.getElementById('bannerPlaceholder').style.display = 'none';
+    alert('Banner uploaded!');
   }
 
   async function uploadLogo(e) {
@@ -219,6 +226,7 @@
     await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
     const { data } = supabase.storage.from('media').getPublicUrl(path);
     document.getElementById('logoPreview').src = data.publicUrl + '?t=' + Date.now();
+    alert('Logo uploaded!');
   }
 
   async function saveArtistName() {
@@ -256,9 +264,10 @@
     if (vError || tError) {
       alert('Upload failed: ' + (vError?.message || tError?.message));
     } else {
+      const { data: profile } = await supabase.from('profiles').select('subdomain').eq('id', currentUser.id).single();
       await supabase.from('user_videos').insert({
         user_id: currentUser.id,
-        subdomain: (await supabase.from('profiles').select('subdomain').eq('id', currentUser.id).single()).data.subdomain,
+        subdomain: profile.subdomain,
         title: videoFile.name.replace(/\.[^/.]+$/, ""),
         video_url: videoPath,
         thumbnail_url: thumbPath
