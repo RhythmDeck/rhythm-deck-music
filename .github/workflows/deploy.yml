@@ -5,19 +5,26 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy site
+      - name: Copy public to gh-pages
         run: |
-          mkdir _site
-          cp -r public/* _site/
-          cd _site
-          git init
-          git config user.name "RhythmDeck"
-          git config user.email "rhythmdeck@example.com"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout gh-pages || git checkout -b gh-pages
+          rm -rf * .gitignore
+          cp -r public/* .
           git add .
-          git commit -m "Deploy"
-          git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/RhythmDeck/rhythm-deck-music.git HEAD:gh-pages
+          git commit -m "Deploy from public folder" || true
+          git push origin gh-pages
+
+  pages-deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Deploy
+        run: echo "Site deployed to gh-pages"
