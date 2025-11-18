@@ -17,9 +17,9 @@ const supabase = createClient(
 
 // Your real Stripe Price IDs (replace these with yours!)
 const PRO_PRICE_IDS = {
-  '1year': 'price_1SLKLEFV6v4usVQ1aUro0ZbP',
-  '2year': 'price_1SLWy5FV6v4usVQ12KvuIFim',
-  '3year': 'price_1SLX0IFV6v4usVQ1xsTaeCGk'
+  '1year': 'price_1SMqWH2WyyY6hPDEkY5nO9Xv',
+  '2year': 'price_1SMqXh2WyyY6hPDEWABVsPHY',
+  '3year': 'price_1SMqWH2WyyY6hPDEkY5nO9Xv'
 };
 
 // SIGNUP ROUTE — FINAL WORKING VERSION
