@@ -1,0 +1,23 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy site
+        run: |
+          mkdir _site
+          cp -r public/* _site/
+          cd _site
+          git init
+          git config user.name "RhythmDeck"
+          git config user.email "rhythmdeck@example.com"
+          git add .
+          git commit -m "Deploy"
+          git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/RhythmDeck/rhythm-deck-music.git HEAD:gh-pages
