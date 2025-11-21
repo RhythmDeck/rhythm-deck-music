@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Profile | Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .video-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
+    .video-card:hover .video-overlay{opacity:1}
+    #videoModal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
+    #videoModal.show{opacity:1;visibility:visible}
+    #modalVideo{max-width:90%;max-height:90%;border:4px solid #10b981;border-radius:12px}
+    #closeModal{position:absolute;top:20px;right:20px;background:white;color:black;width:50px;height:50px;border-radius:50%;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(0,0,0,.8);z-index:10}
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
+<!-- REMOVE ANY URL GARBAGE ON LOAD -->
+<script>
+  if (window.location.search) {
+    history.replaceState(null, '', '/profile-admin-pro.html');
+  }
+</script>
+
+<header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
+  <div class="flex items-center space-x-3">
+    <img src="logo-1-sm.jpg" alt="Logo" class="w-10 h-10 rounded-full">
+    <div><h1 class="text-2xl font-bold">RHYTHM DECK</h1><p class="text-sm text-gray-300">Pro Plan</p></div>
+  </div>
+  <nav class="space-x-4">
+    <a href="index.html" class="hover:underline">Home</a>
+    <button onclick="logout()" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300">Logout</button>
+  </nav>
+</header>
+
+<main class="flex-grow">
+  <section class="relative h-80 bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
+    <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
+    <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-4xl font-bold opacity-70">
+      Your Banner Image Here
+    </div>
+    <div class="absolute bottom-4 left-4 w-32 h-32 rounded-full border-8 border-white shadow-2xl overflow-hidden bg-white">
+      <img id="logoPreview" src="logo-placeholder.png" class="w-full h-full object-cover">
+    </div>
+    <input type="file" id="bannerInput" accept="image/*" class="hidden">
+    <button onclick="document.getElementById('bannerInput').click()" class="absolute bottom-4 right-4 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold">Upload Banner</button>
+    <input type="file" id="logoInput" accept="image/*" class="hidden">
+    <button onclick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm font-bold">Change Logo</button>
+  </section>
+
+  <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
+    <div class="grid md:grid-cols-4 gap-8">
+      <div class="md:col-span-1 space-y-6">
+        <div class="bg-gray-50 p-5 rounded-xl shadow">
+          <h3 class="text-xl font-bold mb-3">Artist Name</h3>
+          <input type="text" id="artistNameInput" class="w-full border p-3 rounded-lg" placeholder="Your name">
+          <button onclick="saveArtistName()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 mt-2 font-bold">Save</button>
+        </div>
+        <div class="bg-gray-50 p-5 rounded-xl shadow">
+          <label class="block font-bold mb-2">Bio</label>
+          <textarea id="bioInput" class="w-full border p-3 rounded-lg h-40"></textarea>
+          <button onclick="saveBio()" class="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 mt-2 font-bold">Save Bio</button>
+        </div>
+        <div class="bg-green-50 p-6 rounded-xl shadow text-center">
+          <p class="text-sm text-gray-600">Your Public Page:</p>
+          <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-3">Loading...</p>
+          <a id="publicLink" target="_blank" class="block mt-3 text-blue-600 underline font-medium">Open in new tab</a>
+        </div>
+      </div>
+
+      <div class="md:col-span-3 space-y-8">
+        <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">Upload New Video</h3>
+          <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <input type="file" accept="image/*" id="thumbnailInput" class="file:mr-4 file:py-3 file:px-6 file:rounded-full file:bg-green-600 file:text-white">
+            <input type="file" accept="video/mp4" id="videoInput" class="file:mr-4 file:py-3 file:px-6 file:rounded-full file:bg-green-600 file:text-white">
+          </div>
+          <button id="uploadVideo" class="bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold flex items-center gap-3">
+            Upload & Publish
+            <div id="uploadSpinner" class="spinner hidden"></div>
+          </button>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">Your Videos</h3>
+          <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="col-span-full text-center text-gray-500 py-10">Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="videoModal">
+  <div id="closeModal" onclick="closeModal()">X</div>
+  <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
+</div>
+
+<footer class="bg-black text-white p-6 text-center text-sm">
+  © 2025 Rhythm Deck Music. All rights reserved.
+</footer>
+
+<script>
+const supabase = window.supabase.createClient(
+  "https://bxoqhmfnseskwqkywppg.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+);
+
+let currentUser = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return location.href = 'login.html';
+  currentUser = user;
+
+  // === FINAL EMERGENCY SUBDOMAIN FIX (THIS IS THE ONE THAT KILLS THE BUG) ===
+  let { data: profile } = await supabase
+    .from('profiles')
+    .select('subdomain, name, bio, banner_url, logo_url')
+    .eq('id', currentUser.id)
+    .single();
+
+  let subdomain = profile?.subdomain?.trim();
+
+  // If subdomain is missing or still the cursed old one → FORCE IT FROM AUTH METADATA
+  if (!subdomain || subdomain === 'rhythm-deck-platform' || subdomain.startsWith('user-')) {
+    const authSubdomain = currentUser.user_metadata?.subdomain;
+    if (authSubdomain) {
+      subdomain = authSubdomain.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+      // Permanently fix the database
+      await supabase.from('profiles').upsert({
+        id: currentUser.id,
+        subdomain: subdomain
+      });
+      profile = { ...profile, subdomain };
+    }
+  }
+
+  // Final fallback (should never happen)
+  if (!subdomain) subdomain = 'unknown-user';
+
+  // === THIS IS THE ONLY PUBLIC URL THAT MATTERS ===
+  const publicUrl = `${location.origin}/public-profile.html?id=${subdomain}`;
+  document.getElementById('publicUrl').textContent = publicUrl;
+  document.getElementById('publicLink').href = publicUrl;
+
+  // Fill the rest of the page
+  document.getElementById('artistNameInput').value = profile?.name || '';
+  document.getElementById('bioInput').value = profile?.bio || '';
+
+  if (profile?.banner_url) loadImage('bannerPreview', profile.banner_url, 'bannerPlaceholder');
+  if (profile?.logo_url) loadImage('logoPreview', profile.logo_url);
+
+  await loadVideos();
+
+  document.getElementById('bannerInput').onchange = uploadBanner;
+  document.getElementById('logoInput').onchange = uploadLogo;
+  document.getElementById('uploadVideo').onclick = uploadAndPublish;
+});
+
+function loadImage(elId, path, placeholderId = null) {
+  const url = supabase.storage.from('media').getPublicUrl(path).data.publicUrl + '?t=' + Date.now();
+  const img = document.getElementById(elId);
+  img.src = url;
+  img.classList.remove('hidden');
+  if (placeholderId) document.getElementById(placeholderId).classList.add('hidden');
+}
+
+async function uploadBanner(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const path = `banners/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+  await supabase.storage.from('media').upload(path, file, { upsert: true });
+  await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
+  loadImage('bannerPreview', path, 'bannerPlaceholder');
+}
+
+async function uploadLogo(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const path = `logos/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+  await supabase.storage.from('media').upload(path, file, { upsert: true });
+  await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
+  loadImage('logoPreview', path);
+}
+
+async function saveArtistName() {
+  const name = document.getElementById('artistNameInput').value.trim();
+  if (name) await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
+}
+
+async function saveBio() {
+  await supabase.from('profiles').update({ bio: document.getElementById('bioInput').value }).eq('id', currentUser.id);
+}
+
+async function uploadAndPublish() {
+  const video = document.getElementById('videoInput').files[0];
+  const thumb = document.getElementById('thumbnailInput').files[0];
+  if (!video || !thumb) return alert('Both files required');
+  document.getElementById('uploadVideo').disabled = true;
+  document.getElementById('uploadSpinner').classList.remove('hidden');
+  const ts = Date.now();
+  const vPath = `videos/${currentUser.id}_${ts}.mp4`;
+  const tPath = `thumbnails/${currentUser.id}_${ts}.${thumb.name.split('.').pop()}`;
+  await Promise.all([
+    supabase.storage.from('media').upload(vPath, video),
+    supabase.storage.from('media').upload(tPath, thumb)
+  ]);
+  await supabase.from('user_videos').insert({
+    user_id: currentUser.id,
+    title: video.name.replace('.mp4',''),
+    video_url: vPath,
+    thumbnail_url: tPath
+  });
+  alert('Published!');
+  document.getElementById('videoInput').value = document.getElementById('thumbnailInput').value = '';
+  await loadVideos();
+  document.getElementById('uploadVideo').disabled = false;
+  document.getElementById('uploadSpinner').classList.add('hidden');
+}
+
+async function loadVideos() {
+  const { data } = await supabase.from('user_videos').select('*').eq('user_id', currentUser.id).order('created_at', { descending: true });
+  const list = document.getElementById('videoList');
+  list.innerHTML = data?.length ? '' : '<p class="col-span-full text-center text-gray-500 py-10">No videos yet</p>';
+  data?.forEach(v => {
+    const vUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+    const tUrl = supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl;
+    list.innerHTML += `<div class="video-card relative bg-white rounded-xl shadow-lg overflow-hidden">
+      <div onclick="openVideoPopup('${vUrl}')" class="cursor-pointer">
+        <img src="${tUrl}" class="w-full h-48 object-cover">
+        <div class="video-overlay"><svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M8 5v10l7-5-7-5z"/></svg></div>
+      </div>
+      <div class="p-4"><p class="font-bold truncate">${v.title || 'Untitled'}</p></div>
+    </div>`;
+  });
+}
+
+function openVideoPopup(url) {
+  document.getElementById('modalVideo').src = url;
+  document.getElementById('videoModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalVideo').src = '';
+  document.getElementById('videoModal').classList.remove('show');
+}
+
+async function logout() {
+  await supabase.auth.signOut();
+  location.href = 'index.html';
+}
+</script>
+</body>
+</html>
