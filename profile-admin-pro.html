@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Dashboard | Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    iframe {width:100%;height:500px;border:none;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);}
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+<script>
+// CLEAN URL INSTANTLY
+if (window.location.search) history.replaceState(null, '', '/profile-admin-pro.html');
+</script>
+
+<header class="bg-black text-white p-6 text-center">
+  <h1 class="text-4xl font-bold">RHYTHM DECK — PRO DASHBOARD</h1>
+</header>
+
+<div class="max-w-7xl mx-auto p-6 grid lg:grid-cols-3 gap-8">
+
+  <!-- LEFT COLUMN -->
+  <div class="space-y-8">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-2xl font-bold mb-6">Your Public Link</h2>
+      <div class="bg-green-50 p-6 rounded-xl text-center border-4 border-green-300">
+        <p class="text-sm text-gray-600 mb-2">Share this everywhere:</p>
+        <p id="publicUrl" class="font-black text-2xl text-green-700 break-all">Loading...</p>
+        <a id="publicLink" target="_blank" class="inline-block mt-4 px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 font-bold">Open Public Page</a>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-2xl font-bold mb-6">Artist Info</h2>
+      <input id="artistNameInput" placeholder="Artist / Band Name" class="w-full p-4 border rounded-lg mb-4 text-lg">
+      <textarea id="bioInput" placeholder="Your bio..." class="w-full p-4 border rounded-lg h-32 mb-4"></textarea>
+      <button onclick="saveInfo()" class="w-full bg-black text-white py-4 rounded-lg font-bold hover:bg-gray-800">Save Info</button>
+    </div>
+
+    <div class="bg-purple-50 rounded-2xl shadow-xl p-8 text-center">
+      <h3 class="text-xl font-bold mb-4">Live Stream & Chat</h3>
+      <iframe src="https://vdo.ninja/?room=rhythmdeck_&push=" allow="camera;microphone;display-capture" allowfullscreen></iframe>
+      <p class="text-sm text-gray-600 mt-4">Your fans can watch & chat here in real-time</p>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN — UPLOADS -->
+  <div class="lg:col-span-2 space-y-8">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-3xl font-bold mb-8">Upload New Video</h2>
+      <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <div>
+          <label class="block font-bold mb-3 text-lg">Thumbnail (image)</label>
+          <input type="file" id="thumbnailInput" accept="image/*" class="w-full file:py-4 file:px-8 file:rounded-full file:bg-green-600 file:text-white">
+        </div>
+        <div>
+          <label class="block font-bold mb-3 text-lg">Video (MP4)</label>
+          <input type="file" id="videoInput" accept="video/mp4" class="w-full file:py-4 file:px-8 file:rounded-full file:bg-green-600 file:text-white">
+        </div>
+      </div>
+      <button id="uploadBtn" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-6 rounded-2xl font-black text-xl hover:from-green-700 hover:to-emerald-700 flex items-center justify-center gap-4 shadow-2xl">
+        <span>Upload & Publish Video</span>
+        <div id="spinner" class="spinner hidden></div>
+      </button>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-3xl font-bold mb-8">Your Published Videos</h2>
+      <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <p class="col-span-full text-center text-gray-500 text-xl py-20">No videos yet — upload your first!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const supabase = window.supabase.createClient(
+  "https://bxoqhmfnseskwqkywppg.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+);
+
+let currentUser = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return location.href = 'login.html';
+  currentUser = user;
+
+  // FINAL SUBDOMAIN RESCUE MISSION — THIS CANNOT FAIL
+  let subdomain = user.user_metadata?.subdomain;
+
+  if (!subdomain) {
+    // Last resort: try to get from profiles table
+    const { data } = await supabase.from('profiles').select('subdomain').eq('id', user.id).maybeSingle();
+    subdomain = data?.subdomain;
+  }
+
+  if (!subdomain) {
+    subdomain = prompt("Enter your subdomain (from signup):);
+    if (subdomain) {
+      await supabase.from('profiles').upsert({ id: user.id, subdomain });
+    }
+  }
+
+  subdomain = subdomain.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  if (subdomain.length < 3) subdomain = 'user-' + user.id.slice(-8);
+
+  // THIS IS THE ONLY URL THAT WILL EVER BE SHOWN
+  const publicUrl = `${location.origin}/public-profile.html?id=${subdomain}`;
+  document.getElementById('publicUrl').textContent = publicUrl;
+  document.getElementById('publicLink').href = publicUrl;
+
+  // Load rest of profile
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+  document.getElementById('artistNameInput').value = profile?.name || '';
+  document.getElementById('bioInput').value = profile?.bio || '';
+
+  await loadVideos();
+  document.getElementById('uploadBtn').onclick = uploadVideo;
+});
+
+async function uploadVideo() {
+  const videoFile = document.getElementById('videoInput').files[0];
+  const thumbFile = document.getElementById('thumbnailInput').files[0];
+  if (!videoFile || !thumbFile) return alert('Select both files');
+
+  const btn = document.getElementById('uploadBtn');
+  const spin = document.getElementById('spinner');
+  btn.disabled = true;
+  spin.classList.remove('hidden');
+
+  const ts = Date.now();
+  const vPath = `videos/${currentUser.id}_${ts}.mp4`;
+  const tPath = `thumbs/${currentUser.id}_${ts}.jpg`;
+
+  await Promise.all([
+    supabase.storage.from('media').upload(vPath, videoFile),
+    supabase.storage.from('media').upload(tPath, thumbFile)
+  ]);
+
+  await supabase.from('user_videos').insert({
+    user_id: currentUser.id,
+    title: videoFile.name.replace('.mp4', ''),
+    video_url: vPath,
+    thumbnail_url: tPath
+  });
+
+  alert('Video published!');
+  document.getElementById('videoInput').value = '';
+  document.getElementById('thumbnailInput').value = '';
+  await loadVideos();
+  btn.disabled = false;
+  spin.classList.add('hidden');
+}
+
+async function loadVideos() {
+  const { data } = await supabase.from('user_videos').select('*').eq('user_id', currentUser.id);
+  const list = document.getElementById('videoList');
+  list.innerHTML = '';
+  if (!data?.length) {
+    list.innerHTML = '<p class="col-span-full text-center text-gray-500 text-xl py-20">No videos yet — upload your first!</p>';
+    return;
+  }
+  data.forEach(v => {
+    const vUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+    const tUrl = supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl;
+    list.innerHTML += `
+      <div class="bg-gray-50 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition">
+        <img src="${tUrl}" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <p class="font-bold text-lg">${v.title}</p>
+          <button onclick="this.parentElement.parentElement.remove(); supabase.from('user_videos').delete().eq('id',${v.id})" class="text-red-600 text-sm">Delete</button>
+        </div>
+      </div>`;
+  });
+}
+
+async function saveInfo() {
+  const name = document.getElementById('artistNameInput').value.trim();
+  const bio = document.getElementById('bioInput').value;
+  await supabase.from('profiles').update({ name, bio }).eq('id', currentUser.id);
+  alert('Saved!');
+}
+</script>
+</body>
+</html>
