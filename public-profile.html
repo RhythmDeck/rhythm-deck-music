@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Artist | Rhythm Deck</title>
+  <base href="/">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    #chatMessages { max-height: 400px; overflow-y: auto; }
+    .live-dot { display: inline-block; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .5 } }
+    .offline-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.95)); }
+
+    /* PLAY BUTTON OVERLAY */
+    .video-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+    .video-card:hover {
+      transform: translateY(-12px) scale(1.03);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+    }
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .video-card:hover .play-overlay { opacity: 1; }
+    .play-button {
+      width: 90px;
+      height: 90px;
+      background: rgba(16, 185, 129, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .play-button svg {
+      width: 40px;
+      height: 40px;
+      margin-left: 6px;
+      color: white;
+    }
+
+    /* RISING STAR BADGE */
+    #risingStarBadge {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      width: 140px;
+      height: 140px;
+      z-index: 30;
+      opacity: 0;
+      transform: scale(0) rotate(-20deg);
+      transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.4);
+      filter: drop-shadow(0 15px 30px rgba(0,0,0,0.5));
+      pointer-events: none;
+    }
+    #risingStarBadge.show {
+      opacity: 1;
+      transform: scale(1) rotate(10deg);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
+
+  <!-- BANNER WITH RISING STAR BADGE -->
+  <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
+    <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
+    <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
+      Artist Banner
+    </div>
+    <img id="risingStarBadge" src="rising-artist-badge-transparent.png" alt="Rising Star">
+  </div>
+
+  <div class="max-w-7xl mx-auto p-6 -mt-20 relative z-10">
+    <!-- ARTIST HEADER -->
+    <div class="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
+      <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
+      <div class="text-center md:text-left">
+        <h1 id="artistName" class="text-6xl md:text-8xl font-black text-gray-900 drop-shadow-lg">
+          Loading...
+        </h1>
+      </div>
+    </div>
+
+    <!-- BIO CARD -->
+    <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
+      <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
+      <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">
+        Loading bio...
+      </p>
+    </div>
+
+    <!-- VIDEOS SECTION -->
+    <div class="mb-20">
+      <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center md:text-left">Videos</h2>
+      <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <p class="col-span-full text-center text-3xl text-gray-500 font-medium">Loading videos...</p>
+      </div>
+    </div>
+
+    <!-- UPGRADE TO PRO TEASER (FREE PLAN) -->
+    <div id="proOnlyNotice" class="mb-16">
+      <div class="bg-white rounded-3xl shadow-2xl border-4 border-emerald-500 overflow-hidden">
+        <div class="text-center py-10 px-8">
+          <h3 class="text-5xl md:text-6xl font-black text-emerald-600 mb-4">
+            Live Stream Only Available on the Pro Plan
+          </h3>
+          <p class="text-2xl text-gray-700 mb-8">
+            Go live, chat with fans, and grow your audience in real-time!
+          </p>
+          <a href="pricing.html" class="inline-block bg-emerald-600 text-white font-black px-12 py-6 rounded-2xl text-3xl hover:bg-emerald-700 transition shadow-xl">
+            Upgrade to Pro Now
+          </a>
+        </div>
+
+        <!-- LIVESTREAM PREVIEW TEASER -->
+        <div class="bg-gradient-to-br from-emerald-800 via-teal-800 to-green-900 p-8">
+          <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+              <div class="relative bg-black rounded-3xl overflow-hidden shadow-2xl aspect-video">
+                <video src="https://cdn.jsdelivr.net/gh/rhythm-deck/assets/demo-live-stream.mp4" loop muted class="w-full h-full object-cover opacity-70"></video>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-8">
+                  <div>
+                    <h4 class="text-4xl font-black text-white mb-2">This Could Be You Live!</h4>
+                    <p class="text-xl text-white/90">Streaming to hundreds of fans right now</p>
+                  </div>
+                </div>
+                <div class="absolute top-4 left-4 bg-red-600 text-white px-4 py-2 rounded-full font-black flex items-center gap-2">
+                  <span class="live-dot"></span>
+                  LIVE NOW
+                </div>
+              </div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
+              <h4 class="text-3xl font-black text-white mb-4">Live Chat</h4>
+              <div class="space-y-3 text-white/90">
+                <p><strong>Fan123:</strong> This is amazing!</p>
+                <p><strong>MusicLover:</strong> Keep going!!</p>
+                <p><strong>SuperFan:</strong> Best stream ever!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULL LIVESTREAM SECTION (PRO ONLY) -->
+    <div id="liveSection" class="hidden bg-gradient-to-br from-emerald-800 via-teal-800 to-green-900 rounded-3xl shadow-2xl overflow-hidden mb-20">
+      <div class="bg-black/40 backdrop-blur p-8 text-white">
+        <h2 class="text-4xl md:text-5xl font-black flex items-center gap-4">
+          <span id="liveStatusText">WAITING FOR ARTIST...</span>
+          <span id="liveIndicator" class="hidden items-center gap-3">
+            <span class="live-dot"></span>
+            <span class="text-3xl animate-pulse">LIVE NOW</span>
+          </span>
+        </h2>
+      </div>
+      <div class="grid lg:grid-cols-3 gap-8 p-8">
+        <div class="lg:col-span-2">
+          <div class="relative bg-black rounded-3xl overflow-hidden shadow-2xl aspect-video">
+            <video id="liveVideo" controls class="w-full h-full" autoplay muted playsinline></video>
+            <div id="offlineOverlay" class="absolute inset-0 offline-overlay flex flex-col items-center justify-center text-white text-center px-8">
+              <h3 class="text-5xl font-black mb-4">Stream Hasn't Started</h3>
+              <p class="text-2xl opacity-90">The artist will appear soon — chat below!</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-3xl shadow-2xl flex flex-col h-96 lg:h-full min-h-96">
+          <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6 rounded-t-3xl">
+            <h3 class="font-black text-3xl text-center">Live Chat</h3>
+          </div>
+          <div id="chatMessages" class="flex-1 p-5 space-y-4 overflow-y-auto"></div>
+          <div class="p-5 border-t bg-gray-50 rounded-b-3xl">
+            <input id="chatName" placeholder="Your name" class="w-full p-4 mb-3 border-2 border-emerald-200 rounded-xl text-sm">
+            <div class="flex gap-3">
+              <textarea id="chatMessage" placeholder="Send a message..." class="flex-1 p-4 border-2 border-emerald-200 rounded-xl text-sm resize-none" rows="2"></textarea>
+              <button id="sendChat" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-8 py-4 rounded-xl transition shadow-xl text-lg">
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://bxoqhmfnseskwqkywppg.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+    );
+
+    const params = new URLSearchParams(window.location.search);
+    const rawId = params.get('id')?.trim();
+
+    if (!rawId) {
+      document.body.innerHTML = '<h1 class="text-center mt-32 text-8xl font-black text-red-600">Invalid Link</h1>';
+      throw new Error("No ID");
+    }
+
+    let profile = null;
+
+    async function loadProfile() {
+      let found = null;
+
+      // Try exact subdomain
+      let { data } = await supabase.from('profiles')
+        .select('id, name, bio, banner_url, logo_url, subdomain, plan')
+        .eq('subdomain', rawId)
+        .maybeSingle();
+      if (data) found = data;
+
+      // Try lowercase
+      if (!found && rawId.length < 40) {
+        ({ data } = await supabase.from('profiles')
+          .select('id, name, bio, banner_url, logo_url, subdomain, plan')
+          .eq('subdomain', rawId.toLowerCase())
+          .maybeSingle());
+        if (data) found = data;
+      }
+
+      // Try UUID fallback
+      if (!found && rawId.length > 30 && rawId.includes('-')) {
+        ({ data } = await supabase.from('profiles')
+          .select('id, name, bio, banner_url, logo_url, subdomain, plan')
+          .eq('id', rawId)
+          .maybeSingle());
+        if (data) found = data;
+      }
+
+      if (!found) {
+        document.body.innerHTML = `
+          <div class="text-center mt-32 p-16 bg-white rounded-3xl shadow-2xl max-w-2xl mx-auto">
+            <h1 class="text-8xl font-black text-red-600 mb-8">Artist Not Found</h1>
+            <a href="index.html" class="bg-emerald-600 text-white px-12 py-6 rounded-2xl text-3xl font-black hover:bg-emerald-700">Go Home</a>
+          </div>`;
+        return;
+      }
+
+      profile = found;
+
+      document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
+      document.getElementById('artistName').textContent = profile.name || 'Artist';
+      document.getElementById('artistBio').textContent = profile.bio || 'No bio yet.';
+
+      // Banner
+      if (profile.banner_url) {
+        const { data: b } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
+        const banner = document.getElementById('banner');
+        banner.src = b.publicUrl;
+        banner.classList.remove('hidden');
+        document.getElementById('bannerPlaceholder').classList.add('hidden');
+      }
+
+      // Logo
+      if (profile.logo_url) {
+        const { data: l } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
+        document.getElementById('logo').src = l.publicUrl;
+      }
+
+      // Live section visibility
+      if (profile.plan === 'pro') {
+        document.getElementById('liveSection').classList.remove('hidden');
+        document.getElementById('proOnlyNotice').classList.add('hidden');
+        initLiveStreamAndChat();
+      } else {
+        document.getElementById('liveSection').classList.add('hidden');
+        document.getElementById('proOnlyNotice').classList.remove('hidden');
+      }
+
+      await loadVideos();
+    }
+
+    async function loadVideos() {
+      const { data: videos, count } = await supabase
+        .from('user_videos')
+        .select('*', { count: 'exact' })
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false });
+
+      const list = document.getElementById('videoList');
+      list.innerHTML = '';
+
+      if (!videos || videos.length === 0) {
+        list.innerHTML = '<p class="col-span-full text-center text-4xl text-gray-600 font-medium">No videos yet</p>';
+      } else {
+        videos.forEach(v => {
+          const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+          const thumbUrl = supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl;
+
+          const card = document.createElement('div');
+          card.className = 'video-card bg-white';
+
+          card.innerHTML = `
+            <div class="relative">
+              <img src="${thumbUrl}" class="w-full h-80 object-cover rounded-t-3xl" onerror="this.src='logo-placeholder.png'">
+              <div class="play-overlay">
+                <div class="play-button">
+                  <svg fill="currentColor" viewBox="0 0 20 20"><path d="M8 5v10l7-5-7-5z"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-8 text-center">
+              <p class="font-black text-3xl text-emerald-900">${v.title || 'Untitled'}</p>
+            </div>
+          `;
+
+          card.onclick = () => {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center p-8';
+            modal.innerHTML = `
+              <video controls autoplay class="max-w-full max-h-full rounded-3xl shadow-2xl">
+                <source src="${videoUrl}" type="video/mp4">
+              </video>
+              <button class="absolute top-8 right-8 text-white text-8xl hover:text-gray-400">×</button>
+            `;
+            modal.querySelector('button').onclick = () => modal.remove();
+            document.body.appendChild(modal);
+          };
+
+          list.appendChild(card);
+        });
+      }
+
+      // Rising Star Badge
+      const badge = document.getElementById('risingStarBadge');
+      if (profile.plan !== 'pro' && (count || 0) >= 3) {
+        badge.classList.add('show');
+      } else {
+        badge.classList.remove('show');
+      }
+    }
+
+    async function initLiveStreamAndChat() {
+      document.getElementById('liveStatusText').textContent = 'WAITING FOR ARTIST...';
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>
