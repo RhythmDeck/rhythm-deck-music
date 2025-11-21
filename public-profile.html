@@ -11,15 +11,15 @@
     #chatMessages { max-height: 400px; overflow-y: auto; }
     .live-dot { display: inline-block; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .5 } }
-    .offline-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.9)); }
+    .offline-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.95)); }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
 
   <!-- BANNER -->
-  <div class="relative h-64 md:h-96 bg-gray-300 overflow-hidden">
+  <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
-    <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-5xl font-bold bg-gradient-to-br from-gray-900 to-black">
+    <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
       Artist Banner
     </div>
   </div>
@@ -28,37 +28,39 @@
 
     <!-- ARTIST HEADER -->
     <div class="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
-      <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-44 h-44 rounded-full border-8 border-white shadow-2xl object-cover">
+      <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
       <div class="text-center md:text-left">
-        <h1 id="artistName" class="text-5xl md:text-7xl font-black text-white drop-shadow-2xl">Loading...</h1>
+        <h1 id="artistName" class="text-6xl md:text-8xl font-black text-gray-900 drop-shadow-lg">
+          Loading...
+        </h1>
       </div>
     </div>
 
     <!-- BIO CARD -->
-    <div class="bg-white/95 backdrop-blur rounded-3xl shadow-2xl p-10 mb-12 border border-gray-200">
-      <h2 class="text-3xl font-bold text-purple-800 mb-6">About</h2>
+    <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
+      <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">
         Loading bio...
       </p>
     </div>
 
-    <!-- VIDEOS SECTION -->
-    <div class="mb-16">
-      <h2 class="text-4xl font-bold text-gray-800 mb-10">Videos</h2>
+    <!-- VIDEOS SECTION — GROWS DOWN AUTOMATICALLY -->
+    <div class="mb-20">
+      <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center md:text-left">Videos</h2>
       <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-        <p class="col-span-full text-center text-2xl text-gray-500">Loading videos...</p>
+        <p class="col-span-full text-center text-3xl text-gray-500 font-medium">Loading videos...</p>
       </div>
     </div>
 
-    <!-- LIVESTREAM + CHAT — ALWAYS VISIBLE FOR FANS -->
-    <div class="bg-gradient-to-br from-purple-900 via-pink-800 to-indigo-900 rounded-3xl shadow-2xl overflow-hidden mb-20">
-      <div class="bg-black/50 backdrop-blur p-8 text-white">
+    <!-- LIVESTREAM + CHAT — ALWAYS VISIBLE & PUSHED DOWN BY VIDEOS -->
+    <div class="bg-gradient-to-br from-emerald-800 via-teal-800 to-green-900 rounded-3xl shadow-2xl overflow-hidden mb-20">
+      <div class="bg-black/40 backdrop-blur p-8 text-white">
         <div class="flex items-center justify-between">
-          <h2 class="text-4xl font-black flex items-center gap-4">
+          <h2 class="text-4xl md:text-5xl font-black flex items-center gap-4">
             <span id="liveStatusText">WAITING FOR ARTIST...</span>
             <span id="liveIndicator" class="hidden items-center gap-3">
               <span class="live-dot"></span>
-              <span class="text-2xl animate-pulse">LIVE NOW</span>
+              <span class="text-3xl animate-pulse">LIVE NOW</span>
             </span>
           </h2>
         </div>
@@ -67,32 +69,34 @@
       <div class="grid lg:grid-cols-3 gap-8 p-8">
         <!-- Video Player -->
         <div class="lg:col-span-2">
-          <div class="relative bg-black rounded-2xl overflow-hidden shadow-2xl aspect-video">
+          <div class="relative bg-black rounded-3xl overflow-hidden shadow-2xl aspect-video">
             <video id="liveVideo" controls class="w-full h-full" autoplay muted playsinline></video>
             
             <!-- Offline Overlay -->
             <div id="offlineOverlay" class="absolute inset-0 offline-overlay flex flex-col items-center justify-center text-white text-center px-8">
-              <div class="bg-white/20 backdrop-blur rounded-full p-8 mb-6">
-                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 13v-1h2v1H9zm0-3V6h2v4H9z"/></svg>
+              <div class="bg-white/20 backdrop-blur-lg rounded-full p-10 mb-8">
+                <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 13v-1h2v1H9zm0-3V6h2v4H9z"/>
+                </svg>
               </div>
-              <h3 class="text-4xl font-bold mb-4">Stream Hasn't Started Yet</h3>
-              <p class="text-xl opacity-90">Hang tight! The artist will go live soon. Chat with other fans below!</p>
+              <h3 class="text-5xl font-black mb-4">Stream Hasn't Started</h3>
+              <p class="text-2xl opacity-90">The artist will appear soon — chat with fans below!</p>
             </div>
           </div>
         </div>
 
         <!-- Chat Box -->
         <div class="bg-white rounded-3xl shadow-2xl flex flex-col h-96 lg:h-full min-h-96">
-          <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-5 rounded-t-3xl">
-            <h3 class="font-black text-2xl text-center">Live Chat</h3>
+          <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6 rounded-t-3xl">
+            <h3 class="font-black text-3xl text-center">Live Chat</h3>
             <p class="text-center text-sm opacity-90">Say hi to the artist & fans!</p>
           </div>
-          <div id="chatMessages" class="flex-1 p-5 space-y-3 overflow-y-auto"></div>
+          <div id="chatMessages" class="flex-1 p-5 space-y-4 overflow-y-auto"></div>
           <div class="p-5 border-t bg-gray-50 rounded-b-3xl">
-            <input id="chatName" placeholder="Your name (optional)" class="w-full p-3 mb-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <input id="chatName" placeholder="Your name (optional)" class="w-full p-4 mb-3 border-2 border-emerald-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100">
             <div class="flex gap-3">
-              <textarea id="chatMessage" placeholder="Type a message..." class="flex-1 p-3 border border-gray-300 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500" rows="2"></textarea>
-              <button id="sendChat" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg">
+              <textarea id="chatMessage" placeholder="Type a message..." class="flex-1 p-4 border-2 border-emerald-200 rounded-xl text-sm resize-none focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100" rows="2"></textarea>
+              <button id="sendChat" class="bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black px-8 py-4 rounded-xl transition shadow-xl text-lg">
                 Send
               </button>
             </div>
@@ -111,12 +115,11 @@
     const params = new URLSearchParams(window.location.search);
     const rawId = params.get('id')?.trim();
     if (!rawId) {
-      document.body.innerHTML = '<h1 class="text-center mt-32 text-8xl text-red-600 font-bold">Invalid Link</h1>';
+      document.body.innerHTML = '<h1 class="text-center mt-32 text-8xl font-black text-red-600">Invalid Link</h1>';
     }
 
     let profile = null;
     let liveSession = null;
-    let channel = null;
 
     async function loadProfile() {
       let data = null;
@@ -141,13 +144,13 @@
       if (!data) {
         document.body.innerHTML = `<div class="text-center mt-32 p-16 bg-white rounded-3xl shadow-2xl max-w-2xl mx-auto">
           <h1 class="text-8xl font-black text-red-600 mb-8">Artist Not Found</h1>
-          <a href="index.html" class="bg-green-600 text-white px-12 py-6 rounded-2xl text-2xl font-bold hover:bg-green-700">Go Home</a>
+          <a href="index.html" class="bg-emerald-600 text-white px-12 py-6 rounded-2xl text-3xl font-black hover:bg-emerald-700">Go Home</a>
         </div>`;
         return;
       }
 
       profile = data;
-      document.title = `${profile.name} • Rhythm Deck Live`;
+      document.title = `${profile.name} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Artist';
       document.getElementById('artistBio').textContent = profile.bio || 'No bio yet.';
 
@@ -165,7 +168,7 @@
       }
 
       loadVideos();
-      initLiveStreamAndChat(); // ← ALWAYS RUN — even when offline
+      initLiveStreamAndChat();
     }
 
     async function loadVideos() {
@@ -176,7 +179,7 @@
       const list = document.getElementById('videoList');
       list.innerHTML = '';
       if (!videos || videos.length === 0) {
-        list.innerHTML = '<p class="col-span-full text-center text-3xl text-gray-500">No videos yet</p>';
+        list.innerHTML = '<p class="col-span-full text-center text-4xl text-gray-600 font-medium">No videos yet</p>';
         return;
       }
 
@@ -187,9 +190,9 @@
         const card = document.createElement('div');
         card.className = 'bg-white rounded-3xl shadow-2xl overflow-hidden cursor-pointer hover:scale-105 transition duration-300';
         card.innerHTML = `
-          <img src="${thumbUrl}" class="w-full h-72 object-cover" onerror="this.src='logo-placeholder.png'">
-          <div class="p-6 text-center">
-            <p class="font-black text-2xl text-gray-800">${v.title || 'Untitled'}</p>
+          <img src="${thumbUrl}" class="w-full h-80 object-cover" onerror="this.src='logo-placeholder.png'">
+          <div class="p-8 text-center">
+            <p class="font-black text-3xl text-emerald-900">${v.title || 'Untitled'}</p>
           </div>
         `;
         card.onclick = () => {
@@ -208,9 +211,8 @@
       });
     }
 
-    // ALWAYS SHOW LIVESTREAM + CHAT — even when artist is offline
     async function initLiveStreamAndChat() {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('live_sessions')
         .select('*')
         .eq('user_id', profile.id)
@@ -218,10 +220,9 @@
         .limit(1)
         .single();
 
-      if (error || !data) {
-        // No session yet → show "waiting" state but keep chat active
+      if (!data) {
         document.getElementById('liveStatusText').textContent = 'WAITING FOR ARTIST...';
-        setupChat(null); // chat works even with no session
+        setupChat(null);
         return;
       }
 
@@ -241,9 +242,8 @@
     }
 
     function setupChat(sessionId) {
-      // Create or join a temporary chat channel even if no session
-      const channelName = sessionId ? `live-chat:${sessionId}` : `pre-chat:${profile.id}`;
-      channel = supabase.channel(channelName);
+      const channelName = sessionId.orgsessionId ? `live-chat:${sessionId}` : `pre-chat:${profile.id}`;
+      const channel = supabase.channel(channelName);
 
       channel
         .on('postgres_changes', {
@@ -254,8 +254,8 @@
         }, payload => {
           const msg = payload.new;
           const div = document.createElement('div');
-          div.className = 'bg-purple-100 rounded-2xl p-4 text-sm shadow';
-          div.innerHTML = `<strong class="text-purple-800">${msg.name || 'Fan'}:</strong> ${msg.message}`;
+          div.className = 'bg-emerald-100 rounded-2xl p-4 shadow-md';
+          div.innerHTML = `<strong class="text-emerald-900 font-bold">${msg.name || 'Fan'}:</strong> <span class="text-gray-800">${msg.message}</span>`;
           document.getElementById('chatMessages').prepend(div);
         })
         .subscribe();
