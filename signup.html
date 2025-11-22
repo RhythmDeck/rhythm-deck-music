@@ -54,7 +54,7 @@
             </div>
             <div class="w-full md:w-1/2 p-6 md:p-10">
                 <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Create Your Rhythm Deck Account</h2>
-                <form id="signupForm" class="space-y-4">
+                <zn id="signupForm" class="space-y-4">
                     <div><label class="block text-gray-700 font-semibold mb-1">Name</label><input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
                     <div><label class="block text-gray-700 font-semibold mb-1">Email</label><input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
                     <div><label class="block text-gray-700 font-semibold mb-1">Password</label>
@@ -185,52 +185,60 @@
             submitButton.innerHTML = 'Processing...';
 
             try {
-                const { data, error } = await supabase.auth.signUp({
+                let { data, error } = await supabase.auth.signUp({
                     email, password,
                     options: { data: { full_name: name, subdomain: cleanSubdomain } }
                 });
 
                 let user = data?.user;
 
-                // USER ALREADY EXISTS → log in and continue
                 if (error && (error.message.toLowerCase().includes('already registered') || error.code === 'user_already_exists')) {
-                    const login = await supabase.auth.signInWithPassword({ email, password });
-                    if (login.error) throw login.error;
-                    user = login.data.user;
+                    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+                    if (loginError) throw loginError;
+                    user = loginData.user;
                     showMessage('Welcome back!', 'Updating your account...', 'bg-emerald-600');
                 }
 
-                if (error && !user) throw error;
-                if (!user) throw new Error('No user');
+                if (!user) throw new Error('No user created or logged in');
 
-                // Always upsert profile with current choices
                 await supabase.from('profiles').upsert({
                     id: user.id,
                     name, email, subdomain: cleanSubdomain, plan,
                     bio: '', created_at: new Date().toISOString()
                 }, { onConflict: 'id' });
 
-                // NOW CHECK PLAN AND ACT
                 if (plan === 'free') {
                     showMessage('Success!', 'Free account ready', 'bg-green-600');
                     setTimeout(() => location.href = 'profile-admin.html', 1500);
-                } else {
-                    // PRO PLAN → GO TO STRIPE
-                    const res = await fetch('/signup', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            name,
-                            email,
-                            subdomain: cleanSubdomain,
-                            planDuration: planDuration.value
-                        })
-                    });
-                    const result = await res.json();
-                    if (!res.ok) throw new Error(result.message || 'Checkout failed');
-                    showMessage('Redirecting...', 'Taking you to secure checkout', 'bg-emerald-600');
-                    setTimeout(() => location.href = result.url, 1200);
+                    return;
                 }
+
+                // PRO PLAN → STRIPE WITH AUTH TOKEN
+                const { data: { session } } = await supabase.auth.getSession();
+
+                const res = await fetch('/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        subdomain: cleanSubdomain,
+                        planDuration: planDuration.value
+                    })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || 'Checkout failed');
+                }
+
+                const { url } = await res.json();
+                showMessage('Redirecting...', 'Taking you to secure checkout', 'bg-emerald-600');
+                setTimeout(() => location.href = url, 1200);
+
             } catch (err) {
                 console.error(err);
                 showMessage('Error', err.message || 'Something went wrong', 'bg-red-600');
