@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhythm Deck | Public Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .video-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
+    .video-card:hover .video-overlay{opacity:1}
+    #videoModal{position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
+    #videoModal.show{opacity:1;visibility:visible}
+    #modalVideo{max-width:90%;max-height:90%;border:4px solid #10b981;border-radius:12px}
+    #closeModal{position:absolute;top:20px;right:20px;background:white;color:black;width:50px;height:50px;border-radius:50%;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+  <div class="max-w-6xl mx-auto p-6">
+    <div class="text-center py-10" id="loading">
+      <h1 class="text-4xl font-bold">Loading artist...</h1>
+    </div>
+
+    <div id="notFound" class="text-center py-20 text-3xl hidden">
+      Artist not found
+    </div>
+
+    <div id="profile" class="hidden">
+      <div class="relative h-96 rounded-2xl overflow-hidden mb-10">
+        <img id="banner" src="" alt="Banner" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+        <div class="absolute bottom-6 left-6 flex items-end gap-6">
+          <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-40 h-40 rounded-full border-8 border-white shadow-2xl">
+          <div>
+            <h1 id="artistName" class="text-5xl font-bold"></h1>
+            <p id="bio" class="text-xl mt-2 max-w-2xl"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 mt-12">
+        <div class="md:col-span-3">
+          <h2 class="text-3xl font-bold mb-8">Videos</h2>
+          <div id="videoGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="videoModal">
+    <div id="closeModal" onclick="closeModal()">X</div>
+    <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
+  </div>
+
+<script>
+  const supabase = window.supabase.createClient(
+    'https://bxoqhmfnseskwqkywppg.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  );
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const subdomain = urlParams.get('id')?.toLowerCase().trim();
+
+  async function loadPublicProfile() {
+    if (!subdomain) {
+      showNotFound();
+      return;
+    }
+
+    // Step 1: Try to find in profiles table
+    let { data: profile, error } = await supabase
+      .from('profiles')
+      .select('id, name, bio, banner_url, logo_url')
+      .ilike('subdomain', subdomain)
+      .single();
+
+    // Step 2: If not found in profiles, fall back to auth.users metadata
+    if (!profile || error) {
+      const { data: users } = await supabase.auth.admin.listUsers();
+      const user = users?.users.find(u => 
+        u?.user_metadata?.subdomain?.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-') === subdomain
+      );
+
+      if (user) {
+        profile = {
+          id: user.id,
+          name: user.user_metadata?.name || user.email.split('@')[0],
+          bio: user.user_metadata?.bio || '',
+          banner_url: user.user_metadata?.banner_url || null,
+          logo_url: user.user_metadata?.logo_url || null
+        };
+      }
+    }
+
+    if (!profile) {
+      showNotFound();
+      return;
+    }
+
+    // Show profile
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('profile').classList.remove('hidden');
+
+    document.getElementById('artistName').textContent = profile.name || 'Unnamed Artist';
+    document.getElementById('bio').textContent = profile.bio || 'No bio yet.';
+
+    if (profile.banner_url) {
+      const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
+      document.getElementById('banner').src = data.publicUrl;
+    }
+    if (profile.logo_url) {
+      const { data } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
+      document.getElementById('logo').src = data.publicUrl;
+    }
+
+    // Load videos
+    const { data: videos } = await supabase
+      .from('user_videos')
+      .select('*')
+      .eq('user_id', profile.id)
+      .order('created_at', { ascending: false });
+
+    const grid = document.getElementById('videoGrid');
+    if (!videos || videos.length === 0) {
+      grid.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-10">No videos uploaded yet.</p>';
+      return;
+    }
+
+    videos.forEach(v => {
+      const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+      const thumbUrl = supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl;
+
+      grid.innerHTML += `
+        <div class="video-card relative bg-gray-800 rounded-xl overflow-hidden cursor-pointer" onclick="openVideo('${videoUrl}')">
+          <img src="${thumbUrl}" class="w-full h-64 object-cover">
+          <div class="video-overlay">
+            <svg class="w-20 h-20 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 0111 8v4a1 1 0 01-1.555.832l-3-2a1 1 0 010-1.664l3-2z"/>
+            </svg>
+          </div>
+          <p class="p-4 font-bold text-lg">${v.title}</p>
+        </div>`;
+    });
+  }
+
+  function showNotFound() {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('notFound').classList.remove('hidden');
+  }
+
+  function openVideo(url) {
+    document.getElementById('modalVideo').src = url;
+    document.getElementById('videoModal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('videoModal').classList.remove('show');
+    document.getElementById('modalVideo').src = '';
+  }
+
+  loadPublicProfile();
+</script>
+</body>
+</html>
