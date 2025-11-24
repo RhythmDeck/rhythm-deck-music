@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Rhythm Deck Music</title>
+    <base href="/">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .input-focus:focus { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4); }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
+<div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
+
+<!-- Your entire HTML stays 100% the same until the script -->
+<header><!-- ... same ... --></header>
+<section><!-- ... same ... --></section>
+<main><!-- ... same ... --></main>
+<footer><!-- ... same ... --></footer>
+
+<script>
+    const supabase = window.supabase.createClient(
+        "https://bxoqhmfnseskwqkywppg.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+    );
+
+    function showMessage(title, message, color = 'bg-green-600') {
+        const id = 'toast' + Date.now();
+        document.getElementById('toastContainer').insertAdjacentHTML('beforeend',
+            `<div id="${id}" class="fixed top-4 left-1/2 -translate-x-1/2 ${color} text-white px-8 py-5 rounded-xl shadow-2xl max-w-md w-full z-50 transform transition-all duration-300 scale-95 opacity-0">
+                <div class="font-black text-2xl">${title}</div>
+                <p class="text-lg mt-2">${message}</p>
+                <button onclick="document.getElementById('${id}').remove()" class="absolute top-3 right-4 text-3xl">×</button>
+            </div>`);
+        setTimeout(() => document.getElementById(id)?.classList.add('opacity-100', 'scale-100'), 50);
+        setTimeouttls(() => document.getElementById(id)?.remove(), 8000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const subdomainInput = document.getElementById('subdomain');
+        const subdomainStatus = document.getElementById('subdomainStatus');
+        const planType = document.getElementById('planType');
+        const proOptions = document.getElementById('proOptions');
+        const planDuration = document.getElementById('planDuration');
+        const priceDisplay = document.getElementById('priceDisplay');
+        const finalPrice = document.getElementById('finalPrice');
+        const submitButton = document.getElementById('submitButton');
+        const form = document.getElementById('signupForm');
+        let isSubdomainAvailable = false;
+        let subdomainTimeout;
+
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            togglePassword.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+
+        async function checkSubdomain(value) {
+            const clean = value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+            if (clean.length < 3) {
+                subdomainStatus.textContent = 'Too short';
+                subdomainStatus.className = 'mt-2 text-sm h-5 text-red-600';
+                isSubdomainAvailable = false;
+                return clean;
+            }
+            subdomainStatus.textContent = 'Checking...';
+            subdomainStatus.className = 'mt-2 text-sm h-5 text-gray-500';
+
+            const { data } = await supabase.from('profiles').select('id').eq('subdomain', clean).maybeSingle();
+            if (data) {
+                subdomainStatus.textContent = 'Taken';
+                subdomainStatus.className = 'mt-2 text-sm h-5 text-red-600';
+                isSubdomainAvailable = false;
+            } else {
+                subdomainStatus.textContent = 'Available!';
+                subdomainStatus.className = 'mt-2 text-sm h-5 text-green-600';
+                isSubdomainAvailable = true;
+            }
+            return clean;
+        }
+
+        subdomainInput.addEventListener('input', () => {
+            clearTimeout(subdomainTimeout);
+            subdomainTimeout = setTimeout(() => checkSubdomain(subdomainInput.value), 600);
+        });
+
+        planType.addEventListener('change', () => {
+            proOptions.classList.toggle('hidden', planType.value !== 'pro');
+            priceDisplay.classList.add('hidden');
+        });
+
+        planDuration.addEventListener('change', () => {
+            const price = planDuration.selectedOptions[0]?.dataset.price || '0.00';
+            finalPrice.textContent = '$' + price;
+            priceDisplay.classList.remove('hidden');
+        });
+
+        // ←←← THE ONLY CHANGES ARE HERE ↓↓↓
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Creating your page…';
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const rawSubdomain = subdomainInput.value.trim();
+            let cleanSubdomain = rawSubdomain.toLowerCase().replace(/[^a-z0-9-]/g, '');
+
+            // ← Re-check subdomain right now (no early return!)
+            if (cleanSubdomain.length >= 3) {
+                cleanSubdomain = await checkSubdomain(rawSubdomain); // forces fresh check
+            }
+            if (cleanSubdomain.length < 3 || !isSubdomainAvailable) {
+                showMessage('Error', 'Please choose an available subdomain (min 3 chars, letters/numbers only)', 'bg-red-600');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Create Account';
+                return;
+            }
+
+            // Auto-fix the input field so user sees the clean version
+            if (cleanSubdomain !== rawSubdomain) subdomainInput.value = cleanSubdomain;
+
+            const plan = planType.value;
+
+            try {
+                let { data: { user }, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { full_name: name, subdomain: cleanSubdomain } }
+                });
+
+                if (error && error.message.toLowerCase().includes('already registered')) {
+                    const { data } = await supabase.auth.signInWithPassword({ email, password });
+                    user = data.user;
+                }
+                if (error) throw error;
+
+                await supabase.from('profiles').upsert({
+                    id: user.id,
+                    name,
+                    email,
+                    subdomain: cleanSubdomain,
+                    plan,
+                    bio: '',
+                    created_at: new Date().toISOString()
+                });
+
+                if (plan === 'free') {
+                    showMessage('Welcome!', 'Your page is ready!', 'bg-green-600');
+                    setTimeout(() => {
+                        location.href = `https://${cleanSubdomain}.rhythmdeckmusic.com`;
+                    }, 1500);
+                    return;
+                }
+
+                // PRO PLAN — 100% untouched
+                const { data: { session } } = await supabase.auth.getSession();
+                const res = await fetch('/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        subdomain: cleanSubdomain,
+                        planDuration: planDuration.value
+                    })
+                });
+
+                if (!res.ok) throw new Error((await res.json()).message || 'Checkout failed');
+                const { url } = await res.json();
+                showMessage('Redirecting…', 'Secure checkout with Stripe', 'bg-emerald-600');
+                setTimeout(() => location.href = url, 1200);
+
+            } catch (err) {
+                console.error(err);
+                showMessage('Error', err.message || 'Something went wrong', 'bg-red-600');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Create Account';
+            }
+        });
+    });
+</script>
+</body>
+</html>
