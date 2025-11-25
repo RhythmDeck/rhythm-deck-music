@@ -61,13 +61,6 @@
             <div id="cameraOff" class="h-96 flex items-center justify-center text-white text-xl">
               <p>Camera Off — Click "Start Stream" to go live</p>
             </div>
-            <div id="livePreview" class="hidden relative">
-              <video id="selfView" autoplay muted playsinline class="w-full rounded-lg" style="aspect-ratio:16/9;"></video>
-              <div id="liveIndicator" class="absolute top-4 left-4 bg-red-600 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2 animate-pulse">
-                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                LIVE NOW
-              </div>
-            </div>
           </div>
         </div>
         <div class="bg-white rounded-xl shadow-lg p-4">
@@ -83,17 +76,13 @@
         <button id="startStream" class="bg-red-600 text-white px-8 py-4 rounded-lg hover:bg-red-700 font-bold text-lg shadow-lg">
           Start Livestream
         </button>
-        <button id="stopStream" class="bg-gray-600 text-white px-8 py-4 rounded-lg hover:bg-gray-700 font-bold text-lg shadow-lg hidden">
-          Stop Stream
-        </button>
-        <p id="streamStatus" class="text-purple-700 font-semibold"></p>
       </div>
     </div>
   </section>
 
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
-      <!-- LEFT COLUMN: Name, Bio, Public URL -->
+      <!-- LEFT COLUMN -->
       <div class="md:col-span-1 space-y-6">
         <div class="bg-gray-50 p-5 rounded-xl shadow">
           <h3 class="text-xl font-bold text-gray-800 mb-3">Artist / Band Name</h3>
@@ -112,7 +101,7 @@
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: Upload + Videos -->
+      <!-- RIGHT COLUMN -->
       <div class="md:col-span-3 space-y-8">
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6">Upload New Video</h3>
@@ -132,9 +121,7 @@
 
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6">Your Published Videos</h3>
-          <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <p class="col-span-full text-center text-gray-600 italic py-8">No videos uploaded yet.</p>
-          </div>
+          <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
       </div>
     </div>
@@ -144,12 +131,10 @@
     <div class="max-w-2xl mx-auto bg-red-50 border-2 border-red-500 rounded-xl p-8 shadow-xl">
       <h3 class="text-2xl font-bold text-red-800 mb-4 text-center">Danger Zone</h3>
       <p class="text-center text-gray-700 mb-6">Permanently delete your account and all content.</p>
-      <div class="space-y-4">
-        <input type="text" id="deleteConfirmInput" placeholder='Type exactly: Delete My Account' class="w-full px-4 py-3 border border-red-400 rounded-lg text-red-700">
-        <button id="deleteAccountBtn" disabled class="w-full bg-red-600 text-white py-4 rounded-lg font-bold hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
-          Delete My Account Forever
-        </button>
-      </div>
+      <input type="text" id="deleteConfirmInput" placeholder='Type exactly: Delete My Account' class="w-full px-4 py-3 border border-red-400 rounded-lg text-red-700">
+      <button id="deleteAccountBtn" disabled class="w-full mt-4 bg-red-600 text-white py-4 rounded-lg font-bold hover:bg-red-700 disabled:bg-gray-400">
+        Delete My Account Forever
+      </button>
     </div>
   </section>
 </main>
@@ -169,22 +154,16 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
   );
   let currentUser = null;
+  let publicUrl = '';
 
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return window.location.href = 'login.html';
     currentUser = user;
 
-    let { data: profile } = await supabase
-      .from('profiles')
-      .select('subdomain, name, bio, banner_url, logo_url')
-      .eq('id', user.id)
-      .single();
-
-    let subdomain = profile?.subdomain || `user-${Date.now().toString().slice(-6)}`;
-    subdomain = subdomain.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-
-    const publicUrl = `${location.origin}/public-profile.html?id=${subdomain}`;
+    const { data: profile } = await supabase.from('profiles').select('subdomain, name, bio, banner_url, logo_url').eq('id', user.id).single();
+    const subdomain = (profile?.subdomain || `user-${Date.now().toString().slice(-6)}`).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    publicUrl = `${location.origin}/public-profile.html?id=${subdomain}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
 
@@ -206,8 +185,8 @@
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
-    document.getElementById('deleteConfirmInput').addEventListener('input', function() {
-      document.getElementById('deleteAccountBtn').disabled = this.value.trim() !== 'Delete My Account';
+    document.getElementById('deleteConfirmInput').addEventListener('input', e => {
+      document.getElementById('deleteAccountBtn').disabled = e.target.value.trim() !== 'Delete My Account';
     });
     document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
       if (confirm('This deletes EVERYTHING forever. Sure?')) {
@@ -219,25 +198,13 @@
   });
 
   async function loadVideos() {
-    const { data } = await supabase
-      .from('user_videos')
-      .select('*')
-      .eq('user_id', currentUser.id)
-      .order('created_at', { ascending: false });
-
+    const { data } = await supabase.from('user_videos').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
     const container = document.getElementById('videoList');
-    container.innerHTML = '';
+    container.innerHTML = data?.length ? '' : '<p class="col-span-full text-center text-gray-600 italic py-8">No videos uploaded yet.</p>';
 
-    if (!data || data.length === 0) {
-      container.innerHTML = '<p class="col-span-full text-center text-gray-600 italic py-8">No videos uploaded yet.</p>';
-      return;
-    }
-
-    for (const video of data) {
+    for (const video of (data || [])) {
       const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl + '?t=' + Date.now();
-      const thumbUrl = video.thumbnail_url
-        ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now()
-        : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
+      const thumbUrl = video.thumbnail_url ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now() : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
 
       const [{ count: likes = 0 }, { count: comments = 0 }] = await Promise.all([
         supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id),
@@ -252,22 +219,19 @@
               <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 0111 8v4a1 1 0 01-1.555.832l-3-2a1 1 0 010-1.664l-3-2z"/>
             </svg>
           </div>
-          <div class="p-4 bg-gradient-to-t from-black/90 to-transparent absolute inset-x-0 bottom-0">
+          <div class="absolute inset-x-0 bottom-16 p-4 bg-gradient-to-t from-black/90 to-transparent">
             <p class="text-white font-bold text-lg truncate">${video.title || 'Untitled Video'}</p>
-            <div class="flex justify-between items-center mt-3 text-sm text-gray-300">
-              <div class="flex gap-5">
-                <span class="flex items-center gap-1">Heart ${likes}</span>
-                <span class="flex items-center gap-1">Chat ${comments}</span>
-                <span class="flex items-center gap-1 cursor-pointer hover:text-white" onclick="event.stopPropagation(); navigator.clipboard.writeText('${publicUrl}'); alert('Link copied!')">
-                  Share
-                </span>
-              </div>
+            <div class="flex gap-4 mt-2 text-sm text-gray-300">
+              <span>Heart ${likes}</span>
+              <span>Chat ${comments}</span>
+              <span class="cursor-pointer hover:text-white" onclick="event.stopPropagation(); navigator.clipboard.writeText('${publicUrl}'); alert('Link copied!')">Share</span>
             </div>
           </div>
 
-          <!-- DELETE BUTTON BELOW THE VIDEO -->
-          <div class="p-3 bg-red-600 hover:bg-red-700 transition-all" onclick="event.stopPropagation(); if(confirm('Delete this video forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url}')">
-            <button class="w-full text-white font-bold py-2 rounded-lg text-sm">
+          <!-- DELETE BUTTON — EXACTLY UNDER THE VIDEO, SAME HEIGHT -->
+          <div class="absolute inset-x-0 bottom-0 bg-red-600 hover:bg-red-700 transition-all h-12 flex items-center justify-center">
+            <button onclick="event.stopPropagation(); if(confirm('Delete this video forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" 
+                    class="text-white font-bold text-sm">
               Delete Video
             </button>
           </div>
@@ -283,90 +247,57 @@
       videoPath && supabase.storage.from('media').remove([videoPath]),
       thumbPath && supabase.storage.from('media').remove([thumbPath])
     ]);
-    alert('Video deleted forever.');
+    alert('Video deleted.');
     loadVideos();
   }
 
   async function uploadAndPublish() {
     const thumbnail = document.getElementById('thumbnailInput').files[0];
-    const video = document.getElementById('videoInput').files[0];
-    if (!thumbnail || !video) return alert('Select both thumbnail and video');
+    const videoFile = document.getElementById('videoInput').files[0];
+    if (!thumbnail || !videoFile) return alert('Select both thumbnail and video');
+
     document.getElementById('uploadSpinner').classList.remove('hidden');
+    document.getElementById('uploadVideo').disabled = true;
 
     const videoName = `${currentUser.id}/videos/${Date.now()}.mp4`;
     const thumbName = `${currentUser.id}/thumbnails/${Date.now()}.jpg`;
 
     const [vRes, tRes] = await Promise.all([
-      supabase.storage.from('media').upload(videoName, video, { upsert: true }),
+      supabase.storage.from('media').upload(videoName, videoFile, { upsert: true }),
       supabase.storage.from('media').upload(thumbName, thumbnail, { upsert: true })
     ]);
 
     if (vRes.error || tRes.error) {
+      alert('Upload failed');
       document.getElementById('uploadSpinner').classList.add('hidden');
-      return alert('Upload failed: ' + (vRes.error?.message || tRes.error?.message));
+      document.getElementById('uploadVideo').disabled = false;
+      return;
     }
 
     await supabase.from('user_videos').insert({
       user_id: currentUser.id,
       video_url: videoName,
       thumbnail_url: thumbName,
-      title: video.name.replace(/\.mp4$/i, '').substring(0, 60) || 'Untitled Video'
+      title: videoFile.name.replace(/\.mp4$/i, '').substring(0, 60)
     });
 
     document.getElementById('uploadSpinner').classList.add('hidden');
+    document.getElementById('uploadVideo').disabled = false;
     document.getElementById('thumbnailInput').value = '';
     document.getElementById('videoInput').value = '';
     alert('Video published!');
     loadVideos();
   }
 
-  async function uploadBanner(e) {
-    const file = e.target.files[0]; if (!file) return;
-    const fileName = `${currentUser.id}/banner.${file.name.split('.').pop()}`;
-    await supabase.storage.from('media').upload(fileName, file, { upsert: true });
-    const url = supabase.storage.from('media').getPublicUrl(fileName).data.publicUrl + '?t=' + Date.now();
-    document.getElementById('bannerPreview').src = url;
-    document.getElementById('bannerPreview').classList.remove('hidden');
-    document.getElementById('bannerPlaceholder').classList.add('hidden');
-    await supabase.from('profiles').update({ banner_url: fileName }).eq('id', currentUser.id);
-  }
+  async function uploadBanner(e) { const f = e.target.files[0]; if(!f) return; const n = `${currentUser.id}/banner.${f.name.split('.').pop()}`; await supabase.storage.from('media').upload(n,f,{upsert:true}); const u = supabase.storage.from('media').getPublicUrl(n).data.publicUrl + '?t=' + Date.now(); document.getElementById('bannerPreview').src = u; document.getElementById('bannerPreview').classList.remove('hidden'); document.getElementById('bannerPlaceholder').classList.add('hidden'); await supabase.from('profiles').update({banner_url:n}).eq('id',currentUser.id); }
+  async function uploadLogo(e) { const f = e.target.files[0]; if(!f) return; const n = `${currentUser.id}/logo.${f.name.split('.').pop()}`; await supabase.storage.from('media').upload(n,f,{upsert:true}); const u = supabase.storage.from('media').getPublicUrl(n).data.publicUrl + '?t=' + Date.now(); document.getElementById('logoPreview').src = u; await supabase.from('profiles').update({logo_url:n}).eq('id',currentUser.id); }
 
-  async function uploadLogo(e) {
-    const file = e.target.files[0]; if (!file) return;
-    const fileName = `${currentUser.id}/logo.${file.name.split('.').pop()}`;
-    await supabase.storage.from('media').upload(fileName, file, { upsert: true });
-    const url = supabase.storage.from('media').getPublicUrl(fileName).data.publicUrl + '?t=' + Date.now();
-    document.getElementById('logoPreview').src = url;
-    await supabase.from('profiles').update({ logo_url: fileName }).eq('id', currentUser.id);
-  }
+  async function saveArtistName() { const n = document.getElementById('artistNameInput').value.trim(); if(!n) return alert('Enter name'); await supabase.from('profiles').update({name:n}).eq('id',currentUser.id); alert('Saved!'); }
+  async function saveBio() { const b = document.getElementById('bioInput').value.trim(); await supabase.from('profiles').update({bio:b}).eq('id',currentUser.id); alert('Bio saved!'); }
 
-  async function saveArtistName() {
-    const name = document.getElementById('artistNameInput').value.trim();
-    if (!name) return alert('Enter a name');
-    await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
-    alert('Name saved!');
-  }
-
-  async function saveBio() {
-    const bio = document.getElementById('bioInput').value.trim();
-    await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
-    alert('Bio saved!');
-  }
-
-  function openVideoPopup(url) {
-    document.getElementById('modalVideo').src = url;
-    document.getElementById('videoModal').classList.add('show');
-  }
-
-  function closeModal() {
-    document.getElementById('videoModal').classList.remove('show');
-    document.getElementById('modalVideo').src = '';
-  }
-
-  async function logout() {
-    await supabase.auth.signOut();
-    window.location.href = 'index.html';
-  }
+  function openVideoPopup(url) { document.getElementById('modalVideo').src = url; document.getElementById('videoModal').classList.add('show'); }
+  function closeModal() { document.getElementById('videoModal').classList.remove('show'); document.getElementById('modalVideo').src = ''; }
+  async function logout() { await supabase.auth.signOut(); location.href = 'index.html'; }
 </script>
 </body>
 </html>
