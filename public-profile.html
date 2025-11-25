@@ -9,6 +9,7 @@
   <style>
     .live-dot {display:inline-block;width:16px;height:16px;background:#ef4444;border-radius:50%;animation:pulse 1.8s infinite;box-shadow:0 0 20px #ef4444}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
     .video-card {
       border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.15);
       transition: all .4s ease; background: white;
@@ -23,9 +24,12 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: all .3s ease; backdrop-filter: blur(10px); }
     .video-card:hover .play-button { transform: scale(1.15); background: white; }
     .play-button svg { width: 38px; height: 38px; margin-left: 6px; fill: #10b981; }
-    #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(0.175,0.885,0.32,1.4);display:none}
-    #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg);display:block}
+
+    #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(0.175,0.885,0.32,1.4)}
+    #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg)}
+
     .like-btn.liked{ color:#ef4444; filter: drop-shadow(0 0 10px #ef4444); }
+
     .comment-bubble {
       background: #f1f5f9;
       border: 1px solid #e2e8f0;
@@ -44,6 +48,7 @@
       margin-left: 0.5rem;
       font-weight: 500;
     }
+
     #artistName {
       color: #ffffff !important;
       text-shadow: 0 4px 20px rgba(0,0,0,0.8);
@@ -53,6 +58,7 @@
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
+
   <!-- Banner -->
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
@@ -61,6 +67,7 @@
     </div>
     <img id="risingStarBadge" src="rising-artist-badge-transparent.png" alt="Rising Star">
   </div>
+
   <div class="max-w-7xl mx-auto p-6 -mt-20 relative z-10">
     <div class="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
       <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
@@ -68,6 +75,7 @@
         <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
       </div>
     </div>
+
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
@@ -121,6 +129,7 @@
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
+
     const params = new URLSearchParams(location.search);
     const idParam = params.get('id')?.trim().toLowerCase();
     if (!idParam) {
@@ -133,12 +142,12 @@
 
     async function loadProfile() {
       const { data } = await supabase.from('profiles')
-        .select('id, name, bio, banner_url, logo_url, subdomain, plan, is_live, live_stream_url')  // ← added these two
+        .select('id, name, bio, banner_url, logo_url, subdomain, plan')
         .ilike('subdomain', idParam)
         .maybeSingle();
 
       if (!data) {
-        document.body.innerHTML = `<div class="text-center mt-32 p-16 bg-white rounded-3xl shadow-2xl max-w-2xl mx-auto"><h1 class="text-8xl font-black text-red-600 mb-8">Artist Not Found</a></div>`;
+        document.body.innerHTML = `<div class="text-center mt-32 p-16 bg-white rounded-3xl shadow-2xl max-w-2xl mx-auto"><h1 class="text-8xl font-black text-red-600 mb-8">Artist Not Found</h1><a href="/" class="bg-emerald-600 text-white px-12 py-6 rounded-2xl text-3xl font-black hover:bg-emerald-700">Go Home</a></div>`;
         return;
       }
 
@@ -159,80 +168,37 @@
         document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl;
       }
 
-      // ← THIS IS THE ONLY NEW CODE FOR LIVE STREAM
       if (profile.plan === 'pro') {
         document.getElementById('liveSection').classList.remove('hidden');
-        if (profile.is_live && profile.live_stream_url) {
-          document.getElementById('offlinePlaceholder').classList.add('hidden');
-          document.getElementById('livePlayer').classList.remove('hidden');
-          let url = profile.live_stream_url.trim();
-          if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            url = url.replace('watch?v=', 'embed/').split('&')[0] + '?autoplay=1';
-          } else if (url.includes('twitch.tv')) {
-            const channel = url.split('/').pop();
-            url = `https://player.twitch.tv/?channel=${channel}&parent=${location.hostname}&autoplay=true`;
-          }
-          document.getElementById('liveIframe').src = url;
-          loadLiveChat();
-          setInterval(loadLiveChat, 5000);
-        }
+        // Your live stream code here later
       }
 
       await loadVideos();
     }
 
-    // Live Chat – works instantly
-    async function loadLiveChat() {
-      if (!artistUserId) return;
-      const { data } = await supabase.from('live_chat')
-        .select('name, message')
-        .eq('artist_id', artistUserId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-      const el =  document.getElementById('liveMessages');
-      if (!data?.length) {
-        el.innerHTML = '<p class="text-gray-500 italic text-center">Be the first to chat!</p>';
-        return;
-      }
-      el.innerHTML = data.reverse().map(m => `
-        <div class="comment-bubble">
-          <span class="comment-name">${m.name}:</span>
-          <span class="comment-text">${m.message}</span>
-        </div>
-      `).join('');
-    }
-
-    document.getElementById('sendLiveMessage')?.addEventListener('click', async () => {
-      const input = document.getElementById('liveChatInput');
-      const msg = input.value.trim();
-      if (!msg || !artistUserId) return;
-      await supabase.from('live_chat').insert({ artist_id: artistUserId, name: currentFanName || 'Fan', message: msg });
-      input.value = '';
-      loadLiveChat();
-    });
-
-    document.getElementById('liveChatInput')?.addEventListener('keypress', e => {
-      if (e.key === 'Enter') document.getElementById('sendLiveMessage').click();
-    });
-
-    // Your original loadVideos + everything else — 100% untouched
     async function loadVideos() {
       if (!artistUserId) return;
+
       const { data: videos } = await supabase.from('user_videos')
         .select('*')
         .eq('user_id', artistUserId)
         .order('created_at', { ascending: false });
+
       const list = document.getElementById('videoList');
       list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-600">No videos yet</p>';
+
       for (const v of (videos || [])) {
         const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
-        const thumbUrl = v.thumbnail_url
-          ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl
+        const thumbUrl = v.thumbnail_url 
+          ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl 
           : 'logo-placeholder.png';
+
+        // Get current like & comment count
         const [{ count: likeCount = 0 }, { data: comments = [] }] = await Promise.all([
           supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', v.id),
           supabase.from('video_comments').select('name, comment, created_at').eq('video_id', v.id).order('created_at', { ascending: false })
         ]);
+
         const card = document.createElement('div');
         card.className = 'video-card';
         card.dataset.videoUrl = videoUrl;
@@ -273,12 +239,12 @@
         list.appendChild(card);
       }
 
-      // Rising Star Badge – Free plan only
+      // Rising Star Badge for Free Plan
       if (profile.plan !== 'pro' && videos?.length >= 3) {
         document.getElementById('risingStarBadge').classList.add('show');
       }
 
-      // All your original event listeners — unchanged
+      // === EVENT LISTENERS (now work perfectly) ===
       document.querySelectorAll('.name-input').forEach(input => {
         input.addEventListener('change', () => {
           const name = input.value.trim();
@@ -288,6 +254,7 @@
           }
         });
       });
+
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const card = btn.closest('.video-card');
@@ -295,21 +262,27 @@
           const commentInput = card.querySelector('.comment-input');
           const name = nameInput.value.trim();
           const comment = commentInput.value.trim();
+
           if (!name) return alert("Please enter your name!");
           if (!comment) return alert("Comment cannot be empty!");
+
           await supabase.from('video_comments').insert({
             video_id: card.dataset.videoId,
             name,
             comment
           });
+
+          // Save name for next time
           if (name !== currentFanName) {
             currentFanName = name;
             localStorage.setItem('rhythmDeckFanName', name);
           }
+
           commentInput.value = '';
-          await loadVideos();
+          await loadVideos(); // refresh comments instantly
         };
       });
+
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const name = btn.closest('.video-card').querySelector('.name-input').value.trim();
@@ -323,12 +296,15 @@
           btn.classList.add('liked');
         };
       });
+
       document.querySelectorAll('.share-btn').forEach(btn => {
         btn.onclick = () => {
           navigator.clipboard.writeText(location.href);
           alert("Link copied to clipboard!");
         };
       });
+
+      // Video modal on click
       document.querySelectorAll('.thumbnail-container').forEach(container => {
         container.onclick = () => {
           const videoUrl = container.closest('.video-card').dataset.videoUrl;
