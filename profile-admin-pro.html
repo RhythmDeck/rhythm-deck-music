@@ -204,34 +204,43 @@
 
     for (const video of (data || [])) {
       const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl + '?t=' + Date.now();
-      const thumbUrl = video.thumbnail_url ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now() : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
+      const thumbUrl = video.thumbnail_url 
+        ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now()
+        : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
 
-      const [{ count: likes = 0 }, { count: comments = 0 }] = await Promise.all([
-        supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id),
-        supabase.from('video_comments').select('id', { count: 'exact', head: true }).eq('video_id', video.id)
-      ]);
+      const { count: likes = 0 } = await supabase
+        .from('video_likes')
+        .select('id', { count: 'exact', head: true })
+        .eq('video_id', video.id)
+        .single();
 
       container.innerHTML += `
-        <div class="video-card relative bg-gray-900 rounded-xl overflow-hidden cursor-pointer group">
-          <img src="${thumbUrl}" class="w-full h-48 object-cover" onerror="this.src='https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail'">
-          <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
-            <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 0111 8v4a1 1 0 01-1.555.832l-3-2a1 1 0 010-1.664l-3-2z"/>
-            </svg>
-          </div>
-          <div class="absolute inset-x-0 bottom-16 p-4 bg-gradient-to-t from-black/90 to-transparent">
-            <p class="text-white font-bold text-lg truncate">${video.title || 'Untitled Video'}</p>
-            <div class="flex gap-4 mt-2 text-sm text-gray-300">
-              <span>Heart ${likes}</span>
-              <span>Chat ${comments}</span>
-              <span class="cursor-pointer hover:text-white" onclick="event.stopPropagation(); navigator.clipboard.writeText('${publicUrl}'); alert('Link copied!')">Share</span>
+        <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
+          <!-- Thumbnail -->
+          <div class="relative">
+            <img src="${thumbUrl}" class="w-full h-48 object-cover" onerror="this.src='https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail'">
+            <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
+              <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7L8 5z"/>
+              </svg>
             </div>
           </div>
 
-          <!-- DELETE BUTTON — EXACTLY UNDER THE VIDEO, SAME HEIGHT -->
-          <div class="absolute inset-x-0 bottom-0 bg-red-600 hover:bg-red-700 transition-all h-12 flex items-center justify-center">
+          <!-- Likes + Share (clean, no overlay) -->
+          <div class="p-4 bg-gray-800 flex justify-between items-center text-white">
+            <div class="flex items-center gap-2 font-bold">
+              <span>Likes</span> <span class="text-emerald-400">${likes}</span>
+            </div>
+            <button onclick="event.stopPropagation(); navigator.clipboard.writeText('${publicUrl}'); alert('Public link copied!')" 
+                    class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">
+              Share
+            </button>
+          </div>
+
+          <!-- Delete Button (full width, red) -->
+          <div class="bg-red-600 hover:bg-red-700 transition">
             <button onclick="event.stopPropagation(); if(confirm('Delete this video forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" 
-                    class="text-white font-bold text-sm">
+                    class="w-full text-white font-bold py-3">
               Delete Video
             </button>
           </div>
@@ -247,7 +256,7 @@
       videoPath && supabase.storage.from('media').remove([videoPath]),
       thumbPath && supabase.storage.from('media').remove([thumbPath])
     ]);
-    alert('Video deleted.');
+    alert('Video deleted forever.');
     loadVideos();
   }
 
@@ -278,7 +287,7 @@
       user_id: currentUser.id,
       video_url: videoName,
       thumbnail_url: thumbName,
-      title: videoFile.name.replace(/\.mp4$/i, '').substring(0, 60)
+      title: videoFile.name.replace(/\.mp4$/i, '').substring(0, 60) || 'Untitled'
     });
 
     document.getElementById('uploadSpinner').classList.add('hidden');
