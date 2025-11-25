@@ -52,7 +52,7 @@
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
 
-    <!-- LIVE STREAM SECTION — NOW SAFE & ALWAYS VISIBLE -->
+    <!-- LIVE STREAM SECTION -->
     <div class="mb-20">
       <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl shadow-2xl p-8 border-8 border-emerald-600">
         <div class="grid md:grid-cols-3 gap-8">
@@ -66,7 +66,9 @@
             </div>
             <div id="offlinePlaceholder">
               <div class="bg-gray-900 rounded-3xl h-96 md:h-[495px] flex flex-col items-center justify-center text-center p-10 text-white">
-                <svg class="w-24 h-24 mb-6 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17V8h2v6l-5 5-1.41-1.41L10 17z"/></svg>
+                <svg class="w-24 h-24 mb-6 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17V8h2v6l-5 5-1.41-1.41L10 17z"/>
+                </svg>
                 <h2 class="text-5xl font-black text-emerald-400 mb-4">LIVE STREAM</h2>
                 <p class="text-2xl">This artist is not live right now</p>
                 <p class="text-lg text-gray-400 mt-2">Check back later or watch their videos below</p>
@@ -129,52 +131,56 @@
       profile = data;
       artistUserId = profile.id;
 
+      // Update page
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Artist';
       document.getElementById('artistBio').textContent = profile.bio || 'No bio yet.';
 
-      // Banner & Logo
+      // Banner
       if (profile.banner_url) {
-        const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl + '?t=' + Date.now();
-        document.getElementById('banner').src = url;
+        const bannerUrl = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl + '?t=' + Date.now();
+        document.getElementById('banner').src = bannerUrl;
         document.getElementById('banner').classList.remove('hidden');
         document.getElementById('bannerPlaceholder').classList.add('hidden');
       }
+
+      // Logo
       if (profile.logo_url) {
-        document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
+        const logoUrl = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
+        document.getElementById('logo').src = logoUrl;
       }
 
-      // Live Stream Logic
+      // Live Stream
       if (profile.plan === 'pro' && profile.is_live && profile.live_stream_url) {
         document.getElementById('livePlayer').classList.remove('hidden');
         document.getElementById('offlinePlaceholder').classList.add('hidden');
         let url = profile.live_stream_url.trim();
         if (url.includes('youtube.com') || url.includes('youtu.be')) {
-          url = url.replace('watch?v=', 'embed/').split('&')[0] + '?autoplay=1';
+          url = url.replace('watch?v=', 'embed/').split('&')[0] + '?autoplay=1&mute=0';
         } else if (url.includes('twitch.tv')) {
           const channel = url.split('/').pop();
           url = `https://player.twitch.tv/?channel=${channel}&parent=${location.hostname}&autoplay=true`;
         }
         document.getElementById('liveIframe').src = url;
         loadLiveChat();
-        setInterval(loadLiveChat, 5000);
+        setInterval(loadLiveChat, 4000);
       }
-      // Otherwise placeholder stays — no error
 
       await loadVideos();
     }
 
     async function loadLiveChat() {
       if (!artistUserId) return;
-      const { data } = await supabase.from('live_chat')
+      const { data } = await supabase
+        .from('live_chat')
         .select('name, message')
         .eq('artist_id', artistUserId)
         .order('created_at', { ascending: false })
         .limit(50);
 
       const container = document.getElementById('liveMessages');
-      if (!data?.length) {
-        container.innerHTML = '<p class="text-gray-500 italic text-center">No messages yet — say hi!</p>';
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 italic text-center">Be the first to chat!</p>';
         return;
       }
       container.innerHTML = data.reverse().map(m => `
@@ -190,26 +196,34 @@
       const input = document.getElementById('liveChatInput');
       const msg = input.value.trim();
       if (!msg || !artistUserId) return;
-      await supabase.from('live_chat').insert({ artist_id: artistUserId, name: currentFanName || 'Fan', message: msg });
+      const name = currentFanName || 'Fan';
+      await supabase.from('live_chat').insert({ artist_id: artistUserId, name, message: msg });
       input.value = '';
       loadLiveChat();
     };
 
-    // Full working loadVideos() + likes + comments + share + modal — unchanged from your working version
     async function loadVideos() {
       if (!artistUserId) return;
-      const { data: videos } = await supabase.from('user_videos')
-        .select('*').eq('user_id', artistUserId)
+
+      const { data: videos } = await supabase
+        .from('user_videos')
+        .select('*')
+        .eq('user_id', artistUserId)
         .order('created_at', { ascending: false });
 
       const list = document.getElementById('videoList');
-      list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-600">No videos yet</p>';
+      list.innerHTML = '';
 
-      for (const v of (videos || [])) {
+      if (!videos || videos.length === 0) {
+        list.innerHTML = '<p class="col-span-full text-center text-5xl text-gray-600 py-20">No videos yet</p>';
+        return;
+      }
+
+      for (const v of videos) {
         const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl + '?t=' + Date.now();
         const thumbUrl = v.thumbnail_url
           ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl + '?t=' + Date.now()
-          : 'logo-placeholder.png';
+          : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumbnail';
 
         const [{ count: likeCount = 0 }, { data: comments = [] }] = await Promise.all([
           supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', v.id),
@@ -220,18 +234,126 @@
         card.className = 'video-card';
         card.dataset.videoUrl = videoUrl;
         card.dataset.videoId = v.id;
-        card.innerHTML = /* same beautiful card as before */;
+
+        card.innerHTML = `
+          <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
+            <img src="${thumbUrl}" alt="${v.title || 'Video'}" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumbnail'">
+            <div class="play-overlay">
+              <div class="play-button">
+                <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled Video'}</h3>
+            <div class="flex justify-between items-center mb-4 text-lg">
+              <button class="like-btn flex items-center gap-2 font-bold ${likeCount > 0 ? 'liked' : 'text-gray-600'}">
+                Heart ${likeCount}
+              </button>
+              <button class="share-btn text-emerald-600 font-bold">Share</button>
+            </div>
+            <div class="space-y-2 mb-4 text-sm max-h-40 overflow-y-auto">
+              ${comments.length === 0 ? '<p class="text-gray-500 italic text-center py-2">No comments yet</p>' : ''}
+              ${comments.map(c => `
+                <div class="comment-bubble">
+                  <span class="comment-name">${c.name}:</span>
+                  <span class="comment-text">${c.comment}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="space-y-3">
+              <input type="text" value="${currentFanName}" placeholder="Your name" class="name-input w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-sm">
+              <div class="flex gap-2">
+                <input type="text" placeholder="Add a comment..." class="comment-input flex-1 px-4 py-3 rounded-xl border border-gray-300 bg-white text-sm">
+                <button class="post-comment bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm">Post</button>
+              </div>
+            </div>
+          </div>
+        `;
+
         list.appendChild(card);
       }
 
-      if (profile.plan !== 'pro' && videos?.length >= 3) {
+      // Rising Star Badge
+      if (profile.plan !== 'pro' && videos.length >= 3) {
         document.getElementById('risingStarBadge').classList.add('show');
       }
 
-      // All event listeners (likes, comments, share, share, modal) go here — they work perfectly
+      // Event Listeners
+      document.querySelectorAll('.name-input').forEach(input => {
+        input.addEventListener('change', () => {
+          const name = input.value.trim();
+          if (name && name !== currentFanName) {
+            currentFanName = name;
+            localStorage.setItem('rhythmDeckFanName', name);
+          }
+        });
+      });
+
+      document.querySelectorAll('.post-comment').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const card = btn.closest('.video-card');
+          const input = card.querySelector('.comment-input');
+          const nameInput = card.querySelector('.name-input');
+          const comment = input.value.trim();
+          const name = nameInput.value.trim() || 'Fan';
+          if (!comment) return;
+          await supabase.from('video_comments').insert({
+            video_id: card.dataset.videoId,
+            name: name,
+            comment: comment
+          });
+          input.value = '';
+          loadVideos(); // Refresh to show new comment
+        });
+      });
+
+      document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const card = btn.closest('.video-card');
+          const { data: existing } = await supabase
+            .from('video_likes')
+            .select('id')
+            .eq('video_id', card.dataset.videoId)
+            .limit(1);
+          if (existing?.length > 0) return;
+          await supabase.from('video_likes').insert({ video_id: card.dataset.videoId });
+          btn.classList.add('liked');
+          btn.innerHTML = `Heart ${parseInt(btn.textContent.split(' ')[1]) + 1}`;
+        });
+      });
+
+      document.querySelectorAll('.share-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(location.href);
+          alert('Link copied to clipboard!');
+        });
+      });
     }
 
-    load();
+    function openVideo(url) {
+      const video = document.createElement('video');
+      video.src = url;
+      video.controls = true;
+      video.autoplay = true;
+      video.style.position = 'fixed';
+      video.style.top = '50%';
+      video.style.left = '50%';
+      video.style.transform = 'translate(-50%, -50%)';
+      video.style.maxWidth = '90%';
+      video.style.maxHeight = '90%';
+      video.style.zIndex = '9999';
+      video.style.background = 'black';
+      video.style.borderRadius = '12px';
+      video.style.boxShadow = '0 0 50px rgba(0,0,0,0.9)';
+      document.body.appendChild(video);
+
+      video.onclick = () => video.remove();
+      document.addEventListener('keydown', e => e.key === 'Escape' && video.remove());
+    }
+
+    // Start loading
+    loadProfile();
   </script>
 </body>
 </html>
