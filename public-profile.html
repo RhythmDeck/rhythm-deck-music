@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Artist | Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .live-dot {display:inline-block;width:16px;height:16px;background:#ef4444;border-radius:50%;animation:pulse 1.8s infinite;box-shadow:0 0 20px #ef4444}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .video-card{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.15);transition:all .4s ease;background:white}
+    .video-card:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,0.3)}
+    .thumbnail-container{position:relative;width:100%;padding-top:56.25%;overflow:hidden;background:#000;cursor:pointer}
+    .thumbnail-container img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+    .video-card:hover .thumbnail-container img{transform:scale(1.08)}
+    .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s ease}
+    .video-card:hover .play-overlay{opacity:1}
+    .play-button{width:90px;height:90px;background:rgba(255,255,255,0.95);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);transition:all .3s ease;backdrop-filter:blur(10px)}
+    .video-card:hover .play-button{transform:scale(1.15);background:white}
+    .play-button svg{width:38px;height:38px;margin-left:6px;fill:#10b981}
+    #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(0.175,0.885,0.32,1.4)}
+    #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg)}
+    .like-btn.liked{color:#ef4444;filter:drop-shadow(0 0 10px #ef4444)}
+    .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:0.75rem 1rem;margin-bottom:0.5rem}
+    .comment-name{font-weight:700;color:#10b981;text-shadow:0 0 8px rgba(16,185,129,0.4)}
+    .comment-text{color:#1f2937;margin-left:0.5rem;font-weight:500}
+    #artistName{color:#ffffff !important;text-shadow:0 4px 20px rgba(0,0,0,0.8);-webkit-text-stroke:2px black;paint-order:stroke fill}
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
+  <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
+    <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
+    <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
+      Artist Banner
+    </div>
+    <img id="risingStarBadge" src="rising-artist-badge-transparent.png" alt="Rising Star">
+  </div>
+
+  <div class="max-w-7xl mx-auto p-6 -mt-20 relative z-10">
+    <div class="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
+      <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
+      <div class="text-center md:text-left">
+        <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
+      <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
+      <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
+    </div>
+
+    <!-- LIVE STREAM (PRO ONLY) -->
+    <div id="liveSection" class="mb-20 hidden">
+      <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl shadow-2xl p-8 border-8 border-emerald-600">
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="md:col-span-2">
+            <div id="livePlayer" class="hidden">
+              <iframe id="liveIframe" width="100%" height="495" frameborder="0" allowfullscreen class="rounded-3xl shadow-2xl"></iframe>
+              <div class="text-center mt-4">
+                <span class="live-dot"></span>
+                <span class="text-4xl font-black text-red-500 ml-4">LIVE NOW</span>
+              </div>
+            </div>
+            <div id="offlinePlaceholder" class="bg-gray-900 rounded-3xl h-96 md:h-[495px] flex items-center justify-center text-center p-10">
+              <div>
+                <h2 class="text-6xl md:text-8xl font-black text-emerald-400 mb-6">LIVE STREAM</h2>
+                <p class="text-3xl text-gray-300">The artist is not live right now.</p>
+                <p class="text-xl text-gray-500 mt-4">Check out their videos below</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-3xl shadow-2xl p-6 flex flex-col h-96 md:h-[495px]">
+            <h3 class="text-2xl font-black text-emerald-700 mb-4">Live Chat</h3>
+            <div id="liveMessages" class="flex-1 overflow-y-auto space-y-3 bg-gray-50 rounded-xl p-4 text-sm">
+              <p class="text-gray-500 italic text-center">Waiting for messages...</p>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <input type="text" id="liveChatInput" placeholder="Say something..." class="flex-1 px-4 py-3 rounded-xl border border-emerald-300 focus:border-emerald-500 bg-white text-gray-900 placeholder-gray-500">
+              <button id="sendLiveMessage" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition transform hover:scale-105">
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-20">
+      <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center md:text-left">Videos</h2>
+      <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
+    </div>
+  </div>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://bxoqhmfnseskwqkywppg.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+    );
+
+    const params = new URLSearchParams(location.search);
+    const idParam = params.get('id')?.trim().toLowerCase();
+    if (!idParam) location.href = '/';
+
+    let profile = null;
+    let artistUserId = null;
+    let currentFanName = localStorage.getItem('rhythmDeckFanName') || '';
+
+    async function loadProfile() {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, name, bio, banner_url, logo_url, subdomain, plan')
+        .ilike('subdomain', idParam)
+        .single();
+
+      if (!data) {
+        document.body.innerHTML = `<div class="text-center mt-32 p-16 bg-white rounded-3xl shadow-2xl max-w-2xl mx-auto"><h1 class="text-8xl font-black text-red-600 mb-8">Artist Not Found</h1><a href="/" class="bg-emerald-600 text-white px-12 py-6 rounded-2xl text-3xl font-black hover:bg-emerald-700">Go Home</a></div>`;
+        return;
+      }
+
+      profile = data;
+      artistUserId = data.id;
+
+      document.title = `${data.name} • Rhythm Deck`;
+      document.getElementById('artistName').textContent = data.name;
+      document.getElementById('artistBio').textContent = data.bio || 'No bio yet.';
+
+      if (data.banner_url) {
+        document.getElementById('banner').src = supabase.storage.from('media').getPublicUrl(data.banner_url).data.publicUrl;
+        document.getElementById('banner').classList.remove('hidden');
+        document.getElementById('bannerPlaceholder').classList.add('hidden');
+      }
+      if (data.logo_url) {
+        document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(data.logo_url).data.publicUrl;
+      }
+
+      // Pro: Show livestream section
+      if (data.plan === 'pro') {
+        document.getElementById('liveSection').classList.remove('hidden');
+
+        const { data: live } = await supabase
+          .from('profiles')
+          .select('is_live, live_stream_url')
+          .eq('id', data.id)
+          .single();
+
+        if (live?.is_live && live?.live_stream_url) {
+          document.getElementById('offlinePlaceholder').classList.add('hidden');
+          document.getElementById('livePlayer').classList.remove('hidden');
+
+          let url = live.live_stream_url.trim();
+          if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            url = url.replace('watch?v=', 'embed/') + '?autoplay=1';
+          } else if (url.includes('twitch.tv')) {
+            const channel = url.split('/').pop();
+            url = `https://player.twitch.tv/?channel=${channel}&parent=${location.hostname}&autoplay=true`;
+          }
+          document.getElementById('liveIframe').src = url;
+
+          loadLiveChat();
+          setInterval(loadLiveChat, 5000);
+        }
+      }
+
+      loadVideos();
+    }
+
+    async function loadLiveChat() {
+      if (!artistUserId) return;
+      const { data } = await supabase
+        .from('live_chat')
+        .select('name, message')
+        .eq('artist_id', artistUserId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      const chat = document.getElementById('liveMessages');
+      chat.innerHTML = data?.length
+        ? data.reverse().map(m => `<div class="comment-bubble"><span class="comment-name">${m.name}:</span> <span class="comment-text">${m.message}</span></div>`).join('')
+        : '<p class="text-gray-500 italic text-center">Be the first to chat!</p>';
+    }
+
+    document.getElementById('sendLiveMessage')?.addEventListener('click', async () => {
+      const input = document.getElementById('liveChatInput');
+      const msg = input.value.trim();
+      if (!msg || !artistUserId) return;
+      await supabase.from('live_chat').insert({ artist_id: artistUserId, name: currentFanName || 'Fan', message: msg });
+      input.value = '';
+      loadLiveChat();
+    });
+
+    document.getElementById('liveChatInput')?.addEventListener('keypress', e => e.key === 'Enter' && document.getElementById('sendLiveMessage').click());
+
+    async function loadVideos() {
+      const { data: videos } = await supabase
+        .from('user_videos')
+        .select('*')
+        .eq('user_id', artistUserId)
+        .order('created_at', { ascending: false });
+
+      const list = document.getElementById('videoList');
+      list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-600">No videos yet</p>';
+
+      for (const v of (videos || [])) {
+        const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+        const thumbUrl = v.thumbnail_url ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'logo-placeholder.png';
+
+        const [{ count: likes = 0 }, { data: comments = [] }] = await Promise.all([
+          supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', v.id),
+          supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false })
+        ]);
+
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.dataset.videoUrl = videoUrl;
+        card.dataset.videoId = v.id;
+        card.innerHTML = `
+          <div class="thumbnail-container">
+            <img src="${thumbUrl}" alt="Thumbnail" onerror="this.src='logo-placeholder.png'">
+            <div class="play-overlay"><div class="play-button"><svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg></div></div>
+          </div>
+          <div class="p-6">
+            <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled'}</h3>
+            <div class="flex justify-between items-center mb-3 text-lg">
+              <button class="like-btn flex items-center gap-2 font-bold ${likes > 0 ? 'liked' : 'text-gray-600'}">Heart ${likes}</button>
+              <button class="share-btn text-emerald-600 font-bold">Share</button>
+            </div>
+            <div class="space-y-2 mb-4 text-sm max-h-40 overflow-y-auto">
+              ${comments.length ? comments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name}:</span> <span class="comment-text">${c.comment}</span></div>`).join('') : '<p class="text-gray-500 italic text-center py-2">No comments yet</p>'}
+            </div>
+            <div class="space-y-3">
+              <input type="text" value="${currentFanName}" placeholder="Your name" class="name-input w-full px-4 py-3 rounded-xl border border-gray-300 bg-white">
+              <div class="flex gap-2">
+                <input type="text" placeholder="Add a comment..." class="comment-input flex-1 px-4 py-3 rounded-xl border border-gray-300 bg-white">
+                <button class="post-comment bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg">Post</button>
+              </div>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      }
+
+      if (profile.plan !== 'pro' && videos?.length >= 3) {
+        document.getElementById('risingStarBadge').classList.add('show');
+      }
+
+      // Event Listeners
+      document.querySelectorAll('.name-input').forEach(i => i.addEventListener('change', () => {
+        const n = i.value.trim();
+        if (n && n !== currentFanName) { currentFanName = n; localStorage.setItem('rhythmDeckFanName', n); }
+      }));
+
+      document.querySelectorAll('.post-comment').forEach(btn => btn.onclick = async () => {
+        const card = btn.closest('.video-card');
+        const name = card.querySelector('.name-input').value.trim() || 'Fan';
+        const comment = card.querySelector('.comment-input').value.trim();
+        if (!comment) return alert('Write a comment!');
+        await supabase.from('video_comments').insert({ video_id: card.dataset.videoId, name, comment });
+        if (name !== currentFanName) { currentFanName = name; localStorage.setItem('rhythmDeckFanName', name); }
+        card.querySelector('.comment-input').value = '';
+        loadVideos();
+      });
+
+      document.querySelectorAll('.like-btn').forEach(btn => btn.onclick = async () => {
+        const name = btn.closest('.video-card').querySelector('.name-input').value.trim() || 'Fan';
+        await supabase.from('video_likes').insert({ video_id: btn.closest('.video-card').dataset.videoId, fan_name: name });
+        const count = (parseInt(btn.textContent.match(/\d+/)?.[0] || 0) + 1);
+        btn.innerHTML = `Heart ${count}`;
+        btn.classList.add('liked');
+      });
+
+      document.querySelectorAll('.share-btn').forEach(b => b.onclick = () => {
+        navigator.clipboard.writeText(location.href);
+        alert('Link copied!');
+      });
+
+      document.querySelectorAll('.thumbnail-container').forEach(c => c.onclick = () => {
+        const url = c.closest('.video-card').dataset.videoUrl;
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-8';
+        modal.innerHTML = `<video controls autoplay class="max-w-full max-h-full rounded-3xl shadow-2xl border-8 border-emerald-500"><source src="${url}" type="video/mp4"></video>
+          <button class="absolute top-8 right-8 text-white text-8xl hover:text-gray-400 font-thin">×</button>`;
+        modal.querySelector('button').onclick = () => modal.remove();
+        document.body.appendChild(modal);
+      });
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>
