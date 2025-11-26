@@ -9,8 +9,38 @@
   <style>
     .live-dot{display:inline-block;width:16px;height:16px;background:#ef4444;border-radius:50%;animation:pulse 1.8s infinite;box-shadow:0 0 20px #ef4444}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-    .video-card{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.15);transition:all .4s;background:white}
-    .video-card:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,0.3)}
+
+    /* Neon Green Glow Border */
+    .video-card {
+      border-radius:1.5rem;
+      overflow:hidden;
+      box-shadow:0 20px 40px rgba(0,0,0,0.15);
+      transition:all .4s;
+      background:white;
+      border: 4px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+    }
+    .video-card::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 1.75rem;
+      background: linear-gradient(45deg, #10b981, #34d399, #6ee7b7);
+      z-index: -1;
+      filter: blur(12px);
+      opacity: 0.8;
+      animation: glow 4s infinite alternate;
+    }
+    @keyframes glow {
+      0% { opacity: 0.7; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.02); }
+    }
+    .video-card:hover {
+      transform:translateY(-10px) scale(1.03);
+      box-shadow:0 30px 60px rgba(0,0,0,0.3);
+    }
+
     .thumbnail-container{position:relative;width:100%;padding-top:56.25%;overflow:hidden;background:#000;cursor:pointer}
     .thumbnail-container img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
     .video-card:hover .thumbnail-container img{transform:scale(1.08)}
@@ -21,7 +51,30 @@
     .play-button svg{width:38px;height:38px;margin-left:6px;fill:#10b981}
     #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(0.175,0.885,0.32,1.4)}
     #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg)}
-    .like-btn.liked svg{fill:#ef4444 !important;stroke:#ef4444;filter:drop-shadow(0 0 12px #ef4444)}
+
+    /* Like Button - Red Heart */
+    .like-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #666;
+      transition: all 0.3s;
+    }
+    .like-btn:hover { color: #ef4444; }
+    .like-btn.liked { color: #ef4444; }
+    .like-btn.liked svg { 
+      fill: #ef4444 !important; 
+      stroke: #ef4444; 
+      filter: drop-shadow(0 0 12px #ef4444);
+    }
+    .like-btn svg {
+      width: 28px;
+      height: 28px;
+      transition: all 0.3s;
+    }
+
     .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem;transition:all .3s}
     .comment-name{font-weight:700;color:#10b981;text-shadow:0 0 8px rgba(16,185,129,0.4)}
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
@@ -51,7 +104,7 @@
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
 
-    <!-- LIVE STREAM SECTION — ONLY FOR PRO PLAN -->
+    <!-- LIVE STREAM — ONLY FOR PRO -->
     <div id="liveStreamSection" class="hidden mb-20">
       <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl shadow-2xl p-8 border-8 border-emerald-600">
         <div class="grid md:grid-cols-3 gap-8">
@@ -65,12 +118,8 @@
             </div>
             <div id="offlinePlaceholder">
               <div class="bg-gray-900 rounded-3xl h-96 md:h-[495px] flex flex-col items-center justify-center text-center p-10 text-white">
-                <svg class="w-24 h-24 mb-6 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17V8h2v6l-5 5-1.41-1.41L10 17z"/>
-                </svg>
                 <h2 class="text-5xl font-black text-emerald-400 mb-4">LIVE STREAM</h2>
                 <p class="text-2xl">This artist is not live right now</p>
-                <p class="text-lg text-gray-400 mt-2">Check back later or watch their videos below</p>
               </div>
             </div>
           </div>
@@ -134,14 +183,14 @@
       document.getElementById('artistBio').textContent = profile.bio || 'No bio yet.';
 
       if (profile.banner_url) {
-        const bannerUrl = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl + '?t=' + Date.now();
-        document.getElementById('banner').src = bannerUrl;
+        const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl + '?t=' + Date.now();
+        document.getElementById('banner').src = url;
         document.getElementById('banner').classList.remove('hidden');
         document.getElementById('bannerPlaceholder').classList.add('hidden');
       }
       if (profile.logo_url) {
-        const logoUrl = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
-        document.getElementById('logo').src = logoUrl;
+        const url = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
+        document.getElementById('logo').src = url;
       }
 
       if (profile.plan === 'pro') {
@@ -169,7 +218,7 @@
       if (!artistUserId) return;
       const { data } = await supabase.from('live_chat').select('name, message').eq('artist_id', artistUserId).order('created_at', { ascending: false }).limit(50);
       const container = document.getElementById('liveMessages');
-      container.innerHTML = data && data.length > 0 
+      container.innerHTML = data?.length > 0 
         ? data.reverse().map(m => `<div class="comment-bubble"><span class="comment-name">${m.name}:</span><span class="comment-text">${m.message}</span></div>`).join('')
         : '<p class="text-gray-500 italic text-center">Be the first to chat!</p>';
       container.scrollTop = container.scrollHeight;
@@ -231,12 +280,13 @@
           <div class="p-6">
             <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled Video'}</h3>
             
-            <div class="flex justify-between items-center mb-4 text-lg">
-              <button class="like-btn flex items-center gap-2 font-bold text-gray-600 hover:text-red-500 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="flex justify-between items-center mb-4">
+              <button class="like-btn">
+                Heart
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-                <span class="like-count">${likeCount}</span>
+                <span class="like-count ml-1 font-bold">${likeCount}</span>
               </button>
               <button class="share-btn text-emerald-600 font-bold hover:text-emerald-700">Share</button>
             </div>
@@ -267,7 +317,7 @@
         document.getElementById('risingStarBadge').classList.add('show');
       }
 
-      // Like Button Logic
+      // Like Button - Now works perfectly
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           if (btn.classList.contains('liked')) return;
@@ -282,46 +332,46 @@
         });
       });
 
-      // Other event listeners (name, comment, share)
-      document.querySelectorAll('.name-input').forEach(input => {
-        input.addEventListener('change', () => {
-          const name = input.value.trim();
-          if (name) {
-            currentFanName = name;
-            localStorage.setItem('rhythmDeckFanName', name);
-          }
-        });
-      });
-
-      document.querySelectorAll('.post-comment').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const card = btn.closest('.video-card');
-          const input = card.querySelector('.comment-input');
-          const nameInput = card.querySelector('.name-input');
-          const comment = input.value.trim();
-          const name = nameInput.value.trim() || 'Fan';
-          if (!comment) return;
-
-          await supabase.from('video_comments').insert({
-            video_id: card.dataset.videoId,
-            name: name,
-            comment: comment
+      document.querySelectorAll('.name-input, .comment-input, .post-comment, .share-btn').forEach(el => {
+        // Re-attach other listeners (name save, comment post, share)
+        if (el.classList.contains('name-input')) {
+          el.addEventListener('change', () => {
+            const name = el.value.trim();
+            if (name) {
+              currentFanName = name;
+              localStorage.setItem('rhythmDeckFanName', name);
+            }
           });
+        }
+        if (el.classList.contains('post-comment')) {
+          el.addEventListener('click', async () => {
+            const card = el.closest('.video-card');
+            const input = card.querySelector('.comment-input');
+            const nameInput = card.querySelector('.name-input');
+            const comment = input.value.trim();
+            const name = nameInput.value.trim() || 'Fan';
+            if (!comment) return;
 
-          if (nameInput.value.trim()) {
-            currentFanName = name;
-            localStorage.setItem('rhythmDeckFanName', name);
-          }
-          input.value = '';
-          loadVideos();
-        });
-      });
+            await supabase.from('video_comments').insert({
+              video_id: card.dataset.videoId,
+              name: name,
+              comment: comment
+            });
 
-      document.querySelectorAll('.share-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          navigator.clipboard.writeText(location.href);
-          alert('Link copied!');
-        });
+            if (nameInput.value.trim()) {
+              currentFanName = name;
+              localStorage.setItem('rhythmDeckFanName', name);
+            }
+            input.value = '';
+            loadVideos();
+          });
+        }
+        if (el.classList.contains('share-btn')) {
+          el.addEventListener('click', () => {
+            navigator.clipboard.writeText(location.href);
+            alert('Link copied!');
+          });
+        }
       });
     }
 
