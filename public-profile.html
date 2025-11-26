@@ -29,7 +29,6 @@
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
-
   <!-- Banner -->
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
@@ -52,8 +51,8 @@
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
 
-    <!-- LIVE STREAM SECTION -->
-    <div class="mb-20">
+    <!-- LIVE STREAM SECTION — ONLY FOR PRO PLAN -->
+    <div id="liveStreamSection" class="hidden mb-20">
       <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl shadow-2xl p-8 border-8 border-emerald-600">
         <div class="grid md:grid-cols-3 gap-8">
           <div class="md:col-span-2">
@@ -106,7 +105,6 @@
 
     const params = new URLSearchParams(location.search);
     const idParam = params.get('id')?.trim().toLowerCase();
-
     if (!idParam) {
       document.body.innerHTML = `<div class="text-center mt-32"><h1 class="text-8xl font-black text-red-600">Invalid Link</h1><a href="/" class="mt-8 inline-block bg-emerald-600 text-white px-12 py-6 rounded-2xl text-3xl font-black">Go Home</a></div>`;
       throw new Error();
@@ -131,7 +129,6 @@
       profile = data;
       artistUserId = profile.id;
 
-      // Update page
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Artist';
       document.getElementById('artistBio').textContent = profile.bio || 'No bio yet.';
@@ -150,20 +147,25 @@
         document.getElementById('logo').src = logoUrl;
       }
 
-      // Live Stream
-      if (profile.plan === 'pro' && profile.is_live && profile.live_stream_url) {
-        document.getElementById('livePlayer').classList.remove('hidden');
-        document.getElementById('offlinePlaceholder').classList.add('hidden');
-        let url = profile.live_stream_url.trim();
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-          url = url.replace('watch?v=', 'embed/').split('&')[0] + '?autoplay=1&mute=0';
-        } else if (url.includes('twitch.tv')) {
-          const channel = url.split('/').pop();
-          url = `https://player.twitch.tv/?channel=${channel}&parent=${location.hostname}&autoplay=true`;
+      // LIVE STREAM: ONLY SHOW FOR PRO PLAN
+      if (profile.plan === 'pro') {
+        document.getElementById('liveStreamSection').classList.remove('hidden');
+
+        if (profile.is_live && profile.live_stream_url) {
+          document.getElementById('livePlayer').classList.remove('hidden');
+          document.getElementById('offlinePlaceholder').classList.add('hidden');
+
+          let url = profile.live_stream_url.trim();
+          if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            url = url.replace('watch?v=', 'embed/').split('&')[0] + '?autoplay=1&mute=0';
+          } else if (url.includes('twitch.tv')) {
+            const channel = url.split('/').pop();
+            url = `https://player.twitch.tv/?channel=${channel}&parent=${location.hostname}&autoplay=true`;
+          }
+          document.getElementById('liveIframe').src = url;
+          loadLiveChat();
+          setInterval(loadLiveChat, 4000);
         }
-        document.getElementById('liveIframe').src = url;
-        loadLiveChat();
-        setInterval(loadLiveChat, 4000);
       }
 
       await loadVideos();
@@ -192,7 +194,7 @@
       container.scrollTop = container.scrollHeight;
     }
 
-    document.getElementById('sendLiveMessage').onclick = async () => {
+    document.getElementById('sendLiveMessage')?.addEventListener('click', async () => {
       const input = document.getElementById('liveChatInput');
       const msg = input.value.trim();
       if (!msg || !artistUserId) return;
@@ -200,11 +202,10 @@
       await supabase.from('live_chat').insert({ artist_id: artistUserId, name, message: msg });
       input.value = '';
       loadLiveChat();
-    };
+    });
 
     async function loadVideos() {
       if (!artistUserId) return;
-
       const { data: videos } = await supabase
         .from('user_videos')
         .select('*')
@@ -225,16 +226,23 @@
           ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl + '?t=' + Date.now()
           : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumbnail';
 
-        const [{ count: likeCount = 0 }, { data: comments = [] }] = await Promise.all([
-          supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', v.id),
-          supabase.from('video_comments').select('name, comment, created_at').eq('video_id', v.id).order('created_at', { ascending: false })
-        ]);
+        // Fixed: Correct like count (no more NaN)
+        const { count: likeCount = 0 } = await supabase
+          .from('video_likes')
+          .select('id', { count: 'exact', head: true })
+          .eq('video_id', v.id)
+          .single() || { count: 0 };
+
+        const { data: comments = [] } = await supabase
+          .from('video_comments')
+          .select('name, comment, created_at')
+          .eq('video_id', v.id)
+          .order('created_at', { ascending: false });
 
         const card = document.createElement('div');
         card.className = 'video-card';
         card.dataset.videoUrl = videoUrl;
         card.dataset.videoId = v.id;
-
         card.innerHTML = `
           <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
             <img src="${thumbUrl}" alt="${v.title || 'Video'}" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumbnail'">
@@ -247,7 +255,7 @@
           <div class="p-6">
             <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled Video'}</h3>
             <div class="flex justify-between items-center mb-4 text-lg">
-              <button class="like-btn flex items-center gap-2 font-bold ${likeCount > 0 ? 'liked' : 'text-gray-600'}">
+              <button class="like-btn flex items-center gap-2 font-bold text-gray-600">
                 Heart ${likeCount}
               </button>
               <button class="share-btn text-emerald-600 font-bold">Share</button>
@@ -262,7 +270,7 @@
               `).join('')}
             </div>
             <div class="space-y-3">
-              <input type="text" value="${currentFanName}" placeholder="Your name" class="name-input w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-sm">
+              <input type="text" value="${currentFanName}" placeholder="Your name (optional)" class="name-input w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-sm">
               <div class="flex gap-2">
                 <input type="text" placeholder="Add a comment..." class="comment-input flex-1 px-4 py-3 rounded-xl border border-gray-300 bg-white text-sm">
                 <button class="post-comment bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm">Post</button>
@@ -270,7 +278,6 @@
             </div>
           </div>
         `;
-
         list.appendChild(card);
       }
 
@@ -283,7 +290,7 @@
       document.querySelectorAll('.name-input').forEach(input => {
         input.addEventListener('change', () => {
           const name = input.value.trim();
-          if (name && name !== currentFanName) {
+          if (name) {
             currentFanName = name;
             localStorage.setItem('rhythmDeckFanName', name);
           }
@@ -298,35 +305,42 @@
           const comment = input.value.trim();
           const name = nameInput.value.trim() || 'Fan';
           if (!comment) return;
+
           await supabase.from('video_comments').insert({
             video_id: card.dataset.videoId,
             name: name,
             comment: comment
           });
+
+          if (nameInput.value.trim()) {
+            currentFanName = name;
+            localStorage.setItem('rhythmDeckFanName', name);
+          }
+
           input.value = '';
-          loadVideos(); // Refresh to show new comment
+          loadVideos();
         });
       });
 
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const card = btn.closest('.video-card');
-          const { data: existing } = await supabase
-            .from('video_likes')
-            .select('id')
-            .eq('video_id', card.dataset.videoId)
-            .limit(1);
-          if (existing?.length > 0) return;
-          await supabase.from('video_likes').insert({ video_id: card.dataset.videoId });
+          const videoId = card.dataset.videoId;
+
+          // Check if already liked (simple client-side check)
+          if (btn.classList.contains('liked')) return;
+
+          await supabase.from('video_likes').insert({ video_id: videoId });
           btn.classList.add('liked');
-          btn.innerHTML = `Heart ${parseInt(btn.textContent.split(' ')[1]) + 1}`;
+          const current = parseInt(btn.textContent.match(/\d+/)?.[0] || '0');
+          btn.innerHTML = `Heart ${current + 1}`;
         });
       });
 
       document.querySelectorAll('.share-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           navigator.clipboard.writeText(location.href);
-          alert('Link copied to clipboard!');
+          alert('Link copied!');
         });
       });
     }
@@ -347,12 +361,11 @@
       video.style.borderRadius = '12px';
       video.style.boxShadow = '0 0 50px rgba(0,0,0,0.9)';
       document.body.appendChild(video);
-
-      video.onclick = () => video.remove();
-      document.addEventListener('keydown', e => e.key === 'Escape' && video.remove());
+      const close = () => video.remove();
+      video.onclick = close;
+      document.addEventListener('keydown', e => e.key === 'Escape' && close());
     }
 
-    // Start loading
     loadProfile();
   </script>
 </body>
