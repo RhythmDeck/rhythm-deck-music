@@ -10,36 +10,19 @@
     .live-dot{display:inline-block;width:16px;height:16px;background:#ef4444;border-radius:50%;animation:pulse 1.8s infinite;box-shadow:0 0 20px #ef4444}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-    /* Neon Green Glow Border */
-    .video-card {
-      border-radius:1.5rem;
-      overflow:hidden;
-      box-shadow:0 20px 40px rgba(0,0,0,0.15);
-      transition:all .4s;
-      background:white;
-      border: 4px solid transparent;
-      background-clip: padding-box;
-      position: relative;
+    /* Neon Green Glow */
+    .video-card{
+      border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.15);
+      transition:all .4s;background:white;position:relative;
+      border:4px solid transparent;background-clip:padding-box;
     }
-    .video-card::before {
-      content: '';
-      position: absolute;
-      inset: -8px;
-      border-radius: 1.75rem;
-      background: linear-gradient(45deg, #10b981, #34d399, #6ee7b7);
-      z-index: -1;
-      filter: blur(12px);
-      opacity: 0.8;
-      animation: glow 4s infinite alternate;
+    .video-card::before{
+      content:'';position:absolute;inset:-8px;border-radius:1.75rem;
+      background:linear-gradient(45deg,#10b981,#34d399,#6ee7b7);z-index:-1;
+      filter:blur(12px);opacity:0.8;animation:glow 4s infinite alternate;
     }
-    @keyframes glow {
-       0% { opacity: 0.7; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.02); }
-    }
-    .video-card:hover {
-      transform:translateY(-10px) scale(1.03);
-      box-shadow:0 30px 60px rgba(0,0,0,0.3);
-    }
+    @keyframes glow{0%{opacity:0.7;transform:scale(1)}100%{opacity:1;transform:scale(1.02)}}
+    .video-card:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,0.3)}
 
     .thumbnail-container{position:relative;width:100%;padding-top:56.25%;overflow:hidden;background:#000;cursor:pointer}
     .thumbnail-container img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
@@ -52,33 +35,12 @@
     #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(0.175,0.885,0.32,1.4)}
     #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg)}
 
-    /* Like Button - Clean & Perfect */
-    .like-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: bold;
-      font-size: 1.15rem;
-      color: #666;
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-    .like-btn:hover { color: #ef4444; }
-    .like-btn.liked { color: #ef4444; }
-    .like-btn.liked svg {
-      fill: #ef4444 !important;
-      stroke: #ef4444;
-      filter: drop-shadow(0 0 12px #ef4444);
-    }
-    .like-btn svg {
-      width: 28px;
-      height: 28px;
-      transition: all 0.3s;
-    }
-    .like-count {
-      font-weight: bold;
-      min-width: 20px;
-    }
+    .like-btn{display:flex;align-items:center;gap:10px;font-weight:bold;font-size:1.15rem;color:#666;transition:all .3s;cursor:pointer}
+    .like-btn:hover{color:#ef4444}
+    .like-btn.liked{color:#ef4444}
+    .like-btn.liked svg{fill:#ef4444;stroke:#ef4444;filter:drop-shadow(0 0 12px #ef4444)}
+    .like-btn svg{width:28px;height:28px;transition:all .3s}
+    .like-count{font-weight:bold;min-width:20px}
 
     .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem;transition:all .3s}
     .comment-name{font-weight:700;color:#10b981;text-shadow:0 0 8px rgba(16,185,129,0.4)}
@@ -88,7 +50,7 @@
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
 
-  <!-- Banner & rest of your HTML (unchanged) -->
+  <!-- Banner -->
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
@@ -110,8 +72,38 @@
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
 
-    <!-- LIVE STREAM SECTION (unchanged) -->
-    <div id="liveStreamSection" class="hidden mb-20">...</div>
+    <!-- LIVE STREAM -->
+    <div id="liveStreamSection" class="hidden mb-20">
+      <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl shadow-2xl p-8 border-8 border-emerald-600">
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="md:col-span-2">
+            <div id="livePlayer" class="hidden">
+              <iframe id="liveIframe" width="100%" height="495" frameborder="0" allowfullscreen class="rounded-3xl shadow-2xl"></iframe>
+              <div class="text-center mt-4">
+                <span class="live-dot"></span>
+                <span class="text-4xl font-black text-red-500 ml-4">LIVE NOW</span>
+              </div>
+            </div>
+            <div id="offlinePlaceholder">
+              <div class="bg-gray-900 rounded-3xl h-96 md:h-[495px] flex flex-col items-center justify-center text-center p-10 text-white">
+                <h2 class="text-5xl font-black text-emerald-400 mb-4">LIVE STREAM</h2>
+                <p class="text-2xl">This artist is not live right now</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-3xl shadow-2xl p-6 flex flex-col h-96 md:h-[495px]">
+            <h3 class="text-2xl font-black text-emerald-700 mb-4">Live Chat</h3>
+            <div id="liveMessages" class="flex-1 overflow-y-auto space-y-3 bg-gray-50 rounded-xl p-4 text-sm">
+              <p class="text-gray-500 italic text-center">Waiting for artist to go live...</p>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <input type="text" id="liveChatInput" placeholder="Say something..." class="flex-1 px-4 py-3 rounded-xl border border-emerald-300 focus:border-emerald-500 bg-white">
+              <button id="sendLiveMessage" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Videos -->
     <div class="mb-20">
@@ -128,13 +120,78 @@
 
     const params = new URLSearchParams(location.search);
     const idParam = params.get('id')?.trim().toLowerCase();
-    if (!idParam) { /* error handling same as before */ }
+
+    if (!idParam) {
+      document.body.innerHTML = `<div class="text-center mt-32"><h1 class="text-8xl font-black text-red-600">Invalid Link</h1><a href="/" class="mt-8 inline-block bg-emerald-600 text-white px-12 py-6 rounded-2xl text-3xl font-black">Go Home</a></div>`;
+      throw new Error();
+    }
 
     let profile = null;
     let artistUserId = null;
     let currentFanName = localStorage.getItem('rhythmDeckFanName') || '';
 
-    // ... (loadProfile, loadLiveChat, etc. — unchanged until loadVideos)
+    async function loadProfile() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name, bio, banner_url, logo_url, subdomain, plan, is_live, live_stream_url')
+        .ilike('subdomain', idParam)
+        .single();
+
+      if (error || !data) {
+        document.body.innerHTML = `<div class="text-center mt-32 p-16 bg-white rounded-3xl shadow-2xl max-w-2xl mx-auto"><h1 class="text-8xl font-black text-red-600 mb-8">Artist Not Found</h1><a href="/" class="bg-emerald-600 text-white px-12 py-6 rounded-2xl text-3xl font-black hover:bg-emerald-700">Go Home</a></div>`;
+        return;
+      }
+
+      profile = data;
+      artistUserId = profile.id;
+      document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
+      document.getElementById('artistName').textContent = profile.name || 'Artist';
+      document.getElementById('artistBio').textContent = profile.bio || 'No bio yet.';
+
+      if (profile.banner_url) {
+        const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl + '?t=' + Date.now();
+        document.getElementById('banner').src = url;
+        document.getElementById('banner').classList.remove('hidden');
+        document.getElementById('bannerPlaceholder').classList.add('hidden');
+      }
+      if (profile.logo_url) {
+        const url = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
+        document.getElementById('logo').src = url;
+      }
+
+      if (profile.plan === 'pro') {
+        document.getElementById('liveStreamSection').classList.remove('hidden');
+        if (profile.is_live && profile.live_stream_url) {
+          document.getElementById('livePlayer').classList.remove('hidden');
+          document.getElementById('offlinePlaceholder').classList.add('hidden');
+          let url = profile.live_stream_url.trim();
+          if (url.includes('youtube.com') || url.includes('youtu.be')) url = url.replace('watch?v=', 'embed/').split('&')[0] + '?autoplay=1&mute=0';
+          else if (url.includes('twitch.tv')) { const ch = url.split('/').pop(); url = `https://player.twitch.tv/?channel=${ch}&parent=${location.hostname}&autoplay=true`; }
+          document.getElementById('liveIframe').src = url;
+          loadLiveChat();
+          setInterval(loadLiveChat, 4000);
+        }
+      }
+
+      await loadVideos();
+    }
+
+    async function loadLiveChat() {
+      if (!artistUserId) return;
+      const { data } = await supabase.from('live_chat').select('name, message').eq('artist_id', artistUserId).order('created_at', { ascending: false }).limit(50);
+      const container = document.getElementById('liveMessages');
+      container.innerHTML = data?.length ? data.reverse().map(m => `<div class="comment-bubble"><span class="comment-name">${m.name}:</span><span class="comment-text">${m.message}</span></div>`).join('') : '<p class="text-gray-500 italic text-center">Be the first to chat!</p>';
+      container.scrollTop = container.scrollHeight;
+    }
+
+    document.getElementById('sendLiveMessage')?.addEventListener('click', async () => {
+      const input = document.getElementById('liveChatInput');
+      const msg = input.value.trim();
+      if (!msg || !artistUserId) return;
+      await supabase.from('live_chat').insert({ artist_id: artistUserId, name: currentFanName || 'Fan', message: msg });
+      input.value = '';
+      loadLiveChat();
+    });
 
     async function loadVideos() {
       if (!artistUserId) return;
@@ -142,61 +199,43 @@
       const list = document.getElementById('videoList');
       list.innerHTML = '';
 
-      if (!videos || videos.length === 0) {
+      if (!videos || !videos.length) {
         list.innerHTML = '<p class="col-span-full text-center text-5xl text-gray-600 py-20">No videos yet</p>';
         return;
       }
 
       for (const v of videos) {
         const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl + '?t=' + Date.now();
-        const thumbUrl = v.thumbnail_url
-          ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl + '?t=' + Date.now()
-          : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumbnail';
+        const thumbUrl = v.thumbnail_url ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl + '?t=' + Date.now() : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumbnail';
 
-        const { count: likeCount = 0 } = await supabase
-          .from('video_likes')
-          .select('id', { count: 'exact', head: true })
-          .eq('video_id', v.id)
-          .single() || { count: 0 };
+        const { count: likeCount = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', v.id).single() || { count: 0 };
+        const { data: comments = [] } = await supabase.from('video_comments').select('name, comment, created_at').eq('video_id', v.id).order('created_at', { ascending: false });
 
-        const { data: comments = [] } = await supabase
-          .from('video_comments')
-          .select('name, comment, created_at')
-          .eq('video_id', v.id)
-          .order('created_at', { ascending: false });
+        const countDisplay = likeCount > 0 ? `<span class="like-count ml-2">${likeCount}</span>` : '';
 
         const card = document.createElement('div');
         card.className = 'video-card';
         card.dataset.videoUrl = videoUrl;
         card.dataset.videoId = v.id;
 
-        // ONLY show number if likes > 0
-        const countDisplay = likeCount > 0 ? `<span class="like-count ml-2">${likeCount}</span>` : '';
-
         card.innerHTML = `
           <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
             <img src="${thumbUrl}" alt="${v.title || 'Video'}" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumbnail'">
-            <div class="play-overlay">
-              <div class="play-button">
-                <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg>
-              </div>
-            </div>
+            <div class="play-overlay"><div class="play-button"><svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg></div></div>
           </div>
           <div class="p-6">
             <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled Video'}</h3>
-            
             <div class="flex justify-between items-center mb-4">
               <button class="like-btn">
                 Heart
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
                 ${countDisplay}
               </button>
               <button class="share-btn text-emerald-600 font-bold hover:text-emerald-700">Share</button>
             </div>
 
-            <!-- comments and inputs same as before -->
             <div class="space-y-2 mb-4 text-sm max-h-40 overflow-y-auto">
               ${comments.length === 0 ? '<p class="text-gray-500 italic text-center py-2">No comments yet</p>' : ''}
               ${comments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name}:</span><span class="comment-text">${c.comment}</span></div>`).join('')}
@@ -214,41 +253,52 @@
         list.appendChild(card);
       }
 
-      // Rising Star Badge
-      if (profile.plan !== 'pro' && videos.length >= 3) {
-        document.getElementById('risingStarBadge').classList.add('show');
-      }
+      if (profile.plan !== 'pro' && videos.length >= 3) document.getElementById('risingStarBadge').classList.add('show');
 
-      // LIKE BUTTON LOGIC — NOW PERFECT
+      // LIKE BUTTON — FINAL & PERFECT
       document.querySelectorAll('.like-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
+        btn.onclick = async () => {
           if (btn.classList.contains('liked')) return;
-
           const videoId = btn.closest('.video-card').dataset.videoId;
           await supabase.from('video_likes').insert({ video_id: videoId });
-
           btn.classList.add('liked');
 
-          // Find or create the count span
           let countEl = btn.querySelector('.like-count');
           if (!countEl) {
             countEl = document.createElement('span');
             countEl.className = 'like-count ml-2';
             btn.appendChild(countEl);
           }
-
-          const current = parseInt(countEl.textContent || '0');
-          countEl.textContent = current + 1;
-        });
+          countEl.textContent = (parseInt(countEl.textContent || '0') + 1);
+        };
       });
 
-      // Other listeners (comments, name, share) — unchanged
-      // ... (same as your original code)
+      // Comments, name, share
+      document.querySelectorAll('.name-input').forEach(i => i.onchange = () => { const n = i.value.trim(); if(n){ currentFanName=n; localStorage.setItem('rhythmDeckFanName',n); }});
+      document.querySelectorAll('.post-comment').forEach(b => b.onclick = async () => {
+        const card = b.closest('.video-card');
+        const comment = card.querySelector('.comment-input').value.trim();
+        const name = card.querySelector('.name-input').value.trim() || 'Fan';
+        if(!comment) return;
+        await supabase.from('video_comments').insert({ video_id: card.dataset.videoId, name, comment });
+        if(name !== 'Fan') { currentFanName = name; localStorage.setItem('rhythmDeckFanName', name); }
+        card.querySelector('.comment-input').value = '';
+        loadVideos();
+      });
+      document.querySelectorAll('.share-btn').forEach(b => b.onclick = () => { navigator.clipboard.writeText(location.href); alert('Link copied!'); });
     }
 
-    // openVideo, loadProfile, etc. — unchanged
+    function openVideo(url) {
+      const v = document.createElement('video');
+      v.src = url; v.controls = true; v.autoplay = true;
+      v.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90%;max-height:90%;z-index:9999;background:black;border-radius:12px;box-shadow:0 0 50px rgba(0,0,0,0.9)';
+      document.body.appendChild(v);
+      const close = () => v.remove();
+      v.onclick = close;
+      document.onkeydown = e => e.key === 'Escape' && close();
+    }
+
     loadProfile();
-  // make sure you call it!
   </script>
 </body>
 </html>
