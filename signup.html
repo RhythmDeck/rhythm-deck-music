@@ -7,12 +7,14 @@
     <base href="/">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://js.stripe.com/v3/"></script> <!-- Stripe.js -->
     <style>
         .input-focus:focus { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4); }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
 <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
+
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3">
         <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -53,7 +55,7 @@
             </div>
             <div class="w-full md:w-1/2 p-6 md:p-10">
                 <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Create Your Rhythm Deck Account</h2>
-               
+              
                 <form id="signupForm" class="space-y-4">
                     <div><label class="block text-gray-700 font-semibold mb-1">Name</label><input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
                     <div><label class="block text-gray-700 font-semibold mb-1">Email</label><input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
@@ -127,14 +129,6 @@
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    // TEST PAYMENT LINKS — UPDATE THESE WHEN YOU GO LIVE
-    const paymentLinks = {
-        '3month-trial': 'https://buy.stripe.com/test_7sYbIUe462yIexieyg48005', 
-        '1year': 'https://buy.stripe.com/test_9B66oA7FIddm60M2Py48002',
-        '2year': 'https://buy.stripe.com/test_5kQeV6bVYa1a4WIcq848003',
-        '3year': 'https://buy.stripe.com/test_14AcMY5xA2yI0Gs9dW48004'
-    };
-
     function showMessage(title, message, color = 'bg-green-600') {
         const id = 'toast-' + Date.now();
         document.getElementById('toastContainer').insertAdjacentHTML('beforeend',
@@ -168,20 +162,19 @@
             }
         });
 
-        // Show/hide Pro options
+        // Show/hide Pro options + price
         planType.addEventListener('change', () => {
             proOptions.classList.toggle('hidden', planType.value !== 'pro');
             if (planType.value !== 'pro') priceDisplay.classList.add('hidden');
         });
 
-        // Update price display
         planDuration.addEventListener('change', () => {
             const price = planDuration.selectedOptions[0].dataset.price;
             finalPrice.textContent = '$' + price;
             priceDisplay.classList.remove('hidden');
         });
 
-        // Subdomain check (unchanged)
+        // Subdomain check
         subdomainInput.addEventListener('input', () => {
             clearTimeout(window.subdomainTimeout);
             window.subdomainTimeout = setTimeout(async () => {
@@ -199,55 +192,74 @@
             }, 600);
         });
 
-        // Form submit
+        // FORM SUBMIT — NOW USES SERVER CHECKOUT SESSIONS
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             submitButton.disabled = true;
             submitButton.innerHTML = 'Creating account...';
+
 
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             let rawSubdomain = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
             const plan = planType.value;
+            const planDurationValue = planDuration.value;
 
             try {
                 if (rawSubdomain.length < 3) throw new Error("Subdomain too short");
                 const { data: taken } = await supabase.from('profiles').select('id').eq('subdomain', rawSubdomain).maybeSingle();
                 if (taken) throw new Error(`Subdomain "${rawSubdomain}" is already taken`);
 
+                // 1. Sign up with Supabase Auth
+                const { data: { user }, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { full_name: name, subdomain: rawSubdomain } }
+                });
+                if (authError) throw authError;
+                if (!user) throw new Error('No user created');
+
+                // 2. Save profile
+                await supabase.from('profiles').upsert({
+                    id: user.id,
+                    name: name || 'Artist',
+                    email,
+                    subdomain: rawSubdomain,
+                    plan: plan === 'pro' ? 'pro' : 'free',
+                    payment_pending: plan === 'pro',
+                    bio: '',
+                    created_at: new Date().toISOString()
+                });
+
+                // FREE PLAN → go to dashboard
                 if (plan === 'free') {
-                    const { data: { user }, error: authError } = await supabase.auth.signUp({
-                        email, password,
-                        options: { data: { full_name: name, subdomain: rawSubdomain } }
-                    });
-                    if (authError) throw authError;
-                    await supabase.from('profiles').upsert({
-                        id: user.id, name, email, subdomain: rawSubdomain, plan: 'free', bio: '', created_at: new Date().toISOString()
-                    });
-                    showMessage('Welcome!', 'Free plan activated! Redirecting...');
-                    setTimeout(() => location.href = `https://rhythm-deck-music.onrender.com/profile-admin.html?subdomain=${rawSubdomain}`, 2000);
+                    showMessage('Welcome!', 'Free plan activated!');
+                    setTimeout(() => location.href = `https://rhythm-deck-music.onrender.com/profile-admin.html?subdomain=${rawSubdomain}`, 1500);
                     return;
                 }
 
-                if (plan === 'pro') {
-                    if (!planDuration.value) throw new Error("Please select a duration");
-                    
-                    const { data: { user }, error: authError } = await supabase.auth.signUp({
-                        email, password,
-                        options: { data: { full_name: name, subdomain: rawSubdomain } }
-                    });
-                    if (authError) throw authError;
+                // PRO PLAN → create Checkout Session via server
+                const sessionResponse = await fetch('/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${await (await supabase.auth.getSession()).data.session.access_token}`
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        subdomain: rawSubdomain,
+                        planDuration: planDurationValue
+                    })
+                });
 
-                    await supabase.from('profiles').upsert({
-                        id: user.id, name, email, subdomain: rawSubdomain,
-                        plan: 'pro', payment_pending: true, bio: '', created_at: new Date().toISOString()
-                    });
+                const { url } = await sessionResponse.json();
+                if (!url) throw new Error('No checkout URL received');
 
-                    const checkoutUrl = `${paymentLinks[planDuration.value]}?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${rawSubdomain}`;
-                    showMessage('Redirecting...', 'Taking you to secure checkout...');
-                    setTimeout(() => location.href = checkoutUrl, 800);
-                }
+                showMessage('Redirecting...', 'Taking you to secure checkout...');
+                setTimeout(() => location.href = url, 800);
+
             } catch (err) {
                 console.error(err);
                 showMessage('Error', err.message || 'Something went wrong', 'bg-red-600');
