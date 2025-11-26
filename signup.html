@@ -13,7 +13,8 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
 <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
-<!-- header, hero, form — all unchanged -->
+
+<!-- Header & Hero unchanged -->
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3">
         <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -32,6 +33,7 @@
         <a href="signup.html" class="bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-400 transition shadow-md">Sign Up</a>
     </nav>
 </header>
+
 <section class="relative h-[350px] md:h-[450px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
          style="background-image: url('banner-cropped.jpg');">
     <div class="bg-black bg-opacity-60 p-8 md:p-10 rounded-xl text-center shadow-2xl">
@@ -44,6 +46,7 @@
         </a>
     </div>
 </section>
+
 <main class="flex-grow flex items-center justify-center py-12 md:py-16 px-4">
     <div class="container mx-auto">
         <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
@@ -52,7 +55,7 @@
             </div>
             <div class="w-full md:w-1/2 p-6 md:p-10">
                 <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Create Your Rhythm Deck Account</h2>
-              
+             
                 <form id="signupForm" class="space-y-4">
                     <div><label class="block text-gray-700 font-semibold mb-1">Name</label><input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
                     <div><label class="block text-gray-700 font-semibold mb-1">Email</label><input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
@@ -78,12 +81,14 @@
                             <option value="pro">Pro Plan</option>
                         </select>
                     </div>
+
                     <div id="proOptions" class="hidden space-y-4">
                         <div>
                             <label class="block text-gray-700 font-semibold mb-1">Pro Plan Duration</label>
                             <select id="planDuration" class="w-full border border-gray-300 rounded-lg p-3">
                                 <option value="" disabled selected>Select duration</option>
-                                <option value="3month-trial" data-price="30.00">3-Month Trial – Only $30 ($10/month)</option>
+                                <!-- Updated label & price -->
+                                <option value="monthly" data-price="12.95">Monthly Pro Plan – $12.95</option>
                                 <option value="1year" data-price="126.10">1 Year (10% off) — $126.10</option>
                                 <option value="2year" data-price="238.19">2 Years (15% off) — $238.19</option>
                                 <option value="3year" data-price="336.26">3 Years (20% off) — $336.26</option>
@@ -94,6 +99,7 @@
                             <p class="text-sm text-gray-600 mt-2">Secure checkout with Stripe · Instant access after payment</p>
                         </div>
                     </div>
+
                     <div class="flex items-center space-x-2">
                         <input type="checkbox" id="terms" required class="rounded text-green-500 h-4 w-4">
                         <label for="terms" class="text-gray-700 text-sm">I agree to the <a href="terms.html" class="text-green-500 hover:underline">Terms</a> and <a href="privacy.html" class="text-green-500 hover:underline">Privacy Policy</a>.</label>
@@ -106,6 +112,7 @@
         </div>
     </div>
 </main>
+
 <footer class="bg-black text-white mt-10 p-5 text-center text-sm">
     <nav class="mb-2 space-x-4">
         <a href="contact.html" class="hover:text-green-400">Contact Us</a>
@@ -121,12 +128,13 @@
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    // YOUR ORIGINAL PAYMENT LINKS (keep them exactly as they are)
+    // All plans now use the same Stripe Checkout link (your new test link)
+    // This link uses price_1SXowH2WyyY6hPDEldDW3uMI behind the scenes
     const paymentLinks = {
-        '3month-trial': 'https://buy.stripe.com/test_7sYbIUe462yIexieyg48005',
-        '1year': 'https://buy.stripe.com/test_9B66oA7FIddm60M2Py48002',
-        '2year': 'https://buy.stripe.com/test_5kQeV6bVYa1a4WIcq848003',
-        '3year': 'https://buy.stripe.com/test_14AcMY5xA2yI0Gs9dW48004'
+        monthly: 'https://buy.stripe.com/test_6oU00cf8a5KU3SE9dW48006',
+        '1year': 'https://buy.stripe.com/test_6oU00cf8a5KU3SE9dW48006',
+        '2year': 'https://buy.stripe.com/test_6oU00cf8a5KU3SE9dW48006',
+        '3year': 'https://buy.stripe.com/test_6oU00cf8a5KU3SE9dW48006'
     };
 
     function showMessage(title, message, color = 'bg-green-600') {
@@ -151,7 +159,7 @@
         const subdomainStatus = document.getElementById('subdomainStatus');
         const submitButton = document.getElementById('submitButton');
 
-        // Password toggle — unchanged
+        // Password toggle
         document.getElementById('togglePassword').addEventListener('click', () => {
             const pw = document.getElementById('password');
             const toggle = document.getElementById('togglePassword');
@@ -188,18 +196,17 @@
                 subdomainStatus.textContent = data ? 'Taken' : 'Available!';
                 subdomainStatus.className = data ? 'mt-2 text-sm h-5 text-red-600' : 'mt-2 text-sm h-5 text-green-600';
             }, 600);
-
         });
 
-        // ONLY CHANGE: Add &success=1 to ALL payment links
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             submitButton.disabled = true;
             submitButton.innerHTML = 'Creating account...';
+
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
-            let rawSubdomain = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+            const rawSubdomain = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
             const plan = planType.value;
 
             try {
@@ -213,29 +220,38 @@
                         options: { data: { full_name: name, subdomain: rawSubdomain } }
                     });
                     if (authError) throw authError;
+
                     await supabase.from('profiles').upsert({
-                        id: user.id, name, email, subdomain: rawSubdomain, plan: 'free', bio: '', created_at: new Date().toISOString()
+                        id: user.id, name, email, subdomain: rawSubdomain,
+                        plan: 'free', bio: '', created_at: new Date().toISOString()
                     });
+
                     showMessage('Welcome!', 'Free plan activated! Redirecting...');
-                    setTimeout(() => location.href = `https://rhythm-deck-music.onrender.com/profile-admin.html?subdomain=${rawSubdomain}`, 2000);
+                    setTimeout(() => location.href = `https://rhythm-deck-music.onrender.com/profile-admin-pro.html?subdomain=${rawSubdomain}`, 2000);
                     return;
                 }
 
                 if (plan === 'pro') {
                     if (!planDuration.value) throw new Error("Please select a duration");
-                   
+
                     const { data: { user }, error: authError } = await supabase.auth.signUp({
                         email, password,
                         options: { data: { full_name: name, subdomain: rawSubdomain } }
                     });
                     if (authError) throw authError;
+
                     await supabase.from('profiles').upsert({
                         id: user.id, name, email, subdomain: rawSubdomain,
                         plan: 'pro', payment_pending: true, bio: '', created_at: new Date().toISOString()
                     });
 
-                    // ONLY LINE CHANGED — add &success=1
-                    const checkoutUrl = `${paymentLinks[planDuration.value]}?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${rawSubdomain}&success=1`;
+                    const baseUrl = paymentLinks[planDuration.value];
+                    const successUrl = `https://rhythm-deck-music.onrender.com/profile-admin-pro.html?subdomain=${encodeURIComponent(rawSubdomain)}&session_id={CHECKOUT_SESSION_ID}`;
+
+                    const checkoutUrl = `${baseUrl}?prefilled_email=${encodeURIComponent(email)}` +
+                        `&client_reference_id=${user.id}` +
+                        `&success_url=${encodeURIComponent(successUrl)}` +
+                        `&cancel_url=${encodeURIComponent('https://rhythm-deck-music.onrender.com/signup.html')}`;
 
                     showMessage('Redirecting...', 'Taking you to secure checkout...');
                     setTimeout(() => location.href = checkoutUrl, 800);
