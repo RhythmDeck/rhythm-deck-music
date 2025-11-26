@@ -15,7 +15,7 @@
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
 <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
 
-<!-- Header & Hero – unchanged -->
+<!-- Header & Hero (unchanged) -->
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3">
         <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -56,18 +56,28 @@
             </div>
             <div class="w-full md:w-1/2 p-6 md:p-10">
                 <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Create Your Rhythm Deck Account</h2>
-                
-                <form id="signupForm" class="space-y-4">
-                    <div><label class="block text-gray-700 font-semibold mb-1">Name</label><input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
-                    <div><label class="block text-gray-700 font-semibold mb-1">Email</label><input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
-                    <div><label class="block text-gray-700 font-semibold mb-1">Password</label>
+
+                <form id="signupForm" class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-1">Name</label>
+                        <input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-1">Email</label>
+                        <input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-1">Password</label>
                         <div class="relative">
                             <input type="password" id="password" required minlength="6" class="w-full border border-gray-300 rounded-lg p-3 pr-12 input-focus">
-                            <span id="togglePassword" class="absolute right-3 top-3.5 cursor-pointer text-gray-500 text-sm select-none">Show</span>
+                            <span id="togglePassword" class="absolute right-3 top-3.5 cursor-pointer text-gray-500 text-sm select-none hover:text-gray-800">Show</span>
                         </div>
                     </div>
+
                     <div>
-                        <label class="block text-gray-700 font-semibold mb-1">Choose Your Subdomain <br><small class="text-gray-500">(Example: retro-rock-band)</small></label>
+                        <label class="block text-gray-700 font-semibold mb-1">Choose Your Subdomain<br><small class="text-gray-500">(Example: retro-rock-band)</small></label>
                         <div class="flex">
                             <input type="text" id="subdomain" placeholder="yourname" required minlength="3" class="flex-grow border border-gray-300 rounded-l-lg p-3 input-focus">
                             <span class="bg-gray-200 text-gray-700 px-3 py-3 rounded-r-lg text-sm flex items-center border border-l-0 border-gray-300 select-none">.rhythmdeckmusic.com</span>
@@ -84,7 +94,8 @@
                         </select>
                     </div>
 
-                    <div id="proOptions" class="hidden space-y-4">
+                    <!-- PRO OPTIONS — NOW FULLY VISIBLE -->
+                    <div id="proOptions" class="hidden space-y-6">
                         <div>
                             <label class="block text-gray-700 font-semibold mb-1">Pro Plan Duration</label>
                             <select id="planDuration" class="w-full border border-gray-300 rounded-lg p-3">
@@ -95,9 +106,10 @@
                                 <option value="3year"  data-price="336.26">3 Years (20% off) — $336.26</option>
                             </select>
                         </div>
-                        <div id="priceDisplay" class="hidden bg-gradient-to-r from-emerald-50 to-green-50 p-5 rounded-xl border-2 border-emerald-300 text-center">
-                            <p class="text-3xl font-black text-emerald-700">Total: <span id="finalPrice">$0.00</span></p>
-                            <p class="text-sm text-gray-600 mt-2">Secure checkout with Stripe · Instant access after payment</p>
+
+                        <div id="priceDisplay" class="hidden bg-gradient-to-r from-emerald-50 to-green-50 p-6 rounded-xl border-2 border-emerald-300 text-center">
+                            <p class="text-4xl font-black text-emerald-700">Total: <span id="finalPrice">$0.00</span></p>
+                            <p class="text-sm text-gray-600 mt-2">Secure checkout with Stripe · Instant access</p>
                         </div>
                     </div>
 
@@ -130,26 +142,24 @@
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    // YOUR REAL TEST-MODE STRIPE PUBLISHABLE KEY (replace with your actual pk_test_...)
     const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
 
-    // YOUR REAL PRICE IDs — already inserted!
     const priceIds = {
-        monthly: 'price_1SXowH2WyyY6hPDEldDW3uMI',   // recurring monthly
-        '1year': 'price_1SLKLEFV6v4usVQ1aUro0ZbP',   // one-time 1 year
-        '2year': 'price_1SLWy5FV6v4usVQ12KvuIFim',   // one-time 2 years
-        '3year': 'price_1SLX0IFV6v4usVQ1xsTaeCGk'    // one-time 3 years
+        monthly: 'price_1SXowH2WyyY6hPDEldDW3uMI',
+        '1year': 'price_1SLKLEFV6v4usVQ1aUro0ZbP',
+        '2year': 'price_1SLWy5FV6v4usVQ12KvuIFim',
+        '3year': 'price_1SLX0IFV6v4usVQ1xsTaeCGk'
     };
 
     function showMessage(title, message, color = 'bg-green-600') {
         const id = 'toast-' + Date.now();
-        document.getElementById-toastContainer').insertAdjacentHTML('beforeend',
-            `<div id="${id}" class="fixed top-4 left-1/2 -translate-x-1/2 ${color} text-white px-8 py-5 rounded-xl shadow-2xl max-w-md w-full z-50 transform transition-all duration-300 scale-95 opacity-0">
+        document.getElementById('toastContainer').insertAdjacentHTML('beforeend',
+            `<div id="${id}" class="fixed top-4 left-1/2 -translate-x-1/2 ${color} text-white px-8 py-5 rounded-xl shadow-2xl max-w-md w-full z-50 transition-all duration-300 scale-95 opacity-0">
                 <div class="font-black text-2xl">${title}</div>
-                <p class="text-lg mt-2 break-words">${message}</p>
+                <p class="text-lg mt-2">${message}</p>
                 <button onclick="document.getElementById('${id}').remove()" class="absolute top-3 right-4 text-3xl">×</button>
             </div>`);
-        setTimeout(() => document.getElementById(id)?.classList.add('opacity-100', 'scale-100'), 50);
+        setTimeout(() => document.getElementById(id)?.classList.replace('opacity-0', 'opacity-100'), 50);
         setTimeout(() => document.getElementById(id)?.remove(), 10000);
     }
 
@@ -163,21 +173,28 @@
         const subdomainStatus = document.getElementById('subdomainStatus');
         const submitButton = document.getElementById('submitButton');
 
-        // Password toggle
-        document.getElementById('togglePassword').onclick = () => {
+        // Password toggle — FIXED
+        document.getElementById('togglePassword').addEventListener('click', () => {
             const pw = document.getElementById('password');
-            const toggle = document.getElementById('togglePassword');
-            pw.type = pw.type === 'password' ? 'text' : 'password';
-            toggle.textContent = pw.type === 'password' ? 'Show' : 'Hide';
-        };
-
-        planType.addEventListener('change', () => {
-            proOptions.classList.toggle('hidden', planType.value !== 'pro');
-            priceDisplay.classList.add('hidden');
+            const btn = document.getElementById('togglePassword');
+            if (pw.type === 'password') {
+                pw.type = 'text';
+                btn.textContent = 'Hide';
+            } else {
+                pw.type = 'password';
+                btn.textContent = 'Show';
+            }
         });
 
+        // Show/hide pro options
+        planType.addEventListener('change', () => {
+            proOptions.classList.toggle('hidden', planType.value !== 'pro');
+            if (planType.value !== 'pro') priceDisplay.classList.add('hidden');
+        });
+
+        // Update price preview
         planDuration.addEventListener('change', () => {
-            const price = planDuration.selectedOptions[0].dataset.price;
+            const price = planDuration.selectedOptions[0].dataset.price || '0.00';
             finalPrice.textContent = '$' + price;
             priceDisplay.classList.remove('hidden');
         });
@@ -187,8 +204,13 @@
             clearTimeout(window.subdomainTimeout);
             window.subdomainTimeout = setTimeout(async () => {
                 let raw = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-                if (raw.length < 3) { subdomainStatus.textContent = 'Too short'; subdomainStatus.className = 'mt-2 text-sm h-5 text-red-600'; return; }
-                subdomainStatus.textContent = 'Checking...'; subdomainStatus.className = 'mt-2 text-sm h-5 text-gray-500';
+                if (raw.length < 3) {
+                    subdomainStatus.textContent = 'Too short';
+                    subdomainStatus.className = 'mt-2 text-sm h-5 text-red-600';
+                    return;
+                }
+                subdomainStatus.textContent = 'Checking...';
+                subdomainStatus.className = 'mt-2 text-sm h-5 text-gray-500';
                 const { data } = await supabase.from('profiles').select('id').eq('subdomain', raw).maybeSingle();
                 subdomainStatus.textContent = data ? 'Taken' : 'Available!';
                 subdomainStatus.className = data ? 'mt-2 text-sm h-5 text-red-600' : 'mt-2 text-sm h-5 text-green-600';
@@ -225,7 +247,7 @@
                         plan: 'free', bio: '', created_at: new Date().toISOString()
                     });
 
-                    showMessage('Welcome!', 'Free account created!');
+                    showMessage('Success', 'Free account created!');
                     setTimeout(() => location.href = `https://rhythm-deck-music.onrender.com/profile-admin-pro.html?subdomain=${rawSubdomain}`, 2000);
                     return;
                 }
