@@ -21,7 +21,7 @@
     .play-button svg{width:38px;height:38px;margin-left:6px;fill:#10b981}
     #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(0.175,0.885,0.32,1.4)}
     #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg)}
-    .like-btn.liked{color:#ef4444;filter:drop-shadow(0 0 10px #ef4444)}
+    .like-btn.liked svg{fill:#ef4444 !important;stroke:#ef4444;filter:drop-shadow(0 0 12px #ef4444)}
     .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem;transition:all .3s}
     .comment-name{font-weight:700;color:#10b981;text-shadow:0 0 8px rgba(16,185,129,0.4)}
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
@@ -133,28 +133,22 @@
       document.getElementById('artistName').textContent = profile.name || 'Artist';
       document.getElementById('artistBio').textContent = profile.bio || 'No bio yet.';
 
-      // Banner
       if (profile.banner_url) {
         const bannerUrl = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl + '?t=' + Date.now();
         document.getElementById('banner').src = bannerUrl;
         document.getElementById('banner').classList.remove('hidden');
         document.getElementById('bannerPlaceholder').classList.add('hidden');
       }
-
-      // Logo
       if (profile.logo_url) {
         const logoUrl = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
         document.getElementById('logo').src = logoUrl;
       }
 
-      // LIVE STREAM: ONLY SHOW FOR PRO PLAN
       if (profile.plan === 'pro') {
         document.getElementById('liveStreamSection').classList.remove('hidden');
-
         if (profile.is_live && profile.live_stream_url) {
           document.getElementById('livePlayer').classList.remove('hidden');
           document.getElementById('offlinePlaceholder').classList.add('hidden');
-
           let url = profile.live_stream_url.trim();
           if (url.includes('youtube.com') || url.includes('youtu.be')) {
             url = url.replace('watch?v=', 'embed/').split('&')[0] + '?autoplay=1&mute=0';
@@ -173,24 +167,11 @@
 
     async function loadLiveChat() {
       if (!artistUserId) return;
-      const { data } = await supabase
-        .from('live_chat')
-        .select('name, message')
-        .eq('artist_id', artistUserId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
+      const { data } = await supabase.from('live_chat').select('name, message').eq('artist_id', artistUserId).order('created_at', { ascending: false }).limit(50);
       const container = document.getElementById('liveMessages');
-      if (!data || data.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 italic text-center">Be the first to chat!</p>';
-        return;
-      }
-      container.innerHTML = data.reverse().map(m => `
-        <div class="comment-bubble">
-          <span class="comment-name">${m.name}:</span>
-          <span class="comment-text">${m.message}</span>
-        </div>
-      `).join('');
+      container.innerHTML = data && data.length > 0 
+        ? data.reverse().map(m => `<div class="comment-bubble"><span class="comment-name">${m.name}:</span><span class="comment-text">${m.message}</span></div>`).join('')
+        : '<p class="text-gray-500 italic text-center">Be the first to chat!</p>';
       container.scrollTop = container.scrollHeight;
     }
 
@@ -206,12 +187,7 @@
 
     async function loadVideos() {
       if (!artistUserId) return;
-      const { data: videos } = await supabase
-        .from('user_videos')
-        .select('*')
-        .eq('user_id', artistUserId)
-        .order('created_at', { ascending: false });
-
+      const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistUserId).order('created_at', { ascending: false });
       const list = document.getElementById('videoList');
       list.innerHTML = '';
 
@@ -226,7 +202,6 @@
           ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl + '?t=' + Date.now()
           : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumbnail';
 
-        // Fixed: Correct like count (no more NaN)
         const { count: likeCount = 0 } = await supabase
           .from('video_likes')
           .select('id', { count: 'exact', head: true })
@@ -243,6 +218,7 @@
         card.className = 'video-card';
         card.dataset.videoUrl = videoUrl;
         card.dataset.videoId = v.id;
+
         card.innerHTML = `
           <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
             <img src="${thumbUrl}" alt="${v.title || 'Video'}" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumbnail'">
@@ -254,12 +230,17 @@
           </div>
           <div class="p-6">
             <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled Video'}</h3>
+            
             <div class="flex justify-between items-center mb-4 text-lg">
-              <button class="like-btn flex items-center gap-2 font-bold text-gray-600">
-                Heart ${likeCount}
+              <button class="like-btn flex items-center gap-2 font-bold text-gray-600 hover:text-red-500 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span class="like-count">${likeCount}</span>
               </button>
-              <button class="share-btn text-emerald-600 font-bold">Share</button>
+              <button class="share-btn text-emerald-600 font-bold hover:text-emerald-700">Share</button>
             </div>
+
             <div class="space-y-2 mb-4 text-sm max-h-40 overflow-y-auto">
               ${comments.length === 0 ? '<p class="text-gray-500 italic text-center py-2">No comments yet</p>' : ''}
               ${comments.map(c => `
@@ -269,6 +250,7 @@
                 </div>
               `).join('')}
             </div>
+
             <div class="space-y-3">
               <input type="text" value="${currentFanName}" placeholder="Your name (optional)" class="name-input w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-sm">
               <div class="flex gap-2">
@@ -281,12 +263,26 @@
         list.appendChild(card);
       }
 
-      // Rising Star Badge
       if (profile.plan !== 'pro' && videos.length >= 3) {
         document.getElementById('risingStarBadge').classList.add('show');
       }
 
-      // Event Listeners
+      // Like Button Logic
+      document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (btn.classList.contains('liked')) return;
+
+          const videoId = btn.closest('.video-card').dataset.videoId;
+          await supabase.from('video_likes').insert({ video_id: videoId });
+
+          btn.classList.add('liked');
+          const countEl = btn.querySelector('.like-count');
+          const current = parseInt(countEl.textContent) || 0;
+          countEl.textContent = current + 1;
+        });
+      });
+
+      // Other event listeners (name, comment, share)
       document.querySelectorAll('.name-input').forEach(input => {
         input.addEventListener('change', () => {
           const name = input.value.trim();
@@ -316,24 +312,8 @@
             currentFanName = name;
             localStorage.setItem('rhythmDeckFanName', name);
           }
-
           input.value = '';
           loadVideos();
-        });
-      });
-
-      document.querySelectorAll('.like-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const card = btn.closest('.video-card');
-          const videoId = card.dataset.videoId;
-
-          // Check if already liked (simple client-side check)
-          if (btn.classList.contains('liked')) return;
-
-          await supabase.from('video_likes').insert({ video_id: videoId });
-          btn.classList.add('liked');
-          const current = parseInt(btn.textContent.match(/\d+/)?.[0] || '0');
-          btn.innerHTML = `Heart ${current + 1}`;
         });
       });
 
