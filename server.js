@@ -33,11 +33,12 @@ if (process.env.STRIPE_SECRET_KEY) {
 
 // ALL PRICE IDs — including your $30 one-time trial
 const PRICE_IDS = {
-  '3month-trial': 'price_1SXkS4FV6v4usVQ1oHOnpMTd',  // One-time $30
+  '3month-trial': 'price_1SXkS4FV6v4usVQ1oHOnpMTd', 
   '1year': 'price_1SLKLEFV6v4usVQ1aUro0ZbP',
   '2year': 'price_1SLWy5FV6v4usVQ12KvuIFim',
   '3year': 'price_1SLX0IFV6v4usVQ1xsTaeCGk'
 };
+
 
 app.post('/signup', async (req, res) => {
   const { name, email, subdomain, planDuration } = req.body;
