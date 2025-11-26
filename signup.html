@@ -7,6 +7,7 @@
     <base href="/">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         .input-focus:focus { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4); }
     </style>
@@ -14,7 +15,7 @@
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
 <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
 
-<!-- Header & Hero unchanged -->
+<!-- Header & Hero – unchanged -->
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3">
         <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -55,7 +56,7 @@
             </div>
             <div class="w-full md:w-1/2 p-6 md:p-10">
                 <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Create Your Rhythm Deck Account</h2>
-             
+                
                 <form id="signupForm" class="space-y-4">
                     <div><label class="block text-gray-700 font-semibold mb-1">Name</label><input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
                     <div><label class="block text-gray-700 font-semibold mb-1">Email</label><input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
@@ -73,6 +74,7 @@
                         </div>
                         <div id="subdomainStatus" class="mt-2 text-sm h-5 font-medium"></div>
                     </div>
+
                     <div>
                         <label class="block text-gray-700 font-semibold mb-1">Select Plan</label>
                         <select id="planType" required class="w-full border border-gray-300 rounded-lg p-3">
@@ -87,11 +89,10 @@
                             <label class="block text-gray-700 font-semibold mb-1">Pro Plan Duration</label>
                             <select id="planDuration" class="w-full border border-gray-300 rounded-lg p-3">
                                 <option value="" disabled selected>Select duration</option>
-                                <!-- Updated label & price -->
-                                <option value="monthly" data-price="12.95">Monthly Pro Plan – $12.95</option>
-                                <option value="1year" data-price="126.10">1 Year (10% off) — $126.10</option>
-                                <option value="2year" data-price="238.19">2 Years (15% off) — $238.19</option>
-                                <option value="3year" data-price="336.26">3 Years (20% off) — $336.26</option>
+                                <option value="monthly" data-price="12.95">Monthly Pro Plan – $12.95 / month</option>
+                                <option value="1year"  data-price="126.10">1 Year (10% off) — $126.10</option>
+                                <option value="2year"  data-price="238.19">2 Years (15% off) — $238.19</option>
+                                <option value="3year"  data-price="336.26">3 Years (20% off) — $336.26</option>
                             </select>
                         </div>
                         <div id="priceDisplay" class="hidden bg-gradient-to-r from-emerald-50 to-green-50 p-5 rounded-xl border-2 border-emerald-300 text-center">
@@ -104,6 +105,7 @@
                         <input type="checkbox" id="terms" required class="rounded text-green-500 h-4 w-4">
                         <label for="terms" class="text-gray-700 text-sm">I agree to the <a href="terms.html" class="text-green-500 hover:underline">Terms</a> and <a href="privacy.html" class="text-green-500 hover:underline">Privacy Policy</a>.</label>
                     </div>
+
                     <button type="submit" id="submitButton" class="w-full bg-green-500 text-white font-bold py-4 rounded-lg hover:bg-green-600 transition text-lg">
                         Create Account
                     </button>
@@ -128,18 +130,20 @@
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    // All plans now use the same Stripe Checkout link (your new test link)
-    // This link uses price_1SXowH2WyyY6hPDEldDW3uMI behind the scenes
-    const paymentLinks = {
-        monthly: 'https://buy.stripe.com/test_6oU00cf8a5KU3SE9dW48006',
-        '1year': 'https://buy.stripe.com/test_6oU00cf8a5KU3SE9dW48006',
-        '2year': 'https://buy.stripe.com/test_6oU00cf8a5KU3SE9dW48006',
-        '3year': 'https://buy.stripe.com/test_6oU00cf8a5KU3SE9dW48006'
+    // YOUR REAL TEST-MODE STRIPE PUBLISHABLE KEY (replace with your actual pk_test_...)
+    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
+
+    // YOUR REAL PRICE IDs — already inserted!
+    const priceIds = {
+        monthly: 'price_1SXowH2WyyY6hPDEldDW3uMI',   // recurring monthly
+        '1year': 'price_1SLKLEFV6v4usVQ1aUro0ZbP',   // one-time 1 year
+        '2year': 'price_1SLWy5FV6v4usVQ12KvuIFim',   // one-time 2 years
+        '3year': 'price_1SLX0IFV6v4usVQ1xsTaeCGk'    // one-time 3 years
     };
 
     function showMessage(title, message, color = 'bg-green-600') {
         const id = 'toast-' + Date.now();
-        document.getElementById('toastContainer').insertAdjacentHTML('beforeend',
+        document.getElementById-toastContainer').insertAdjacentHTML('beforeend',
             `<div id="${id}" class="fixed top-4 left-1/2 -translate-x-1/2 ${color} text-white px-8 py-5 rounded-xl shadow-2xl max-w-md w-full z-50 transform transition-all duration-300 scale-95 opacity-0">
                 <div class="font-black text-2xl">${title}</div>
                 <p class="text-lg mt-2 break-words">${message}</p>
@@ -160,19 +164,16 @@
         const submitButton = document.getElementById('submitButton');
 
         // Password toggle
-        document.getElementById('togglePassword').addEventListener('click', () => {
+        document.getElementById('togglePassword').onclick = () => {
             const pw = document.getElementById('password');
             const toggle = document.getElementById('togglePassword');
-            if (pw.type === 'password') {
-                pw.type = 'text'; toggle.textContent = 'Hide';
-            } else {
-                pw.type = 'password'; toggle.textContent = 'Show';
-            }
-        });
+            pw.type = pw.type === 'password' ? 'text' : 'password';
+            toggle.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+        };
 
         planType.addEventListener('change', () => {
             proOptions.classList.toggle('hidden', planType.value !== 'pro');
-            if (planType.value !== 'pro') priceDisplay.classList.add('hidden');
+            priceDisplay.classList.add('hidden');
         });
 
         planDuration.addEventListener('change', () => {
@@ -181,23 +182,20 @@
             priceDisplay.classList.remove('hidden');
         });
 
+        // Subdomain check
         subdomainInput.addEventListener('input', () => {
             clearTimeout(window.subdomainTimeout);
             window.subdomainTimeout = setTimeout(async () => {
                 let raw = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-                if (raw.length < 3) {
-                    subdomainStatus.textContent = 'Too short';
-                    subdomainStatus.className = 'mt-2 text-sm h-5 text-red-600';
-                    return;
-                }
-                subdomainStatus.textContent = 'Checking...';
-                subdomainStatus.className = 'mt-2 text-sm h-5 text-gray-500';
+                if (raw.length < 3) { subdomainStatus.textContent = 'Too short'; subdomainStatus.className = 'mt-2 text-sm h-5 text-red-600'; return; }
+                subdomainStatus.textContent = 'Checking...'; subdomainStatus.className = 'mt-2 text-sm h-5 text-gray-500';
                 const { data } = await supabase.from('profiles').select('id').eq('subdomain', raw).maybeSingle();
                 subdomainStatus.textContent = data ? 'Taken' : 'Available!';
                 subdomainStatus.className = data ? 'mt-2 text-sm h-5 text-red-600' : 'mt-2 text-sm h-5 text-green-600';
             }, 600);
         });
 
+        // FORM SUBMIT
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             submitButton.disabled = true;
@@ -212,50 +210,54 @@
             try {
                 if (rawSubdomain.length < 3) throw new Error("Subdomain too short");
                 const { data: taken } = await supabase.from('profiles').select('id').eq('subdomain', rawSubdomain).maybeSingle();
-                if (taken) throw new Error(`Subdomain "${rawSubdomain}" is already taken`);
+                if (taken) throw new Error(`Subdomain "${rawSubdomain}" is taken`);
 
+                // FREE PLAN
                 if (plan === 'free') {
-                    const { data: { user }, error: authError } = await supabase.auth.signUp({
+                    const { data: { user }, error } = await supabase.auth.signUp({
                         email, password,
-                        options: { data: { full_name: name, subdomain: rawSubdomain } }
+                        options: { data: { full_name: name, subdomain: rawSubdomain }}
                     });
-                    if (authError) throw authError;
+                    if (error) throw error;
 
                     await supabase.from('profiles').upsert({
                         id: user.id, name, email, subdomain: rawSubdomain,
                         plan: 'free', bio: '', created_at: new Date().toISOString()
                     });
 
-                    showMessage('Welcome!', 'Free plan activated! Redirecting...');
+                    showMessage('Welcome!', 'Free account created!');
                     setTimeout(() => location.href = `https://rhythm-deck-music.onrender.com/profile-admin-pro.html?subdomain=${rawSubdomain}`, 2000);
                     return;
                 }
 
-                if (plan === 'pro') {
-                    if (!planDuration.value) throw new Error("Please select a duration");
+                // PRO PLAN
+                if (!planDuration.value) throw new Error("Please select a duration");
 
-                    const { data: { user }, error: authError } = await supabase.auth.signUp({
-                        email, password,
-                        options: { data: { full_name: name, subdomain: rawSubdomain } }
-                    });
-                    if (authError) throw authError;
+                const { data: { user }, error: authError } = await supabase.auth.signUp({
+                    email, password,
+                    options: { data: { full_name: name, subdomain: rawSubdomain }}
+                });
+                if (authError) throw authError;
 
-                    await supabase.from('profiles').upsert({
-                        id: user.id, name, email, subdomain: rawSubdomain,
-                        plan: 'pro', payment_pending: true, bio: '', created_at: new Date().toISOString()
-                    });
+                await supabase.from('profiles').upsert({
+                    id: user.id, name, email, subdomain: rawSubdomain,
+                    plan: 'pro', payment_pending: true, bio: '', created_at: new Date().toISOString()
+                });
 
-                    const baseUrl = paymentLinks[planDuration.value];
-                    const successUrl = `https://rhythm-deck-music.onrender.com/profile-admin-pro.html?subdomain=${encodeURIComponent(rawSubdomain)}&session_id={CHECKOUT_SESSION_ID}`;
+                const selected = planDuration.value;
+                const mode = selected === 'monthly' ? 'subscription' : 'payment';
 
-                    const checkoutUrl = `${baseUrl}?prefilled_email=${encodeURIComponent(email)}` +
-                        `&client_reference_id=${user.id}` +
-                        `&success_url=${encodeURIComponent(successUrl)}` +
-                        `&cancel_url=${encodeURIComponent('https://rhythm-deck-music.onrender.com/signup.html')}`;
+                const { error } = await stripe.redirectToCheckout({
+                    lineItems: [{ price: priceIds[selected], quantity: 1 }],
+                    mode: mode,
+                    successUrl: `https://rhythm-deck-music.onrender.com/profile-admin-pro.html?subdomain=${rawSubdomain}&session_id={CHECKOUT_SESSION_ID}`,
+                    cancelUrl: 'https://rhythm-deck-music.onrender.com/signup.html?canceled=1',
+                    clientReferenceId: user.id,
+                    customerEmail: email,
+                });
 
-                    showMessage('Redirecting...', 'Taking you to secure checkout...');
-                    setTimeout(() => location.href = checkoutUrl, 800);
-                }
+                if (error) throw error;
+
             } catch (err) {
                 console.error(err);
                 showMessage('Error', err.message || 'Something went wrong', 'bg-red-600');
