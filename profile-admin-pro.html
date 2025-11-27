@@ -6,18 +6,24 @@
   <title>Pro Profile | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     .video-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
     .video-card:hover .video-overlay{opacity:1}
-    #videoModal, #collabModal{position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
-    #videoModal.show, #collabModal.show{opacity:1;visibility:visible}
-    #modalVideo{max-width:90%;max-height:90%;border:8px solid #10b981;border-radius:16px}
-    #closeModal, #closeCollab{position:absolute;top:20px;right:20px;background:white;color:black;width:60px;height:60px;border-radius:50%;font-size:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;font-weight:bold}
+    #videoModal, #collabModal, #liveModal{position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
+    #videoModal.show, #collabModal.show, #liveModal.show{opacity:1;visibility:visible}
+    #modalVideo, #liveVideo{max-width:90%;max-height:90%;border:8px solid #10b981;border-radius:16px}
+    #closeModal, #closeCollab, #closeLive{position:absolute;top:20px;right:20px;background:white;color:black;width:60px;height:60px;border-radius:50%;font-size:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;font-weight:bold}
     .like-heart { transition: all 0.3s; }
     .like-heart.liked { fill: #ef4444; transform: scale(1.2); }
     @keyframes heartbeat { 0%,100% { transform:scale(1) } 50% { transform:scale(1.4) } }
+    .live-dot {background:#ef4444;animation:pulse 2s infinite;border-radius:50%;width:12px;height:12px;display:inline-block;}
+    @keyframes pulse{0%{opacity:1}50%{opacity:0.5}100%{opacity:1}}
+    #chatMessages{max-height:500px;overflow-y:auto;padding-right:8px;}
+    #chatMessages::-webkit-scrollbar{width:6px;}
+    #chatMessages::-webkit-scrollbar-thumb{background:#10b981;border-radius:3px;}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -83,6 +89,12 @@
           <button onclick="saveCollabSettings()" class="mt-4 w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-bold">Save Settings</button>
         </div>
 
+        <!-- GO LIVE BUTTON -->
+        <button onclick="goLive()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-xl shadow-2xl transform hover:scale-105 transition text-2xl flex items-center justify-center gap-3 animate-pulse">
+          <span class="live-dot"></span>
+          GO LIVE NOW
+        </button>
+
         <div class="bg-green-50 p-5 rounded-xl shadow text-center">
           <p class="text-sm text-gray-600">Your Public Page:</p>
           <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
@@ -125,6 +137,31 @@
   </div>
 </div>
 
+<!-- LIVE STREAM + CHAT MODAL -->
+<div id="liveModal">
+  <div id="closeLive" onclick="endStream()">X</div>
+  <div class="bg-black rounded-2xl shadow-2xl w-11/12 max-w-6xl flex flex-col lg:flex-row gap-6 p-6 max-h-[90vh]">
+    <div class="flex-1">
+      <video id="liveVideo" controls autoplay playsinline muted class="w-full rounded-xl shadow-2xl bg-black"></video>
+      <div class="mt-4 text-white text-center">
+        <h3 class="text-2xl font-bold flex items-center justify-center gap-3">
+          <span class="live-dot"></span>
+          LIVE NOW
+          <span class="ml-4 text-sm bg-red-600 px-3 py-1 rounded-full" id="viewerCount">0 watching</span>
+        </h3>
+      </div>
+    </div>
+    <div class="w-full lg:w-96 bg-gray-900 rounded-xl p-4 flex flex-col">
+      <h3 class="text-xl font-bold text-green-400 mb-4">Live Chat</h3>
+      <div id="chatMessages" class="flex-1 space-y-2 mb-4 overflow-y-auto text-sm"></div>
+      <form onsubmit="sendMessage(event)" class="flex gap-2">
+        <input type="text" id="chatInput" placeholder="Say something..." class="flex-1 bg-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" autocomplete="off">
+        <button type="submit" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-bold">Send</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <footer class="bg-black text-white mt-auto p-6 text-center"><p class="text-sm">© 2025 Rhythm Deck Music. All rights reserved.</p></footer>
 
 <script>
@@ -135,6 +172,8 @@
 
   let currentUser = null;
   const videoList = document.getElementById('videoList');
+  let hls = null;
+  let chatChannel = null;
 
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -150,15 +189,12 @@
       await supabase.from('profiles').insert({ id: currentUser.id, open_to_collab: false, collab_skills: [] });
       profile = { name: '', bio: '', banner_url: null, logo_url: null, open_to_collab: false, collab_skills: [] };
     }
-
     if (profile.name) document.getElementById('artistNameInput').value = profile.name;
     if (profile.bio) document.getElementById('bioInput').value = profile.bio;
-
     document.getElementById('openToCollab').checked = profile.open_to_collab === true || profile.open_to_collab === 'true';
     document.querySelectorAll('.collab-skill').forEach(cb => {
       cb.checked = (profile.collab_skills || []).includes(cb.value);
     });
-
     if (profile.banner_url) {
       const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
       document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
@@ -168,8 +204,7 @@
     if (profile.logo_url) {
       document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
     }
-
-    const publicUrl = `${location.origin}/public-profile.html?id=${profile.subdomain || currentUser.id.split('-')[0]}`;
+    const publicUrl = `${location.origin}/public-profile.html?id=${currentUser.id.split('-')[0]}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
   }
@@ -182,7 +217,7 @@
 
   async function renderVideoCard(video) {
     const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl + '?t=' + Date.now();
-    const thumbUrl = video.thumbnail_url 
+    const thumbUrl = video.thumbnail_url
       ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now()
       : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
 
@@ -191,7 +226,7 @@
     const isLiked = !!userLike;
 
     const { data: comments } = await supabase.from('video_comments').select('comment').eq('video_id', video.id).order('created_at', { ascending: false });
-    const commentHTML = comments?.length 
+    const commentHTML = comments?.length
       ? comments.map(c => `<div class="text-sm bg-gray-700 p-2 rounded mb-1 text-gray-200">→ ${c.comment}</div>`).join('')
       : '<p class="text-gray-500 italic">No comments yet</p>';
 
@@ -229,9 +264,7 @@
     const heart = button.querySelector('.like-heart');
     const countSpan = button.querySelector('span');
     let count = parseInt(countSpan.textContent);
-
     const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id', videoId).eq('user_id', currentUser.id).maybeSingle();
-
     if (existing) {
       await supabase.from('video_likes').delete().eq('id', existing.id);
       count--;
@@ -252,27 +285,24 @@
       .select('id, name, logo_url, collab_skills, open_to_collab')
       .neq('id', currentUser.id)
       .or('open_to_collab.eq.true,open_to_collab.eq."true"');
-
     const grid = document.getElementById('artistsGrid');
     if (!artists || artists.length === 0) {
       grid.innerHTML = '<p class="col-span-full text-center text-gray-600 text-xl">No artists open to collabs yet. Be the first!</p>';
       return;
     }
-
     grid.innerHTML = '';
     artists.forEach(artist => {
       const skills = (artist.collab_skills || []).join(' • ');
-      const logoUrl = artist.logo_url 
-        ? supabase.storage.from('media').getPublicUrl(artist.logo_url).data.publicUrl 
+      const logoUrl = artist.logo_url
+        ? supabase.storage.from('media').getPublicUrl(artist.logo_url).data.publicUrl
         : 'logo-placeholder.png';
-
       const card = document.createElement('div');
       card.className = 'bg-white rounded-2xl shadow-xl p-6 text-center transform hover:scale-105 transition duration-300 artist-card';
       card.innerHTML = `
         <img src="${logoUrl}" class="w-28 h-28 rounded-full mx-auto border-4 border-purple-600 object-cover shadow-lg">
         <h3 class="mt-4 text-xl font-bold text-gray-800">${artist.name || 'Unnamed Artist'}</h3>
         <p class="text-sm text-purple-600 mt-2 font-medium">${skills || 'No skills listed'}</p>
-        <a href="public-profile.html?id=${artist.id.split('-')[0]}" target="_blank" 
+        <a href="public-profile.html?id=${artist.id.split('-')[0]}" target="_blank"
            class="mt-5 inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-bold hover:shadow-2xl transform hover:scale-110 transition">
           View Profile
         </a>
@@ -286,7 +316,6 @@
     document.getElementById('artistsGrid').innerHTML = '<p class="col-span-full text-center text-xl">Loading artists...</p>';
     document.getElementById('searchArtists').value = '';
     loadAllArtists();
-
     document.getElementById('searchArtists').oninput = () => {
       const term = document.getElementById('searchArtists').value.toLowerCase();
       document.querySelectorAll('.artist-card').forEach(card => {
@@ -311,26 +340,21 @@
     const thumbnail = document.getElementById('thumbnailInput').files[0];
     const videoFile = document.getElementById('videoInput').files[0];
     if (!thumbnail || !videoFile) return alert('Select both files');
-
     document.getElementById('uploadSpinner').classList.remove('hidden');
     document.getElementById('uploadVideo').disabled = true;
-
     const videoName = `${currentUser.id}/videos/${Date.now()}.mp4`;
     const thumbName = `${currentUser.id}/thumbnails/${Date.now()}.jpg`;
-
     try {
       await Promise.all([
         supabase.storage.from('media').upload(videoName, videoFile, { upsert: true }),
         supabase.storage.from('media').upload(thumbName, thumbnail, { upsert: true })
       ]);
-
       await supabase.from('user_videos').insert({
         user_id: currentUser.id,
         video_url: videoName,
         thumbnail_url: thumbName,
         title: videoFile.name.replace(/\.mp4$/i, '')
       });
-
       alert('Uploaded & published!');
       document.getElementById('thumbnailInput').value = '';
       document.getElementById('videoInput').value = '';
@@ -359,12 +383,10 @@
   async function saveCollabSettings() {
     const openToCollab = document.getElementById('openToCollab').checked;
     const skills = Array.from(document.querySelectorAll('.collab-skill:checked')).map(cb => cb.value);
-
     const { error } = await supabase
       .from('profiles')
       .update({ open_to_collab: openToCollab, collab_skills: skills })
       .eq('id', currentUser.id);
-
     alert(error ? 'Error saving' : (openToCollab ? 'You are now visible!' : 'Settings saved'));
   }
 
@@ -379,6 +401,72 @@
     if (videoPath) await supabase.storage.from('media').remove([videoPath]);
     if (thumbPath) await supabase.storage.from('media').remove([thumbPath]);
     await loadVideos();
+  }
+
+  // ——— LIVE STREAM + CHAT (LIVEPEER) ———
+  async function goLive() {
+    document.getElementById('liveModal').classList.add('show');
+    
+    // Your Livepeer playback ID = your Supabase user ID with dashes removed
+    const playbackId = currentUser.id.replace(/-/g, '');
+    const streamUrl = `https://livepeercdn.com/hls/${playbackId}/index.m3u8`;
+
+    const video = document.getElementById('liveVideo');
+
+    if (Hls.isSupported()) {
+      hls = new Hls();
+      hls.loadSource(streamUrl);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = streamUrl;
+      video.play().catch(() => {});
+    }
+
+    startLiveChat();
+  }
+
+  function endStream() {
+    document.getElementById('liveModal').classList.remove('show');
+    if (hls) { hls.destroy(); hls = null; }
+    const video = document.getElementById('liveVideo');
+    video.pause();
+    video.src = '';
+    if (chatChannel) {
+      supabase.removeChannel(chatChannel);
+      chatChannel = null;
+    }
+    document.getElementById('chatMessages').innerHTML = '';
+  }
+
+  function startLiveChat() {
+    chatChannel = supabase.channel(`live-chat-${currentUser.id}`);
+    chatChannel
+      .on('broadcast', { event: 'message' }, ({ payload }) => {
+        const div = document.createElement('div');
+        div.innerHTML = `<span class="font-bold text-green-400">${payload.name}:</span> <span class="text-gray-200">${payload.message}</span>`;
+        document.getElementById('chatMessages').appendChild(div);
+        div.scrollIntoView({ behavior: 'smooth' });
+      })
+      .subscribe();
+  }
+
+  async function sendMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message || !chatChannel) return;
+
+    const { data: profile } = await supabase.from('profiles').select('name').eq('id', currentUser.id).single();
+    const name = profile?.name || 'Guest';
+
+    chatChannel.send({
+      type: 'broadcast',
+      event: 'message',
+      payload: { name, message }
+    });
+
+    input.value = '';
   }
 </script>
 </body>
