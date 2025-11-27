@@ -6,7 +6,6 @@
   <title>Pro Profile | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- TalkJS -->
   <script src="https://unpkg.com/talkjs@0.16.6/dist/talkjs.js"></script>
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
@@ -32,7 +31,6 @@
     </div>
   </div>
 
-  <!-- NEW: Find Collaborators Button - dead center -->
   <button onclick="openCollabDirectory()" class="absolute left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition z-10">
     Find Collaborators
   </button>
@@ -64,7 +62,7 @@
     </button>
   </section>
 
-  <!-- GO LIVE SECTION (FULLY RESTORED) -->
+  <!-- GO LIVE SECTION -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl shadow border-l-4 border-purple-600">
       <h3 class="text-2xl font-bold text-indigo-800 mb-2">Go Live</h3>
@@ -92,26 +90,23 @@
     </div>
   </section>
 
-  <!-- MAIN CONTENT: LEFT SIDEBAR + RIGHT UPLOAD/VIDEOS -->
+  <!-- MAIN CONTENT -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
       <div class="md:col-span-1 space-y-6">
-
-        <!-- Artist Name -->
         <div class="bg-gray-50 p-5 rounded-xl shadow">
           <h3 class="text-xl font-bold text-gray-800 mb-3">Artist / Band Name</h3>
           <input type="text" id="artistNameInput" class="w-full border border-gray-300 p-3 rounded-lg mb-3" placeholder="Enter your name">
           <button onclick="saveArtistName()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold">Save Name</button>
         </div>
 
-        <!-- Bio -->
         <div class="bg-gray-50 p-5 rounded-xl shadow">
           <label class="block text-sm font-bold text-gray-700 mb-2">Bio</label>
           <textarea id="bioInput" placeholder="Tell your story..." class="w-full border border-gray-300 p-3 rounded-lg h-40 resize-none"></textarea>
           <button onclick="saveBio()" class="mt-3 w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 font-bold">Save Bio</button>
         </div>
 
-        <!-- NEW: Collaboration Settings -->
+        <!-- COLLAB SETTINGS -->
         <div class="bg-purple-50 border-2 border-purple-300 p-5 rounded-xl shadow">
           <h3 class="text-xl font-bold text-purple-800 mb-4">Collaboration Settings</h3>
           <label class="flex items-center gap-3 mb-4 cursor-pointer">
@@ -130,7 +125,6 @@
           <button onclick="saveCollabSettings()" class="mt-4 w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-bold">Save Settings</button>
         </div>
 
-        <!-- Public URL -->
         <div class="bg-green-50 p-5 rounded-xl shadow text-center">
           <p class="text-sm text-gray-600">Your Public Page:</p>
           <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
@@ -138,7 +132,7 @@
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: Upload + Videos -->
+      <!-- RIGHT SIDE -->
       <div class="md:col-span-3 space-y-8">
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6">Upload New Video</h3>
@@ -166,7 +160,7 @@
     </div>
   </section>
 
-  <!-- DANGER ZONE (FULLY RESTORED) -->
+  <!-- DANGER ZONE -->
   <section class="max-w-6xl mx-auto my-12 px-6">
     <div class="max-w-2xl mx-auto bg-red-50 border-2 border-red-500 rounded-xl p-8 shadow-xl">
       <h3 class="text-2xl font-bold text-red-800 mb-4 text-center">Danger Zone</h3>
@@ -206,7 +200,6 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
   );
 
-  // ←←← YOUR TALKJS KEYS (replace these!)
   const TALKJS_APP_ID = "tLZqiXQU";
   const TALKJS_SECRET_KEY = "sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1";
 
@@ -220,12 +213,15 @@
     currentUser = user;
 
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+
+    // Subdomain & public URL
     const subdomain = profile?.subdomain || `artist-${user.id.split('-')[0]}`;
     if (!profile?.subdomain) await supabase.from('profiles').upsert({ id: user.id, subdomain });
     publicUrl = `${location.origin}/public-profile.html?id=${subdomain}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
 
+    // Load profile data
     if (profile?.name) document.getElementById('artistNameInput').value = profile.name;
     if (profile?.bio) document.getElementById('bioInput').value = profile.bio;
     if (profile?.open_to_collab) document.getElementById('openToCollab').checked = true;
@@ -246,7 +242,7 @@
       document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
     }
 
-    // TalkJS setup
+    // TalkJS
     if (!profile?.talkjs_id) {
       const talkId = 'rd_' + user.id.replace(/-/g, '');
       await supabase.from('profiles').update({ talkjs_id: talkId }).eq('id', user.id);
@@ -259,15 +255,14 @@
         id: profile.talkjs_id,
         name: profile.name || user.email.split('@')[0],
         email: user.email,
-        photoUrl: profile.logo_url ? supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl : '',
-        role: 'member'
+        photoUrl: profile.logo_url ? supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl : ''
       });
       window.talkSession = new Talk.Session({ appId: TALKJS_APP_ID, me: me });
     });
 
     await loadVideos();
 
-    // Event listeners
+    // Event Listeners
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
@@ -283,33 +278,150 @@
     });
   });
 
-  // === ALL YOUR ORIGINAL FUNCTIONS (100% intact) ===
+  // ==================== VIDEO SYSTEM (FULLY RESTORED) ====================
   async function loadVideos() {
-    const { data: videos } = await supabase.from('user_videos').select('id, video_url, thumbnail_url, title').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const { data: videos } = await supabase
+      .from('user_videos')
+      .select('id, video_url, thumbnail_url, title')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
     const container = document.getElementById('videoList');
     container.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-gray-600 italic py-8">No videos uploaded yet.</p>';
-    for (const video of (videos || [])) await renderVideoCard(video);
+
+    for (const video of (videos || [])) {
+      await renderVideoCard(video);
   }
 
   async function renderVideoCard(video) {
     const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl;
-    const thumbUrl = video.thumbnail_url ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
+    const thumbUrl = video.thumbnail_url
+      ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl
+      : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
+
     const { count: likes = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id);
     const { data: comments } = await supabase.from('video_comments').select('comment').eq('video_id', video.id).order('created_at', { ascending: false });
 
     const commentCount = comments?.length || 0;
-    const commentList = commentCount ? comments.map(c => `<div class="text-sm bg-gray-800 p-3 rounded mb-2"><p class="text-white">${c.comment}</p></div>`).join('') : '<p class="text-gray-500 text-sm italic">No comments yet</p>';
+    const commentList = commentCount
+      ? comments.map(c => `<div class="text-sm bg-gray-800 p-3 rounded mb-2"><p class="text-white">${c.comment}</p></div>`).join('')
+      : '<p class="text-gray-500 text-sm italic">No comments yet</p>';
 
-    const cardHTML = `...`; // (your full working cardHTML from before — I’ll paste it in full at the very end)
+    const cardHTML = `
+      <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col" data-video-id="${video.id}">
+        <div class="relative">
+          <img src="${thumbUrl}" class="w-full h-48 object-cover" onerror="this.src='https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail'">
+          <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
+            <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
+          </div>
+        </div>
+        <div class="p-4 bg-gray-800 text-white border-b border-gray-700">
+          <h4 class="font-bold text-lg truncate">${video.title || 'Untitled Video'}</h4>
+        </div>
+        <div class="p-4 bg-gray-800 flex items-center justify-between text-white">
+          <button onclick="toggleLike('${video.id}')" class="flex items-center gap-3 font-bold text-lg hover:scale-105 transition">
+            Heart
+            <svg class="w-7 h-7 transition-all ${likes > 0 ? 'text-red-500' : 'text-gray-400'}" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+            </svg>
+            <span class="like-count text-xl font-bold">${likes}</span>
+          </button>
+          <button onclick="navigator.clipboard.writeText('${publicUrl}'); alert('Public link copied!')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Share</button>
+        </div>
+        <div class="p-4 bg-gray-900 border-t border-gray-700 max-h-60 overflow-y-auto">
+          <h5 class="font-bold text-green-400 mb-3">Comments (${commentCount})</h5>
+          <div class="comments-container">${commentList}</div>
+        </div>
+        <button onclick="if(confirm('Delete forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">
+          Delete Video
+        </button>
+      </div>`;
 
     const existing = document.querySelector(`[data-video-id="${video.id}"]`);
     if (existing) existing.outerHTML = cardHTML;
     else document.getElementById('videoList').insertAdjacentHTML('afterbegin', cardHTML);
   }
 
-  // (All other functions: toggleLike, updateLikeCount, addNewComment, deleteVideo, uploadAndPublish, uploadBanner, uploadLogo, saveArtistName, saveBio, openVideoPopup, closeModal, logout — all 100% unchanged)
+  async function updateLikeCount(videoId) {
+    const card = document.querySelector(`[data-video-id="${videoId}"]`);
+    if (!card) return;
+    const { count: likes } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', videoId);
+    const span = card.querySelector('.like-count');
+    const heart = card.querySelector('svg');
+    span.textContent = likes;
+    if (likes > 0) {
+      heart.classList.add('text-red-500', 'new-like');
+      setTimeout(() => heart.classList.remove('new-like'), 600);
+    } else heart.classList.remove('text-red-500');
+  }
 
-  // === COLLABORATION FUNCTIONS ===
+  function addNewComment(videoId, commentText) {
+    const card = document.querySelector(`[data-video-id="${videoId}"]`);
+    if (!card) return;
+    const container = card.querySelector('.comments-container');
+    const countEl = card.querySelector('h5');
+    container.insertAdjacentHTML('afterbegin', `<div class="text-sm bg-gray-800 p-3 rounded mb-2 animate-pulse"><p class="text-white font-medium">${commentText}</p></div>`);
+    const count = (parseInt(countEl.textContent.match(/\d+/)?.[0] || 0) || 0) + 1;
+    countEl.textContent = `Comments (${count})`;
+  }
+
+  async function toggleLike(videoId) {
+    const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id', videoId).eq('user_id', currentUser.id).maybeSingle();
+    if (existing) await supabase.from('video_likes').delete().eq('id', existing.id);
+    else await supabase.from('video_likes').insert({ video_id: videoId, user_id: currentUser.id });
+    updateLikeCount(videoId);
+  }
+
+  async function deleteVideo(id, videoPath, thumbPath) {
+    await Promise.all([
+      supabase.from('user_videos').delete().eq('id', id),
+      supabase.from('video_likes').delete().eq('video_id', id),
+      supabase.from('video_comments').delete().eq('video_id', id),
+      videoPath && supabase.storage.from('media').remove([videoPath]),
+      thumbPath && supabase.storage.from('media').remove([thumbPath])
+    ]);
+    document.querySelector(`[data-video-id="${id}"]`)?.remove();
+  }
+
+  async function uploadAndPublish() {
+    const thumbnail = document.getElementById('thumbnailInput').files[0];
+    const videoFile = document.getElementById('videoInput').files[0];
+    if (!thumbnail || !videoFile) return alert('Please select both files');
+
+    document.getElementById('uploadSpinner').classList.remove('hidden');
+    document.getElementById('uploadVideo').disabled = true;
+
+    const videoName = `${currentUser.id}/videos/${Date.now()}.mp4`;
+    const thumbName = `${currentUser.id}/thumbnails/${Date.now()}.jpg`;
+
+    const [vRes, tRes] = await Promise.all([
+      supabase.storage.from('media').upload(videoName, videoFile, { upsert: true }),
+      supabase.storage.from('media').upload(thumbName, thumbnail, { upsert: true })
+    ]);
+
+    if (vRes.error || tRes.error) alert('Upload failed');
+    else {
+      await supabase.from('user_videos').insert({
+        user_id: currentUser.id,
+        video_url: videoName,
+        thumbnail_url: thumbName,
+        title: videoFile.name.replace(/\.mp4$/i, '').substring(0, 60)
+      });
+      alert('Video published!');
+    }
+
+    document.getElementById('uploadSpinner').classList.add('hidden');
+    document.getElementById('uploadVideo').disabled = false;
+    document.getElementById('thumbnailInput').value = '';
+    document.getElementById('videoInput').value = '';
+  }
+
+  async function uploadBanner(e) { const f=e.target.files[0]; if(!f)return; const n=`${currentUser.id}/banner.${f.name.split('.').pop()}`; await supabase.storage.from('media').upload(n,f,{upsert:true}); const u=supabase.storage.from('media').getPublicUrl(n).data.publicUrl+'?t='+Date.now(); document.getElementById('bannerPreview').src=u; document.getElementById('bannerPreview').classList.remove('hidden'); document.getElementById('bannerPlaceholder').classList.add('hidden'); await supabase.from('profiles').update({banner_url:n}).eq('id',currentUser.id); }
+  async function uploadLogo(e) { const f=e.target.files[0]; if(!f)return; const n=`${currentUser.id}/logo.${f.name.split('.').pop()}`; await supabase.storage.from('media').upload(n,f,{upsert:true}); const u=supabase.storage.from('media').getPublicUrl(n).data.publicUrl+'?t='+Date.now(); document.getElementById('logoPreview').src=u; await supabase.from('profiles').update({logo_url:n}).eq('id',currentUser.id); }
+  async function saveArtistName() { const n=document.getElementById('artistNameInput').value.trim(); if(!n)return alert('Enter name'); await supabase.from('profiles').update({name:n}).eq('id',currentUser.id); alert('Saved!'); }
+  async function saveBio() { const b=document.getElementById('bioInput').value; await supabase.from('profiles').update({bio:b}).eq('id',currentUser.id); alert('Bio saved!'); }
+
+  // COLLAB FUNCTIONS
   async function saveCollabSettings() {
     const open = document.getElementById('openToCollab').checked;
     const skills = Array.from(document.querySelectorAll('.collab-skill:checked')).map(cb => cb.value);
@@ -351,7 +463,7 @@
   }
 
   function startChat(otherUserId) {
-    if (!talkjsReady) return alert('Loading chat...');
+    if (!talkjsReady) return alert('Chat loading...');
     const otherUser = new Talk.User({ id: otherUserId });
     const convo = window.talkSession.getOrCreateConversation(Talk.oneOnOneId(window.talkSession.me, otherUser));
     convo.setParticipant(window.talkSession.me);
@@ -361,13 +473,18 @@
     chatbox.mount(document.querySelector('#collabModal .relative'));
   }
 
+  // Modal functions
+  function openVideoPopup(url) { document.getElementById('modalVideo').src = url; document.getElementById('videoModal').classList.add('show'); }
+  function closeModal() { document.getElementById('videoModal').classList.remove('show'); document.getElementById('modalVideo').src = ''; }
+  async function logout() { await supabase.auth.signOut(); location.href = 'index.html'; }
+
+  // Search
   document.getElementById('searchArtists')?.addEventListener('input', e => {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('#artistsGrid > div').forEach(card => {
       card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none';
     });
   });
-
 </script>
 </body>
 </html>
