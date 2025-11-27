@@ -21,7 +21,6 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
-
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg relative">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -120,7 +119,7 @@
   <div id="closeCollab" onclick="document.getElementById('collabModal').classList.remove('show')">X</div>
   <div class="bg-white rounded-2xl shadow-2xl w-11/12 max-w-7xl max-h-[90vh] overflow-y-auto p-8 relative">
     <h2 class="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Find Collaborators</h2>
-    <input type="text" id="searchArtists" placeholder="Search by name or skill (Vocals, Guitar, Beats...)" class="w-full p-4 rounded-xl border-2 border-purple-300 mb-6 text-lg focus:outline-none focus:border-purple-600">
+    <input type="text" id="searchArtists" placeholder="Search by name or skill..." class="w-full p-4 rounded-xl border-2 border-purple-300 mb-6 text-lg focus:outline-none focus:border-purple-600">
     <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
   </div>
 </div>
@@ -145,7 +144,7 @@
   });
 
   async function loadProfileData() {
-    let { data: profile, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+    let { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
     if (!profile) {
       await supabase.from('profiles').insert({ 
         id: currentUser.id,
@@ -155,17 +154,13 @@
       profile = { name: '', bio: '', banner_url: null, logo_url: null, open_to_collab: false, collab_skills: [] };
     }
 
-    // Load text fields
     if (profile.name) document.getElementById('artistNameInput').value = profile.name;
     if (profile.bio) document.getElementById('bioInput').value = profile.bio;
-
-    // Load collab settings
-    document.getElementById('openToCollab').checked = !!profile.open_to_collab;
+    document.getElementById('openToCollab').checked = profile.open_to_collab === true || profile.open_to_collab === 'true';
     document.querySelectorAll('.collab-skill').forEach(cb => {
-      cb.checked = profile.collab_skills?.includes(cb.value) || false;
+      cb.checked = (profile.collab_skills || []).includes(cb.value);
     });
 
-    // Banner & Logo
     if (profile.banner_url) {
       const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
       document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
@@ -189,13 +184,13 @@
 
   async function renderVideoCard(video) {
     const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl + '?t=' + Date.now();
-    const thumbUrl = video.thumbnail_url ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now() : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
+    const thumbUrl = video.thumbnail_url ? supabaseploitation.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now() : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
 
-    const { count: likeCount = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id);
+    const { count: likeCount = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: 1 }).eq('video_id', video.id);
     const { data: userLike } = await supabase.from('video_likes').select('id').eq('video_id', video.id).eq('user_id', currentUser.id).maybeSingle();
     const isLiked = !!userLike;
 
-    const { data: comments } = await supabase.from('video_comments').select('comment, created_at').eq('video_id', video.id).order('created_at', { ascending: false });
+    const { data: comments } = await supabase.from('video_comments').select('comment').eq('video_id', video.id).order('created_at', { ascending: false });
     const commentHTML = comments?.length ? comments.map(c => `<div class="text-sm bg-gray-700 p-2 rounded mb-1 text-gray-200">→ ${c.comment}</div>`).join('') : '<p class="text-gray-500 italic">No comments yet</p>';
 
     const card = document.createElement('div');
@@ -249,15 +244,16 @@
     countSpan.textContent = count;
   }
 
+  // FIXED: This now works with boolean AND string "true"
   async function loadAllArtists() {
-    const { data: artists } = await supabase
+    const { data: artists, error } = await supabase
       .from('profiles')
       .select('id, name, logo_url, collab_skills, open_to_collab')
       .neq('id', currentUser.id)
-      .eq('open_to_collab', true);
+      .or('open_to_collab.eq.true,open_to_collab.eq."true"');  // THIS IS THE FIX
 
     const grid = document.getElementById('artistsGrid');
-    if (!artists || artists.length === 0) {
+    if (error || !artists || artists.length === 0) {
       grid.innerHTML = '<p class="col-span-full text-center text-gray-600 text-xl">No artists open to collabs yet. Be the first!</p>';
       return;
     }
@@ -377,18 +373,18 @@
     const { error } = await supabase
       .from('profiles')
       .update({
-        open_to_collab: openToCollab,
+        open_to_collab: openToCollab,  // Always save as real boolean
         collab_skills: skills
       })
       .eq('id', currentUser.id);
 
     if (error) {
       console.error(error);
-      alert('Error saving collab settings');
+      alert('Error saving settings');
     } else {
       alert(openToCollab 
-        ? 'You are now visible in Find Collaborators!'
-        : 'Collaboration settings saved (you are hidden)');
+        ? 'You are NOW visible in Find Collaborators!'
+        : 'Settings saved (you are hidden)');
     }
   }
 
