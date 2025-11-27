@@ -115,7 +115,7 @@
 <!-- Video Modal -->
 <div id="videoModal"><div id="closeModal" onclick="closeModal()">X</div><video id="modalVideo" controls autoplay class="shadow-2xl"></video></div>
 
-<!-- Collab Modal - NOW FULLY WORKING -->
+<!-- Collab Modal -->
 <div id="collabModal">
   <div id="closeCollab" onclick="document.getElementById('collabModal').classList.remove('show')">X</div>
   <div class="bg-white rounded-2xl shadow-2xl w-11/12 max-w-7xl max-h-[90vh] overflow-y-auto p-8 relative">
@@ -145,13 +145,27 @@
   });
 
   async function loadProfileData() {
-    let { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+    let { data: profile, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
     if (!profile) {
-      await supabase.from('profiles').insert({ id: currentUser.id });
-      profile = { banner_url: null, logo_url: null, name: '', bio: '', subdomain: null };
+      await supabase.from('profiles').insert({ 
+        id: currentUser.id,
+        open_to_collab: false,
+        collab_skills: []
+      });
+      profile = { name: '', bio: '', banner_url: null, logo_url: null, open_to_collab: false, collab_skills: [] };
     }
+
+    // Load text fields
     if (profile.name) document.getElementById('artistNameInput').value = profile.name;
     if (profile.bio) document.getElementById('bioInput').value = profile.bio;
+
+    // Load collab settings
+    document.getElementById('openToCollab').checked = !!profile.open_to_collab;
+    document.querySelectorAll('.collab-skill').forEach(cb => {
+      cb.checked = profile.collab_skills?.includes(cb.value) || false;
+    });
+
+    // Banner & Logo
     if (profile.banner_url) {
       const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
       document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
@@ -161,6 +175,7 @@
     if (profile.logo_url) {
       document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
     }
+
     const publicUrl = `${location.origin}/public-profile.html?id=${profile.subdomain || currentUser.id.split('-')[0]}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
@@ -234,7 +249,6 @@
     countSpan.textContent = count;
   }
 
-  // FULLY WORKING FIND COLLABORATORS
   async function loadAllArtists() {
     const { data: artists } = await supabase
       .from('profiles')
@@ -263,7 +277,7 @@
         <p class="text-sm text-purple-600 mt-2 font-medium">${skills || 'No skills listed'}</p>
         <a href="public-profile.html?id=${artist.id.split('-')[0]}" target="_blank" 
            class="mt-5 inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-bold hover:shadow-2xl transform hover:scale-110 transition">
-          View Profile →
+          View Profile
         </a>
       `;
       grid.appendChild(card);
@@ -276,7 +290,6 @@
     document.getElementById('searchArtists').value = '';
     loadAllArtists();
 
-    // Live search
     document.getElementById('searchArtists').oninput = function() {
       const term = this.value.toLowerCase();
       document.querySelectorAll('.artist-card').forEach(card => {
@@ -344,17 +357,46 @@
     await loadVideos();
   }
 
+  async function saveArtistName() {
+    const name = document.getElementById('artistNameInput').value.trim();
+    if (!name) return alert('Enter your artist name first!');
+    await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
+    alert('Artist name saved!');
+  }
+
+  async function saveBio() {
+    const bio = document.getElementById('bioInput').value.trim();
+    await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
+    alert('Bio saved!');
+  }
+
+  async function saveCollabSettings() {
+    const openToCollab = document.getElementById('openToCollab').checked;
+    const skills = Array.from(document.querySelectorAll('.collab-skill:checked')).map(cb => cb.value);
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        open_to_collab: openToCollab,
+        collab_skills: skills
+      })
+      .eq('id', currentUser.id);
+
+    if (error) {
+      console.error(error);
+      alert('Error saving collab settings');
+    } else {
+      alert(openToCollab 
+        ? 'You are now visible in Find Collaborators!'
+        : 'Collaboration settings saved (you are hidden)');
+    }
+  }
+
   async function logout() {
     await supabase.auth.signOut();
     location.href = 'index.html';
   }
 
-  // Placeholder save functions (you can implement later)
-  async function saveArtistName() { alert('Name saved!'); }
-  async function saveBio() { alert('Bio saved!'); }
-  async function saveCollabSettings() { alert('Collab settings saved!'); }
-  async function uploadBanner() { alert('Banner upload coming soon'); }
-  async function uploadLogo() { alert('Logo upload coming soon'); }
   async function deleteVideo(id, videoPath, thumbPath) {
     if (!confirm('Delete this video forever?')) return;
     await supabase.from('user_videos').delete().eq('id', id);
