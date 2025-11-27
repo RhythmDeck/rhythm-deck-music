@@ -33,6 +33,7 @@
 </header>
 
 <main class="flex-grow">
+  <!-- [Your banner, live stream, upload sections — unchanged] -->
   <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
     <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center">
@@ -51,6 +52,7 @@
     </button>
   </section>
 
+  <!-- Live Stream Section (unchanged) -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl shadow border-l-4 border-purple-600">
       <h3 class="text-2xl font-bold text-indigo-800 mb-2">Go Live</h3>
@@ -80,9 +82,9 @@
     </div>
   </section>
 
+  <!-- Main Content -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
-      <!-- LEFT COLUMN -->
       <div class="md:col-span-1 space-y-6">
         <div class="bg-gray-50 p-5 rounded-xl shadow">
           <h3 class="text-xl font-bold text-gray-800 mb-3">Artist / Band Name</h3>
@@ -101,7 +103,6 @@
         </div>
       </div>
 
-      <!-- RIGHT COLUMN -->
       <div class="md:col-span-3 space-y-8">
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6">Upload New Video</h3>
@@ -127,6 +128,7 @@
     </div>
   </section>
 
+  <!-- Danger Zone -->
   <section class="max-w-6xl mx-auto my-12 px-6">
     <div class="max-w-2xl mx-auto bg-red-50 border-2 border-red-500 rounded-xl p-8 shadow-xl">
       <h3 class="text-2xl font-bold text-red-800 mb-4 text-center">Danger Zone</h3>
@@ -168,8 +170,7 @@
     document.getElementById('publicLink').href = publicUrl;
 
     if (profile?.name) document.getElementById('artistNameInput').value = profile.name;
-    if (profile?.bio) document.getElementById('bioInput').value = profile.bio;
-
+    if (profile?.bio) && (document.getElementById('bioInput').value = profile.bio);
     if (profile?.banner_url) {
       const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl + '?t=' + Date.now();
       document.getElementById('bannerPreview').src = url;
@@ -182,6 +183,7 @@
 
     await loadVideos();
 
+    // Event Listeners
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
@@ -198,25 +200,39 @@
   });
 
   async function loadVideos() {
-    const { data } = await supabase.from('user_videos').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    const container = document.getElementById('videoList');
-    container.innerHTML = data?.length ? '' : '<p class="col-span-full text-center text-gray-600 italic py-8">No videos uploaded yet.</p>';
+    const { data: videos } = await supabase
+      .from('user_videos')
+      .select('id, video_url, thumbnail_url')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
 
-    for (const video of (data || [])) {
+    const container = document.getElementById('videoList');
+    container.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-gray-600 italic py-8">No videos uploaded yet.</p>';
+
+    for (const video of (videos || [])) {
       const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl + '?t=' + Date.now();
-      const thumbUrl = video.thumbnail_url 
+      const thumbUrl = video.thumbnail_url
         ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now()
         : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
 
+      // Get current like count
       const { count: likes = 0 } = await supabase
         .from('video_likes')
         .select('id', { count: 'exact', head: true })
+        .eq('video_id', video.id);
+
+      // Check if current user already liked this video
+      const { data: existingLike } = await supabase
+        .from('video_likes')
+        .select('id')
         .eq('video_id', video.id)
-        .single();
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+
+      const isLiked = !!existingLike;
 
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
-          <!-- Thumbnail -->
           <div class="relative">
             <img src="${thumbUrl}" class="w-full h-48 object-cover" onerror="this.src='https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail'">
             <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
@@ -226,20 +242,28 @@
             </div>
           </div>
 
-          <!-- Likes + Share (clean, no overlay) -->
-          <div class="p-4 bg-gray-800 flex justify-between items-center text-white">
-            <div class="flex items-center gap-2 font-bold">
-              <span>Likes</span> <span class="text-emerald-400">${likes}</span>
-            </div>
-            <button onclick="event.stopPropagation(); navigator.clipboard.writeText('${publicUrl}'); alert('Public link copied!')" 
-                    class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">
+          <!-- Heart Button + Counter -->
+          <div class="p-4 bg-gray-800 flex items-center justify-between text-white">
+            <button 
+              onclick="toggleLike('${video.id}', this)" 
+              class="flex items-center gap-3 font-bold text-lg hover:scale-105 transition transform"
+            >
+              <span>Heart</span>
+              <svg class="w-7 h-7 transition-all ${isLiked ? 'text-red-500 scale-110 drop-shadow-glow' : 'text-gray-400'}"
+                   fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+              </svg>
+              <span class="like-count text-xl">${likes}</span>
+            </button>
+
+            <button onclick="event.stopPropagation(); navigator.clipboard.writeText('${publicUrl}'); alert('Link copied!')"
+                    class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold transition">
               Share
             </button>
           </div>
 
-          <!-- Delete Button (full width, red) -->
           <div class="bg-red-600 hover:bg-red-700 transition">
-            <button onclick="event.stopPropagation(); if(confirm('Delete this video forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" 
+            <button onclick="event.stopPropagation(); if(confirm('Delete this video forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')"
                     class="w-full text-white font-bold py-3">
               Delete Video
             </button>
@@ -248,6 +272,34 @@
     }
   }
 
+  // Toggle Like Function
+  async function toggleLike(videoId, button) {
+    const likeCountSpan = button.querySelector('.like-count');
+    const heartIcon = button.querySelector('svg');
+
+    const { data: existing } = await supabase
+      .from('video_likes')
+      .select('id')
+      .eq('video_id', videoId)
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+
+    if (existing) {
+      // Unlike
+      await supabase.from('video_likes').delete().eq('id', existing.id);
+      likeCountSpan.textContent = parseInt(likeCountSpan.textContent) - 1;
+      heartIcon.classList.remove('text-red-500', 'scale-110', 'drop-shadow-glow');
+      heartIcon.classList.add('text-gray-400');
+    } else {
+      // Like
+      await supabase.from('video_likes').insert({ video_id: videoId, user_id: currentUser.id });
+      likeCountSpan.textContent = parseInt(likeCountSpan.textContent) + 1;
+      heartIcon.classList.add('text-red-500', 'scale-110', 'drop-shadow-glow');
+      heartIcon.classList.remove('text-gray-400');
+    }
+  }
+
+  // Rest of your functions unchanged
   async function deleteVideo(id, videoPath, thumbPath) {
     await Promise.all([
       supabase.from('user_videos').delete().eq('id', id),
@@ -264,7 +316,7 @@
     const thumbnail = document.getElementById('thumbnailInput').files[0];
     const videoFile = document.getElementById('videoInput').files[0];
     if (!thumbnail || !videoFile) return alert('Select both thumbnail and video');
-
+    
     document.getElementById('uploadSpinner').classList.remove('hidden');
     document.getElementById('uploadVideo').disabled = true;
 
@@ -298,9 +350,9 @@
     loadVideos();
   }
 
+  // Other functions (uploadBanner, uploadLogo, saveArtistName, saveBio, openVideoPopup, closeModal, logout) remain the same
   async function uploadBanner(e) { const f = e.target.files[0]; if(!f) return; const n = `${currentUser.id}/banner.${f.name.split('.').pop()}`; await supabase.storage.from('media').upload(n,f,{upsert:true}); const u = supabase.storage.from('media').getPublicUrl(n).data.publicUrl + '?t=' + Date.now(); document.getElementById('bannerPreview').src = u; document.getElementById('bannerPreview').classList.remove('hidden'); document.getElementById('bannerPlaceholder').classList.add('hidden'); await supabase.from('profiles').update({banner_url:n}).eq('id',currentUser.id); }
   async function uploadLogo(e) { const f = e.target.files[0]; if(!f) return; const n = `${currentUser.id}/logo.${f.name.split('.').pop()}`; await supabase.storage.from('media').upload(n,f,{upsert:true}); const u = supabase.storage.from('media').getPublicUrl(n).data.publicUrl + '?t=' + Date.now(); document.getElementById('logoPreview').src = u; await supabase.from('profiles').update({logo_url:n}).eq('id',currentUser.id); }
-
   async function saveArtistName() { const n = document.getElementById('artistNameInput').value.trim(); if(!n) return alert('Enter name'); await supabase.from('profiles').update({name:n}).eq('id',currentUser.id); alert('Saved!'); }
   async function saveBio() { const b = document.getElementById('bioInput').value.trim(); await supabase.from('profiles').update({bio:b}).eq('id',currentUser.id); alert('Bio saved!'); }
 
