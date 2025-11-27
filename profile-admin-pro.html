@@ -21,6 +21,7 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg relative">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -58,11 +59,13 @@
           <input type="text" id="artistNameInput" class="w-full border border-gray-300 p-3 rounded-lg mb-3" placeholder="Enter your name">
           <button onclick="saveArtistName()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold">Save Name</button>
         </div>
+
         <div class="bg-gray-50 p-5 rounded-xl shadow">
           <label class="block text-sm font-bold text-gray-700 mb-2">Bio</label>
           <textarea id="bioInput" placeholder="Tell your story..." class="w-full border border-gray-300 p-3 rounded-lg h-40 resize-none"></textarea>
           <button onclick="saveBio()" class="mt-3 w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 font-bold">Save Bio</button>
         </div>
+
         <div class="bg-purple-50 border-2 border-purple-300 p-5 rounded-xl shadow">
           <h3 class="text-xl font-bold text-purple-800 mb-4">Collaboration Settings</h3>
           <label class="flex items-center gap-3 mb-4 cursor-pointer">
@@ -79,6 +82,7 @@
           </div>
           <button onclick="saveCollabSettings()" class="mt-4 w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-bold">Save Settings</button>
         </div>
+
         <div class="bg-green-50 p-5 rounded-xl shadow text-center">
           <p class="text-sm text-gray-600">Your Public Page:</p>
           <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
@@ -96,9 +100,6 @@
           <button id="uploadVideo" class="mt-6 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg flex items-center shadow-lg">
             <span>Upload & Publish Video</span>
             <div id="uploadSpinner" class="spinner hidden"></div>
-          </button>
-          <button onclick="recoverLostVideos()" class="mt-4 block w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700">
-            Recover Lost Videos from Storage
           </button>
         </div>
 
@@ -146,16 +147,13 @@
   async function loadProfileData() {
     let { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
     if (!profile) {
-      await supabase.from('profiles').insert({ 
-        id: currentUser.id,
-        open_to_collab: false,
-        collab_skills: []
-      });
+      await supabase.from('profiles').insert({ id: currentUser.id, open_to_collab: false, collab_skills: [] });
       profile = { name: '', bio: '', banner_url: null, logo_url: null, open_to_collab: false, collab_skills: [] };
     }
 
     if (profile.name) document.getElementById('artistNameInput').value = profile.name;
     if (profile.bio) document.getElementById('bioInput').value = profile.bio;
+
     document.getElementById('openToCollab').checked = profile.open_to_collab === true || profile.open_to_collab === 'true';
     document.querySelectorAll('.collab-skill').forEach(cb => {
       cb.checked = (profile.collab_skills || []).includes(cb.value);
@@ -184,14 +182,18 @@
 
   async function renderVideoCard(video) {
     const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl + '?t=' + Date.now();
-    const thumbUrl = video.thumbnail_url ? supabaseploitation.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now() : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
+    const thumbUrl = video.thumbnail_url 
+      ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now()
+      : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
 
-    const { count: likeCount = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: 1 }).eq('video_id', video.id);
+    const { count: likeCount = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id);
     const { data: userLike } = await supabase.from('video_likes').select('id').eq('video_id', video.id).eq('user_id', currentUser.id).maybeSingle();
     const isLiked = !!userLike;
 
     const { data: comments } = await supabase.from('video_comments').select('comment').eq('video_id', video.id).order('created_at', { ascending: false });
-    const commentHTML = comments?.length ? comments.map(c => `<div class="text-sm bg-gray-700 p-2 rounded mb-1 text-gray-200">→ ${c.comment}</div>`).join('') : '<p class="text-gray-500 italic">No comments yet</p>';
+    const commentHTML = comments?.length 
+      ? comments.map(c => `<div class="text-sm bg-gray-700 p-2 rounded mb-1 text-gray-200">→ ${c.comment}</div>`).join('')
+      : '<p class="text-gray-500 italic">No comments yet</p>';
 
     const card = document.createElement('div');
     card.className = 'video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col';
@@ -244,16 +246,15 @@
     countSpan.textContent = count;
   }
 
-  // FIXED: This now works with boolean AND string "true"
   async function loadAllArtists() {
-    const { data: artists, error } = await supabase
+    const { data: artists } = await supabase
       .from('profiles')
       .select('id, name, logo_url, collab_skills, open_to_collab')
       .neq('id', currentUser.id)
-      .or('open_to_collab.eq.true,open_to_collab.eq."true"');  // THIS IS THE FIX
+      .or('open_to_collab.eq.true,open_to_collab.eq."true"');
 
     const grid = document.getElementById('artistsGrid');
-    if (error || !artists || artists.length === 0) {
+    if (!artists || artists.length === 0) {
       grid.innerHTML = '<p class="col-span-full text-center text-gray-600 text-xl">No artists open to collabs yet. Be the first!</p>';
       return;
     }
@@ -286,11 +287,11 @@
     document.getElementById('searchArtists').value = '';
     loadAllArtists();
 
-    document.getElementById('searchArtists').oninput = function() {
-      const term = this.value.toLowerCase();
+    document.getElementById('searchArtists').oninput = () => {
+      const term = document.getElementById('searchArtists').value.toLowerCase();
       document.querySelectorAll('.artist-card').forEach(card => {
-        const name = card.querySelector('h3').textContent.toLowerCase();
-        const skills = card.querySelector('p').textContent.toLowerCase();
+        const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
+        const skills = card.querySelector('p')?.textContent.toLowerCase() || '';
         card.style.display = (name.includes(term) || skills.includes(term)) ? '' : 'none';
       });
     };
@@ -310,60 +311,49 @@
     const thumbnail = document.getElementById('thumbnailInput').files[0];
     const videoFile = document.getElementById('videoInput').files[0];
     if (!thumbnail || !videoFile) return alert('Select both files');
+
     document.getElementById('uploadSpinner').classList.remove('hidden');
     document.getElementById('uploadVideo').disabled = true;
+
     const videoName = `${currentUser.id}/videos/${Date.now()}.mp4`;
     const thumbName = `${currentUser.id}/thumbnails/${Date.now()}.jpg`;
+
     try {
       await Promise.all([
         supabase.storage.from('media').upload(videoName, videoFile, { upsert: true }),
         supabase.storage.from('media').upload(thumbName, thumbnail, { upsert: true })
       ]);
+
       await supabase.from('user_videos').insert({
         user_id: currentUser.id,
         video_url: videoName,
         thumbnail_url: thumbName,
         title: videoFile.name.replace(/\.mp4$/i, '')
       });
+
       alert('Uploaded & published!');
       document.getElementById('thumbnailInput').value = '';
       document.getElementById('videoInput').value = '';
       await loadVideos();
-    } catch (err) { alert('Error: ' + err.message); }
-    finally {
+    } catch (err) {
+      alert('Upload failed: ' + err.message);
+    } finally {
       document.getElementById('uploadSpinner').classList.add('hidden');
       document.getElementById('uploadVideo').disabled = false;
     }
   }
 
-  async function recoverLostVideos() {
-    if (!confirm('Scan storage for lost videos?')) return;
-    const { data: files } = await supabase.storage.from('media').list(`${currentUser.id}/videos/`);
-    let recovered = 0;
-    for (const file of (files || [])) {
-      if (!file.name.endsWith('.mp4')) continue;
-      const path = `${currentUser.id}/videos/${file.name}`;
-      const { data } = await supabase.from('user_videos').select('id').eq('video_url', path).maybeSingle();
-      if (!data) {
-        await supabase.from('user_videos').insert({ user_id: currentUser.id, video_url: path, thumbnail_url: null, title: file.name.replace(/\.mp4$/, '') });
-        recovered++;
-      }
-    }
-    alert(`Recovered ${recovered} video(s)!`);
-    await loadVideos();
-  }
-
   async function saveArtistName() {
     const name = document.getElementById('artistNameInput').value.trim();
-    if (!name) return alert('Enter your artist name first!');
+    if (!name) return alert('Enter a name!');
     await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
-    alert('Artist name saved!');
+    alert('Name saved');
   }
 
   async function saveBio() {
     const bio = document.getElementById('bioInput').value.trim();
     await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
-    alert('Bio saved!');
+    alert('Bio saved');
   }
 
   async function saveCollabSettings() {
@@ -372,20 +362,10 @@
 
     const { error } = await supabase
       .from('profiles')
-      .update({
-        open_to_collab: openToCollab,  // Always save as real boolean
-        collab_skills: skills
-      })
+      .update({ open_to_collab: openToCollab, collab_skills: skills })
       .eq('id', currentUser.id);
 
-    if (error) {
-      console.error(error);
-      alert('Error saving settings');
-    } else {
-      alert(openToCollab 
-        ? 'You are NOW visible in Find Collaborators!'
-        : 'Settings saved (you are hidden)');
-    }
+    alert(error ? 'Error saving' : (openToCollab ? 'You are now visible!' : 'Settings saved'));
   }
 
   async function logout() {
@@ -394,7 +374,7 @@
   }
 
   async function deleteVideo(id, videoPath, thumbPath) {
-    if (!confirm('Delete this video forever?')) return;
+    if (!confirm('Delete forever?')) return;
     await supabase.from('user_videos').delete().eq('id', id);
     if (videoPath) await supabase.storage.from('media').remove([videoPath]);
     if (thumbPath) await supabase.storage.from('media').remove([thumbPath]);
