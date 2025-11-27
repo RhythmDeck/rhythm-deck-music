@@ -18,7 +18,6 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
-
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -158,10 +157,8 @@
   let currentUser = null;
   let publicUrl = '';
 
-  // FIXED: This was the main bug!
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-
     if (authError || !user) {
       alert('You must be logged in to access this page.');
       window.location.href = 'login.html';
@@ -170,18 +167,12 @@
 
     currentUser = user;
 
-    // Load profile safely
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('subdomain, name, bio, banner_url, logo_url')
       .eq('id', user.id)
       .single();
 
-    if (profileError && profileError.code !== 'PGRST116') {
-      console.error('Profile load error:', profileError);
-    }
-
-    // Generate subdomain if missing
     let subdomain = profile?.subdomain || `artist-${user.id.split('-')[0]}`;
     if (!profile?.subdomain) {
       await supabase.from('profiles').upsert({ id: user.id, subdomain });
@@ -191,21 +182,18 @@
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
 
-    // Load everything
     if (profile?.name) document.getElementById('artistNameInput').value = profile.name;
     if (profile?.bio) document.getElementById('bioInput').value = profile.bio;
 
     if (profile?.banner_url) {
       const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl + '?t=' + Date.now();
-      const bannerImg = document.getElementById('bannerPreview');
-      bannerImg.src = url;
-      bannerImg.classList.remove('hidden');
+      document.getElementById('bannerPreview').src = url;
+      document.getElementById('bannerPreview').classList.remove('hidden');
       document.getElementById('bannerPlaceholder').classList.add('hidden');
     }
 
     if (profile?.logo_url) {
-      const url = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
-      document.getElementById('logoPreview').src = url;
+      document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
     }
 
     await loadVideos();
@@ -224,13 +212,18 @@
         location.href = 'index.html';
       }
     });
+
+    // AUTO-REFRESH LIKES & COMMENTS EVERY 8 SECONDS
+    setInterval(() => {
+      if (currentUser) loadVideos();
+    }, 8000);
   });
 
-  // Rest of your functions (unchanged but working)
+  // FULLY FIXED loadVideos() — now shows real-time likes + comments!
   async function loadVideos() {
     const { data: videos } = await supabase
       .from('user_videos')
-      .select('id, video_url, thumbnail_url')
+      .select('id, video_url, thumbnail_url, title')
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false });
 
@@ -247,6 +240,25 @@
       const { data: existingLike } = await supabase.from('video_likes').select('id').eq('video_id', video.id).eq('user_id', currentUser.id).maybeSingle();
       const isLiked = !!existingLike;
 
+      const { data: comments } = await supabase
+        .from('video_comments')
+        .select('comment, created_at')
+        .eq('video_id', video.id)
+        .order('created_at', { ascending: false });
+
+      let commentsHTML = '';
+      if (comments && comments.length > 0) {
+        commentsHTML = comments.map(c => `
+          <div class="bg-gray-800 p-3 rounded-lg mb-2 text-sm">
+            <p class="text-green-400 font-bold">Fan comment:</p>
+            <p class="text-white">${c.comment}</p>
+            <p class="text-xs text-gray-400">${new Date(c.created_at).toLocaleString()}</p>
+          </div>
+        `).join('');
+      } else {
+        commentsHTML = '<p class="text-gray-500 text-sm italic">No comments yet — be the first!</p>';
+      }
+
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
           <div class="relative">
@@ -257,29 +269,39 @@
               </svg>
             </div>
           </div>
+
+          <div class="p-4 bg-gray-800 text-white border-b border-gray-700">
+            <h4 class="font-bold text-lg truncate">${video.title || 'Untitled Video'}</h4>
+          </div>
+
           <div class="p-4 bg-gray-800 flex items-center justify-between text-white">
             <button onclick="toggleLike('${video.id}', this)" class="flex items-center gap-3 font-bold text-lg hover:scale-105 transition">
               Heart
-              <svg class="w-7 h-7 transition-all ${isLiked ? 'text-red-500 scale-110 drop-shadow-glow' : 'text-gray-400'}"
+              <svg class="w-7 h-7 transition-all ${isLiked ? 'text-red-500 scale-110' : 'text-gray-400'}"
                    fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
               </svg>
-              <span class="like-count text-xl">${likes}</span>
+              <span class="like-count text-xl font-bold">${likes}</span>
             </button>
-            <button onclick="navigator.clipboard.writeText('${publicUrl}'); alert('Public link copied!')"
+            <button onclick="navigator.clipboard.writeText('${publicUrl}'); alert('Link copied!')"
                     class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">
               Share
             </button>
           </div>
+
+          <!-- Comments Section -->
+          <div class="p-4 bg-gray-900 border-t border-gray-700 max-h-60 overflow-y-auto">
+            <h5 class="font-bold text-green-400 mb-3">Comments (${comments.length})</h5>
+            ${commentsHTML}
+          </div>
+
           <button onclick="if(confirm('Delete this video forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')"
-                  class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">
+                  class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
             Delete Video
           </button>
         </div>`;
     }
   }
-
-  // All other functions (toggleLike, deleteVideo, uploadAndPublish, etc.) — same as before, now work perfectly
 
   async function toggleLike(videoId, button) {
     const likeCountSpan = button.querySelector('.like-count');
@@ -289,12 +311,12 @@
     if (existing) {
       await supabase.from('video_likes').delete().eq('id', existing.id);
       likeCountSpan.textContent = parseInt(likeCountSpan.textContent) - 1;
-      heartIcon.classList.remove('text-red-500', 'scale-110', 'drop-shadow-glow');
+      heartIcon.classList.remove('text-red-500', 'scale-110');
       heartIcon.classList.add('text-gray-400');
     } else {
       await supabase.from('video_likes').insert({ video_id: videoId, user_id: currentUser.id });
-      likeCountSpan.textContent = parseInt(likeCountSpan.textContent) + 1;
-      heartIcon.classList.add('text-red-500', 'scale-110', 'drop-shadow-glow');
+      likeCountSpan.text = parseInt(likeCountSpan.textContent) + 1;
+      heartIcon.classList.add('text-red-500', 'scale-110');
       heartIcon.classList.remove('text-gray-400');
     }
   }
@@ -345,13 +367,13 @@
     document.getElementById('uploadVideo').disabled = false;
     document.getElementById('thumbnailInput').value = '';
     document.getElementById('videoInput').value = '';
-    alert('Video published!');
+    alert('Video published successfully!');
     loadVideos();
   }
 
   async function uploadBanner(e) { const f = e.target.files[0]; if(!f) return; const n = `${currentUser.id}/banner.${f.name.split('.').pop()}`; await supabase.storage.from('media').upload(n,f,{upsert:true}); const u = supabase.storage.from('media').getPublicUrl(n).data.publicUrl + '?t=' + Date.now(); document.getElementById('bannerPreview').src = u; document.getElementById('bannerPreview').classList.remove('hidden'); document.getElementById('bannerPlaceholder').classList.add('hidden'); await supabase.from('profiles').update({banner_url:n}).eq('id',currentUser.id); }
   async function uploadLogo(e) { const f = e.target.files[0]; if(!f) return; const n = `${currentUser.id}/logo.${f.name.split('.').pop()}`; await supabase.storage.from('media').upload(n,f,{upsert:true}); const u = supabase.storage.from('media').getPublicUrl(n).data.publicUrl + '?t=' + Date.now(); document.getElementById('logoPreview').src = u; await supabase.from('profiles').update({logo_url:n}).eq('id',currentUser.id); }
-  async function saveArtistName() { const n = document.getElementById('artistNameInput').value.trim(); if(!n) return alert('Enter name'); await supabase.from('profiles').update({name:n}).eq('id',currentUser.id); alert('Saved!'); }
+  async function saveArtistName() { const n = document.getElementById('artistNameInput').value.trim(); if(!n) return alert('Enter name'); await supabase.from('profiles').update({name:n}).eq('id',currentUser.id); alert('Name saved!'); }
   async function saveBio() { const b = document.getElementById('bioInput').value; await supabase.from('profiles').update({bio:b}).eq('id',currentUser.id); alert('Bio saved!'); }
   function openVideoPopup(url) { document.getElementById('modalVideo').src = url; document.getElementById('videoModal').classList.add('show'); }
   function closeModal() { document.getElementById('videoModal').classList.remove('show'); document.getElementById('modalVideo').src = ''; }
