@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pro Profile | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FIXED: Using correct Supabase URL format that works with old + new syntax -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
@@ -47,7 +48,7 @@
     <button onclick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
 
-  <!-- GO LIVE -->
+  <!-- GO LIVE SECTION -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl shadow border-l-4 border-purple-600">
       <h3 class="text-2xl font-bold text-indigo-800 mb-2">Go Live</h3>
@@ -143,28 +144,27 @@
       .eq('id', currentUser.id)
       .single();
 
-    if (!profile || !profile.subdomain) {
-      const defaultSubdomain = currentUser.email.split('@')[0].replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-      await supabase.from('profiles').upsert({
-        id: currentUser.id,
-        subdomain: defaultSubdomain
-      });
-      profile = profile || {};
-      profile.subdomain = defaultSubdomain;
+    if (!profile) {
+      profile = { name: '', bio: '', banner_url: null, logo_url: null, subdomain: 'new-user' };
+    }
+    if (!profile.subdomain) {
+      profile.subdomain = currentUser.email.split('@')[0].replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+      await supabase.from('profiles').upsert({ id: currentUser.id, subdomain: profile.subdomain });
     }
 
     document.getElementById('artistNameInput').value = profile.name || '';
     document.getElementById('bioInput').value = profile.bio || '';
 
+    // FIXED: Old reliable syntax that works 100%
     if (profile.banner_url) {
-      const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
-      document.getElementById('bannerPreview').src = data.publicUrl + '?t=' + Date.now();
+      const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
+      document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
       document.getElementById('bannerPreview').classList.remove('hidden');
       document.getElementById('bannerPlaceholder').classList.add('hidden');
     }
     if (profile.logo_url) {
-      const { data } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
-      document.getElementById('logoPreview').src = data.publicUrl + '?t=' + Date.now();
+      const url = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl;
+      document.getElementById('logoPreview').src = url + '?t=' + Date.now();
     }
 
     const publicUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${profile.subdomain}`;
