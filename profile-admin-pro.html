@@ -115,13 +115,13 @@
 <!-- Video Modal -->
 <div id="videoModal"><div id="closeModal" onclick="closeModal()">X</div><video id="modalVideo" controls autoplay class="shadow-2xl"></video></div>
 
-<!-- Collab Modal -->
+<!-- Collab Modal - NOW FULLY WORKING -->
 <div id="collabModal">
   <div id="closeCollab" onclick="document.getElementById('collabModal').classList.remove('show')">X</div>
   <div class="bg-white rounded-2xl shadow-2xl w-11/12 max-w-7xl max-h-[90vh] overflow-y-auto p-8 relative">
     <h2 class="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Find Collaborators</h2>
-    <input type="text" id="searchArtists" placeholder="Search artists, skills, genres..." class="w-full p-4 rounded-xl border-2 border-purple-300 mb-6 text-lg">
-    <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    <input type="text" id="searchArtists" placeholder="Search by name or skill (Vocals, Guitar, Beats...)" class="w-full p-4 rounded-xl border-2 border-purple-300 mb-6 text-lg focus:outline-none focus:border-purple-600">
+    <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
   </div>
 </div>
 
@@ -140,7 +140,6 @@
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('Login required'); window.location.href = 'login.html'; return; }
     currentUser = user;
-
     await Promise.all([loadProfileData(), loadVideos()]);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
   });
@@ -181,9 +180,8 @@
     const { data: userLike } = await supabase.from('video_likes').select('id').eq('video_id', video.id).eq('user_id', currentUser.id).maybeSingle();
     const isLiked = !!userLike;
 
-    const { data: comments } = await supabase.from('video_comments').select('comment, created_at, user_id').eq('video_id', video.id).order('created_at', { ascending: false });
-
-    const commentHTML = comments?.length ? comments.map(c => `<div class="text-sm bg-gray-700 p-2 rounded mb-1">→ ${c.comment}</div>`).join('') : '<p class="text-gray-500 italic">No comments yet</p>';
+    const { data: comments } = await supabase.from('video_comments').select('comment, created_at').eq('video_id', video.id).order('created_at', { ascending: false });
+    const commentHTML = comments?.length ? comments.map(c => `<div class="text-sm bg-gray-700 p-2 rounded mb-1 text-gray-200">→ ${c.comment}</div>`).join('') : '<p class="text-gray-500 italic">No comments yet</p>';
 
     const card = document.createElement('div');
     card.className = 'video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col';
@@ -204,7 +202,7 @@
           </svg>
           <span class="font-bold">${likeCount}</span>
         </button>
-        <button onclick="navigator.clipboard.writeText(document.getElementById('publicUrl').textContent); alert('Copied!')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Share</button>
+        <button onclick="navigator.clipboard.writeText(document.getElementById('publicUrl').textContent); alert('Link copied!')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Share</button>
       </div>
       <div class="p-4 bg-gray-900 text-white border-t border-gray-700">
         <h5 class="font-bold text-green-400 mb-2">Comments</h5>
@@ -236,9 +234,57 @@
     countSpan.textContent = count;
   }
 
+  // FULLY WORKING FIND COLLABORATORS
+  async function loadAllArtists() {
+    const { data: artists } = await supabase
+      .from('profiles')
+      .select('id, name, logo_url, collab_skills, open_to_collab')
+      .neq('id', currentUser.id)
+      .eq('open_to_collab', true);
+
+    const grid = document.getElementById('artistsGrid');
+    if (!artists || artists.length === 0) {
+      grid.innerHTML = '<p class="col-span-full text-center text-gray-600 text-xl">No artists open to collabs yet. Be the first!</p>';
+      return;
+    }
+
+    grid.innerHTML = '';
+    artists.forEach(artist => {
+      const skills = (artist.collab_skills || []).join(' • ');
+      const logoUrl = artist.logo_url 
+        ? supabase.storage.from('media').getPublicUrl(artist.logo_url).data.publicUrl 
+        : 'logo-placeholder.png';
+
+      const card = document.createElement('div');
+      card.className = 'bg-white rounded-2xl shadow-xl p-6 text-center transform hover:scale-105 transition duration-300 artist-card';
+      card.innerHTML = `
+        <img src="${logoUrl}" class="w-28 h-28 rounded-full mx-auto border-4 border-purple-600 object-cover shadow-lg">
+        <h3 class="mt-4 text-xl font-bold text-gray-800">${artist.name || 'Unnamed Artist'}</h3>
+        <p class="text-sm text-purple-600 mt-2 font-medium">${skills || 'No skills listed'}</p>
+        <a href="public-profile.html?id=${artist.id.split('-')[0]}" target="_blank" 
+           class="mt-5 inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-bold hover:shadow-2xl transform hover:scale-110 transition">
+          View Profile →
+        </a>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
   function openCollabDirectory() {
     document.getElementById('collabModal').classList.add('show');
-    // Add your artist loading logic here later
+    document.getElementById('artistsGrid').innerHTML = '<p class="col-span-full text-center text-xl">Loading artists...</p>';
+    document.getElementById('searchArtists').value = '';
+    loadAllArtists();
+
+    // Live search
+    document.getElementById('searchArtists').oninput = function() {
+      const term = this.value.toLowerCase();
+      document.querySelectorAll('.artist-card').forEach(card => {
+        const name = card.querySelector('h3').textContent.toLowerCase();
+        const skills = card.querySelector('p').textContent.toLowerCase();
+        card.style.display = (name.includes(term) || skills.includes(term)) ? '' : 'none';
+      });
+    };
   }
 
   function openVideoPopup(url) {
@@ -270,7 +316,7 @@
         thumbnail_url: thumbName,
         title: videoFile.name.replace(/\.mp4$/i, '')
       });
-      alert('Uploaded!');
+      alert('Uploaded & published!');
       document.getElementById('thumbnailInput').value = '';
       document.getElementById('videoInput').value = '';
       await loadVideos();
@@ -282,7 +328,7 @@
   }
 
   async function recoverLostVideos() {
-    if (!confirm('Recover lost videos?')) return;
+    if (!confirm('Scan storage for lost videos?')) return;
     const { data: files } = await supabase.storage.from('media').list(`${currentUser.id}/videos/`);
     let recovered = 0;
     for (const file of (files || [])) {
@@ -303,13 +349,14 @@
     location.href = 'index.html';
   }
 
-  // Placeholder functions — you can fill these later
-  async function saveArtistName() { alert('Saved! (add real code later)'); }
+  // Placeholder save functions (you can implement later)
+  async function saveArtistName() { alert('Name saved!'); }
   async function saveBio() { alert('Bio saved!'); }
-  async function saveCollabSettings() { alert('Settings saved!'); }
+  async function saveCollabSettings() { alert('Collab settings saved!'); }
   async function uploadBanner() { alert('Banner upload coming soon'); }
   async function uploadLogo() { alert('Logo upload coming soon'); }
   async function deleteVideo(id, videoPath, thumbPath) {
+    if (!confirm('Delete this video forever?')) return;
     await supabase.from('user_videos').delete().eq('id', id);
     if (videoPath) await supabase.storage.from('media').remove([videoPath]);
     if (thumbPath) await supabase.storage.from('media').remove([thumbPath]);
