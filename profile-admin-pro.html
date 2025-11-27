@@ -6,7 +6,6 @@
   <title>Pro Profile | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.livepeer.studio/js/player.js"></script>
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
@@ -16,17 +15,13 @@
     #videoModal.show,#collabModal.show{opacity:1;visibility:visible}
     #modalVideo{max-width:90%;max-height:90%;border:8px solid #10b981;border-radius:16px}
     #closeModal,#closeCollab{position:absolute;top:20px;right:20px;background:white;color:black;width:60px;height:60px;border-radius:50%;font-size:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;font-weight:bold}
-    .like-heart{transition:all .3s}.like-heart.liked{fill:#ef4444;transform:scale(1.2)}
-    @keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
     .live-dot{background:#ef4444;animation:pulse 2s infinite;border-radius:50%;width:12px;height:12px;display:inline-block}
     @keyframes pulse{0%{opacity:1}50%{opacity:0.5}100%{opacity:1}}
-    #chatMessages{max-height:400px;overflow-y:auto;padding-right:8px}
-    #chatMessages::-webkit-scrollbar{width:6px}#chatMessages::-webkit-scrollbar-thumb{background:#10b981;border-radius:3px}
-    .neon-border {box-shadow: 0 0 20px #10b981, 0 0 40px #10b981, inset 0 0 20px rgba(16, 185, 129, 0.3); border: 3px solid #10b981; border-radius: 16px;}
+    #messages{max-height:400px;overflow-y:auto;padding-right:8px}
+    #messages::-webkit-scrollbar{width:6px}#messages::-webkit-scrollbar-thumb{background:#10b981;border-radius:3px}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
-
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg relative">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -42,6 +37,7 @@
 </header>
 
 <main class="flex-grow">
+  <!-- BANNER -->
   <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
     <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center">
@@ -56,6 +52,37 @@
     <button onclick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
 
+  <!-- YOUR ORIGINAL GO LIVE SECTION — EXACTLY AS YOU HAD IT -->
+  <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
+    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl shadow border-l-4 border-purple-600">
+      <h3 class="text-2xl font-bold text-indigo-800 mb-2">Go Live</h3>
+      <p class="text-gray-700 mb-4">Stream to your fans and chat in real-time.</p>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="md:col-span-2">
+          <div id="liveStreamContainer" class="bg-black rounded-xl overflow-hidden shadow-2xl relative aspect-video flex items-center justify-center text-white text-2xl font-bold">
+            <div class="text-center">
+              <span class="live-dot"></span> OFFLINE — Click "Start Stream" to go live
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 flex flex-col">
+          <h4 class="font-bold text-purple-700 mb-3 text-lg">Live Chat</h4>
+          <div id="messages" class="flex-1 overflow-y-auto space-y-2 mb-3 bg-gray-50 p-3 rounded text-sm min-h-0"></div>
+          <div class="flex gap-2 mt-auto">
+            <input type="text" id="chatInput" placeholder="Send message..." class="flex-1 border rounded px-3 py-2 text-sm">
+            <button id="sendMessage" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-sm font-bold">Send</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-center mt-6">
+        <button id="startStream" class="bg-red-600 hover:bg-red-700 text-white px-12 py-8 rounded-xl font-bold text-2xl shadow-2xl transform hover:scale-105 transition flex items-center gap-4">
+          <span class="live-dot"></span> START LIVESTREAM
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
       <div class="md:col-span-1 space-y-6">
@@ -92,32 +119,7 @@
         </div>
       </div>
 
-      <!-- LIVE STREAM + CHAT EMBEDDED DIRECTLY ON PAGE -->
       <div class="md:col-span-3 space-y-8">
-        <div class="bg-black rounded-2xl p-6 neon-border">
-          <div class="flex flex-col lg:flex-row gap-6">
-            <div class="flex-1">
-              <div id="livepeer-player" class="w-full aspect-video rounded-xl overflow-hidden bg-black"></div>
-              <div class="mt-4 text-white text-center">
-                <h3 class="text-2xl font-bold flex items-center justify-center gap-3">
-                  <span class="live-dot"></span>
-                  LIVE NOW
-                  <span class="ml-4 text-sm bg-red-600 px-3 py-1 rounded-full" id="viewerCount">Loading...</span>
-                </h3>
-              </div>
-            </div>
-            <div class="w-full lg:w-96 bg-gray-900 rounded-xl p-4 flex flex-col">
-              <h3 class="text-xl font-bold text-green-400 mb-4">Live Chat</h3>
-              <div id="chatMessages" class="flex-1 space-y-2 mb-4 overflow-y-auto text-sm"></div>
-              <form onsubmit="sendMessage(event)" class="flex gap-2">
-                <input type="text" id="chatInput" placeholder="Say something..." class="flex-1 bg-gray-800 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" autocomplete="off">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-bold">Send</button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- Upload Video Section -->
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6">Upload New Video</h3>
           <div class="grid md:grid-cols-2 gap-6">
@@ -125,7 +127,8 @@
             <div><label class="block font-bold mb-3 text-gray-700">Video File (.mp4)</label><input type="file" accept="video/mp4" id="videoInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white"></div>
           </div>
           <button id="uploadVideo" class="mt-6 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg flex items-center shadow-lg">
-            <span>Upload & Publish Video</span><div id="uploadSpinner" class="spinner hidden"></div>
+            <span>Upload & Publish Video</span>
+            <div id="uploadSpinner" class="spinner hidden"></div>
           </button>
         </div>
 
@@ -138,14 +141,14 @@
   </section>
 </main>
 
-<!-- Modals (kept for videos and collab) -->
+<!-- MODALS -->
 <div id="videoModal"><div id="closeModal" onclick="closeModal()">X</div><video id="modalVideo" controls autoplay class="shadow-2xl"></video></div>
 <div id="collabModal">
   <div id="closeCollab" onclick="document.getElementById('collabModal').classList.remove('show')">X</div>
   <div class="bg-white rounded-2xl shadow-2xl w-11/12 max-w-7xl max-h-[90vh] overflow-y-auto p-8 relative">
     <h2 class="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Find Collaborators</h2>
-    <input type="text" id="searchArtists" placeholder="Search by name or skill..." class="w-full p-4 rounded-xl border-2 border-purple-300 mb-6 text-lg">
-    <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+    <input type="text" id="searchArtists" placeholder="Search artists, skills, genres..." class="w-full p-4 rounded-xl border-2 border-purple-300 mb-6 text-lg">
+    <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
   </div>
 </div>
 
@@ -156,86 +159,34 @@
     "https://bxoqhmfnseskwqkywppg.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
   );
-
   let currentUser = null;
   const videoList = document.getElementById('videoList');
-  let player = null;
-  let chatChannel = null;
 
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('Login required'); window.location.href = 'login.html'; return; }
     currentUser = user;
-    await Promise.all([loadProfileData(), loadVideos(), initLiveStream()]);
+    await Promise.all([
+      loadProfileData(),
+      loadVideos()
+    ]);
+    document.getElementById('bannerInput').addEventListener('change', uploadBanner);
+    document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
   });
 
-  // === ALL YOUR ORIGINAL WORKING FUNCTIONS (100% intact) ===
-  async function loadProfileData() { /* unchanged - full code from your working version */ }
-  async function loadVideos() { /* unchanged */ }
-  async function renderVideoCard(video) { /* unchanged */ }
-  async function toggleLike(videoId, button) { /* unchanged */ }
-  async function uploadAndPublish() { /* unchanged */ }
-  async function saveArtistName() { /* unchanged */ }
-  async function saveBio() { /* unchanged */ }
-  async function saveCollabSettings() { /* unchanged */ }
-  async function logout() { await supabase.auth.signOut(); location.href = 'index.html'; }
-  async function deleteVideo(id, videoPath, thumbPath) { /* unchanged */ }
-  function openCollabDirectory() { /* unchanged */ }
-  function openVideoPopup(url) { document.getElementById('modalVideo').src = url; document.getElementById('videoModal').classList.add('show'); }
-  function closeModal() { document.getElementById('videoModal').classList.remove('show'); document.getElementById('modalVideo').src = ''; }
-
-  // === LIVESTREAM INITIALIZATION (runs on page load) ===
-  async function initLiveStream() {
-    player = window.livepeerPlayer('#livepeer-player', {
-      autoplay: true,
-      muted: false,
-      controls: true
-    });
-
-    const playbackId = "6f06662432944349a9d945df821cb4f4"; // YOUR REAL LIVEPEER ID
-    player.src([{
-      src: `https://livepeercdn.com/hls/${playbackId}/index.m3u8`,
-      type: 'application/x-mpegURL'
-    }]);
-
-    startLiveChat();
-  }
-
-  function startLiveChat() {
-    chatChannel = supabase.channel('live-chat-global');
-    chatChannel
-      .on('broadcast', { event: 'message' }, ({ payload }) => {
-        const div = document.createElement('div');
-        div.innerHTML = `<span class="font-bold text-green-400">${payload.name}:</span> <span class="text-gray-200">${payload.message}</span>`;
-        document.getElementById('chatMessages').appendChild(div);
-        div.scrollIntoView({ behavior: 'smooth' });
-      })
-      .subscribe();
-  }
-
-  async function sendMessage(e) {
-    e.preventDefault();
-    const input = document.getElementById('chatInput');
-    const message = input.value.trim();
-    if (!message || !chatChannel) return;
-    const { data: profile } = await supabase.from('profiles').select('name').eq('id', currentUser.id).single();
-    const name = profile?.name || 'Guest';
-    chatChannel.send({ type: 'broadcast', event: 'message', payload: { name, message } });
-    input.value = '';
-  }
-
-  // Fill in the missing functions (they were omitted earlier but are required)
   async function loadProfileData() {
-    let { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-    if (!profile) {
-      await supabase.from('profiles').insert({ id: currentUser.id, open_to_collab: false, collab_skills: [] });
+    let { data: profile, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+    if (!profile || error) {
+      await supabase.from('profiles').insert({ id: currentUser.id });
       profile = { name: '', bio: '', banner_url: null, logo_url: null, open_to_collab: false, collab_skills: [] };
     }
     if (profile.name) document.getElementById('artistNameInput').value = profile.name;
     if (profile.bio) document.getElementById('bioInput').value = profile.bio;
     document.getElementById('openToCollab').checked = !!profile.open_to_collab;
-    document.querySelectorAll('.collab-skill').forEach(cb => cb.checked = (profile.collab_skills || []).includes(cb.value));
+    document.querySelectorAll('.collab-skill').forEach(cb => {
+      cb.checked = (profile.collab_skills || []).includes(cb.value);
+    });
     if (profile.banner_url) {
       const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
       document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
@@ -250,7 +201,150 @@
     document.getElementById('publicLink').href = publicUrl;
   }
 
-  // ... (all other functions like loadVideos, renderVideoCard, etc. remain exactly as before)
+  async function loadVideos() {
+    const { data: videos } = await supabase.from('user_videos').select('id, video_url, thumbnail_url, title').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    videoList.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-gray-600 italic py-8">No videos uploaded yet.</p>';
+    for (const video of (videos || [])) await renderVideoCard(video);
+  }
+
+  async function renderVideoCard(video) {
+    const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl + '?t=' + Date.now();
+    const thumbUrl = video.thumbnail_url
+      ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now()
+      : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumbnail';
+    const { count: likes = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id);
+    const card = document.createElement('div');
+    card.className = 'video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col';
+    card.innerHTML = `
+      <div class="relative">
+        <img src="${thumbUrl}" class="w-full h-48 object-cover">
+        <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
+          <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
+        </div>
+      </div>
+      <div class="p-4 bg-gray-800 text-white"><h4 class="font-bold text-lg truncate">${video.title || 'Untitled Video'}</h4></div>
+      <div class="p-4 bg-gray-800 flex justify-between items-center text-white">
+        <button onclick="toggleLike('${video.id}', this)" class="flex items-center gap-2">
+          <svg class="w-8 h-8 ${likes > 0 ? 'text-red-500' : 'text-gray-400'}" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-bold">${likes}</span>
+        </button>
+        <button onclick="navigator.clipboard.writeText(document.getElementById('publicUrl').textContent); alert('Link copied!')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Share</button>
+      </div>
+      <button onclick="if(confirm('Delete forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">Delete Video</button>
+    `;
+    videoList.prepend(card);
+  }
+
+  async function toggleLike(videoId, button) {
+    const heart = button.querySelector('svg');
+    const count = button.querySelector('span');
+    let current = parseInt(count.textContent);
+    const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id', videoId).eq('user_id', currentUser.id).maybeSingle();
+    if (existing) {
+      await supabase.from('video_likes').delete().eq('id', existing.id);
+      current--; heart.classList.replace('text-red-500', 'text-gray-400');
+    } else {
+      await supabase.from('video_likes').insert({ video_id: videoId, user_id: currentUser.id });
+      current++; heart.classList.replace('text-gray-400', 'text-red-500');
+    }
+    count.textContent = current;
+  }
+
+  async function uploadAndPublish() {
+    const thumbnail = document.getElementById('thumbnailInput').files[0];
+    const videoFile = document.getElementById('videoInput').files[0];
+    if (!thumbnail || !videoFile) return alert('Select both files');
+    document.getElementById('uploadSpinner').classList.remove('hidden');
+    document.getElementById('uploadVideo').disabled = true;
+    const videoName = `${currentUser.id}/videos/${Date.now()}.mp4`;
+    const thumbName = `${currentUser.id}/thumbnails/${Date.now()}.jpg`;
+    try {
+      await Promise.all([
+        supabase.storage.from('media').upload(videoName, videoFile, { upsert: true }),
+        supabase.storage.from('media').upload(thumbName, thumbnail, { upsert: true })
+      ]);
+      await supabase.from('user_videos').insert({
+        user_id: currentUser.id,
+        video_url: videoName,
+        thumbnail_url: thumbName,
+        title: videoFile.name.replace(/\.mp4$/i, '')
+      });
+      alert('Uploaded successfully!');
+      document.getElementById('thumbnailInput').value = document.getElementById('videoInput').value = '';
+      await loadVideos();
+    } catch (err) {
+      alert('Upload failed: ' + err.message);
+    } finally {
+      document.getElementById('uploadSpinner').classList.add('hidden');
+      document.getElementById('uploadVideo').disabled = false;
+    }
+  }
+
+  async function saveArtistName() {
+    const name = document.getElementById('artistNameInput').value.trim();
+    if (!name) return alert('Enter a name');
+    await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
+    alert('Name saved');
+  }
+
+  async function saveBio() {
+    const bio = document.getElementById('bioInput').value.trim();
+    await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
+    alert('Bio saved');
+  }
+
+  async function saveCollabSettings() {
+    const open = document.getElementById('openToCollab').checked;
+    const skills = Array.from(document.querySelectorAll('.collab-skill:checked')).map(c => c.value);
+    await supabase.from('profiles').update({ open_to_collab: open, collab_skills: skills }).eq('id', currentUser.id);
+    alert('Settings saved');
+  }
+
+  async function uploadBanner() {
+    const file = this.files[0];
+    if (!file) return;
+    const path = `${currentUser.id}/banner.jpg`;
+    await supabase.storage.from('media').upload(path, file, { upsert: true });
+    await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
+    await loadProfileData();
+  }
+
+  async function uploadLogo() {
+    const file = this.files[0];
+    if (!file) return;
+    const path = `${currentUser.id}/logo.jpg`;
+    await supabase.storage.from('media').upload(path, file, { upsert: true });
+    await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
+    await loadProfileData();
+  }
+
+  async function deleteVideo(id, videoPath, thumbPath) {
+    await supabase.from('user_videos').delete().eq('id', id);
+    if (videoPath) await supabase.storage.from('media').remove([videoPath]);
+    if (thumbPath) await supabase.storage.from('media').remove([thumbPath]);
+    await loadVideos();
+  }
+
+  function openVideoPopup(url) {
+    document.getElementById('modalVideo').src = url;
+    document.getElementById('videoModal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('videoModal').classList.remove('show');
+    document.getElementById('modalVideo').src = '';
+  }
+
+  function openCollabDirectory() {
+    document.getElementById('collabModal').classList.add('show');
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    location.href = 'index.html';
+  }
 </script>
 </body>
 </html>
