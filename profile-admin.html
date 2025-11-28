@@ -143,19 +143,146 @@
 
   let currentUser = null;
 
-  // ALL YOUR FUNCTIONS (unchanged and working perfectly)
-  async function uploadAndPublish() { /* ... same as before ... */ }
-  async function loadVideos() { /* ... same as before ... */ }
-  async function deleteVideo(id, vPath, tPath) { /* ... same ... */ }
-  async function uploadBanner(e) { /* ... same ... */ }
-  async function uploadLogo(e) { /* ... same ... */ }
-  async function saveArtistName() { /* ... same ... */ }
-  async function saveBio() { /* ... same ... */ }
-  function openVideoPopup(url) { /* ... same ... */ }
-  function closeModal() { /* ... same ... */ }
-  async function logout() { await supabase.auth.signOut(); location.href = 'index.html'; }
+  async function uploadAndPublish() {
+    const videoFile = document.getElementById('videoInput').files[0];
+    const thumbFile = document.getElementById('thumbnailInput').files[0];
+    if (!videoFile || !thumbFile) return alert("Please select both video and thumbnail!");
+    const btn = document.getElementById('uploadVideo');
+    const spinner = document.getElementById('uploadSpinner');
+    btn.disabled = true; spinner.classList.remove('hidden');
+    try {
+      const ts = Date.now();
+      const videoPath = `videos/${currentUser.id}_${ts}.mp4`;
+      const thumbPath = `thumbnails/${currentUser.id}_${ts}_${thumbFile.name}`;
+      await Promise.all([
+        supabase.storage.from('media').upload(videoPath, videoFile, { upsert: true }),
+        supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true })
+      ]);
+      await supabase.from('user_videos').insert({
+        user_id: currentUser.id,
+        title: videoFile.name.replace('.mp4', '').substring(0,80),
+        video_url: videoPath,
+        thumbnail_url: thumbPath
+      });
+      alert("Video published!");
+      document.getElementById('videoInput').value = '';
+      document.getElementById('thumbnailInput').value = '';
+      loadVideos();
+    } catch (e) {
+      alert("Upload failed: " + e.message);
+    } finally {
+      btn.disabled = false;
+      spinner.classList.add('hidden');
+    }
+  }
 
-  // ←←← FIXED THIS ONE LINE (was crashing everything)
+  async function loadVideos() {
+    const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const list = document.getElementById('videoList');
+    list.innerHTML = videos?.length === 0 ? '<p class="col-span-full text-center italic py-12 text-xl text-gray-600">No videos yet. Upload your first one!</p>' : '';
+    for (const v of (videos || [])) {
+      const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+      const thumbUrl = supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl;
+      const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
+      const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false });
+      list.innerHTML += `
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div class="relative cursor-pointer" onclick="openVideoPopup('${videoUrl}')">
+            <img src="${thumbUrl}" class="w-full h-48 object-cover" onerror="this.src='logo-placeholder.png'">
+            <div class="video-overlay"><svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M8 5v10l7-5-7-5z"/></svg></div>
+          </div>
+          <div class="p-6 space-y-4">
+            <h4 class="font-black text-xl text-emerald-900 truncate">${v.title || 'Untitled Video'}</h4>
+            <div class="flex justify-between items-center">
+              <div class="like-btn ${likes > 0 ? 'liked' : ''}">Heart <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg> <span class="font-bold">${likes}</span></div>
+              <button onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')" class="text-emerald-600 font-bold hover:text-emerald-700">Share</button>
+            </div>
+            <div class="border-t pt-4 space-y-3 max-h-48 overflow-y-auto">
+              ${comments.length === 0 ? '<p class="text-gray-500 italic text-center">No comments yet</p>' : ''}
+              ${comments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name}:</span> <span class="comment-text">${c.comment}</span></div>`).join('')}
+            </div>
+            <button onclick="if(confirm('Delete this video forever?')) deleteVideo('${v.id}', '${v.video_url}', '${v.thumbnail_url}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg">Delete Video</button>
+          </div>
+        </div>`;
+    }
+    const badge = document.getElementById('risingStarBadge');
+    if (videos?.length >= 3) {
+      badge.classList.remove('hidden');
+      badge.classList.add('show');
+    } else {
+      badge.classList.remove('show');
+    }
+  }
+
+  async function deleteVideo(id, vPath, tPath) {
+    await Promise.all([
+      supabase.from('user_videos').delete().eq('id', id),
+      supabase.storage.from('media').remove([vPath, tPath])
+    ]);
+    loadVideos();
+  }
+
+  async function uploadBanner(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const btn = document.getElementById('bannerBtn');
+    const spinner = document.getElementById('bannerSpinner');
+    btn.disabled = true; spinner.classList.remove('hidden');
+    try {
+      const path = `banners/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+      await supabase.storage.from('media').upload(path, file, { upsert: true });
+      await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
+      const url = supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
+      document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
+      document.getElementById('bannerPreview').classList.remove('hidden');
+      document.getElementById('bannerPlaceholder').classList.add('hidden');
+    } catch (e) { alert("Banner upload failed: " + e.message); }
+    finally { btn.disabled = false; spinner.classList.add('hidden'); }
+  }
+
+  async function uploadLogo(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const btn = document.getElementById('logoBtn');
+    const spinner = document.getElementById('logoSpinner');
+    btn.disabled = true; spinner.classList.remove('hidden');
+    try {
+      const path = `logos/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+      await supabase.storage.from('media').upload(path, file, { upsert: true });
+      await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
+      document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(path).data.publicUrl + '?t=' + Date.now();
+    } catch (e) { alert("Logo upload failed: " + e.message); }
+    finally { btn.disabled = false; spinner.classList.add('hidden'); }
+  }
+
+  async function saveArtistName() {
+    const name = document.getElementById('artistNameInput').value.trim();
+    if (!name) return alert("Enter a name");
+    await supabase.from('profiles').upsert({ id: currentUser.id, name });
+    alert("Name saved!");
+  }
+
+  async function saveBio() {
+    const bio = document.getElementById('bioInput').value;
+    await supabase.from('profiles').upsert({ id: currentUser.id, bio });
+    alert("Bio saved!");
+  }
+
+  function openVideoPopup(url) {
+    document.getElementById('modalVideo').src = url;
+    document.getElementById('videoModal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modalVideo').src = '';
+    document.getElementById('videoModal').classList.remove('show');
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    location.href = 'index.html';
+  }
+
   document.getElementById('deleteConfirmInput')?.addEventListener('input', (e) => {
     const input = e.target.value.trim();
     const btn = document.getElementById('deleteAccountBtn');
@@ -183,12 +310,7 @@
     if (!user) return location.href = 'login.html';
     currentUser = user;
 
-    let { data: profile } = await supabase
-      .from('profiles')
-      .select('subdomain, name, bio, banner_url, logo_url, plan')
-      .eq('id', currentUser.id)
-      .maybeSingle();
-
+    let { data: profile } = await supabase.from('profiles').select('subdomain, name, bio, banner_url, logo_url, plan').eq('id', currentUser.id).maybeSingle();
     if (!profile) {
       await supabase.from('profiles').insert({ id: currentUser.id });
       profile = { subdomain: null, name: null, bio: null, banner_url: null, logo_url: null, plan: 'free' };
