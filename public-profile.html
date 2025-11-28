@@ -75,7 +75,7 @@
     );
 
     const urlParams = new URLSearchParams(location.search);
-    const subdomain = urlParams.get('id')?.trim().toLowerCase() || '';
+    const subdomain = (urlParams.get('id') || '').trim().toLowerCase();
 
     if (!subdomain) {
       document.body.innerHTML = `<div class="text-center py-40 text-6xl font-black text-red-600">Invalid Link</div>`;
@@ -84,14 +84,17 @@
     let currentArtistId = null;
 
     async function loadProfile() {
-      const { data: profile } = await supabase
+      // FIXED: Use .eq() + lowercase on both sides
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url')
-        .ilike('subdomain', subdomain)
+        .eq('subdomain', subdomain)  // ← EXACT MATCH + lowercase enforced
         .maybeSingle();
 
-      if (!profile) {
-        document.body.innerHTML = `<div class="text-center py-40 text-6xl font-black text-red-600">Artist Not Found</div>`;
+      console.log("Profile query result:", { profile, error, subdomain }); // ← REMOVE LATER
+
+      if (!profile || error) {
+        document.body.innerHTML = `<div class="text-center py-40 text-6xl font-black text-red-600">Artist Not Found<br><small>Subdomain: "${subdomain}"</small></div>`;
         return;
       }
 
@@ -168,19 +171,18 @@
                 ${comments.length === 0 ? '<p class="text-gray-500 italic text-center">Be the first to comment!</p>' : ''}
                 ${comments.map(c => `
                   <div class="text-sm">
-                    <strong class="text-emerald-600">${c.name}:</strong> 
+                    <strong class="text-emerald-600">${c.name}:</strong>
                     <span class="text-gray-700">${c.comment}</span>
                   </div>
                 `).join('')}
               </div>
 
-              <!-- COMMENT FORM -->
               <div class="mt-4 space-y-3">
                 <input type="text" placeholder="Your name" class="comment-input w-full" id="name-${v.id}">
                 <div class="flex gap-2">
                   <input type="text" placeholder="Write a comment..." class="comment-input flex-1" id="comment-${v.id}" onkeydown="if(event.key==='Enter') postComment(${v.id})">
                   <button onclick="postComment(${v.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-lg transition">
-                    Send
+                    Post
                   </button>
                 </div>
               </div>
@@ -189,34 +191,45 @@
       }
     }
 
-    async function likeVideo(e, videoId) {
+    window.likeVideo = async function(e, videoId) {
+      e.preventDefault();
       e.stopPropagation();
       const btn = e.currentTarget;
       if (btn.classList.contains('liked')) return;
-      
-      await supabase.from('video_likes').insert({ video_id: videoId });
-      btn.classList.add('liked');
-      const count = btn.querySelector('span');
-      count.textContent = parseInt(count.textContent) + 1;
-    }
 
-    async function postComment(videoId) {
+      const { error } = await supabase.from('video_likes').insert({ video_id: videoId });
+      if (error) {
+        alert("Like failed: " + error.message);
+        return;
+      }
+
+      btn.classList.add('liked');
+      const span = btn.querySelector('span');
+      span.textContent = parseInt(span.textContent) + 1;
+    };
+
+    window.postComment = async function(videoId) {
       const nameInput = document.getElementById(`name-${videoId}`);
       const commentInput = document.getElementById(`comment-${videoId}`);
       const name = nameInput.value.trim();
       const comment = commentInput.value.trim();
 
-      if (!name || !comment) return alert("Please enter your name and comment!");
+      if (!name || !comment) return alert("Name and comment required!");
 
-      await supabase.from('video_comments').insert({
+      const { error } = await supabase.from('video_comments').insert({
         video_id: videoId,
         name: name,
         comment: comment
       });
 
-      commentInput.value = '';
-      loadVideos(currentArtistId); // Refresh comments
-    }
+      if (error) {
+        alert("Comment failed: " + error.message);
+      } else {
+        commentInput.value = '';
+        nameInput.value = '';
+        loadVideos(currentArtistId);
+      }
+    };
 
     function openVideo(url) {
       document.getElementById('modalVideo').src = url;
@@ -236,7 +249,6 @@
       if (e.key === 'Escape') closeVideo();
     });
 
-    // Start loading
     loadProfile();
   </script>
 </body>
