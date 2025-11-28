@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
+    .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;margin-left:8px;}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     .video-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
     .video-overlay:hover{opacity:1}
@@ -49,9 +49,13 @@
       <img id="logoPreview" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
     </div>
     <input type="file" id="bannerInput" accept="image/*" class="hidden">
-    <button onclick="document.getElementById('bannerInput').click()" class="absolute bottom-4 right-4 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg">Upload Banner</button>
+    <button id="bannerBtn" onclick="document.getElementById('bannerInput').click()" class="absolute bottom-4 right-4 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg flex items-center">
+      Upload Banner <span id="bannerSpinner" class="spinner hidden"></span>
+    </button>
     <input type="file" id="logoInput" accept="image/*" class="hidden">
-    <button onclick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
+    <button id="logoBtn" onclick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm flex items-center">
+      Change Logo <span id="logoSpinner" class="spinner hidden"></span>
+    </button>
   </section>
 
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
@@ -97,12 +101,33 @@
       </div>
     </div>
 
+    <!-- FREE PLAN TEASER -->
     <div id="freePlanUpgradeTeaser" class="mt-16">
       <div class="bg-white rounded-3xl shadow-2xl border-4 border-emerald-500 overflow-hidden text-center py-10 px-8">
         <h3 class="text-5xl md:text-6xl font-black text-emerald-600 mb-4">Live Stream Only on Pro</h3>
         <p class="text-2xl text-gray-700 mb-8">Go live and chat with fans in real-time!</p>
         <a href="pricing.html" class="inline-block bg-emerald-600 text-white font-black px-12 py-6 rounded-2xl text-3xl hover:bg-emerald-700">Upgrade Now</a>
       </div>
+    </div>
+
+    <!-- DANGER ZONE - FULLY RESTORED -->
+    <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
+      <details class="group">
+        <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
+          <span class="flex items-center gap-4">
+            <span class="inline-block w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center text-2xl group-open:rotate-45 transition">X</span>
+            Danger Zone: Delete Account
+          </span>
+          <svg class="w-8 h-8 group-open:rotate-180 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <div class="mt-8">
+          <p class="text-red-900 font-bold mb-4">Type "Delete My Account" to confirm:</p>
+          <input type="text" id="deleteConfirmInput" class="w-full p-4 border-2 border-red-300 rounded-xl" placeholder="Delete My Account">
+          <button id="deleteAccountBtn" disabled class="w-full mt-4 bg-gray-400 text-white font-black py-4 rounded-xl cursor-not-allowed">
+            Yes, Delete Everything
+          </button>
+        </div>
+      </details>
     </div>
   </section>
 </main>
@@ -212,7 +237,14 @@
         </div>`;
     }
 
-    document.getElementById('risingStarBadge').classList.toggle('show', (videos?.length || 0) >= 3);
+    // Show Rising Star Badge if 3+ videos
+    const badge = document.getElementById('risingStarBadge');
+    if (videos?.length >= 3) {
+      badge.classList.add('show');
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.remove('show');
+    }
   }
 
   async function deleteVideo(id, vPath, tPath) {
@@ -226,24 +258,42 @@
   async function uploadBanner(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const path = `banners/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
-    const { error } = await supabase.storage.from('media').upload(path, file, { upsert: true });
-    if (error) return alert("Banner upload failed: " + error.message);
-    await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
-    const url = supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
-    document.getElementById('bannerPreview').src = url;
-    document.getElementById('bannerPreview').classList.remove('hidden');
-    document.getElementById('bannerPlaceholder').classList.add('hidden');
+    const btn = document.getElementById('bannerBtn');
+    const spinner = document.getElementById('bannerSpinner');
+    btn.disabled = true; spinner.classList.remove('hidden');
+    try {
+      const path = `banners/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+      await supabase.storage.from('media').upload(path, file, { upsert: true });
+      await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
+      const url = supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
+      document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
+      document.getElementById('bannerPreview').classList.remove('hidden');
+      document.getElementById('bannerPlaceholder').classList.add('hidden');
+    } catch (e) {
+      alert("Upload failed: " + e.message);
+    } finally {
+      btn.disabled = false;
+      spinner.classList.add('hidden');
+    }
   }
 
   async function uploadLogo(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const path = `logos/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
-    const { error } = await supabase.storage.from('media').upload(path, file, { upsert: true });
-    if (error) return alert("Logo upload failed: " + error.message);
-    await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
-    document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
+    const btn = document.getElementById('logoBtn');
+    const spinner = document.getElementById('logoSpinner');
+    btn.disabled = true; spinner.classList.remove('hidden');
+    try {
+      const path = `logos/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+      await supabase.storage.from('media').upload(path, file, { upsert: true });
+      await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
+      document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(path).data.publicUrl + '?t=' + Date.now();
+    } catch (e) {
+      alert("Upload failed: " + e.message);
+    } finally {
+      btn.disabled = false;
+      spinner.classList.add('hidden');
+    }
   }
 
   async function saveArtistName() {
@@ -274,6 +324,28 @@
     location.href = 'index.html';
   }
 
+  // DELETE ACCOUNT CONFIRMATION
+  document.getElementById('deleteConfirmInput')?.addEventListener('input => {
+    const btn = document.getElementById('deleteAccountBtn');
+    if (input.target.value === 'Delete My Account') {
+      btn.disabled = false;
+      btn.classList.remove('bg-gray-400');
+      btn.classList.add('bg-red-600', 'hover:bg-red-700', 'cursor-pointer');
+      btn.textContent = 'Yes, Delete Everything (Irreversible)';
+    } else {
+      btn.disabled = true;
+      btn.classList.add('bg-gray-400');
+      btn.classList.remove('bg-red-600');
+      btn.textContent = 'Yes, Delete Everything';
+    }
+  });
+
+  document.getElementById('deleteAccountBtn')?.addEventListener('click', () => {
+    if (confirm('This will delete EVERYTHING permanently. Are you ABSOLUTELY sure?')) {
+      alert('Account deletion is disabled in demo mode.');
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return location.href = 'login.html';
@@ -290,7 +362,6 @@
       profile = { subdomain: null, name: null, bio: null, banner_url: null, logo_url: null, plan: 'free' };
     }
 
-    // ENSURE subdomain is always lowercase and exists
     let subdomain = (profile.subdomain || '').toString().trim().toLowerCase();
     if (!subdomain) {
       subdomain = 'user' + currentUser.id.slice(-8).toLowerCase();
@@ -300,8 +371,6 @@
     const publicUrl = `${location.origin}/public-profile.html?id=${subdomain}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
-    document.getElementById('publicLink').textContent = 'Open Public Page';
-    document.getElementById('publicLink').classList.remove('opacity-50');
 
     if (profile.name) document.getElementById('artistNameInput').value = profile.name;
     if (profile.bio) document.getElementById('bioInput').value = profile.bio;
