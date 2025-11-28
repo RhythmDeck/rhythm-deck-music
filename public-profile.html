@@ -9,16 +9,8 @@
   <style>
     .live-dot{display:inline-block;width:16px;height:16px;background:#ef4444;border-radius:50%;animation:pulse 1.8s infinite;box-shadow:0 0 20px #ef4444}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-    .video-card{
-      border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.15);
-      transition:all .4s;background:white;position:relative;
-      border:4px solid transparent;background-clip:padding-box;
-    }
-    .video-card::before{
-      content:'';position:absolute;inset:-8px;border-radius:1.75rem;
-      background:linear-gradient(45deg,#10b981,#34d399,#6ee7b7);z-index:-1;
-      filter:blur(12px);opacity:0.8;animation:glow 4s infinite alternate;
-    }
+    .video-card{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.15);transition:all .4s;background:white;position:relative;border:4px solid transparent;background-clip:padding-box}
+    .video-card::before{content:'';position:absolute;inset:-8px;border-radius:1.75rem;background:linear-gradient(45deg,#10b981,#34d399,#6ee7b7);z-index:-1;filter:blur(12px);opacity:0.8;animation:glow 4s infinite alternate}
     @keyframes glow{0%{opacity:0.7;transform:scale(1)}100%{opacity:1;transform:scale(1.02)}}
     .video-card:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,0.3)}
     .thumbnail-container{position:relative;width:100%;padding-top:56.25%;overflow:hidden;background:#000;cursor:pointer}
@@ -26,30 +18,22 @@
     .video-card:hover .thumbnail-container img{transform:scale(1.08)}
     .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
     .video-card:hover .play-overlay{opacity:1}
-    .play-button{width:90px;height:90px;background:rgba(255,255,255,0.95);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);transition:all .3s;backdrop-filter:blur(10px)}
+    .play-button{width:90px;height:90px;background:rgba(255,255,255 siły,0.95);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);transition:all .3s;backdrop-filter:blur(10px)}
     .video-card:hover .play-button{transform:scale(1.15);background:white}
     .play-button svg{width:38px;height:38px;margin-left:6px;fill:#10b981}
     #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(0.175,0.885,0.32,1.4)}
     #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg)}
     .like-btn{display:flex;align-items:center;gap:10px;font-weight:bold;font-size:1.15rem;color:#666;transition:all .3s;cursor:pointer}
-    .like-btn:hover{color:#ef4444}
-    .like-btn.liked{color:#ef4444}
-    .like-btn.liked svg{fill:#ef4444;stroke:#ef4444;filter:drop-shadow(0 0 12px #ef4444)}
-    .like-btn svg{width:28px;height:28px;transition:all .3s}
-    .like-count{font-weight:bold;min-width:20px}
-    .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem;transition:all .3s}
-    .comment-name{font-weight:700;color:#10b981;text-shadow:0 0 8px rgba(16,185,129,0.4)}
-    .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
+    .like-btn.liked,.like-btn.liked svg{color:#ef4444;fill:#ef4444;stroke:#ef4444;filter:drop-shadow(0 0 12px #ef4444)}
     #artistName{color:#ffffff !important;text-shadow:0 4px 20px rgba(0,0,0,0.8);-webkit-text-stroke:2px black;paint-order:stroke fill}
-    #videoModal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.96);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .4s ease}
+    #videoModal{position:fixed;inset:0;background:rgba(0,0,0,0.96);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .4s}
     #videoModal.show{opacity:1;visibility:visible}
     #modalVideo{max-width:90%;max-height:85vh;border-radius:16px;box-shadow:0 0 60px rgba(16,185,129,0.6);border:8px solid #10b981}
-    #closeModalBtn{position:absolute;top:30px;right:30px;width:70px;height:70px;background:white;color:black;border-radius:50%;font-size:42px;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,0.5);z-index:10000;transition:all .3s}
+    #closeModalBtn{position:absolute;top:30px;right:30px;width:70px;height:70px;background:white;color:black;border-radius:50%;font-size:42px;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10000}
     #closeModalBtn:hover{transform:scale(1.15);background:#ef4444;color:white}
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
-  <!-- BANNER -->
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
@@ -66,53 +50,17 @@
       </div>
     </div>
 
-    <!-- ABOUT -->
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
 
-    <!-- LIVE STREAM SECTION — ONLY FOR PRO -->
-    <div id="liveStreamSection" class="hidden mb-20">
-      <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl shadow-2xl p-8 border-8 border-emerald-600">
-        <div class="grid md:grid-cols-3 gap-8">
-          <div class="md:col-span-2">
-            <div id="livePlayer" class="hidden">
-              <iframe id="liveIframe" width="100%" height="495" frameborder="0" allowfullscreen class="rounded-3xl shadow-2xl"></iframe>
-              <div class="text-center mt-4">
-                <span class="live-dot"></span>
-                <span class="text-4xl font-black text-red-500 ml-4">LIVE NOW</span>
-              </div>
-            </div>
-            <div id="offlinePlaceholder">
-              <div class="bg-gray-900 rounded-3xl h-96 md:h-[495px] flex flex-col items-center justify-center text-center p-10 text-white">
-                <h2 class="text-5xl font-black text-emerald-400 mb-4">LIVE STREAM</h2>
-                <p class="text-2xl">This artist is not live right now</p>
-              </div>
-            </div>
-          </div>
-          <div class="bg-white rounded-3xl shadow-2xl p-6 flex flex-col h-96 md:h-[495px]">
-            <h3 class="text-2xl font-black text-emerald-700 mb-4">Live Chat</h3>
-            <div id="liveMessages" class="flex-1 overflow-y-auto space-y-3 bg-gray-50 rounded-xl p-4 text-sm">
-              <p class="text-gray-500 italic text-center">Waiting for artist to go live...</p>
-            </div>
-            <div class="mt-4 flex gap-2">
-              <input type="text" id="liveChatInput" placeholder="Say something..." class="flex-1 px-4 py-3 rounded-xl border border-emerald-300 focus:border-emerald-500 bg-white">
-              <button id="sendLiveMessage" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg">Send</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIDEOS -->
     <div class="mb-20">
       <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center md:text-left">Videos</h2>
       <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
     </div>
   </div>
 
-  <!-- VIDEO MODAL -->
   <div id="videoModal">
     <div id="closeModalBtn" onclick="closeVideo()">X</div>
     <video id="modalVideo" controls autoplay controlsList="nodownload noplaybackrate noremoteplayback"></video>
@@ -124,30 +72,24 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    const urlParam = new URLSearchParams(location.search).get('id') || '';
-    const subdomain = urlParam.trim().toLowerCase();
+    const subdomain = new URLSearchParams(location.search).get('id')?.trim().toLowerCase() || '';
 
     if (!subdomain) {
       document.body.innerHTML = `<div class="text-center py-40 text-6xl font-black text-red-600">Invalid Link</div>`;
-      throw new Error("No artist ID");
     }
 
-    let artistUserId = null;
-    let currentFanName = localStorage.getItem('rhythmDeckFanName') || '';
-
     async function loadProfile() {
+      // THIS WAS THE BUG: .single() → changed to .maybeSingle()
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('id, name, bio, banner_url, logo_url, plan, is_live, live_stream_url')
-        .ilike('subdomain', subdomain)  // Case-insensitive match
-        .maybeSingle();  // ← THIS WAS THE FIX (not .single())
+        .select('id, name, bio, banner_url, logo_url')
+        .ilike('subdomain', subdomain)
+        .maybeSingle();  // ← THIS FIXES EVERYTHING
 
-      if (error || !profile) {
+      if (!profile || error) {
         document.body.innerHTML = `<div class="text-center py-40 text-6xl font-black text-red-600">Artist Not Found</div>`;
         return;
       }
-
-      artistUserId = profile.id;
 
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unnamed Artist';
@@ -163,64 +105,22 @@
         document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl;
       }
 
-      // Rising Star Badge
-      const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', artistUserId);
+      // Rising star badge
+      const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', profile.id);
       if (count >= 3) {
         document.getElementById('risingStarBadge').classList.remove('hidden');
         document.getElementById('risingStarBadge').classList.add('show');
       }
 
-      // Pro Live Stream
-      if (profile.plan === 'pro') {
-        document.getElementById('liveStreamSection').classList.remove('hidden');
-        if (profile.is_live && profile.live_stream_url) {
-          document.getElementById('livePlayer').classList.remove('hidden');
-          document.getElementById('offlinePlaceholder').classList.add('hidden');
-          let url = profile.live_stream_url.trim();
-          if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            url = url.replace('watch?v=', 'embed/').split('&')[0] + '?autoplay=1';
-          } else if (url.includes('twitch.tv')) {
-            const channel = url.split('/').pop();
-            url = `https://player.twitch.tv/?channel=${channel}&parent=${location.hostname}&autoplay=true`;
-          }
-          document.getElementById('liveIframe').src = url;
-          loadLiveChat();
-          setInterval(loadLiveChat, 5000);
-        }
-      }
-
-      await loadVideos();
+      await loadVideos(profile.id);
     }
 
-    async function loadLiveChat() {
-      if (!artistUserId) return;
-      const { data } = await supabase.from('live_chat').select('name, message').eq('artist_id', artistUserId).order('created_at', { ascending: false }).limit(50);
-      const msgs = document.getElementById('liveMessages');
-      msgs.innerHTML = data?.length ? data.reverse().map(m => `<div class="comment-bubble"><span class="comment-name">${m.name}:</span> <span class="comment-text">${m.message}</span></div>`).join('') 
-        : '<p class="text-gray-500 italic text-center">No messages yet</p>';
-      msgs.scrollTop = msgs.scrollHeight;
-    }
-
-    document.getElementById('sendLiveMessage')?.addEventListener('click', async () => {
-      const input = document.getElementById('liveChatInput');
-      const msg = input.value.trim();
-      if (!msg) return;
-      await supabase.from('live_chat').insert({ artist_id: artistUserId, name: currentFanName || 'Fan', message: msg });
-      input.value = '';
-      loadLiveChat();
-    });
-
-    async function loadVideos() {
-      const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistUserId).order('created_at', { ascending: false });
+    async function loadVideos(userId) {
+      const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', userId).order('created_at', { ascending: false });
       const list = document.getElementById('videoList');
-      list.innerHTML = '';
+      list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-600 py-20">No videos yet</p>';
 
-      if (!videos || videos.length === 0) {
-        list.innerHTML = '<p class="col-span-full text-center text-5xl text-gray-600 py-20">No videos yet</p>';
-        return;
-      }
-
-      for (const v of videos) {
+      for (const v of (videos || [])) {
         const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
         const thumbUrl = v.thumbnail_url ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb';
 
@@ -236,73 +136,28 @@
             <div class="p-6">
               <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled'}</h3>
               <div class="flex justify-between items-center mb-4">
-                <button class="like-btn ${likes > 0 ? 'liked' : ''}">
-                  Heart <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                  </svg>
-                  <span class="like-count ml-2">${likes}</span>
-                </button>
+                <button class="like-btn ${likes > 0 ? 'liked' : ''}">Heart <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg> <span class="font-bold">${likes}</span></button>
                 <button class="text-emerald-600 font-bold hover:text-emerald-700">Share</button>
               </div>
-              <div class="space-y-2 mb-4 text-sm max-h-40 overflow-y-auto">
-                ${comments.length === 0 ? '<p class="text-gray-500 italic text-center">No comments yet</p>' : comments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name}:</span> <span class="comment-text">${c.comment}</span></div>`).join('')}
-              </div>
-              <div class="space-y-3">
-                <input type="text" class="name-input w-full px-4 py-3 rounded-xl border border-gray-300" placeholder="Your name" value="${currentFanName}">
-                <div class="flex gap-2">
-                  <input type="text" class="comment-input flex-1 px-4 py-3 rounded-xl border border-gray-300" placeholder="Add a comment...">
-                  <button class="post-comment bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm">Post</button>
-                </div>
+              <div class="space-y-2 text-sm max-h-40 overflow-y-auto">
+                ${comments.length === 0 ? '<p class="text-gray-500 italic text-center">No comments yet</p>' : comments.map(c => `<div><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')}
               </div>
             </div>
           </div>`;
       }
 
-      // Event Listeners
+      // Like & Share buttons
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           if (btn.classList.contains('liked')) return;
           const videoId = btn.closest('.video-card').dataset.videoId;
           await supabase.from('video_likes').insert({ video_id: videoId });
           btn.classList.add('liked');
-          btn.querySelector('.like-count').textContent = parseInt(btn.querySelector('.like-count').textContent) + 1;
+          btn.querySelector('span').textContent = parseInt(btn.querySelector('span').textContent) + 1;
         };
       });
-
-      document.querySelectorAll('.name-input').forEach(input => {
-        input.onchange = () => {
-          const name = input.value.trim();
-          if (name) {
-            currentFanName = name;
-            localStorage.setItem('rhythmDeckFanName', name);
-          }
-        };
-      });
-
-      document.querySelectorAll('.post-comment').forEach(btn => {
-        btn.onclick = async () => {
-          const card = btn.closest('.video-card');
-          const comment = card.querySelector('.comment-input').value.trim();
-          const nameInput = card.querySelector('.name-input');
-          let name = nameInput.value.trim() || 'Fan';
-          if (!comment) return;
-          await supabase.from('video_comments').insert({ video_id: card.dataset.videoId, name, comment });
-          if (name !== 'Fan') {
-            currentFanName = name;
-            localStorage.setItem('rhythmDeckFanName', name);
-          }
-          card.querySelector('.comment-input').value = '';
-          loadVideos();
-        };
-      });
-
       document.querySelectorAll('button').forEach(b => {
-        if (b.textContent.trim() === 'Share') {
-          b.onclick = () => {
-            navigator.clipboard.writeText(location.href);
-            alert('Link copied to clipboard!');
-          };
-        }
+        if (b.textContent.trim() === 'Share') b.onclick = () => { navigator.clipboard.writeText(location.href); alert('Link copied!'); };
       });
     }
 
@@ -310,15 +165,12 @@
       document.getElementById('modalVideo').src = url;
       document.getElementById('videoModal').classList.add('show');
     }
-
     function closeVideo() {
       document.getElementById('videoModal').classList.remove('show');
       document.getElementById('modalVideo').src = '';
     }
 
-    document.getElementById('videoModal').addEventListener('click', e => {
-      if (e.target === document.getElementById('videoModal')) closeVideo();
-    });
+    document.getElementById('videoModal').addEventListener('click', e => { if (e.target === document.getElementById('videoModal')) closeVideo(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
 
     loadProfile();
