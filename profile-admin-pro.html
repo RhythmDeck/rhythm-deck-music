@@ -51,7 +51,7 @@
     <button onclick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
 
-  <!-- LIVE STREAM SECTION - FULLY RESTORED -->
+  <!-- LIVE STREAM SECTION -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
       <h3 class="text-3xl font-black text-purple-800 mb-4">Go Live with Your Fans</h3>
@@ -101,7 +101,7 @@
           <a id="publicLink" target="_blank" class="block mt-2 text-sm text-blue-600 underline">Open in new tab</a>
         </div>
 
-        <!-- DANGER ZONE - EXACT SAME AS FREE PLAN -->
+        <!-- DANGER ZONE - EXACTLY AS YOU HAD IT -->
         <div class="mt-12 p-8 bg-red-50 border-4 border-red-500 rounded-2xl">
           <details class="group">
             <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
@@ -161,6 +161,7 @@
     currentUser = user;
 
     await Promise.all([loadProfileData(), loadVideos(), initLiveStream()]);
+
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
@@ -168,7 +169,6 @@
     document.getElementById('sendMessage').addEventListener('click', sendChatMessage);
     document.getElementById('chatInput').addEventListener('keydown', e => e.key === 'Enter' && sendChatMessage());
 
-    // Danger Zone
     document.getElementById('deleteConfirmInput').addEventListener('input', e => {
       const val = e.target.value.trim();
       const btn = document.getElementById('deleteAccountBtn');
@@ -188,7 +188,7 @@
   });
 
   async function initLiveStream() {
-    const { data } = await supabase.from('live_streams').select('stream_key, playback_id, is_live').eq('user_id', currentUser.id).single();
+    const { data, error } = await supabase.from('live_streams').select('stream_key, playback_id, is_live').eq('user_id', currentUser.id).single();
     if (data && data.is_live && data.playback_id) {
       startPlayback(data.playback_id);
     }
@@ -213,20 +213,17 @@
     });
 
     const stream = await res.json();
-    streamKey = stream.streamKey;
-    playbackId = stream.playbackId;
-
     await supabase.from('live_streams').upsert({
       user_id: currentUser.id,
       stream_key: stream.streamKey,
-      playback_id: playbackId,
+      playback_id: stream.playbackId,
       is_live: true
     });
 
-    alert(`Go live now in OBS!\n\nRTMP URL: rtmp://rtmp.livepeer.com/live\nStream Key: ${stream.streamKey}`);
-    startPlayback(playbackId);
-    btn.innerHTML = 'LIVE NOW';
-    btn.classList.add('bg-green-600');
+    alert(`Go live in OBS!\n\nRTMP: rtmp://rtmp.livepeer.com/live\nStream Key: ${stream.streamKey}`);
+    startPlayback(stream.playbackId);
+    btn.innerHTML = '<span class="live-dot"></span> LIVE NOW';
+    btn.className = 'bg-green-600 text-white font-black text-3xl px-16 py-10 rounded-2xl shadow-2xl';
   }
 
   function startPlayback(id) {
@@ -263,12 +260,183 @@
     input.value = '';
   }
 
-  // [All your existing functions: loadProfileData, loadVideos, uploadAndPublish, deleteVideo, etc. remain unchanged...]
-  // ... (keeping everything exactly as before)
+  async function loadProfileData() {
+    let { data: profile } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
+    if (!profile) profile = { name: '', bio: '', banner_url: null, logo_url: null, subdomain: 'new-user' };
+    if (!profile.subdomain) {
+      profile.subdomain = currentUser.email.split('@')[0].replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+      await supabase.from('profiles').upsert({ id: currentUser.id, subdomain: profile.subdomain });
+    }
+    document.getElementById('artistNameInput').value = profile.name || '';
+    document.getElementById('bioInput').value = profile.bio || '';
+    if (profile.banner_url) {
+      const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
+      document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
+      document.getElementById('bannerPreview').classList.remove('hidden');
+      document.getElementById('bannerPlaceholder').classList.add('hidden');
+    }
+    if (profile.logo_url) {
+      document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
+    }
+    const publicUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${profile.subdomain}`;
+    document.getElementById('publicUrl').textContent = publicUrl;
+    document.getElementById('publicLink').href = publicUrl;
+  }
 
-  // Paste the rest of your existing script here (loadProfileData, loadVideos, etc.) — unchanged
-  // For brevity, I'm not repeating the 200+ lines you already have — they go here exactly as before
+  async function loadVideos() {
+    const { data: videos } = await supabase.from('user_videos').select('id, video_url, thumbnail_url, title').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const container = document.getElementById('videoList');
+    container.innerHTML = '';
+    if (!videos?.length) {
+      container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No videos uploaded yet.</p>';
+      return;
+    }
+    for (const video of videos) {
+      const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl;
+      const thumbUrl = video.thumbnail_url ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumb';
+      const { count: likes = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id);
+      const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', video.id).order('created_at', { ascending: false });
+      const commentsHTML = comments.length === 0
+        ? '<p class="text-gray-500 italic text-center">No comments yet</p>'
+        : comments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name}:</span> <span class="comment-text">${c.comment}</span></div>`).join('');
+      container.innerHTML += `
+        <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
+          <div class="relative">
+            <img src="${thumbUrl}" class="w-full h-48 object-cover">
+            <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
+              <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
+            </div>
+          </div>
+          <div class="p-4 bg-gray-800 text-white">
+            <h4 class="font-bold text-lg truncate">${video.title || 'Untitled Video'}</h4>
+          </div>
+          <div class="p-4 bg-gray-800 flex justify-between items-center text-white">
+            <button onclick="toggleLike('${video.id}', this)" class="flex items-center gap-2">
+              <svg class="w-8 h-8 ${likes > 0 ? 'text-red-500' : 'text-gray-400'}" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+              </svg>
+              <span class="font-bold">${likes}</span>
+            </button>
+            <button onclick="navigator.clipboard.writeText(document.getElementById('publicUrl').textContent); alert('Link copied!')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Share</button>
+          </div>
+          <div class="p-4 bg-gray-800 text-white border-t border-gray-700">
+            <div class="text-sm max-h-48 overflow-y-auto space-y-2">${commentsHTML}</div>
+          </div>
+          <button onclick="if(confirm('Delete forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">Delete Video</button>
+        </div>`;
+    }
+  }
 
+  async function toggleLike(videoId, button) {
+    const heart = button.querySelector('svg');
+    const count = button.querySelector('span');
+    let current = parseInt(count.textContent);
+    const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id', videoId).eq('user_id', currentUser.id).maybeSingle();
+    if (existing) {
+      await supabase.from('video_likes').delete().eq('id', existing.id);
+      current--; heart.classList.replace('text-red-500', 'text-gray-400');
+    } else {
+      await supabase.from('video_likes').insert({ video_id: videoId, user_id: currentUser.id });
+      current++; heart.classList.replace('text-gray-400', 'text-red-500');
+    }
+    count.textContent = current;
+  }
+
+  async function uploadAndPublish() {
+    const thumb = document.getElementById('thumbnailInput').files[0];
+    const videoFile = document.getElementById('videoInput').files[0];
+    if (!thumb || !videoFile) return alert('Select both files');
+    document.getElementById('uploadSpinner').classList.remove('hidden');
+    document.getElementById('uploadVideo').disabled = true;
+    const vidPath = `${currentUser.id}/videos/${Date.now()}.mp4`;
+    const thumbPath = `${currentUser.id}/thumbnails/${Date.now()}.jpg`;
+    try {
+      await Promise.all([
+        supabase.storage.from('media').upload(vidPath, videoFile, { upsert: true }),
+        supabase.storage.from('media').upload(thumbPath, thumb, { upsert: true })
+      ]);
+      await supabase.from('user_videos').insert({
+        user_id: currentUser.id,
+        video_url: vidPath,
+        thumbnail_url: thumbPath,
+        title: videoFile.name.replace(/\.mp4$/i, '')
+      });
+      alert('Uploaded successfully!');
+      document.getElementById('thumbnailInput').value = '';
+      document.getElementById('videoInput').value = '';
+      await loadVideos();
+    } catch (e) { alert('Error: ' + e.message); }
+    finally {
+      document.getElementById('uploadSpinner').classList.add('hidden');
+      document.getElementById('uploadVideo').disabled = false;
+    }
+  }
+
+  async function deleteVideo(id, videoPath, videoThumb) {
+    await supabase.from('user_videos').delete().eq('id', id);
+    if (videoPath) await supabase.storage.from('media').remove([videoPath]);
+    if (videoThumb) await supabase.storage.from('media').remove([videoThumb]);
+    await loadVideos();
+  }
+
+  async function saveArtistName() {
+    const name = document.getElementById('artistNameInput').value.trim();
+    if (!name) return alert('Enter a name');
+    await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
+    alert('Name saved');
+  }
+
+  async function saveBio() {
+    const bio = document.getElementById('bioInput').value.trim();
+    await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
+    alert('Bio saved');
+  }
+
+  async function uploadBanner() {
+    const file = this.files[0];
+    if (!file) return;
+    const path = `${currentUser.id}/banner.jpg`;
+    await supabase.storage.from('media').upload(path, file, { upsert: true });
+    await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
+    location.reload();
+  }
+
+  async function uploadLogo() {
+    const file = this.files[0];
+    if (!file) return;
+    const path = `${currentUser.id}/logo.jpg`;
+    await supabase.storage.from('media').upload(path, file, { upsert: true });
+    await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
+    location.reload();
+  }
+
+  function openVideoPopup(url) {
+    document.getElementById('modalVideo').src = url;
+    document.getElementById('videoModal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('videoModal').classList.remove('show');
+    document.getElementById('modalVideo').src = '';
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    location.href = 'index.html';
+  }
+
+  async function deleteAccount() {
+    if (!confirm('This will delete EVERYTHING permanently. Are you 100% sure?')) return;
+    try {
+      await supabase.from('user_videos').delete().eq('user_id', currentUser.id);
+      await supabase.from('profiles').delete().eq('id', currentUser.id);
+      await supabase.auth.signOut();
+      alert('Account deleted forever.');
+      location.href = 'index.html';
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  }
 </script>
 </body>
 </html>
