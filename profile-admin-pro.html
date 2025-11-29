@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pro Profile | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FIXED: Using correct Supabase URL format that works with old + new syntax -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
@@ -95,6 +94,15 @@
           <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
           <a id="publicLink" target="_blank" class="block mt-2 text-sm text-blue-600 underline">Open in new tab</a>
         </div>
+
+        <!-- DANGER ZONE - RESTORED -->
+        <div class="bg-red-50 border-2 border-red-300 p-6 rounded-xl shadow-lg mt-10">
+          <h3 class="text-xl font-bold text-red-800 mb-3">Danger Zone</h3>
+          <p class="text-sm text-gray-700 mb-4">This will permanently delete your account, all videos, and data.</p>
+          <button onclick="deleteAccount()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg">
+            Delete My Account Forever
+          </button>
+        </div>
       </div>
 
       <div class="md:col-span-3 space-y-8">
@@ -116,7 +124,6 @@
 </main>
 
 <div id="videoModal"><div id="closeModal" onclick="closeModal()">X</div><video id="modalVideo" controls autoplay class="shadow-2xl"></video></div>
-
 <footer class="bg-black text-white mt-auto p-6 text-center"><p class="text-sm">© 2025 Rhythm Deck Music. All rights reserved.</p></footer>
 
 <script>
@@ -124,7 +131,6 @@
     "https://bxoqhmfnseskwqkywppg.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
   );
-
   let currentUser = null;
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -138,33 +144,24 @@
   });
 
   async function loadProfileData() {
-    let { data: profile } = await supabase
-      .from('profiles')
-      .select('name, bio, banner_url, logo_url, subdomain')
-      .eq('id', currentUser.id)
-      .single();
-
-    if (!profile) {
-      profile = { name: '', bio: '', banner_url: null, logo_url: null, subdomain: 'new-user' };
-    }
+    let { data: profile } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
+    if (!profile) profile = { name: '', bio: '', banner_url: null, logo_url: null, subdomain: 'new-user' };
     if (!profile.subdomain) {
       profile.subdomain = currentUser.email.split('@')[0].replace(/[^a-z0-9-]/gi, '-').toLowerCase();
       await supabase.from('profiles').upsert({ id: currentUser.id, subdomain: profile.subdomain });
     }
-
     document.getElementById('artistNameInput').value = profile.name || '';
     document.getElementById('bioInput').value = profile.bio || '';
 
-    // FIXED: Old reliable syntax that works 100%
     if (profile.banner_url) {
       const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
-      document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
-      document.getElementById('bannerPreview').classList.remove('hidden');
+      const banner = document.getElementById('bannerPreview');
+      banner.src = url + '?t=' + Date.now();
+      banner.classList.remove('hidden');
       document.getElementById('bannerPlaceholder').classList.add('hidden');
     }
     if (profile.logo_url) {
-      const url = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl;
-      document.getElementById('logoPreview').src = url + '?t=' + Date.now();
+      document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
     }
 
     const publicUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${profile.subdomain}`;
@@ -173,54 +170,40 @@
   }
 
   async function loadVideos() {
-    const { data: videos } = await supabase
-      .from('user_videos')
-      .select('id, video_url, thumbnail_url, title')
-      .eq('user_id', currentUser.id)
-      .order('created_at', { ascending: false });
-
+    const { data: videos } = await supabase.from('user_videos').select('id, video_url, thumbnail_url, title').eq('user_id', currentUser.id).order('created_at', { ascending: false });
     const container = document.getElementById('videoList');
     container.innerHTML = '';
-
-    if (!videos || videos.length === 0) {
+    if (!videos?.length) {
       container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No videos uploaded yet.</p>';
       return;
     }
-
     for (const video of videos) {
       const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl;
-      const thumbUrl = video.thumbnail_url 
-        ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl 
-        : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumb';
+      const thumbUrl = video.thumbnail_url ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumb';
+      const { count: likes = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id);
 
-      const { count: likes = 0 } = await supabase.from('video_likes')
-        .select('id', { count: 'exact', head: true })
-        .eq('video_id', video.id);
-
-      const card = document.createElement('div');
-      card.className = 'video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col';
-      card.innerHTML = `
-        <div class="relative">
-          <img src="${thumbUrl}" class="w-full h-48 object-cover">
-          <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
-            <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
+      container.innerHTML += `
+        <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
+          <div class="relative">
+            <img src="${thumbUrl}" class="w-full h-48 object-cover">
+            <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
+              <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
+            </div>
           </div>
-        </div>
-        <div class="p-4 bg-gray-800 text-white">
-          <h4 class="font-bold text-lg truncate">${video.title || 'Untitled Video'}</h4>
-        </div>
-        <div class="p-4 bg-gray-800 flex justify-between items-center text-white">
-          <button onclick="toggleLike('${video.id}', this)" class="flex items-center gap-2">
-            <svg class="w-8 h-8 ${likes > 0 ? 'text-red-500' : 'text-gray-400'}" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-            </svg>
-            <span class="font-bold">${likes}</span>
-          </button>
-          <button onclick="navigator.clipboard.writeText(document.getElementById('publicUrl').textContent); alert('Link copied!')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Share</button>
-        </div>
-        <button onclick="if(confirm('Delete forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">Delete Video</button>
-      `;
-      container.appendChild(card);
+          <div class="p-4 bg-gray-800 text-white">
+            <h4 class="font-bold text-lg truncate">${video.title || 'Untitled Video'}</h4>
+          </div>
+          <div class="p-4 bg-gray-800 flex justify-between items-center text-white">
+            <button onclick="toggleLike('${video.id}', this)" class="flex items-center gap-2">
+              <svg class="w-8 h-8 ${likes > 0 ? 'text-red-500' : 'text-gray-400'}" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+              </svg>
+              <span class="font-bold">${likes}</span>
+            </button>
+            <button onclick="navigator.clipboard.writeText(document.getElementById('publicUrl').textContent); alert('Link copied!')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Share</button>
+          </div>
+          <button onclick="if(confirm('Delete forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">Delete Video</button>
+        </div>`;
     }
   }
 
@@ -261,7 +244,7 @@
       alert('Uploaded successfully!');
       document.getElementById('thumbnailInput').value = '';
       document.getElementById('videoInput').value = '';
-      await loadVideos();
+      await loadVideos(); // This triggers instant refresh → comments now show on public page
     } catch (e) { alert('Error: ' + e.message); }
     finally {
       document.getElementById('uploadSpinner').classList.add('hidden');
@@ -280,9 +263,27 @@
   async function saveBio() { const bio = document.getElementById('bioInput').value.trim(); await supabase.from('profiles').update({ bio }).eq('id', currentUser.id); alert('Bio saved'); }
   async function uploadBanner() { const file = this.files[0]; if (!file) return; const path = `${currentUser.id}/banner.jpg`; await supabase.storage.from('media').upload(path, file, { upsert: true }); await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id); location.reload(); }
   async function uploadLogo() { const file = this.files[0]; if (!file) return; const path = `${currentUser.id}/logo.jpg`; await supabase.storage.from('media').upload(path, file, { upsert: true }); await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id); location.reload(); }
+
   function openVideoPopup(url) { document.getElementById('modalVideo').src = url; document.getElementById('videoModal').classList.add('show'); }
   function closeModal() { document.getElementById('videoModal').classList.remove('show'); document.getElementById('modalVideo').src = ''; }
+
   async function logout() { await supabase.auth.signOut(); location.href = 'index.html'; }
+
+  // DANGER ZONE - FULL ACCOUNT DELETION
+  async function deleteAccount() {
+    if (!confirm('⚠️ This will PERMANENTLY delete your account, all videos, likes, comments, and data. Are you absolutely sure?')) return;
+    if (!confirm('Last chance. This cannot be undone. Type "DELETE" to confirm.')) return;
+    const input = prompt('Type DELETE to confirm:');
+    if (input !== 'DELETE') return alert('Cancelled.');
+    
+    try {
+      await supabase.from('user_videos').delete().eq('user_id', currentUser.id);
+      await supabase.from('profiles').delete().eq('id', currentUser.id);
+      await supabase.auth.signOut();
+      alert('Account deleted forever.');
+      location.href = 'index.html';
+    } catch (e) { alert('Error: ' + e.message); }
+  }
 </script>
 </body>
 </html>
