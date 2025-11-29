@@ -17,15 +17,16 @@
     #closeModal{position:absolute;top:20px;right:20px;background:white;color:black;width:60px;height:60px;border-radius:50%;font-size:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;font-weight:bold}
     .live-dot{background:#ef4444;animation:pulse 2s infinite;border-radius:50%;width:12px;height:12px;display:inline-block}
     @keyframes pulse{0%{opacity:1}50%{opacity:0.5}100%{opacity:1}}
-    .comment-input{border:2px solid #10b981;border-radius:12px;padding:10px;background:#f9fafb;width:100%}
-    .comment-input:focus{border-color:#059669;outline:none}
+    .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
+    .comment-name{font-weight:700;color:#10b981}
+    .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
-    <div><h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1><p class="text-sm text-gray-300">Unleash Your Beat</p></div>
+    <div><h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1><p class="text-sm text-gray-300">Pro Plan</p></div>
   </div>
   <nav class="space-x-6">
     <a href="index.html" class="hover:underline">Home</a>
@@ -68,15 +69,6 @@
           <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
           <a id="publicLink" target="_blank" class="block mt-2 text-sm text-blue-600 underline">Open in new tab</a>
         </div>
-
-        <!-- DANGER ZONE - EXACT SAME AS FREE PLAN -->
-        <div class="mt-12 bg-red-900 p-8 rounded-2xl shadow-2xl border-4 border-red-700">
-          <h3 class="text-3xl font-black text-white mb-4">DANGER ZONE</h3>
-          <p class="text-red-200 text-lg mb-6">Once you delete your account, there is no going back.</p>
-          <button onclick="deleteAccount()" class="w-full bg-white text-red-700 font-bold text-2xl py-5 rounded-xl hover:bg-red-100 transition shadow-lg">
-            Delete My Account Forever
-          </button>
-        </div>
       </div>
 
       <div class="md:col-span-3 space-y-8">
@@ -91,8 +83,31 @@
             <div id="uploadSpinner" class="spinner hidden"></div>
           </button>
         </div>
+
         <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
+    </div>
+
+    <!-- EXACT SAME DANGER ZONE AS FREE PLAN -->
+    <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
+      <details class="group">
+        <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
+          <span class="flex items-center gap-4">
+            <span class="inline-block w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center text-2xl group-open:rotate-45 transition">X</span>
+            Danger Zone: Delete Account
+          </span>
+          <svg class="w-8 h-8 group-open:rotate-180 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </summary>
+        <div class="mt-8">
+          <p class="text-red-900 font-bold mb-4">Type "Delete My Account" to confirm:</p>
+          <input type="text" id="deleteConfirmInput" class="w-full p-4 border-2 border-red-300 rounded-xl" placeholder="Delete My Account">
+          <button id="deleteAccountBtn" disabled class="w-full mt-4 bg-gray-400 text-white font-black py-4  rounded-xl cursor-not-allowed">
+            Yes, Delete Everything
+          </button>
+        </div>
+      </details>
     </div>
   </section>
 </main>
@@ -103,6 +118,7 @@
 <script>
   const supabase = window.supabase.createClient(
     "https://bxoqhmfnseskwqkywppg.supabase.co",
+
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
   );
   let currentUser = null;
@@ -115,6 +131,25 @@
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
+
+    // Danger Zone input validation
+    document.getElementById('deleteConfirmInput').addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      const btn = document.getElementById('deleteAccountBtn');
+      if (val === 'Delete My Account') {
+        btn.disabled = false;
+        btn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+        btn.classList.add('bg-red-600', 'hover:bg-red-700', 'cursor-pointer');
+        btn.textContent = 'Yes, Delete Everything (Irreversible)';
+      } else {
+        btn.disabled = true;
+        btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+        btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+        btn.textContent = 'Yes, Delete Everything';
+      }
+    });
+
+    document.getElementById('deleteAccountBtn').addEventListener('click', deleteAccount);
   });
 
   async function loadProfileData() {
@@ -148,19 +183,18 @@
       container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No videos uploaded yet.</p>';
       return;
     }
+
     for (const video of videos) {
       const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl;
       const thumbUrl = video.thumbnail_url ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumb';
       const { count: likes = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id);
       const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', video.id).order('created_at', { ascending: false });
 
-      let commentsHTML = '<p class="text-gray-500 italic text-center">Be the first to comment!</p>';
-      if (comments.length > 0) {
-        commentsHTML = '';
-        for (const c of comments) {
-          commentsHTML += `<div class="mb-2"><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`;
-        }
-      }
+      const commentsHTML = comments.length === 0 
+        ? '<p class="text-gray-500 italic text-center">No comments yet</p>'
+        : comments.map(c => 
+            `<div class="comment-bubble"><span class="comment-name">${c.name}:</span> <span class="comment-text">${c.comment}</span></div>`
+          ).join('');
 
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
@@ -182,14 +216,10 @@
             </button>
             <button onclick="navigator.clipboard.writeText(document.getElementById('publicUrl').textContent); alert('Link copied!')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Share</button>
           </div>
+          <!-- COMMENTS: READ-ONLY (JUST LIKE FREE PLAN) -->
           <div class="p-4 bg-gray-800 text-white border-t border-gray-700">
-            <div class="text-sm max-h-48 overflow-y-auto mb-4">${commentsHTML}</div>
-            <div class="space-y-2">
-              <input type="text" placeholder="Your name" class="comment-input" id="name-${video.id}">
-              <div class="flex gap-2">
-                <input type="text" placeholder="Write a comment..." class="comment-input flex-1" id="comment-${video.id}" onkeydown="if(event.key==='Enter') postComment('${video.id}')">
-                <button onclick="postComment('${video.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg">Post</button>
-              </div>
+            <div class="text-sm max-h-48 overflow-y-auto space-y-2">
+              ${commentsHTML}
             </div>
           </div>
           <button onclick="if(confirm('Delete forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">Delete Video</button>
@@ -210,16 +240,6 @@
       current++; heart.classList.replace('text-gray-400', 'text-red-500');
     }
     count.textContent = current;
-  }
-
-  window.postComment = async function(videoId) {
-    const name = document.getElementById('name-' + videoId).value.trim();
-    const comment = document.getElementById('comment-' + videoId).value.trim();
-    if (!name || !comment) return alert('Name and comment required');
-    await supabase.from('video_comments').insert({ video_id: videoId, name, comment });
-    document.getElementById('name-' + videoId).value = '';
-    document.getElementById('comment-' + videoId).value = '';
-    loadVideos(); // Refresh to show new comment instantly
   }
 
   async function uploadAndPublish() {
@@ -252,31 +272,71 @@
     }
   }
 
-  async function deleteVideo(id, videoPath, thumbPath) {
+  async function deleteVideo(id, videoPath, videoThumb) {
     await supabase.from('user_videos').delete().eq('id', id);
     if (videoPath) await supabase.storage.from('media').remove([videoPath]);
-    if (thumbPath) await supabase.storage.from('media').remove([thumbPath]);
+    if (videoThumb) await supabase.storage.from('media').remove([videoThumb]);
     await loadVideos();
   }
 
-  async function saveArtistName() { const name = document.getElementById('artistNameInput').value.trim(); if (!name) return alert('Enter a name'); await supabase.from('profiles').update({ name }).eq('id', currentUser.id); alert('Name saved'); }
-  async function saveBio() { const bio = document.getElementById('bioInput').value.trim(); await supabase.from('profiles').update({ bio }).eq('id', currentUser.id); alert('Bio saved'); }
-  async function uploadBanner() { const file = this.files[0]; if (!file) return; const path = `${currentUser.id}/banner.jpg`; await supabase.storage.from('media').upload(path, file, { upsert: true }); await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id); location.reload(); }
-  async function uploadLogo() { const file = this.files[0]; if (!file) return; const path = `${currentUser.id}/logo.jpg`; await supabase.storage.from('media').upload(path, file, { upsert: true }); await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id); location.reload(); }
+  async function saveArtistName() { 
+    const name = document.getElementById('artistNameInput').value.trim(); 
+    if (!name) return alert('Enter a name'); 
+    await supabase.from('profiles').update({ name }).eq('id', currentUser.id); 
+    alert('Name saved'); 
+  }
 
-  function openVideoPopup(url) { document.getElementById('modalVideo').src = url; document.getElementById('videoModal').classList.add('show'); }
-  function closeModal() { document.getElementById('videoModal').classList.remove('show'); document.getElementById('modalVideo').src = ''; }
+  async function saveBio() { 
+    const bio = document.getElementById('bioInput').value.trim(); 
+    await supabase.from('profiles').update({ bio }).eq('id', currentUser.id); 
+    alert('Bio saved'); 
+  }
 
-  async function logout() { await supabase.auth.signOut(); location.href = 'index.html'; }
+  async function uploadBanner() { 
+    const file = this.files[0]; 
+    if (!file) return; 
+    const path = `${currentUser.id}/banner.jpg`; 
+    await supabase.storage.from('media').upload(path, file, { upsert: true }); 
+    await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id); 
+    location.reload(); 
+  }
 
+  async function uploadLogo() { 
+    const file = this.files[0]; 
+    if (!file) return; 
+    const path = `${currentUser.id}/logo.jpg`; 
+    await supabase.storage.from('media').upload(path, file, { upsert: true }); 
+    await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id); 
+    location.reload(); 
+  }
+
+  function openVideoPopup(url) { 
+    document.getElementById('modalVideo').src = url; 
+    document.getElementById('videoModal').classList.add('show'); 
+  }
+
+  function closeModal() { 
+    document.getElementById('videoModal').classList.remove('show'); 
+    document.getElementById('modalVideo').src = ''; 
+  }
+
+  async function logout() { 
+    await supabase.auth.signOut(); 
+    location.href = 'index.html'; 
+  }
+
+  // EXACT SAME DANGER ZONE LOGIC AS FREE PLAN
   async function deleteAccount() {
-    if (!confirm('This will PERMANENTLY delete your account and all data. Are you sure?')) return;
-    if (prompt('Type DELETE to confirm:') !== 'DELETE') return alert('Cancelled.');
-    await supabase.from('user_videos').delete().eq('user_id', currentUser.id);
-    await supabase.from('profiles').delete().eq('id', currentUser.id);
-    await supabase.auth.signOut();
-    alert('Account deleted.');
-    location.href = 'index.html';
+    if (!confirm('This will delete EVERYTHING permanently. Are you 100% sure?')) return;
+    try {
+      await supabase.from('user_videos').delete().eq('user_id', currentUser.id);
+      await supabase.from('profiles').delete().eq('id', currentUser.id);
+      await supabase.auth.signOut();
+      alert('Account deleted forever.');
+      location.href = 'index.html';
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
   }
 </script>
 </body>
