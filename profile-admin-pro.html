@@ -134,7 +134,7 @@
           </svg>
         </summary>
         <div class="mt-8">
-          <p class  class="text-red-900 font-bold mb-4">Type "Delete My Account" to confirm:</p>
+          <p class="text-red-900 font-bold mb-4">Type "Delete My Account" to confirm:</p>
           <input type="text" id="deleteConfirmInput" class="w-full p-4 border-2 border-red-300 rounded-xl" placeholder="Delete My Account">
           <button id="deleteAccountBtn" disabled class="w-full mt-4 bg-gray-400 text-white font-black py-4 rounded-xl cursor-not-allowed">
             Yes, Delete Everything
@@ -159,6 +159,9 @@
   let livepeerPlayer = null;
   let mediaStream = null;
   let currentStreamKey = null;
+
+  // YOUR REAL LIVEPEER API KEY (used in both places)
+  const LIVEPEER_KEY = "6d5c32a1-1177-4ffc-a0da-8d411ddcc6ff";
 
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -214,14 +217,21 @@
       const res = await fetch('https://livepeer.studio/api/stream', {
         method: 'POST',
         headers: {
-          'authorization': 'Bearer 6f066624-3294-4349-a9d9-45df821cb4f4',
-          'content-type': 'application/json'
+          'Authorization': `Bearer ${LIVEPEER_KEY}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          name: 'browser-live-' + Date.now(),
-          profiles: [{ width: 1280, height: 720, name: "720p", bitrate: 3000000 }]
+          name: 'RhythmDeck-' + Date.now(),
+          profiles: [
+            { width: 1280, height: 720, name: "720p", bitrate: 3000000 },
+            { width: 854,  height: 480, name: "480p", bitrate: 1500000 },
+            { width: 640,  height: 360, name: "360p", bitrate: 800000 }
+          ]
         })
       });
+
+      if (!res.ok) throw new Error(`Livepeer error: ${res.status}`);
+
       const { id, streamKey, playbackId } = await res.json();
 
       await supabase.from('live_streams').upsert({
@@ -236,7 +246,6 @@
       video.srcObject = mediaStream;
       video.classList.remove('hidden');
 
-      // Load official Livepeer browser broadcaster
       const scriptRes = await fetch('https://cdn.livepeer.studio/broadcaster.js');
       const script = await scriptRes.text();
       eval(script);
@@ -252,7 +261,7 @@
       btn.disabled = false;
     } catch (e) {
       console.error(e);
-      alert('Error: ' + e.message);
+      alert('Error starting stream: ' + e.message);
       btn.innerHTML = 'Go Live Now';
       btn.disabled = false;
     }
@@ -270,7 +279,7 @@
     if (currentStreamKey) {
       await fetch(`https://livepeer.studio/api/stream/${currentStreamKey}/terminate`, {
         method: 'POST',
-        headers: { authorization: 'Bearer 6f066624-3294-4349-a9d9-45df821cb4f4' }
+        headers: { 'Authorization': `Bearer ${LIVEPEER_KEY}` }
       });
       currentStreamKey = null;
     }
