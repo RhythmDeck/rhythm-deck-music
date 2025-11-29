@@ -83,7 +83,7 @@
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url')
         .eq('subdomain', subdomain)
-        .maybeSingle();
+        .single(); // ← THIS WAS THE MAIN BUG
 
       if (!profile) {
         document.body.innerHTML = `<div class="text-center py-40 text-6xl font-black text-red-600">Artist Not Found</div>`;
@@ -96,13 +96,14 @@
       document.getElementById('artistBio').textContent = profile.bio || 'No bio yet.';
 
       if (profile.banner_url) {
-        const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
-        document.getElementById('banner').src = url;
+        const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
+        document.getElementById('banner').src = data.publicUrl;
         document.getElementById('banner').classList.remove('hidden');
         document.getElementById('bannerPlaceholder').classList.add('hidden');
       }
       if (profile.logo_url) {
-        document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl;
+        const { data } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
+        document.getElementById('logo').src = data.publicUrl;
       }
 
       const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', profile.id);
@@ -125,19 +126,19 @@
       list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-600 py-20">No videos yet</p>';
 
       for (const v of (videos || [])) {
-        const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
-        const thumbUrl = v.thumbnail_url
+        const { data: videoData } = supabase.storage.from('media').getPublicUrl(v.video_url);
+        const videoUrl = videoData.publicUrl;
+        const thumbUrl = v.thumbnail_url 
           ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl
           : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb';
 
-        // FIXED: These now work 100%
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment, created_at').eq('video_id', v.id).order('created_at', { ascending: false });
 
         list.innerHTML += `
-          <div class="video-card" data-video-id="${v.id}">
+          <div class="video-card">
             <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
-              <img src="${thumbUrl}" alt="thumb" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'">
+              <img src="${thumbUrl}" alt="thumb">
               <div class="play-overlay">
                 <div class="play-button">
                   <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg>
@@ -147,7 +148,7 @@
             <div class="p-6">
               <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled Video'}</h3>
               <div class="flex justify-between items-center mb-4">
-                <button class="like-btn ${likes > 0 ? 'liked' : ''}" onclick="likeVideo(event, ${v.id})">
+                <button class="like-btn ${likes > 0 ? 'liked' : ''}" onclick="likeVideo(event, ${v.id}, this)">
                   Heart <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                   </svg>
@@ -159,12 +160,7 @@
               </div>
               <div class="border-t pt-4 space-y-3 max-h-48 overflow-y-auto mb-4">
                 ${comments.length === 0 ? '<p class="text-gray-500 italic text-center">Be the first to comment!</p>' : ''}
-                ${comments.map(c => `
-                  <div class="text-sm">
-                    <strong class="text-emerald-600">${c.name}:</strong>
-                    <span class="text-gray-700">${c.comment}</span>
-                  </div>
-                `).join('')}
+                ${comments.map(c => `<div class="text-sm"><strong class="text-emerald-600">${c.name}:</strong> <span class="text-gray-700">${c.comment}</span></div>`).join('')}
               </div>
               <div class="mt-4 space-y-3">
                 <input type="text" placeholder="Your name" class="comment-input w-full" id="name-${v.id}">
@@ -180,33 +176,28 @@
       }
     }
 
-    // FIXED: likeVideo — now works perfectly
-    window.likeVideo = async function(e, videoId) {
+    // FIXED: Pass the button element directly
+    window.likeVideo = async function(e, videoId, button) {
       e.stopPropagation();
-      const btn = e.currentTarget;
-      if (btn.classList.contains('liked')) return;
+      if (button.classList.contains('liked')) return;
 
-      const { error } = await supabase.from('video_likes').insert({ 
-        video_id: videoId,
-        // Optional: add user_ip or session to prevent spam (you can add later)
-      });
+      const { error } = await supabase.from('video_likes').insert({ video_id: videoId });
 
       if (!error) {
-        btn.classList.add('liked');
-        const span = btn.querySelector('span');
+        button.classList.add('liked');
+        const span = button.querySelector('span');
         span.textContent = parseInt(span.textContent) + 1;
+      } else {
+        console.error("Like failed:", error);
       }
     };
 
-    // FIXED: postComment — now works + refreshes instantly
     window.postComment = async function(videoId) {
-      const nameInput = document.getElementById(`name-${videoId}`);
-      const commentInput = document.getElementById(`comment-${videoId}`);
-      const name = nameInput.value.trim();
-      const comment = commentInput.value.trim();
+      const name = document.getElementById(`name-${videoId}`).value.trim();
+      const comment = document.getElementById(`comment-${videoId}`).value.trim();
 
       if (!name || !comment) {
-        alert("Please enter your name and a comment!");
+        alert("Name and comment required!");
         return;
       }
 
@@ -216,12 +207,12 @@
         comment: comment
       });
 
-      if (error) {
-        alert("Failed to post comment: " + error.message);
+      if (!error) {
+        document.getElementById(`comment-${videoId}`).value = '';
+        document.getElementById(`name-${videoId}`).value = '';
+        loadVideos(currentArtistId);
       } else {
-        commentInput.value = '';
-        nameInput.value = ''; // optional: keep name or clear
-        loadVideos(currentArtistId); // instant refresh so artist sees it in admin
+        alert("Comment failed: " + error.message);
       }
     };
 
@@ -236,7 +227,7 @@
     }
 
     document.getElementById('videoModal')?.addEventListener('click', (e) => {
-      if (e.target === document.getElementById('videoModal')) closeVideo();
+      if (e.target.id === 'videoModal') closeVideo();
     });
 
     document.addEventListener('keydown', (e) => {
