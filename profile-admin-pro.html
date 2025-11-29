@@ -101,8 +101,8 @@
           <a id="publicLink" target="_blank" class="block mt-2 text-sm text-blue-600 underline">Open in new tab</a>
         </div>
 
-        <!-- DANGER ZONE - EXACTLY AS YOU HAD IT -->
-        <div class="mt-12 p-8 bg-red-50 border-4 border-red-500 rounded-2xl">
+        <!-- DANGER ZONE — 100% IDENTICAL TO YOUR FREE PLAN (profile-admin.html) -->
+        <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
           <details class="group">
             <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
               <span class="flex items-center gap-4">
@@ -169,6 +169,7 @@
     document.getElementById('sendMessage').addEventListener('click', sendChatMessage);
     document.getElementById('chatInput').addEventListener('keydown', e => e.key === 'Enter' && sendChatMessage());
 
+    // DANGER ZONE — EXACT SAME LOGIC AS FREE PLAN
     document.getElementById('deleteConfirmInput').addEventListener('input', e => {
       const val = e.target.value.trim();
       const btn = document.getElementById('deleteAccountBtn');
@@ -223,7 +224,7 @@
     alert(`Go live in OBS!\n\nRTMP: rtmp://rtmp.livepeer.com/live\nStream Key: ${stream.streamKey}`);
     startPlayback(stream.playbackId);
     btn.innerHTML = '<span class="live-dot"></span> LIVE NOW';
-    btn.className = 'bg-green-600 text-white font-black text-3xl px-16 py-10 rounded-2xl shadow-2xl';
+    btn.className = 'bg-green-600 hover:bg-green-700 text-white font-black text-3xl px-16 py-10 rounded-2xl shadow-2xl transform hover:scale-105 transition-all flex items-center gap-6 mx-auto';
   }
 
   function startPlayback(id) {
@@ -260,6 +261,7 @@
     input.value = '';
   }
 
+  // === ALL YOUR ORIGINAL FUNCTIONS BELOW (unchanged) ===
   async function loadProfileData() {
     let { data: profile } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
     if (!profile) profile = { name: '', bio: '', banner_url: null, logo_url: null, subdomain: 'new-user' };
