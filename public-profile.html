@@ -26,7 +26,7 @@
     .like-btn{display:flex;align-items:center;gap:10px;font-weight:bold;font-size:1.15rem;color:#666;transition:all .3s;cursor:pointer}
     .like-btn.liked,.like-btn.liked svg{color:#ef4444;fill:#ef4444;stroke:#ef4444;filter:drop-shadow(0 0 12px #ef4444)}
     #artistName{color:#ffffff !important;text-shadow:0 4px 20px rgba(0,0,0,0.8);-webkit-text-stroke:2px black;paint-order:stroke fill}
-    #videoModal{position:fixed;inset:0;background:rgba(0,0,0,0.96);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .4s}
+    #videoModal{position:fixed;inset:0;background:rgba(0,0,0,0,0.96);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .4s}
     #videoModal.show{opacity:1;visibility:visible}
     #modalVideo{max-width:90%;max-height:85vh;border-radius:16px;box-shadow:0 0 60px rgba(16,185,129,0.6);border:8px solid #10b981}
     #closeModalBtn{position:absolute;top:30px;right:30px;width:70px;height:70px;background:white;color:black;border-radius:50%;font-size:42px;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10000}
@@ -43,6 +43,7 @@
     </div>
     <img id="risingStarBadge" src="rising-artist-badge-transparent.png" alt="Rising Star" class="hidden">
   </div>
+
   <div class="max-w-7xl mx-auto p-6 -mt-20 relative z-10">
     <div class="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
       <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
@@ -50,15 +51,18 @@
         <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
       </div>
     </div>
+
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
+
     <div class="mb-20">
       <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center md:text-left">Videos</h2>
       <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
     </div>
   </div>
+
   <div id="videoModal">
     <div id="closeModalBtn" onclick="closeVideo()">X</div>
     <video id="modalVideo" controls autoplay controlsList="nodownload noplaybackrate noremoteplayback"></video>
@@ -78,14 +82,23 @@
 
     let currentArtistId = null;
 
+    // Safe HTML escape
+    const esc = (str = '') => String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/\n/g, '<br>');
+
     async function loadProfile() {
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url')
         .eq('subdomain', subdomain)
-        .single(); // ← THIS WAS THE MAIN BUG
+        .single();
 
-      if (!profile) {
+      if (error || !profile) {
         document.body.innerHTML = `<div class="text-center py-40 text-6xl font-black text-red-600">Artist Not Found</div>`;
         return;
       }
@@ -93,7 +106,7 @@
       currentArtistId = profile.id;
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unnamed Artist';
-      document.getElementById('artistBio').textContent = profile.bio || 'No bio yet.';
+      document.getElementById('artistBio').innerHTML = esc(profile.bio || 'No bio yet.');
 
       if (profile.banner_url) {
         const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
@@ -126,57 +139,57 @@
       list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-600 py-20">No videos yet</p>';
 
       for (const v of (videos || [])) {
-        const { data: videoData } = supabase.storage.from('media').getPublicUrl(v.video_url);
-        const videoUrl = videoData.publicUrl;
+        const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
         const thumbUrl = v.thumbnail_url 
-          ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl
+          ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl 
           : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb';
 
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment, created_at').eq('video_id', v.id).order('created_at', { ascending: false });
 
-        list.innerHTML += `
-          <div class="video-card">
-            <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
-              <img src="${thumbUrl}" alt="thumb">
-              <div class="play-overlay">
-                <div class="play-button">
-                  <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg>
-                </div>
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.innerHTML = `
+          <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
+            <img src="${thumbUrl}" alt="thumb" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'">
+            <div class="play-overlay">
+              <div class="play-button">
+                <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg>
               </div>
             </div>
-            <div class="p-6">
-              <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled Video'}</h3>
-              <div class="flex justify-between items-center mb-4">
-                <button class="like-btn ${likes > 0 ? 'liked' : ''}" onclick="likeVideo(event, ${v.id}, this)">
-                  Heart <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                  </svg>
-                  <span class="font-bold">${likes}</span>
+          </div>
+          <div class="p-6">
+            <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${esc(v.title || 'Untitled Video')}</h3>
+            <div class="flex justify-between items-center mb-4">
+              <button class="like-btn ${likes > 0 ? 'liked' : ''}" onclick="likeVideo(event, ${v.id}, this)">
+                Heart <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                <span class="font-bold">${likes}</span>
+              </button>
+              <button class="text-emerald-600 font-bold hover:text-emerald-700" onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Video link copied!')">
+                Share
+              </button>
+            </div>
+            <div class="border-t pt-4 space-y-3 max-h-48 overflow-y-auto mb-4">
+              ${comments.length === 0 ? '<p class="text-gray-500 italic text-center">Be the first to comment!</p>' : ''}
+              ${comments.map(c => `<div class="text-sm"><strong class="text-emerald-600">${esc(c.name)}:</strong> <span class="text-gray-700">${esc(c.comment)}</span></div>`).join('')}
+            </div>
+            <div class="mt-4 space-y-3">
+              <input type="text" placeholder="Your name" class="comment-input w-full" id="name-${v.id}">
+              <div class="flex gap-2">
+                <input type="text" placeholder="Write a comment..." class="comment-input flex-1" id="comment-${v.id}" onkeydown="if(event.key==='Enter') postComment(${v.id})">
+                <button onclick="postComment(${v.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-lg transition">
+                  Post
                 </button>
-                <button class="text-emerald-600 font-bold hover:text-emerald-700" onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Video link copied!')">
-                  Share
-                </button>
-              </div>
-              <div class="border-t pt-4 space-y-3 max-h-48 overflow-y-auto mb-4">
-                ${comments.length === 0 ? '<p class="text-gray-500 italic text-center">Be the first to comment!</p>' : ''}
-                ${comments.map(c => `<div class="text-sm"><strong class="text-emerald-600">${c.name}:</strong> <span class="text-gray-700">${c.comment}</span></div>`).join('')}
-              </div>
-              <div class="mt-4 space-y-3">
-                <input type="text" placeholder="Your name" class="comment-input w-full" id="name-${v.id}">
-                <div class="flex gap-2">
-                  <input type="text" placeholder="Write a comment..." class="comment-input flex-1" id="comment-${v.id}" onkeydown="if(event.key==='Enter') postComment(${v.id})">
-                  <button onclick="postComment(${v.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-lg transition">
-                    Post
-                  </button>
-                </div>
               </div>
             </div>
-          </div>`;
+          </div>
+        `;
+        list.appendChild(card);
       }
     }
 
-    // FIXED: Pass the button element directly
     window.likeVideo = async function(e, videoId, button) {
       e.stopPropagation();
       if (button.classList.contains('liked')) return;
@@ -189,6 +202,7 @@
         span.textContent = parseInt(span.textContent) + 1;
       } else {
         console.error("Like failed:", error);
+        alert("Like failed — check console");
       }
     };
 
@@ -210,7 +224,7 @@
       if (!error) {
         document.getElementById(`comment-${videoId}`).value = '';
         document.getElementById(`name-${videoId}`).value = '';
-        loadVideos(currentArtistId);
+        loadVideos(currentArtistId); // refresh to show new comment
       } else {
         alert("Comment failed: " + error.message);
       }
@@ -226,11 +240,11 @@
       document.getElementById('modalVideo').src = '';
     }
 
-    document.getElementById('videoModal')?.addEventListener('click', (e) => {
+    document.getElementById('videoModal')?.addEventListener('click', e => {
       if (e.target.id === 'videoModal') closeVideo();
     });
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeVideo();
     });
 
