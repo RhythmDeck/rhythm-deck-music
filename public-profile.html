@@ -35,6 +35,10 @@
     <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
       Artist Banner
     </div>
+    <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
+    <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
+      Artist Banner
+    </div>
     <img id="risingStarBadge" src="rising-artist-badge-transparent.png" alt="Rising Star" class="hidden">
   </div>
 
@@ -58,9 +62,11 @@
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
 
+  <!-- THIS IS THE CORRECT, WORKING SUPABASE SETUP -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = supabase.createClient(
+    // FIXED: Use the global 'supabase' that the CDN exposes
+    const supabase = window.supabase.createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     )
@@ -75,7 +81,12 @@
     let isFreePlan = false
 
     async function init() {
-      const { data: p, error } = await supabase.from('profiles').select('id, name, bio, banner_url, logo_url, plan').eq('subdomain', subdomain).single()
+      const { data: p, error } = await supabase
+        .from('profiles')
+        .select('id, name, bio, banner_url, logo_url, plan')
+        .eq('subdomain', subdomain)
+        .single()
+
       if (error || !p) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>'
         return
@@ -90,8 +101,9 @@
 
       if (p.banner_url) {
         const { data } = supabase.storage.from('media').getPublicUrl(p.banner_url)
-        document.getElementById('banner').src = data.publicUrl
-        document.getElementById('banner').classList.remove('hidden')
+        const banner = document.getElementById('banner')
+        banner.src = data.publicUrl
+        banner.classList.remove('hidden')
         document.getElementById('bannerPlaceholder').classList.add('hidden')
       }
       if (p.logo_url) {
@@ -101,8 +113,9 @@
       if (isFreePlan) {
         const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', p.id)
         if (count >= 3) {
-          document.getElementById('risingStarBadge').classList.remove('hidden')
-          document.getElementById('risingStarBadge').classList.add('show')
+          const badge = document.getElementById('risingStarBadge')
+          badge.classList.remove('hidden')
+          badge.classList.add('show')
         }
       }
 
@@ -110,38 +123,62 @@
     }
 
     async function loadVideos() {
-      const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistId).order('created_at', { ascending: false })
+      const { data: videos } = await supabase
+        .from('user_videos')
+        .select('*')
+        .eq('user_id', artistId)
+        .order('created_at', { ascending: false })
+
       const list = document.getElementById('videoList')
       list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>'
 
       for (const v of (videos || [])) {
         const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl
-        const thumb = v.thumbnail_url ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'
+        const thumb = v.thumbnail_url 
+          ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl 
+          : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'
 
-        const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id)
-        const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false })
+        const { count: likes = 0 } = await supabase.from('video_likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('video_id', v.id)
+
+        const { data: comments = [] } = await supabase.from('video_comments')
+          .select('name, comment')
+          .eq('video_id', v.id)
+          .order('created_at', { ascending: false })
 
         let commentsHTML = '<p class="text-gray-500 italic text-center">Be the first to comment!</p>'
         if (comments.length > 0) {
-          commentsHTML = comments.map(c => `<div><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')
+          commentsHTML = comments.map(c => 
+            `<div><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`
+          ).join('')
         }
 
         list.innerHTML += `
           <div class="video-card">
             <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
               <img src="${thumb}" alt="thumb" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'">
-              <div class="play-overlay"><div class="play-button"><svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg></div></div>
+              <div class="play-overlay">
+                <div class="play-button">
+                  <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg>
+                </div>
+              </div>
             </div>
             <div class="p-6">
               <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled Video'}</h3>
               <div class="flex justify-between items-center mb-4">
                 <button class="like-btn ${likes > 0 ? 'liked' : ''}" onclick="likeVideo(${v.id}, this)">
-                  Heart <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                  Heart 
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
                   <span class="font-bold">${likes}</span>
                 </button>
                 <button class="text-emerald-600 font-bold" onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Copied!')">Share</button>
               </div>
-              <div class="border-t pt-4 space-y-2 text-sm max-h-48 overflow-y-auto">${commentsHTML}</div>
+              <div class="border-t pt-4 space-y-2 text-sm max-h-48 overflow-y-auto">
+                ${commentsHTML}
+              </div>
               <div class="mt-4">
                 <input type="text" placeholder="Your name" class="comment-input mb-2 w-full" id="name-${v.id}">
                 <div class="flex gap-2">
@@ -159,27 +196,43 @@
       const { error } = await supabase.from('video_likes').insert({ video_id: id })
       if (!error) {
         btn.classList.add('liked')
-        btn.querySelector('span').textContent = Number(btn.querySelector('span').textContent) + 1
+        const span = btn.querySelector('span')
+        span.textContent = Number(span.textContent) + 1
       }
     }
 
     async function postComment(id) {
-      const name = document.getElementById('name-' + id).value.trim()
-      const comment = document.getElementById('comment-' + id).value.trim()
+      const nameEl = document.getElementById('name-' + id)
+      const commentEl = document.getElementById('comment-' + id)
+      const name = nameEl.value.trim()
+      const comment = commentEl.value.trim()
       if (!name || !comment) return alert('Name and comment required')
+
       const { error } = await supabase.from('video_comments').insert({ video_id: id, name, comment })
       if (!error) {
-        document.getElementById('name-' + id).value = ''
-        document.getElementById('comment-' + id).value = ''
+        nameEl.value = ''
+        commentEl.value = ''
         loadVideos()
       }
     }
 
-    function openVideo(u) { document.getElementById('modalVideo').src = u; document.getElementById('videoModal').classList.add('show') }
-    function closeVideo() { document.getElementById('videoModal').classList.remove('show'); document.getElementById('modalVideo').src = '' }
+    function openVideo(url) {
+      document.getElementById('modalVideo').src = url
+      document.getElementById('videoModal').classList.add('show')
+    }
 
-    document.getElementById('videoModal').onclick = e => e.target.id === 'videoModal' && closeVideo()
-    document.onkeydown = e => e.key === 'Escape' && closeVideo()
+    function closeVideo() {
+      document.getElementById('videoModal').classList.remove('show')
+      document.getElementById('modalVideo').src = ''
+    }
+
+    document.getElementById('videoModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('videoModal')) closeVideo()
+    })
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeVideo()
+    })
 
     init()
   </script>
