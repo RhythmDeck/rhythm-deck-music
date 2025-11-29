@@ -26,7 +26,7 @@
     .like-btn{display:flex;align-items:center;gap:10px;font-weight:bold;font-size:1.15rem;color:#666;transition:all .3s;cursor:pointer}
     .like-btn.liked,.like-btn.liked svg{color:#ef4444;fill:#ef4444;stroke:#ef4444;filter:drop-shadow(0 0 12px #ef4444)}
     #artistName{color:#ffffff !important;text-shadow:0 4px 20px rgba(0,0,0,0.8);-webkit-text-stroke:2px black;paint-order:stroke fill}
-    #videoModal{position:fixed;inset:0;background:rgba(0,0,0,0,0.96);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .4s}
+    #videoModal{position:fixed;inset:0;background:rgba(0,0,0,0.96);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .4s}
     #videoModal.show{opacity:1;visibility:visible}
     #modalVideo{max-width:90%;max-height:85vh;border-radius:16px;box-shadow:0 0 60px rgba(16,185,129,0.6);border:8px solid #10b981}
     #closeModalBtn{position:absolute;top:30px;right:30px;width:70px;height:70px;background:white;color:black;border-radius:50%;font-size:42px;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10000}
@@ -36,6 +36,7 @@
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
+
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
@@ -82,13 +83,13 @@
 
     let currentArtistId = null;
 
-    // Safe HTML escape
-    const esc = (str = '') => String(str)
-      .replace(/&/g, '&amp;')
+    // Safe escape for HTML + JSON strings
+    const esc = str => String(str || '')
+      .replace(/&/g, '&')
       .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
+      .replace(/>/g, '>')
+      .replace(/"/g, '"')
+      .replace(/'/g, ''')
       .replace(/\n/g, '<br>');
 
     async function loadProfile() {
@@ -147,8 +148,10 @@
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment, created_at').eq('video_id', v.id).order('created_at', { ascending: false });
 
+        // Create card with DOM instead of dangerous string concatenation
         const card = document.createElement('div');
         card.className = 'video-card';
+
         card.innerHTML = `
           <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
             <img src="${thumbUrl}" alt="thumb" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'">
@@ -161,7 +164,7 @@
           <div class="p-6">
             <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${esc(v.title || 'Untitled Video')}</h3>
             <div class="flex justify-between items-center mb-4">
-              <button class="like-btn ${likes > 0 ? 'liked' : ''}" onclick="likeVideo(event, ${v.id}, this)">
+              <button class="like-btn ${likes > 0 ? 'liked' : ''}" data-videoid="${v.id}">
                 Heart <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
@@ -188,32 +191,34 @@
         `;
         list.appendChild(card);
       }
+
+      // Attach like handlers after cards are created
+      document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          if (this.classList.contains('liked')) return;
+          const videoId = this.getAttribute('data-videoid');
+          likeVideo(videoId, this);
+        };
+      });
     }
 
-    window.likeVideo = async function(e, videoId, button) {
-      e.stopPropagation();
-      if (button.classList.contains('liked')) return;
-
+    async function likeVideo(videoId, button) {
       const { error } = await supabase.from('video_likes').insert({ video_id: videoId });
-
       if (!error) {
         button.classList.add('liked');
         const span = button.querySelector('span');
         span.textContent = parseInt(span.textContent) + 1;
       } else {
-        console.error("Like failed:", error);
-        alert("Like failed — check console");
+        console.error(error);
+        alert('Like failed');
       }
-    };
+    }
 
-    window.postComment = async function(videoId) {
+    async function postComment(videoId) {
       const name = document.getElementById(`name-${videoId}`).value.trim();
       const comment = document.getElementById(`comment-${videoId}`).value.trim();
-
-      if (!name || !comment) {
-        alert("Name and comment required!");
-        return;
-      }
+      if (!name || !comment) return alert("Name and comment required!");
 
       const { error } = await supabase.from('video_comments').insert({
         video_id: videoId,
@@ -224,11 +229,11 @@
       if (!error) {
         document.getElementById(`comment-${videoId}`).value = '';
         document.getElementById(`name-${videoId}`).value = '';
-        loadVideos(currentArtistId); // refresh to show new comment
+        loadVideos(currentArtistId);
       } else {
         alert("Comment failed: " + error.message);
       }
-    };
+    }
 
     function openVideo(url) {
       document.getElementById('modalVideo').src = url;
