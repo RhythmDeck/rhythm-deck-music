@@ -58,11 +58,9 @@
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
 
-  <!-- NON-MODULE SCRIPT — THIS FIXES EVERYTHING -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const { createClient } = Supabase
-    const supabase = createClient(
+    const supabase = supabase.createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     )
@@ -103,9 +101,8 @@
       if (isFreePlan) {
         const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', p.id)
         if (count >= 3) {
-          const b = document.getElementById('risingStarBadge')
-          b.classList.remove('hidden')
-          b.classList.add('show')
+          document.getElementById('risingStarBadge').classList.remove('hidden')
+          document.getElementById('risingStarBadge').classList.add('show')
         }
       }
 
@@ -126,17 +123,13 @@
 
         let commentsHTML = '<p class="text-gray-500 italic text-center">Be the first to comment!</p>'
         if (comments.length > 0) {
-          commentsHTML = ''
-          for (const c of comments) {
-            commentsHTML += `<div><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`
-          }
+          commentsHTML = comments.map(c => `<div><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')
         }
 
         list.innerHTML += `
           <div class="video-card">
             <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
               <img src="${thumb}" alt="thumb" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'">
-
               <div class="play-overlay"><div class="play-button"><svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg></div></div>
             </div>
             <div class="p-6">
