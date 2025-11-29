@@ -17,6 +17,8 @@
     #closeModal{position:absolute;top:20px;right:20px;background:white;color:black;width:60px;height:60px;border-radius:50%;font-size:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;font-weight:bold}
     .live-dot{background:#ef4444;animation:pulse 2s infinite;border-radius:50%;width:12px;height:12px;display:inline-block}
     @keyframes pulse{0%{opacity:1}50%{opacity:0.5}100%{opacity:1}}
+    .comment-input{border:2px solid #10b981;border-radius:12px;padding:10px;background:#f9fafb;width:100%}
+    .comment-input:focus{border-color:#059669;outline:none}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -47,34 +49,6 @@
     <button onclick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
 
-  <!-- GO LIVE SECTION -->
-  <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
-    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl shadow border-l-4 border-purple-600">
-      <h3 class="text-2xl font-bold text-indigo-800 mb-2">Go Live</h3>
-      <p class="text-gray-700 mb-4">Stream to your fans and chat in real-time.</p>
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="md:col-span-2">
-          <div id="liveStreamContainer" class="bg-black rounded-xl overflow-hidden shadow-2xl relative aspect-video flex items-center justify-center text-white text-2xl font-bold">
-            <div class="text-center"><span class="live-dot"></span> OFFLINE — Click "Start Stream" to go live</div>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg p-4 flex flex-col">
-          <h4 class="font-bold text-purple-700 mb-3 text-lg">Live Chat</h4>
-          <div id="messages" class="flex-1 overflow-y:auto space-y-2 mb-3 bg-gray-50 p-3 rounded text-sm min-h-0"></div>
-          <div class="flex gap-2 mt-auto">
-            <input type="text" id="chatInput" placeholder="Send message..." class="flex-1 border rounded px-3 py-2 text-sm">
-            <button id="sendMessage" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-sm font-bold">Send</button>
-          </div>
-        </div>
-      </div>
-      <div class="flex justify-center mt-6">
-        <button id="startStream" class="bg-red-600 hover:bg-red-700 text-white px-12 py-8 rounded-xl font-bold text-2xl shadow-2xl transform hover:scale-105 transition flex items-center gap-4">
-          <span class="live-dot"></span> START LIVESTREAM
-        </button>
-      </div>
-    </div>
-  </section>
-
   <!-- MAIN CONTENT -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
@@ -95,11 +69,11 @@
           <a id="publicLink" target="_blank" class="block mt-2 text-sm text-blue-600 underline">Open in new tab</a>
         </div>
 
-        <!-- DANGER ZONE - RESTORED -->
-        <div class="bg-red-50 border-2 border-red-300 p-6 rounded-xl shadow-lg mt-10">
-          <h3 class="text-xl font-bold text-red-800 mb-3">Danger Zone</h3>
-          <p class="text-sm text-gray-700 mb-4">This will permanently delete your account, all videos, and data.</p>
-          <button onclick="deleteAccount()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg">
+        <!-- DANGER ZONE - EXACT SAME AS FREE PLAN -->
+        <div class="mt-12 bg-red-900 p-8 rounded-2xl shadow-2xl border-4 border-red-700">
+          <h3 class="text-3xl font-black text-white mb-4">DANGER ZONE</h3>
+          <p class="text-red-200 text-lg mb-6">Once you delete your account, there is no going back.</p>
+          <button onclick="deleteAccount()" class="w-full bg-white text-red-700 font-bold text-2xl py-5 rounded-xl hover:bg-red-100 transition shadow-lg">
             Delete My Account Forever
           </button>
         </div>
@@ -152,18 +126,15 @@
     }
     document.getElementById('artistNameInput').value = profile.name || '';
     document.getElementById('bioInput').value = profile.bio || '';
-
     if (profile.banner_url) {
       const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
-      const banner = document.getElementById('bannerPreview');
-      banner.src = url + '?t=' + Date.now();
-      banner.classList.remove('hidden');
+      document.getElementById('bannerPreview').src = url + '?t=' + Date.now();
+      document.getElementById('bannerPreview').classList.remove('hidden');
       document.getElementById('bannerPlaceholder').classList.add('hidden');
     }
     if (profile.logo_url) {
       document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now();
     }
-
     const publicUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${profile.subdomain}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
@@ -181,6 +152,15 @@
       const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl;
       const thumbUrl = video.thumbnail_url ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225/10b981/ffffff?text=No+Thumb';
       const { count: likes = 0 } = await supabase.from('video_likes').select('id', { count: 'exact', head: true }).eq('video_id', video.id);
+      const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', video.id).order('created_at', { ascending: false });
+
+      let commentsHTML = '<p class="text-gray-500 italic text-center">Be the first to comment!</p>';
+      if (comments.length > 0) {
+        commentsHTML = '';
+        for (const c of comments) {
+          commentsHTML += `<div class="mb-2"><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`;
+        }
+      }
 
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
@@ -202,6 +182,16 @@
             </button>
             <button onclick="navigator.clipboard.writeText(document.getElementById('publicUrl').textContent); alert('Link copied!')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">Share</button>
           </div>
+          <div class="p-4 bg-gray-800 text-white border-t border-gray-700">
+            <div class="text-sm max-h-48 overflow-y-auto mb-4">${commentsHTML}</div>
+            <div class="space-y-2">
+              <input type="text" placeholder="Your name" class="comment-input" id="name-${video.id}">
+              <div class="flex gap-2">
+                <input type="text" placeholder="Write a comment..." class="comment-input flex-1" id="comment-${video.id}" onkeydown="if(event.key==='Enter') postComment('${video.id}')">
+                <button onclick="postComment('${video.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg">Post</button>
+              </div>
+            </div>
+          </div>
           <button onclick="if(confirm('Delete forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">Delete Video</button>
         </div>`;
     }
@@ -220,6 +210,16 @@
       current++; heart.classList.replace('text-gray-400', 'text-red-500');
     }
     count.textContent = current;
+  }
+
+  window.postComment = async function(videoId) {
+    const name = document.getElementById('name-' + videoId).value.trim();
+    const comment = document.getElementById('comment-' + videoId).value.trim();
+    if (!name || !comment) return alert('Name and comment required');
+    await supabase.from('video_comments').insert({ video_id: videoId, name, comment });
+    document.getElementById('name-' + videoId).value = '';
+    document.getElementById('comment-' + videoId).value = '';
+    loadVideos(); // Refresh to show new comment instantly
   }
 
   async function uploadAndPublish() {
@@ -244,7 +244,7 @@
       alert('Uploaded successfully!');
       document.getElementById('thumbnailInput').value = '';
       document.getElementById('videoInput').value = '';
-      await loadVideos(); // This triggers instant refresh → comments now show on public page
+      await loadVideos();
     } catch (e) { alert('Error: ' + e.message); }
     finally {
       document.getElementById('uploadSpinner').classList.add('hidden');
@@ -269,20 +269,14 @@
 
   async function logout() { await supabase.auth.signOut(); location.href = 'index.html'; }
 
-  // DANGER ZONE - FULL ACCOUNT DELETION
   async function deleteAccount() {
-    if (!confirm('⚠️ This will PERMANENTLY delete your account, all videos, likes, comments, and data. Are you absolutely sure?')) return;
-    if (!confirm('Last chance. This cannot be undone. Type "DELETE" to confirm.')) return;
-    const input = prompt('Type DELETE to confirm:');
-    if (input !== 'DELETE') return alert('Cancelled.');
-    
-    try {
-      await supabase.from('user_videos').delete().eq('user_id', currentUser.id);
-      await supabase.from('profiles').delete().eq('id', currentUser.id);
-      await supabase.auth.signOut();
-      alert('Account deleted forever.');
-      location.href = 'index.html';
-    } catch (e) { alert('Error: ' + e.message); }
+    if (!confirm('This will PERMANENTLY delete your account and all data. Are you sure?')) return;
+    if (prompt('Type DELETE to confirm:') !== 'DELETE') return alert('Cancelled.');
+    await supabase.from('user_videos').delete().eq('user_id', currentUser.id);
+    await supabase.from('profiles').delete().eq('id', currentUser.id);
+    await supabase.auth.signOut();
+    alert('Account deleted.');
+    location.href = 'index.html';
   }
 </script>
 </body>
