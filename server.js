@@ -31,21 +31,58 @@ if (process.env.STRIPE_SECRET_KEY) {
   stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 }
 
-// ALL PRICE IDs — including your $30 one-time trial
+// ───────────────────────────────
+// TALKJS — SECURE AUTH (ONLY NEW PART)
+// ───────────────────────────────
+const TalkJS = require('talkjs');   // ← you already ran: npm install talkjs
+
+const TALKJS_APP_ID = 'tLZqiXQU';   // ← your Test App ID (hardcoded = safe)
+const TALKJS_SECRET_KEY = process.env.TALKJS_SECRET_KEY;  // ← you will add this in Render
+
+// This endpoint gives the browser a secure TalkJS login token
+app.post('/talkjs-token', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ error: 'No token' });
+
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: 'Invalid session' });
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single();
+
+    const talkUser = {
+      id: user.id,
+      name: (profile?.name || user.email.split('@')[0]).trim(),
+      email: user.email,
+      role: 'member'
+    };
+
+    const signature = TalkJS.signUser(talkUser, TALKJS_SECRET_KEY);
+
+    res.json({ token: signature });
+  } catch (err) {
+    console.error('TalkJS token error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+// ─────────────────────────────── END OF TALKJS CODE ───────────────────────────────
+
 const PRICE_IDS = {
-  '3month-trial': 'price_1SXkS4FV6v4usVQ1oHOnpMTd', 
+  '3month-trial': 'price_1SXkS4FV6v4usVQ1oHOnpMTd',
   '1year': 'price_1SLKLEFV6v4usVQ1aUro0ZbP',
   '2year': 'price_1SLWy5FV6v4usVQ12KvuIFim',
   '3year': 'price_1SLX0IFV6v4usVQ1xsTaeCGk'
 };
 
-
 app.post('/signup', async (req, res) => {
   const { name, email, subdomain, planDuration } = req.body;
   const safeSubdomain = (subdomain || '').toString().trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-
   try {
-    // Verify Supabase session
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'No token' });
@@ -56,7 +93,6 @@ app.post('/signup', async (req, res) => {
       return res.status(401).json({ message: 'Invalid session' });
     }
 
-    // Save profile
     await supabase.from('profiles').upsert({
       id: user.id,
       name: name || 'Artist',
@@ -68,25 +104,21 @@ app.post('/signup', async (req, res) => {
       created_at: new Date().toISOString()
     });
 
-    // Free plan → done
     if (!planDuration) {
       return res.json({ success: true });
     }
-
     if (!stripe) {
       return res.status(500).json({ message: 'Stripe not configured' });
     }
 
-    // Create Checkout Session — one-time for trial, subscription for others
     const isTrial = planDuration === '3month-trial';
-
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
         price: PRICE_IDS[planDuration],
         quantity: 1
       }],
-      mode: isTrial ? 'payment' : 'subscription',   // ← This fixes the redirect!
+      mode: isTrial ? 'payment' : 'subscription',
       customer_email: email,
       client_reference_id: user.id,
       metadata: {
@@ -97,36 +129,29 @@ app.post('/signup', async (req, res) => {
       success_url: `${req.headers.origin}/profile-admin-pro.html?success=true`,
       cancel_url: `${req.headers.origin}/signup.html?cancelled=true`
     });
-
     res.json({ url: session.url });
-
   } catch (err) {
     console.error('Signup error:', err);
     res.status(500).json({ message: err.message || 'Server error' });
   }
 });
 
-// Optional webhook — keeps payment_pending = false after successful payment
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
-
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.log('Webhook error:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const userId = session.client_reference_id;
-
     await supabase.from('profiles')
       .update({ payment_pending: false })
       .eq('id', userId);
   }
-
   res.json({ received: true });
 });
 
