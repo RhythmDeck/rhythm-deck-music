@@ -82,7 +82,7 @@
       const { data: artists } = await supabase
         .from('profiles')
         .select('id, name, logo_url, banner_url')
-        .eq('collaboration_optin', true)
+        .eq('collaboration_opt_in', true)
         .neq('id', currentUser.id); // hide yourself
 
       const grid = document.getElementById('artistsGrid');
