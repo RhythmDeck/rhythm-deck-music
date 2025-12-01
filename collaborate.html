@@ -9,11 +9,12 @@
   <script src="https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
-    .artist-card:hover {transform: translateY(-8px);transition:all .3s;box-shadow:0 20px 40px rgba(0,0,0,.6);}
+    .artist-card:hover {transform: translateY(-8px);transition:all .3s;box-shadow:0 20px 40px rgba(0,0,0,.7);}
     .email-hover {opacity:0;transition:opacity .4s;}
     .artist-card:hover .email-hover {opacity:1;}
-    .video-thumb {transition:transform .3s;}
-    .video-thumb:hover {transform:scale(1.1);}
+    .video-item:hover {background-color:#4c1d95;color:white;}
+    .modal {display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;justify-content:center;align-items:center;}
+    .modal:target {display:flex;}
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -36,16 +37,25 @@
     Collaboration Network
   </h2>
   <p class="text-xl max-w-3xl mx-auto opacity-90">
-    Connect with Pro artists • View their public profile • Latest videos • Message instantly
+    Connect with Pro artists • View their public profile • Watch their videos • Message instantly
   </p>
 </section>
 
 <section class="max-w-7xl mx-auto px-6 pb-20">
   <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
-  <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists yet. Be the first!</p>
+  <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists in the network yet.</p>
 </section>
 
+<!-- TalkJS Chat Container -->
 <div id="talkjs-container" style="position:fixed;bottom:20px;right:20px;width:380px;height:580px;z-index:9999;display:none;background:white;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,.9);border:5px solid #10b981;"></div>
+
+<!-- Video Modal (hidden until clicked) -->
+<div id="videoModal" class="modal">
+  <div class="relative max-w-4xl w-full p-8">
+    <a href="#" class="absolute top-4 right-8 text-white text-5xl font-bold z-10">&times;</a>
+    <video id="modalVideo" controls class="w-full rounded-xl shadow-2xl" style="max-height:80vh;"></video>
+  </div>
+</div>
 
 <script>
   const supabase = window.supabase.createClient(
@@ -54,7 +64,7 @@
   );
 
   const TALKJS_APP_ID     = 'tLZqiXQU';
-  const TALKJS_SECRET_KEY = 'sk_test_IEmPfWI8f9gVZUhShL......'; // ← Your real key
+  const TALKJS_SECRET_KEY = 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1'; // ← Your real key
 
   let currentUser = null;
   let talkSession = null;
@@ -99,28 +109,24 @@
         ? supabase.storage.from('media').getPublicUrl(artist.banner_url).data.publicUrl 
         : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
 
-      // Get latest 4 videos
+      // Get ALL videos (not just 4)
       const { data: videos } = await supabase
         .from('user_videos')
-        .select('thumbnail_url, title')
+        .select('id, title, video_url')
         .eq('user_id', artist.id)
-        .order('created_at', { ascending: false })
-        .limit(4);
+        .order('created_at', { ascending: false });
 
-      const videoHtml = videos?.length ? videos.map(v => `
-        <div class="relative group cursor-pointer overflow-hidden rounded-lg">
-          <img src="${v.thumbnail_url || 'https://via.placeholder.com/300x300/333/fff?text=No+Thumb'}"
-               class="w-full h-32 object-cover video-thumb">
-          <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-            <span class="text-white font-bold text-sm">${(v.title || 'Video').slice(0,20)}</span>
-          </div>
-        </div>
+      const videoCount = videos?.length || 0;
+
+      const videoListHtml = videoCount > 0 ? videos.map(v => `
+        <a href="#videoModal" onclick="playVideo('${v.video_url.replace(/'/g, "\\'")}')" 
+           class="block p-3 rounded-lg video-item cursor-pointer border border-purple-600 mb-2 hover:bg-purple-600 transition">
+          ${v.title || 'Untitled Video'}
+        </a>
       `).join('') : '<p class="text-gray-500 text-sm">No videos yet</p>';
 
-      const { count: videoCount = 0 } = await supabase.from('user_videos').select('id', { count: 'exact', head: true }).eq('user_id', artist.id);
-
-      // NEW: Public profile link (opens in new tab)
-      const publicProfileUrl = `https://rhythmdeck.com/${artist.id}`;
+      // CORRECT PUBLIC PROFILE URL
+      const publicProfileUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${artist.id}`;
 
       grid.innerHTML += `
         <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
@@ -129,21 +135,21 @@
             <img src="${logoUrl}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover">
             <h3 class="text-2xl font-black mt-4">${artist.name || 'Artist'}</h3>
             <p class="email-hover text-green-300 text-sm">Email: ${artist.email || 'Hidden'}</p>
-            <div class="text-sm text-gray-400 mt-3">${videoCount} Videos</div>
+            <div class="text-sm text-gray-400 mt-3">${videoCount} Video${videoCount !== 1 ? 's' : ''}</div>
 
-            <!-- Latest Videos Grid -->
-            <div class="grid grid-cols-2 gap-3 mt-6">
-              ${videoHtml}
+            <!-- Video List -->
+            <div class="mt-6 max-h-60 overflow-y-auto bg-black/50 rounded-xl p-4">
+              ${videoListHtml}
             </div>
 
-            <!-- VIEW PUBLIC PROFILE BUTTON -->
-            <a href="${publicProfileUrl}" target="_blank" class="inline-block w-full mt-4">
+            <!-- View Public Profile Button -->
+            <a href="${publicProfileUrl}" target="_blank" class="inline-block w-full mt-5">
               <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg py-3 rounded-xl shadow-xl transition transform hover:scale-105">
                 View Public Profile
               </button>
             </a>
 
-            <!-- MESSAGE BUTTON -->
+            <!-- Message Button -->
             <button onclick="startChat('${artist.id}', '${(artist.name || 'Artist').replace(/'/g, "\\'")}', '${artist.email || ''}')"
               class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-4 rounded-xl shadow-xl transform hover:scale-105 transition">
               Message for Collaboration
@@ -153,6 +159,23 @@
     }
   }
 
+  // Play video in modal
+  function playVideo(videoUrl) {
+    const modalVideo = document.getElementById('modalVideo');
+    modalVideo.src = videoUrl;
+    modalVideo.play();
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('videoModal').addEventListener('click', function(e) {
+    if (e.target === this || e.target.tagName === 'A') {
+      document.getElementById('modalVideo').pause();
+      document.getElementById('modalVideo').src = '';
+      this.style.display = 'none';
+      window.location.hash = '';
+    }
+  });
+
   function createTalkJSSignature(userId) {
     const message = userId + ':' + TALKJS_APP_ID;
     const hash = CryptoJS.HmacSHA256(message, TALKJS_SECRET_KEY);
@@ -161,6 +184,7 @@
 
   async function initTalkJS() {
     await Talk.ready;
+
     const signature = createTalkJSSignature(currentUser.id);
 
     talkSession = new Talk.Session({
@@ -174,36 +198,37 @@
       signature: signature
     });
 
-    const registerUser = async (uid, name, email) => {
-      await fetch(`https://api.talkjs.com/v1/${TALKJS_APP_ID}/users/${uid}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TALKJS_SECRET_KEY}` },
-        body: JSON.stringify({
-          name: name,
-          email: [email || `${uid}@rhythmdeck.local`],
-          photoUrl: supabase.storage.from('media').getPublicUrl(`logos/${uid}`).data.publicUrl || null
-        })
-      }).catch(() => {});
-    };
+    // Auto-register current user
+    await fetch(`https://api.talkjs.com/v1/${TALKJS_APP_ID}/users/${currentUser.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TALKJS_SECRET_KEY}` },
+      body: JSON.stringify({
+        name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
+        email: [currentUser.email]
+      })
+    }).catch(() => {});
 
-    await registerUser(currentUser.id, currentUser.user_metadata?.full_name || currentUser.email.split('@')[0], currentUser.email);
+    // Pre-mount chatbox
     talkSession.createChatbox().mount(document.getElementById('talkjs-container'));
   }
 
   async function startChat(otherUserId, otherUserName, otherUserEmail) {
-    if (!talkSession) return alert('Chat loading...');
+    if (!talkSession) {
+      alert('Chat is initializing... please wait 2 seconds and try again.');
+      return;
+    }
 
+    // Register other user
     await fetch(`https://api.talkjs.com/v1/${TALKJS_APP_ID}/users/${otherUserId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TALKJS_SECRET_KEY}` },
       body: JSON.stringify({
         name: otherUserName,
-        email: [otherUserEmail || `${otherUserId}@rhythmdeck.local`],
-        photoUrl: supabase.storage.from('media').getPublicUrl(`logos/${otherUserId}`).data.publicUrl || null
+        email: [otherUserEmail || `${otherUserId}@rhythmdeck.local`]
       })
     }).catch(() => {});
 
-    const otherUser = new Talk.User({ id: otherUserId, name: otherUserName, email: otherUserEmail });
+    const otherUser = new Talk.User({ id: otherUserId, name: otherUserName });
     const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, otherUser));
     convo.setParticipant(talkSession.me);
     convo.setParticipant(otherUser);
