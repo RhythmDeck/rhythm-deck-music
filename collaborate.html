@@ -20,26 +20,12 @@
     .modal {display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98);
             z-index: 99999; justify-content: center; align-items: center;}
     .modal.active {display: flex;}
-    /* REMOVE THE 3 DOTS MENU + PiP + DOWNLOAD + SPEED */
-    video::-webkit-media-controls-panel { 
-      display: flex !important; 
-      opacity: 1 !important;
-    }
-    video::-webkit-media-controls-enclosure { 
-      display: flex !important; 
-      overflow: hidden !important;
-    }
-    video::-webkit-media-controls-overflow-button,
-    video::-webkit-media-controls-download-button,
-    video::-webkit-media-controls-picture-in-picture-button,
-    video::-webkit-media-controls-speed-button,
-    video::-webkit-media-controls-fullscreen-button,
-    video::-webkit-media-controls-timeline-container,
-    video::-webkit-media-controls-volume-slider-container,
-    video::-webkit-media-controls-mute-button,
-    video::-webkit-media-controls-play-button {
-      display: none !important;
-    }
+    video::-webkit-media-controls-enclosure {display:none!important;}
+    video::-webkit-media-controls-panel {display:none!important;}
+    video::-webkit-media-controls-overflow-button {display:none!important;}
+    video::-webkit-media-controls-download-button {display:none!important;}
+    video::-webkit-media-controls-picture-in-picture-button {display:none!important;}
+    video::--webkit-media-controls-playback-rate {display:none!important;}
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -74,13 +60,7 @@
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
     <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
-    <video id="modalVideo" 
-           controls 
-           controlsList="nodownload noplaybackrate" 
-           disablePictureInPicture 
-           class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" 
-           style="max-height:85vh;">
-    </video>
+    <video id="modalVideo" controls controlsList="nodownload" disablePictureInPicture class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
   </div>
 </div>
 
@@ -93,77 +73,72 @@
   let currentUser = null;
   let talkSession = null;
 
+  async function initApp() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return location.href = 'login.html';
+    currentUser = user;
+
+    const { data: profile } = await supabase.from('profiles').select('collaboration_opt_in').eq('id', user.id).single();
+    if (!profile?.collaboration_opt_in) {
+      alert("Join the network first!");
+      return location.href = 'profile-admin-pro.html';
+    }
+
+    await loadArtists();
+    initTalkJS(); // Now currentUser is ready
+  }
+
   async function loadArtists() {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return location.href = 'login.html';
-      currentUser = user;
+    const { data: artists } = await supabase
+      .from('profiles')
+      .select('id, name, logo_url, banner_url, email, subdomain')
+      .eq('collaboration_opt_in', true)
+      .neq('id', currentUser.id);
 
-      const { data: profile } = await supabase.from('profiles').select('collaboration_opt_in').eq('id', user.id).single();
-      if (!profile?.collaboration_opt_in) {
-        alert("Join the network first!");
-        return location.href = 'profile-admin-pro.html';
-      }
+    const grid = document.getElementById('artistsGrid');
+    grid.innerHTML = '';
 
-      const { data: artists } = await supabase
-        .from('profiles')
-        .select('id, name, logo_url, banner_url, email, subdomain')
-        .eq('collaboration_opt_in', true)
-        .neq('id', currentUser.id);
+    if (!artists || artists.length === 0) {
+      document.getElementById('noArtists').classList.remove('hidden');
+      return;
+    }
 
-      const grid = document.getElementById('artistsGrid');
-      grid.innerHTML = '';
+    for (const artist of artists) {
+      const logo = artist.logo_url ? supabase.storage.from('media').getPublicUrl(artist.logo_url).data.publicUrl : 'logo-placeholder.png';
+      const banner = artist.banner_url ? supabase.storage.from('media').getPublicUrl(artist.banner_url).data.publicUrl : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
 
-      if (!artists || artists.length === 0) {
-        document.getElementById('noArtists').classList.remove('hidden');
-        return;
-      }
+      const { data: videos } = await supabase.from('user_videos').select('title, video_url').eq('user_id', artist.id);
+      const tracks = videos?.length > 0
+        ? videos.map(v => {
+            const url = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+            return `<div class="song-item" onclick="playVideo('${url}')">${v.title || 'Untitled'}</div>`;
+          }).join('')
+        : '<p class="text-gray-500 text-xs">No tracks yet</p>';
 
-      for (const artist of artists) {
-        const logo = artist.logo_url 
-          ? supabase.storage.from('media').getPublicUrl(artist.logo_url).data.publicUrl 
-          : 'logo-placeholder.png';
-        const banner = artist.banner_url 
-          ? supabase.storage.from('media').getPublicUrl(artist.banner_url).data.publicUrl 
-          : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
+      const profileId = artist.subdomain?.trim() || artist.id;
 
-        const { data: videos } = await supabase.from('user_videos').select('title, video_url').eq('user_id', artist.id);
-
-        const tracks = videos?.length > 0
-          ? videos.map(v => {
-              const url = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
-              return `<div class="song-item" onclick="playVideo('${url}')">${v.title || 'Untitled'}</div>`;
-            }).join('')
-          : '<p class="text-gray-500 text-xs">No tracks yet</p>';
-
-        const profileId = artist.subdomain?.trim() ? artist.subdomain.trim() : artist.id;
-
-        grid.innerHTML += `
-          <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
-            <div class="h-40 bg-cover bg-center" style="background-image:url('${banner}')"></div>
-            <div class="p-6 -mt-20 relative z-10 text-center">
-              <img src="${logo}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover">
-              <h3 class="text-2xl font-black mt-4">${artist.name}</h3>
-              <p class="email-hover text-green-300 text-sm mt-1">Email: ${artist.email}</p>
-              <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
-              <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
-              
-              <a href="https://rhythm-deck-music.onrender.com/public-profile.html?id=${profileId}" target="_blank" class="block mt-5">
-                <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
-                  View Public Profile
-                </button>
-              </a>
-              
-              <button onclick="startChat('${artist.id}', '${(artist.name||'').replace(/'/g, "\\'")}', '${artist.email||''}')"
-                class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
-                Message for Collab
+      grid.innerHTML += `
+        <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
+          <div class="h-40 bg-cover bg-center" style="background-image:url('${banner}')"></div>
+          <div class="p-6 -mt-20 relative z-10 text-center">
+            <img src="${logo}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover">
+            <h3 class="text-2xl font-black mt-4">${artist.name || 'Artist'}</h3>
+            <p class="email-hover text-green-300 text-sm mt-1">Email: ${artist.email || 'Hidden'}</p>
+            <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
+            <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
+            
+            <a href="https://rhythm-deck-music.onrender.com/public-profile.html?id=${profileId}" target="_blank" class="block mt-5">
+              <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
+                View Public Profile
               </button>
-            </div>
-          </div>`;
-      }
-    } catch (err) {
-      console.error("Load error:", err);
-      alert("Failed to load artists.");
+            </a>
+            
+            <button onclick="startChat('${artist.id}', '${(artist.name||'').replace(/'/g, "\\'")}', '${artist.email||''}')"
+              class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
+              Message for Collab
+            </button>
+          </div>
+        </div>`;
     }
   }
 
@@ -172,7 +147,7 @@
     const video = document.getElementById('modalVideo');
     video.src = url;
     modal.classList.add('active');
-    video.play().catch(() => {});
+    video.play();
   }
 
   function closeModal() {
@@ -181,60 +156,54 @@
     video.pause(); video.src = ''; modal.classList.remove('active');
   }
 
-  document.getElementById('videoModal').addEventListener('click', e => {
-    if (e.target === document.getElementById('videoModal')) closeModal();
-  });
+  document.getElementById('videoModal').addEventListener('click', e => e.target === e.currentTarget && closeModal());
+
+  function initTalkJS() {
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
+    script.onload = () => {
+      Talk.ready.then(() => {
+        const signature = CryptoJS.HmacSHA256('tLZqiXQU:' + currentUser.id, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1')
+                               .toString(CryptoJS.enc.Base64url);
+
+        talkSession = new Talk.Session({
+          appId: 'tLZqiXQU',
+          me: new Talk.User({
+            id: currentUser.id,
+            name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
+            email: currentUser.email
+          }),
+          signature: signature
+        });
+
+        talkSession.createInbox().mount(document.getElementById('talkjs-container'));
+      });
+    };
+    document.head.appendChild(script);
+  }
+
+  function startChat(id, name, email) {
+    if (!talkSession) {
+      setTimeout(() => startChat(id, name, email), 500);
+      return;
+    }
+    const other = new Talk.User({ id, name, email: email || null });
+    const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, other));
+    convo.setParticipant(talkSession.me);
+    convo.setParticipant(other);
+    convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
+
+    talkSession.createChatbox(convo).mount(document.getElementById('talkjs-container'));
+    document.getElementById('talkjs-container').style.display = 'block';
+  }
 
   async function logout() {
     await supabase.auth.signOut();
     location.href = 'login.html';
   }
 
-  // LOAD ARTISTS FIRST
-  loadArtists();
-
-  // TALKJS — LOAD & INITIALIZE PROPERLY
-  const talkScript = document.createElement('script');
-  talkScript.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
-  talkScript.onload = () => {
-    Talk.ready.then(() => {
-      const signature = CryptoJS.HmacSHA256('tLZqiXQU:' + currentUser.id, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1')
-                             .toString(CryptoJS.enc.Base64url);
-
-      talkSession = new Talk.Session({
-        appId: 'tLZqiXQU',
-        me: new Talk.User({
-          id: currentUser.id,
-          name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
-          email: currentUser.email
-        }),
-        signature: signature
-      });
-
-      // Pre-mount empty chatbox for instant opening
-      const inbox = talkSession.createInbox();
-      inbox.mount(document.getElementById('talkjs-container'));
-    }).catch(console.error);
-  };
-  document.head.appendChild(talkScript);
-
-  // CHAT WORKS INSTANTLY — FIXED
-  function startChat(id, name, email) {
-    if (!talkSession) {
-      setTimeout(() => startChat(id, name, email), 300);
-      return;
-    }
-
-    const otherUser = new Talk.User({ id, name, email: email || null });
-    const conversation = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, otherUser));
-    conversation.setParticipant(talkSession.me);
-    conversation.setParticipant(otherUser);
-    conversation.setAttributes({ subject: "Collab Request – Rhythm Deck" });
-
-    const chatbox = talkSession.createChatbox(conversation);
-    chatbox.mount(document.getElementById('talkjs-container'));
-    document.getElementById('talkjs-container').style.display = 'block';
-  }
+  // START THE APP
+  initApp();
 </script>
 </body>
 </html>
