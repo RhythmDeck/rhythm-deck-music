@@ -6,37 +6,20 @@
   <title>Collaboration Network | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     .artist-card:hover {transform: translateY(-8px);transition:all .3s;box-shadow:0 20px 40px rgba(0,0,0,.9);}
     .email-hover {opacity:0;transition:opacity .4s;}
     .artist-card:hover .email-hover {opacity:1;}
     .song-item {
-      padding: 10px 12px;
-      border-radius: 8px;
-      margin: 3px 0;
-      background: rgba(139,92,246,0.1);
-      transition: all .2s;
-      cursor: pointer;
-      font-weight: 500;
-      border: 1px solid #a855f7;
+      padding: 10px 12px; border-radius: 8px; margin: 3px 0;
+      background: rgba(139,92,246,0.1); transition: all .2s; cursor: pointer;
+      font-weight: 500; border: 1px solid #a855f7;
     }
-    .song-item:hover {
-      background: #a855f7;
-      color: white;
-      transform: translateX(4px);
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.98);
-      z-index: 99999;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal.active { display: flex; }
+    .song-item:hover {background: #a855f7; color: white; transform: translateX(4px);}
+    .modal {display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98);
+            z-index: 99999; justify-content: center; align-items: center;}
+    .modal.active {display: flex;}
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -58,9 +41,7 @@
   <h2 class="text-6xl font-black mb-6 bg-gradient-to-r from-green-400 to-purple-500 bg-clip-text text-transparent">
     Collaboration Network
   </h2>
-  <p class="text-xl max-w-3xl mx-auto opacity-90">
-    Connect • Listen • Collab
-  </p>
+  <p class="text-xl max-w-3xl mx-auto opacity-90">Connect • Listen • Collab</p>
 </section>
 
 <section class="max-w-7xl mx-auto px-6 pb-20">
@@ -72,8 +53,8 @@
 
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
-    <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
-    <video id="modalVideo" controls class="w-full rounded-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
+    <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">x</button>
+    <video id="modalVideo" controls class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
   </div>
 </div>
 
@@ -83,37 +64,31 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
   );
 
-  const TALKJS_APP_ID = 'tLZqiXQU';
-  const TALKJS_SECRET_KEY = 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1';
-
   let currentUser = null;
-  let talkSession = null;
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return window.location.href = 'login.html';
-    currentUser = user;
-
-    const { data: profile } = await supabase.from('profiles').select('collaboration_opt_in').eq('id', user.id).single();
-    if (!profile?.collaboration_opt_in) {
-      alert("Join the network first!");
-      return window.location.href = 'profile-admin-pro.html';
-    }
-
-    // Load artists first (no await on TalkJS)
-    loadArtists();
-    initTalkJS(); // runs in background
-  });
-
+  // LOAD ARTISTS FIRST — TALKJS CANNOT BREAK THIS ANYMORE
   async function loadArtists() {
     try {
-      const { data: artists, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return location.href = 'login.html';
+      currentUser = user;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('collaboration_opt_in')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.collaboration_opt_in) {
+        alert("Join the network first!");
+        return location.href = 'profile-admin-pro.html';
+      }
+
+      const { data: artists } = await supabase
         .from('profiles')
         .select('id, name, logo_url, banner_url, email, subdomain')
         .eq('collaboration_opt_in', true)
         .neq('id', currentUser.id);
-
-      if (error) throw error;
 
       const grid = document.getElementById('artistsGrid');
       grid.innerHTML = '';
@@ -124,11 +99,10 @@
       }
 
       for (const artist of artists) {
-        const logoUrl = artist.logo_url 
+        const logo = artist.logo_url 
           ? supabase.storage.from('media').getPublicUrl(artist.logo_url).data.publicUrl 
           : 'logo-placeholder.png';
-
-        const bannerUrl = artist.banner_url 
+        const banner = artist.banner_url 
           ? supabase.storage.from('media').getPublicUrl(artist.banner_url).data.publicUrl 
           : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
 
@@ -137,36 +111,30 @@
           .select('title, video_url')
           .eq('user_id', artist.id);
 
-        const videoList = (videos?.length > 0)
+        const tracks = (videos && videos.length > 0)
           ? videos.map(v => {
               const url = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
               return `<div class="song-item" onclick="playVideo('${url}')">${v.title || 'Untitled'}</div>`;
             }).join('')
           : '<p class="text-gray-500 text-xs">No tracks yet</p>';
 
-        const profileId = artist.subdomain?.trim() || artist.id;
-        const publicProfileUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${profileId}`;
+        const id = artist.subdomain?.trim() || artist.id;
 
         grid.innerHTML += `
           <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
-            <div class="h-40 bg-cover bg-center" style="background-image:url('${bannerUrl}')"></div>
+            <div class="h-40 bg-cover bg-center" style="background-image:url('${banner}')"></div>
             <div class="p-6 -mt-20 relative z-10 text-center">
-              <img src="${logoUrl}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover">
+              <img src="${logo}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover">
               <h3 class="text-2xl font-black mt-4">${artist.name}</h3>
               <p class="email-hover text-green-300 text-sm mt-1">Email: ${artist.email}</p>
-              <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${videos?.length !== 1 ? 's' : ''}</p>
-
-              <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">
-                ${videoList}
-              </div>
-
-              <a href="${publicProfileUrl}" target="_blank" class="block mt-5">
+              <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
+              <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
+              <a href="https://rhythm-deck-music.onrender.com/public-profile.html?id=${id}" target="_blank" class="block mt-5">
                 <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
                   View Public Profile
                 </button>
               </a>
-
-              <button onclick="startChat('${artist.id}', '${artist.name.replace(/'/g, "\\'")}', '${artist.email}')"
+              <button onclick="startChat('${artist.id}', '${(artist.name||'').replace(/'/g, "\\'")}', '${artist.email||''}')"
                 class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
                 Message for Collab
               </button>
@@ -174,8 +142,8 @@
           </div>`;
       }
     } catch (err) {
-      console.error("Failed to load artists:", err);
-      alert("Error loading artists. Check console.");
+      console.error("Load error:", err);
+      alert("Failed to load artists. Check console (F12).");
     }
   }
 
@@ -184,55 +152,67 @@
     const video = document.getElementById('modalVideo');
     video.src = url;
     modal.classList.add('active');
-    video.play();
+    video.play().catch(() => {});
   }
 
   function closeModal() {
     const modal = document.getElementById('videoModal');
     const video = document.getElementById('modalVideo');
-    video.pause();
-    video.src = '';
-    modal.classList.remove('active');
+    video.pause(); video.src = ''; modal.classList.remove('active');
   }
 
-  document.getElementById('videoModal').onclick = e => e.target === e.currentTarget && closeModal();
-
-  // CORRECT TALKJS SIGNATURE (this is the real fix)
-  async function initTalkJS() {
-    await Talk.ready;
-
-    const message = TALKJS_APP_ID + ':' + currentUser.id;
-    const signature = CryptoJS.HmacSHA256(message, TALKJS_SECRET_KEY);
-    const signatureB64 = signature.toString(CryptoJS.enc.Base64url); // URL-SAFE!
-
-    talkSession = new Talk.Session({
-      appId: TALKJS_APP_ID,
-      me: new Talk.User(currentUser.id, {
-        name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
-        email: currentUser.email
-      }),
-      signature: signatureB64
-    });
-
-    talkSession.createChatbox().mount(document.getElementById('talkjs-container'));
-  }
-
-  function startChat(id, name, email) {
-    if (!talkSession) return setTimeout(() => startChat(id, name, email), 500);
-
-    const other = new Talk.User(id, { name);
-    const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, other));
-    convo.setParticipant(talkSession.me);
-    convo.setParticipant(other);
-    convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
-
-    talkSession.createChatbox(convo).mount(document.getElementById('talkjs-container'));
-    document.getElementById('talkjs-container').style.display = 'block';
-  }
+  document.getElementById('videoModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('videoModal')) closeModal();
+  });
 
   async function logout() {
     await supabase.auth.signOut();
-    window.location.href = 'login.html';
+    location.href = 'login.html';
+  }
+
+  // LOAD ARTISTS IMMEDIATELY
+  loadArtists();
+
+  // TALKJS — LOADED LAST SO IT CAN'T BREAK ANYTHING
+  setTimeout(() => {
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
+    script.onload = initTalkJS;
+    script.onerror = () => console.log("TalkJS failed to load — chat disabled");
+    document.head.appendChild(script);
+  }, 1000);
+
+  let talkSession = null;
+  function initTalkJS() {
+    if (!currentUser) return;
+    Talk.ready.then(() => {
+      const msg = 'tLZqiXQU:' + currentUser.id;
+      const sig = CryptoJS.HmacSHA256(msg, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1');
+      const signature = sig.toString(CryptoJS.enc.Base64url);
+
+      talkSession = new Talk.Session({
+        appId: 'tLZqiXQU',
+        me: new Talk.User({
+          id: currentUser.id,
+          name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
+          email: currentUser.email
+        }),
+        signature: signature
+      });
+
+      talkSession.createChatbox().mount(document.getElementById('talkjs-container'));
+    }).catch(console.error);
+  }
+
+  function startChat(id, name, email) {
+    if (!talkSession) return alert("Chat loading... try again");
+    const user = new Talk.User({ id, name, email: email || undefined });
+    const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, user));
+    convo.setParticipant(talkSession.me);
+    convo.setParticipant(user);
+    convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
+    talkSession.createChatbox(convo).mount(document.getElementById('talkjs-container'));
+    document.getElementById('talkjs-container').style.display = 'block';
   }
 </script>
 </body>
