@@ -87,8 +87,16 @@
 
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`
       document.getElementById('artistName').textContent = profile.name || 'Artist'
-      document.getElementById('artistBio').innerHTML = (profile.bio || 'No bio yet.').replace(/\n/g, '<br>')
 
+      // FIXED BIO — works for empty, null, line breaks, Free & Pro
+      const bioElement = document.getElementById('artistBio')
+      const bioText = profile.bio?.trim()
+      bioElement.textContent = bioText || "This artist hasn't written a bio yet."
+      if (bioText) {
+        bioElement.innerHTML = bioElement.innerHTML.replace(/\n/g, '<br>')
+      }
+
+      // Banner
       if (profile.banner_url) {
         const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url)
         const banner = document.getElementById('banner')
@@ -97,10 +105,12 @@
         document.getElementById('bannerPlaceholder').classList.add('hidden')
       }
 
+      // Logo
       if (profile.logo_url) {
         document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now()
       }
 
+      // Rising Star Badge (Free plan only, 3+ videos)
       if (isFreePlan) {
         const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', profile.id)
         if (count >= 3) {
@@ -121,6 +131,7 @@
         const thumb = v.thumbnail_url ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id)
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false })
+
         const commentsHTML = comments.length === 0
           ? '<p class="text-gray-500 italic text-center">Be the first to comment!</p>'
           : comments.map(c => `<div><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')
@@ -152,6 +163,7 @@
           </div>`
       }
 
+      // Like & Comment handlers
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.classList.contains('liked')) return
@@ -183,10 +195,12 @@
       document.getElementById('modalVideo').src = url
       document.getElementById('videoModal').classList.add('show')
     }
+
     function closeVideo() {
       document.getElementById('videoModal').classList.remove('show')
       document.getElementById('modalVideo').src = ''
     }
+
     window.openVideo = openVideo
     window.closeVideo = closeVideo
     document.getElementById('videoModal').addEventListener('click', e => e.target.id === 'videoModal' && closeVideo())
