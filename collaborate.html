@@ -74,7 +74,7 @@
 <!-- Video Modal -->
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
-    <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z10 hover:text-red-500 transition">&times;</button>
+    <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
     <video id="modalVideo" controls class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
   </div>
 </div>
@@ -103,16 +103,21 @@
       return;
     }
 
-    await initTalkJS();   // ← TalkJS first → instant chat
+    await initTalkJS();
     await loadArtists();
   });
 
   async function loadArtists() {
-    const { data: artists } = await supabase
+    const { data: artists, error } = await supabase
       .from('profiles')
-      .select('id, name, logo_url, banner_url, email, subdomain')  // ← using subdomain, not custom_url_id
+      .select('id, name, logo_url, banner_url, email, subdomain')
       .eq('collaboration_opt_in', true)
       .neq('id', currentUser.id);
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return;
+    }
 
     const grid = document.getElementById('artistsGrid');
     grid.innerHTML = '';
@@ -148,7 +153,6 @@
           }).join('')
         : '<p class="text-gray-500 text-xs">No tracks yet</p>';
 
-      // ← CORRECT: use subdomain (test-user-255)
       const profileId = artist.subdomain && artist.subdomain.trim() ? artist.subdomain.trim() : artist.id;
       const publicProfileUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${profileId}`;
 
@@ -180,13 +184,12 @@
     }
   }
 
-  // ---------- VIDEO MODAL ----------
   function playVideo(url) {
     const modal = document.getElementById('videoModal');
     const video = document.getElementById('modalVideo');
-    video.src = url + "?autoplay=1";
+    video.src = url;
     modal.classList.add('active');
-    video.play().catch(e => console.error("Play failed:", e));
+    video.play().catch(() => {});
   }
 
   function closeModal() {
@@ -201,17 +204,9 @@
     if (e.target === document.getElementById('videoModal')) closeModal();
   });
 
-  // ---------- TALKJS (NOW WORKS INSTANTLY) ----------
-  function createTalkJSSignature(userId) {
-    const message = `${TALKJS_APP_ID}:${userId}:${Date.now()}`;
-    const hash = CryptoJS.HmacSHA256(message, TALKJS_SECRET_KEY);
-    return CryptoJS.enc.Base64.stringify(hash);
-  }
-
+  // TALKJS — NOW FULLY WORKING
   async function initTalkJS() {
     await Talk.ready;
-
-    const signature = createTalkJSSignature(currentUser.id);
 
     talkSession = new Talk.Session({
       appId: TALKJS_APP_ID,
@@ -220,30 +215,34 @@
         name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
         email: currentUser.email
       }),
-      signature: signature
+      signature: CryptoJS.HmacSHA256(`${TALKJS_APP_ID}:${currentUser.id}`, TALKJS_SECRET_KEY).toString(CryptoJS.enc.Base64)
     });
 
-    // Register current user (fire-and-forget)
+    // Register current user
     fetch(`https://api.talkjs.com/v1/${TALKJS_APP_ID}/users/${currentUser.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TALKJS_SECRET_KEY}` },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TALKJS_SECRET_KEY}`
+      },
       body: JSON.stringify({
         name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
-Pods        email: [currentUser.email]
+        email: [currentUser.email]
       })
     }).catch(() => {});
 
-    // Pre-mount empty chatbox so opening is instant
     talkSession.createChatbox().mount(document.getElementById('talkjs-container'));
   }
 
   async function startChat(otherUserId, otherUserName, otherUserEmail) {
-    if (!talkSession) return alert("Chat still loading... try again");
+    if (!talkSession) return alert("Chat loading...");
 
-    // Register other user (non-blocking)
     fetch(`https://api.talkjs.com/v1/${TALKJS_APP_ID}/users/${otherUserId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TALKJS_SECRET_KEY}` },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TALKJS_SECRET_KEY}`
+      },
       body: JSON.stringify({
         name: otherUserName,
         email: [otherUserEmail || `${otherUserId}@rhythmdeck.local`]
@@ -251,13 +250,12 @@ Pods        email: [currentUser.email]
     }).catch(() => {});
 
     const otherUser = new Talk.User({ id: otherUserId, name: otherUserName });
-    const conversation = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, otherUser));
-    conversation.setParticipant(talkSession.me);
-    conversation.setParticipant(otherUser);
-    conversation.setAttributes({ subject: "Collab Request – Rhythm Deck" });
+    const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, otherUser));
+    convo.setParticipant(talkSession.me);
+    convo.setParticipant(otherUser);
+    convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
 
-    const chatbox = talkSession.createChatbox(conversation);
-    chatbox.mount(document.getElementById('talkjs-container'));
+    talkSession.createChatbox(convo).mount(document.getElementById('talkjs-container'));
     document.getElementById('talkjs-container').style.display = 'block';
   }
 
