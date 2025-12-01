@@ -52,7 +52,6 @@
     <div onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold flex items-center justify-center cursor-pointer z-50">X</div>
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
     const supabase = createClient(
@@ -76,27 +75,17 @@
         .select('id, name, bio, banner_url, logo_url, plan')
         .eq('subdomain', subdomain)
         .single()
-
       if (error || !profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>'
         return
       }
-
       artistId = profile.id
       isFreePlan = (profile.plan || 'free') === 'free'
-
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`
       document.getElementById('artistName').textContent = profile.name || 'Artist'
-
-      // FINAL BULLETPROOF BIO FIX
+      // FIXED BIO — works for all cases
       const bioElement = document.getElementById('artistBio')
-      const rawBio = profile.bio
-      if (rawBio && rawBio.toString().trim() !== '') {
-        bioElement.textContent = rawBio
-        bioElement.innerHTML = bioElement.innerHTML.replace(/\n/g, '<br>')
-      } else {
-        bioElement.textContent = "This artist hasn't written a bio yet."
-      }
+      bioElement.innerHTML = (profile.bio || "This artist hasn't written a bio yet.").replace(/\n/g, '<br>');
 
       // Banner
       if (profile.banner_url) {
@@ -123,22 +112,18 @@
       loadVideos()
     }
 
-    // loadVideos(), openVideo(), closeVideo(), etc. — 100% unchanged from your working version
     async function loadVideos() {
       const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistId).order('created_at', { ascending: false })
       const list = document.getElementById('videoList')
       list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>'
-
       for (const v of (videos || [])) {
         const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl
         const thumb = v.thumbnail_url ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id)
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false })
-
         const commentsHTML = comments.length === 0
           ? '<p class="text-gray-500 italic text-center">Be the first to comment!</p>'
           : comments.map(c => `<div><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')
-
         list.innerHTML += `
           <div class="video-card">
             <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
@@ -165,7 +150,7 @@
             </div>
           </div>`
       }
-
+      // Like & Comment handlers
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.classList.contains('liked')) return
@@ -177,7 +162,6 @@
           })
         })
       })
-
       document.querySelectorAll('button[data-video-id]').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.videoId
@@ -192,22 +176,18 @@
         })
       })
     }
-
     function openVideo(url) {
       document.getElementById('modalVideo').src = url
       document.getElementById('videoModal').classList.add('show')
     }
-
     function closeVideo() {
       document.getElementById('videoModal').classList.remove('show')
       document.getElementById('modalVideo').src = ''
     }
-
     window.openVideo = openVideo
     window.closeVideo = closeVideo
     document.getElementById('videoModal').addEventListener('click', e => e.target.id === 'videoModal' && closeVideo())
     document.addEventListener('keydown', e => e.key === 'Escape' && closeVideo())
-
     init()
   </script>
 </body>
