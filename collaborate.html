@@ -20,6 +20,26 @@
     .modal {display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98);
             z-index: 99999; justify-content: center; align-items: center;}
     .modal.active {display: flex;}
+    /* REMOVE THE 3 DOTS MENU + PiP + DOWNLOAD + SPEED */
+    video::-webkit-media-controls-panel { 
+      display: flex !important; 
+      opacity: 1 !important;
+    }
+    video::-webkit-media-controls-enclosure { 
+      display: flex !important; 
+      overflow: hidden !important;
+    }
+    video::-webkit-media-controls-overflow-button,
+    video::-webkit-media-controls-download-button,
+    video::-webkit-media-controls-picture-in-picture-button,
+    video::-webkit-media-controls-speed-button,
+    video::-webkit-media-controls-fullscreen-button,
+    video::-webkit-media-controls-timeline-container,
+    video::-webkit-media-controls-volume-slider-container,
+    video::-webkit-media-controls-mute-button,
+    video::-webkit-media-controls-play-button {
+      display: none !important;
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -54,7 +74,13 @@
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
     <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
-    <video id="modalVideo" controls class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
+    <video id="modalVideo" 
+           controls 
+           controlsList="nodownload noplaybackrate" 
+           disablePictureInPicture 
+           class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" 
+           style="max-height:85vh;">
+    </video>
   </div>
 </div>
 
@@ -73,12 +99,7 @@
       if (!user) return location.href = 'login.html';
       currentUser = user;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('collaboration_opt_in')
-        .eq('id', user.id)
-        .single();
-
+      const { data: profile } = await supabase.from('profiles').select('collaboration_opt_in').eq('id', user.id).single();
       if (!profile?.collaboration_opt_in) {
         alert("Join the network first!");
         return location.href = 'profile-admin-pro.html';
@@ -106,20 +127,16 @@
           ? supabase.storage.from('media').getPublicUrl(artist.banner_url).data.publicUrl 
           : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
 
-        const { data: videos } = await supabase
-          .from('user_videos')
-          .select('title, video_url')
-          .eq('user_id', artist.id);
+        const { data: videos } = await supabase.from('user_videos').select('title, video_url').eq('user_id', artist.id);
 
-        const tracks = (videos && videos.length > 0)
+        const tracks = videos?.length > 0
           ? videos.map(v => {
               const url = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
               return `<div class="song-item" onclick="playVideo('${url}')">${v.title || 'Untitled'}</div>`;
             }).join('')
           : '<p class="text-gray-500 text-xs">No tracks yet</p>';
 
-        // FIXED: Force use of subdomain if it exists and is not empty
-        const profileId = (artist.subdomain && artist.subdomain.trim() !== '') ? artist.subdomain.trim() : artist.id;
+        const profileId = artist.subdomain?.trim() ? artist.subdomain.trim() : artist.id;
 
         grid.innerHTML += `
           <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
@@ -146,7 +163,7 @@
       }
     } catch (err) {
       console.error("Load error:", err);
-      alert("Failed to load artists. Check console.");
+      alert("Failed to load artists.");
     }
   }
 
@@ -176,14 +193,13 @@
   // LOAD ARTISTS FIRST
   loadArtists();
 
-  // TALKJS — LOAD AFTER PAGE IS READY + PRE-CREATE SESSION
-  const script = document.createElement('script');
-  script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
-  script.onload = () => {
+  // TALKJS — LOAD & INITIALIZE PROPERLY
+  const talkScript = document.createElement('script');
+  talkScript.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
+  talkScript.onload = () => {
     Talk.ready.then(() => {
-      const msg = 'tLZqiXQU:' + currentUser.id;
-      const sig = CryptoJS.HmacSHA256(msg, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1');
-      const signature = sig.toString(CryptoJS.enc.Base64url);
+      const signature = CryptoJS.HmacSHA256('tLZqiXQU:' + currentUser.id, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1')
+                             .toString(CryptoJS.enc.Base64url);
 
       talkSession = new Talk.Session({
         appId: 'tLZqiXQU',
@@ -195,27 +211,27 @@
         signature: signature
       });
 
-      // Pre-mount an empty chatbox so opening is instant
-      talkSession.createChatbox().mount(document.getElementById('talkjs-container'));
-    }).catch(e => console.error("TalkJS init failed:", e));
+      // Pre-mount empty chatbox for instant opening
+      const inbox = talkSession.createInbox();
+      inbox.mount(document.getElementById('talkjs-container'));
+    }).catch(console.error);
   };
-  document.head.appendChild(script);
+  document.head.appendChild(talkScript);
 
-  // CHAT OPENS INSTANTLY — NO MORE "loading" ALERT
+  // CHAT WORKS INSTANTLY — FIXED
   function startChat(id, name, email) {
-    if (!talkSession || !Talk?.ready) {
-      // Fallback: retry in 300ms
+    if (!talkSession) {
       setTimeout(() => startChat(id, name, email), 300);
       return;
     }
 
-    const otherUser = new Talk.User({ id, name, email: email || undefined });
-    const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, otherUser));
-    convo.setParticipant(talkSession.me);
-    convo.setParticipant(otherUser);
-    convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
+    const otherUser = new Talk.User({ id, name, email: email || null });
+    const conversation = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, otherUser));
+    conversation.setParticipant(talkSession.me);
+    conversation.setParticipant(otherUser);
+    conversation.setAttributes({ subject: "Collab Request – Rhythm Deck" });
 
-    const chatbox = talkSession.createChatbox(convo);
+    const chatbox = talkSession.createChatbox(conversation);
     chatbox.mount(document.getElementById('talkjs-container'));
     document.getElementById('talkjs-container').style.display = 'block';
   }
