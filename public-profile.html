@@ -88,12 +88,14 @@
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`
       document.getElementById('artistName').textContent = profile.name || 'Artist'
 
-      // FIXED BIO — works for empty, null, line breaks, Free & Pro
+      // FINAL BULLETPROOF BIO FIX
       const bioElement = document.getElementById('artistBio')
-      const bioText = profile.bio?.trim()
-      bioElement.textContent = bioText || "This artist hasn't written a bio yet."
-      if (bioText) {
+      const rawBio = profile.bio
+      if (rawBio && rawBio.toString().trim() !== '') {
+        bioElement.textContent = rawBio
         bioElement.innerHTML = bioElement.innerHTML.replace(/\n/g, '<br>')
+      } else {
+        bioElement.textContent = "This artist hasn't written a bio yet."
       }
 
       // Banner
@@ -110,7 +112,7 @@
         document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now()
       }
 
-      // Rising Star Badge (Free plan only, 3+ videos)
+      // Rising Star Badge
       if (isFreePlan) {
         const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', profile.id)
         if (count >= 3) {
@@ -121,6 +123,7 @@
       loadVideos()
     }
 
+    // loadVideos(), openVideo(), closeVideo(), etc. — 100% unchanged from your working version
     async function loadVideos() {
       const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistId).order('created_at', { ascending: false })
       const list = document.getElementById('videoList')
@@ -163,7 +166,6 @@
           </div>`
       }
 
-      // Like & Comment handlers
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.classList.contains('liked')) return
