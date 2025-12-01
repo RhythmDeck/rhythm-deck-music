@@ -9,11 +9,11 @@
   <script src="https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
-    .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;display:inline-block;margin-left:8px;}
-    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-    .artist-card:hover {transform: translateY(-8px);transition:all .3s;box-shadow:0 20px 40px rgba(0,0,0,.5);}
-    .email-hover {opacity:0;transition:opacity .4s;pointer-events:none;}
+    .artist-card:hover {transform: translateY(-8px);transition:all .3s;box-shadow:0 20px 40px rgba(0,0,0,.6);}
+    .email-hover {opacity:0;transition:opacity .4s;}
     .artist-card:hover .email-hover {opacity:1;}
+    .video-thumb {transition:transform .3s;}
+    .video-thumb:hover {transform:scale(1.1);}
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -36,18 +36,16 @@
     Collaboration Network
   </h2>
   <p class="text-xl max-w-3xl mx-auto opacity-90">
-    Discover other Pro artists. Message instantly for collabs, features, remixes, shows.
+    Connect with Pro artists • View their public profile • Latest videos • Message instantly
   </p>
 </section>
 
 <section class="max-w-7xl mx-auto px-6 pb-20">
-  <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
-  <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">
-    No artists in the network yet. Be the first!
-  </p>
+  <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
+  <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists yet. Be the first!</p>
 </section>
 
-<div id="talkjs-container" style="position:fixed;bottom:20px;right:20px;width:380px;height:560px;z-index:9999;display:none;background:white;border-radius:16px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.8);border:4px solid #10b981;"></div>
+<div id="talkjs-container" style="position:fixed;bottom:20px;right:20px;width:380px;height:580px;z-index:9999;display:none;background:white;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,.9);border:5px solid #10b981;"></div>
 
 <script>
   const supabase = window.supabase.createClient(
@@ -55,12 +53,8 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
   );
 
-  // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-  //    REPLACE THESE TWO LINES WITH YOUR REAL CREDENTIALS
-  // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-
-  const TALKJS_APP_ID      = 'tLZqiXQU';                                      
-  const TALKJS_SECRET_KEY  = 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1';     
+  const TALKJS_APP_ID     = 'tLZqiXQU';
+  const TALKJS_SECRET_KEY = 'sk_test_IEmPfWI8f9gVZUhShL......'; // ← Your real key
 
   let currentUser = null;
   let talkSession = null;
@@ -70,14 +64,9 @@
     if (!user) { alert('Login required'); window.location.href = 'login.html'; return; }
     currentUser = user;
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('collaboration_opt_in')
-      .eq('id', user.id)
-      .single();
-
+    const { data: profile } = await supabase.from('profiles').select('collaboration_opt_in').eq('id', user.id).single();
     if (!profile?.collaboration_opt_in) {
-      alert("You must join the Collaboration Network first! Go to your dashboard and check the box.");
+      alert("Join the network first in your dashboard!");
       window.location.href = 'profile-admin-pro.html';
       return;
     }
@@ -96,39 +85,67 @@
     const grid = document.getElementById('artistsGrid');
     grid.innerHTML = '';
 
-    if (!artists || artists.length === 0) {
+    if (!artists?.length) {
       document.getElementById('noArtists').classList.remove('hidden');
       return;
     }
 
     for (const artist of artists) {
-      const logoUrl = artist.logo_url
-        ? supabase.storage.from('media').getPublicUrl(artist.logo_url).data.publicUrl
+      const logoUrl = artist.logo_url 
+        ? supabase.storage.from('media').getPublicUrl(artist.logo_url).data.publicUrl 
         : 'logo-placeholder.png';
 
-      const bannerUrl = artist.banner_url
-        ? supabase.storage.from('media').getPublicUrl(artist.banner_url).data.publicUrl
-        : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist+Banner';
+      const bannerUrl = artist.banner_url 
+        ? supabase.storage.from('media').getPublicUrl(artist.banner_url).data.publicUrl 
+        : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
+
+      // Get latest 4 videos
+      const { data: videos } = await supabase
+        .from('user_videos')
+        .select('thumbnail_url, title')
+        .eq('user_id', artist.id)
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      const videoHtml = videos?.length ? videos.map(v => `
+        <div class="relative group cursor-pointer overflow-hidden rounded-lg">
+          <img src="${v.thumbnail_url || 'https://via.placeholder.com/300x300/333/fff?text=No+Thumb'}"
+               class="w-full h-32 object-cover video-thumb">
+          <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+            <span class="text-white font-bold text-sm">${(v.title || 'Video').slice(0,20)}</span>
+          </div>
+        </div>
+      `).join('') : '<p class="text-gray-500 text-sm">No videos yet</p>';
 
       const { count: videoCount = 0 } = await supabase.from('user_videos').select('id', { count: 'exact', head: true }).eq('user_id', artist.id);
-      const videoIds = (await supabase.from('user_videos').select('id').eq('user_id', artist.id)).data || [];
-      const { count: likeCount = 0 } = videoIds.length > 0
-        ? await supabase.from('video_likes').select('id', { count: 'exact', head: true }).in('video_id', videoIds.map(v => v.id))
-        : { count: 0 };
+
+      // NEW: Public profile link (opens in new tab)
+      const publicProfileUrl = `https://rhythmdeck.com/${artist.id}`;
 
       grid.innerHTML += `
-        <div class="artist-card bg-gradient-to-br from-purple-800 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600 relative">
-          <div class="h-32 bg-cover bg-center" style="background-image:url('${bannerUrl}')"></div>
-          <div class="p-6 text-center -mt-16 relative z-10">
+        <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
+          <div class="h-40 bg-cover bg-center" style="background-image:url('${bannerUrl}')"></div>
+          <div class="p-6 -mt-20 relative z-10 text-center">
             <img src="${logoUrl}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover">
             <h3 class="text-2xl font-black mt-4">${artist.name || 'Artist'}</h3>
-            <p class="email-hover text-green-300 text-sm mt-1">Email: ${artist.email || 'Hidden'}</p>
-            <div class="flex justify-around mt-6 text-sm">
-              <div><strong>${videoCount}</strong><br>Videos</div>
-              <div><strong>${likeCount}</strong><br>Likes</div>
+            <p class="email-hover text-green-300 text-sm">Email: ${artist.email || 'Hidden'}</p>
+            <div class="text-sm text-gray-400 mt-3">${videoCount} Videos</div>
+
+            <!-- Latest Videos Grid -->
+            <div class="grid grid-cols-2 gap-3 mt-6">
+              ${videoHtml}
             </div>
+
+            <!-- VIEW PUBLIC PROFILE BUTTON -->
+            <a href="${publicProfileUrl}" target="_blank" class="inline-block w-full mt-4">
+              <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg py-3 rounded-xl shadow-xl transition transform hover:scale-105">
+                View Public Profile
+              </button>
+            </a>
+
+            <!-- MESSAGE BUTTON -->
             <button onclick="startChat('${artist.id}', '${(artist.name || 'Artist').replace(/'/g, "\\'")}', '${artist.email || ''}')"
-              class="w-full mt-6 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-4 rounded-xl shadow-xl transform hover:scale-105 transition">
+              class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-4 rounded-xl shadow-xl transform hover:scale-105 transition">
               Message for Collaboration
             </button>
           </div>
@@ -137,19 +154,13 @@
   }
 
   function createTalkJSSignature(userId) {
-    const message = `${userId}:${TALKJS_APP_ID}`;
+    const message = userId + ':' + TALKJS_APP_ID;
     const hash = CryptoJS.HmacSHA256(message, TALKJS_SECRET_KEY);
     return CryptoJS.enc.Base64.stringify(hash);
   }
 
   async function initTalkJS() {
-    if (TALKJS_SECRET_KEY.includes('XXXX') || TALKJS_SECRET_KEY.length < 30) {
-      alert('STOP! You forgot to replace the TalkJS secret key! Check line with TALKJS_SECRET_KEY');
-      return;
-    }
-
     await Talk.ready;
-
     const signature = createTalkJSSignature(currentUser.id);
 
     talkSession = new Talk.Session({
@@ -158,46 +169,47 @@
         id: currentUser.id,
         name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
         email: currentUser.email,
-        photoUrl: supabase.storage.from('media').getPublicUrl(`logos/${currentUser.id}`).data.publicUrl || 'logo-placeholder.png'
+        photoUrl: supabase.storage.from('media').getPublicUrl(`logos/${currentUser.id}`).data.publicUrl || null
       }),
       signature: signature
     });
 
-    // Auto-register user in TalkJS (required in test mode)
-    await fetch(`https://api.talkjs.com/v1/${TALKJS_APP_ID}/users/${currentUser.id}`, {
+    const registerUser = async (uid, name, email) => {
+      await fetch(`https://api.talkjs.com/v1/${TALKJS_APP_ID}/users/${uid}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TALKJS_SECRET_KEY}` },
+        body: JSON.stringify({
+          name: name,
+          email: [email || `${uid}@rhythmdeck.local`],
+          photoUrl: supabase.storage.from('media').getPublicUrl(`logos/${uid}`).data.publicUrl || null
+        })
+      }).catch(() => {});
+    };
+
+    await registerUser(currentUser.id, currentUser.user_metadata?.full_name || currentUser.email.split('@')[0], currentUser.email);
+    talkSession.createChatbox().mount(document.getElementById('talkjs-container'));
+  }
+
+  async function startChat(otherUserId, otherUserName, otherUserEmail) {
+    if (!talkSession) return alert('Chat loading...');
+
+    await fetch(`https://api.talkjs.com/v1/${TALKJS_APP_ID}/users/${otherUserId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TALKJS_SECRET_KEY}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TALKJS_SECRET_KEY}` },
       body: JSON.stringify({
-        name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
-        email: [currentUser.email],
-        photoUrl: supabase.storage.from('media').getPublicUrl(`logos/${currentUser.id}`).data.publicUrl || null
+        name: otherUserName,
+        email: [otherUserEmail || `${otherUserId}@rhythmdeck.local`],
+        photoUrl: supabase.storage.from('media').getPublicUrl(`logos/${otherUserId}`).data.publicUrl || null
       })
     }).catch(() => {});
 
-    const chatbox = talkSession.createChatbox();
-    chatbox.mount(document.getElementById('talkjs-container'));
-  }
+    const otherUser = new Talk.User({ id: otherUserId, name: otherUserName, email: otherUserEmail });
+    const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, otherUser));
+    convo.setParticipant(talkSession.me);
+    convo.setParticipant(otherUser);
+    convo.setAttributes({ subject: "Collaboration – Rhythm Deck" });
 
-  function startChat(otherUserId, otherUserName, otherUserEmail) {
-    if (!talkSession) return alert('Chat still loading…');
-
-    const otherUser = new Talk.User({
-      id: otherUserId,
-      name: otherUserName,
-      email: otherUserEmail || `${otherUserId}@rhythmdeck.local`,
-      photoUrl: supabase.storage.from('media').getPublicUrl(`logos/${otherUserId}`).data.publicUrl || 'logo-placeholder.png'
-    });
-
-    const conversationId = Talk.oneOnOneId(talkSession.me, otherUser);
-    const conversation = talkSession.getOrCreateConversation(conversationId);
-    conversation.setParticipant(talkSession.me);
-    conversation.setParticipant(otherUser);
-    conversation.setAttributes({ subject: "Collaboration – Rhythm Deck" });
-
-    talkSession.createChatbox(conversation).mount(document.getElementById('talkjs-container'));
+    talkSession.createChatbox(convo).mount(document.getElementById('talkjs-container'));
     document.getElementById('talkjs-container').style.display = 'block';
   }
 
