@@ -53,7 +53,7 @@
 
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
-    <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">x</button>
+    <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
     <video id="modalVideo" controls class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
   </div>
 </div>
@@ -65,8 +65,8 @@
   );
 
   let currentUser = null;
+  let talkSession = null;
 
-  // LOAD ARTISTS FIRST — TALKJS CANNOT BREAK THIS ANYMORE
   async function loadArtists() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -118,7 +118,8 @@
             }).join('')
           : '<p class="text-gray-500 text-xs">No tracks yet</p>';
 
-        const id = artist.subdomain?.trim() || artist.id;
+        // FIXED: Force use of subdomain if it exists and is not empty
+        const profileId = (artist.subdomain && artist.subdomain.trim() !== '') ? artist.subdomain.trim() : artist.id;
 
         grid.innerHTML += `
           <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
@@ -129,11 +130,13 @@
               <p class="email-hover text-green-300 text-sm mt-1">Email: ${artist.email}</p>
               <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
               <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
-              <a href="https://rhythm-deck-music.onrender.com/public-profile.html?id=${id}" target="_blank" class="block mt-5">
+              
+              <a href="https://rhythm-deck-music.onrender.com/public-profile.html?id=${profileId}" target="_blank" class="block mt-5">
                 <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
                   View Public Profile
                 </button>
               </a>
+              
               <button onclick="startChat('${artist.id}', '${(artist.name||'').replace(/'/g, "\\'")}', '${artist.email||''}')"
                 class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
                 Message for Collab
@@ -143,7 +146,7 @@
       }
     } catch (err) {
       console.error("Load error:", err);
-      alert("Failed to load artists. Check console (F12).");
+      alert("Failed to load artists. Check console.");
     }
   }
 
@@ -170,21 +173,13 @@
     location.href = 'login.html';
   }
 
-  // LOAD ARTISTS IMMEDIATELY
+  // LOAD ARTISTS FIRST
   loadArtists();
 
-  // TALKJS — LOADED LAST SO IT CAN'T BREAK ANYTHING
-  setTimeout(() => {
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
-    script.onload = initTalkJS;
-    script.onerror = () => console.log("TalkJS failed to load — chat disabled");
-    document.head.appendChild(script);
-  }, 1000);
-
-  let talkSession = null;
-  function initTalkJS() {
-    if (!currentUser) return;
+  // TALKJS — LOAD AFTER PAGE IS READY + PRE-CREATE SESSION
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
+  script.onload = () => {
     Talk.ready.then(() => {
       const msg = 'tLZqiXQU:' + currentUser.id;
       const sig = CryptoJS.HmacSHA256(msg, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1');
@@ -200,18 +195,28 @@
         signature: signature
       });
 
+      // Pre-mount an empty chatbox so opening is instant
       talkSession.createChatbox().mount(document.getElementById('talkjs-container'));
-    }).catch(console.error);
-  }
+    }).catch(e => console.error("TalkJS init failed:", e));
+  };
+  document.head.appendChild(script);
 
+  // CHAT OPENS INSTANTLY — NO MORE "loading" ALERT
   function startChat(id, name, email) {
-    if (!talkSession) return alert("Chat loading... try again");
-    const user = new Talk.User({ id, name, email: email || undefined });
-    const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, user));
+    if (!talkSession || !Talk?.ready) {
+      // Fallback: retry in 300ms
+      setTimeout(() => startChat(id, name, email), 300);
+      return;
+    }
+
+    const otherUser = new Talk.User({ id, name, email: email || undefined });
+    const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, otherUser));
     convo.setParticipant(talkSession.me);
-    convo.setParticipant(user);
+    convo.setParticipant(otherUser);
     convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
-    talkSession.createChatbox(convo).mount(document.getElementById('talkjs-container'));
+
+    const chatbox = talkSession.createChatbox(convo);
+    chatbox.mount(document.getElementById('talkjs-container'));
     document.getElementById('talkjs-container').style.display = 'block';
   }
 </script>
