@@ -22,7 +22,6 @@
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-
 <header class="bg-black/90 backdrop-blur-lg border-b border-purple-600 p-6 shadow-2xl">
   <div class="max-w-7xl mx-auto flex justify-between items-center">
     <div class="flex items-center space-x-4">
@@ -48,8 +47,10 @@
   <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists available yet. Be the first!</p>
 </section>
 
+<!-- TalkJS Chat Container -->
 <div id="talkjs-container" style="position:fixed;bottom:20px;right:20px;width:380px;height:580px;z-index:9999;display:none;background:white;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,.9);border:5px solid #10b981;"></div>
 
+<!-- Video Modal -->
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
     <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
@@ -59,7 +60,6 @@
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
-
   const supabase = createClient(
     "https://bxoqhmfnseskwqkywppg.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
@@ -68,14 +68,12 @@
   let currentUser = null;
   let talkSession = null;
 
-  // Check access
   async function checkAccess() {
     const { data: profile } = await supabase
       .from('profiles')
       .select('collaboration_opt_in')
       .eq('id', currentUser.id)
       .single();
-
     if (!profile?.collaboration_opt_in) {
       alert("You must turn on 'Open to Collaboration' in your profile first!");
       location.href = 'profile-admin-pro.html';
@@ -84,24 +82,21 @@
     return true;
   }
 
-  // MAIN START
   (async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return location.href = 'login.html';
     currentUser = user;
-
     if (!await checkAccess()) return;
 
     await loadArtists();
     loadTalkJS();
   })();
 
-  // FIXED: Now Black Birds appears 100%
   async function loadArtists() {
     const { data: artists } = await supabase
       .from('profiles')
       .select('id, name, logo_url, banner_url, email, subdomain')
-      .eq('collaboration_opt_in', true)   // This is the correct column
+      .eq('collaboration_opt_in', true)
       .neq('id', currentUser.id);
 
     const grid = document.getElementById('artistsGrid');
@@ -111,17 +106,15 @@
       document.getElementById('noArtists').classList.remove('hidden');
       return;
     }
-
     document.getElementById('noArtists').classList.add('hidden');
 
     for (const a of artists) {
-      const logo = a.logo_url 
-        ? supabase.storage.from('media').getPublicUrl(a.logo_url).data.publicUrl 
+      const logo = a.logo_url
+        ? supabase.storage.from('media').getPublicUrl(a.logo_url).data.publicUrl
         : 'logo-placeholder.png';
-
-      const banner = a.banner_url 
-        ? supabase.storage.from('media').getPublicUrl(a.banner_url).data.publicUrl 
-        : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
+      const banner = a.banner_url
+        ? supabase.storage.from('media').getPublicUrl(a.banner_url).data.publicUrl
+        : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist+Banner';
 
       const { data: videos } = await supabase
         .from('user_videos')
@@ -136,7 +129,7 @@
           }).join('')
         : '<p class="text-gray-500 text-xs">No tracks yet</p>';
 
-      const profileId = a.subdomain?.trim() || a.id;
+      const profileId = a.subdomain?.trim() ? a.subdomain.trim() : a.id;
 
       grid.innerHTML += `
         <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
@@ -161,13 +154,12 @@
     }
   }
 
-  // FIXED: Videos now play perfectly
   window.playVideo = function(url) {
     const modal = document.getElementById('videoModal');
     const video = document.getElementById('modalVideo');
     video.src = url;
     modal.classList.add('active');
-    video.play().catch(err => console.log("Play failed:", err));
+    video.play();
   };
 
   window.closeModal = function() {
@@ -178,63 +170,59 @@
     modal.classList.remove('active');
   };
 
-  // Close modal on background click
   document.getElementById('videoModal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeModal();
   });
 
-  // Logout
   window.logout = async function() {
     await supabase.auth.signOut();
     location.href = 'login.html';
   };
 
-  // FIXED: TalkJS now works 100%
+  // FULLY WORKING TALKJS (Test Mode)
   function loadTalkJS() {
-    if (typeof Talk === 'undefined') {
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
-      script.onload = initTalkJS;
-      document.head.appendChild(script);
-    } else {
-      initTalkJS();
-    }
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/talkjs@~0.16.0/dist/talkjs.all.js';
+    script.onload = initTalkJS;
+    document.head.appendChild(script);
   }
 
   function initTalkJS() {
     Talk.ready.then(() => {
-      import('https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js').then(CryptoJS => {
-        const signature = CryptoJS.default.HmacSHA256(`tLZqiXQU:${currentUser.id}`, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1')
-          .toString(CryptoJS.default.enc.Base64url);
+      const me = new Talk.User({
+        id: currentUser.id,
+        name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
+        email: currentUser.email,
+        role: 'member'
+      });
 
-        talkSession = new Talk.Session({
-          appId: 'tLZqiXQU',
-          me: new Talk.User({
-            id: currentUser.id,
-            name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
-            email: currentUser.email
-          }),
-          signature
+      talkSession = new Talk.Session({
+        appId: 'tLZqiXQU',
+        me: me
+      });
+
+      // Pre-create inbox (hidden)
+      const inbox = talkSession.createInbox();
+      inbox.mount(document.getElementById('talkjs-container'));
+
+      window.openChat = function(otherUserId, otherName, otherEmail) {
+        const other = new Talk.User({
+          id: otherUserId,
+          name: otherName,
+          email: otherEmail || undefined
         });
 
-        // Pre-mount inbox (invisible)
-        talkSession.createInbox().mount(document.getElementById('talkjs-container'));
+        const conversation = talkSession.getOrCreateConversation(Talk.oneOnOneId(me, other));
+        conversation.setParticipant(me);
+        conversation.setParticipant(other);
+        conversation.setAttributes({ subject: "Collab Request – Rhythm Deck" });
 
-        // Global function for buttons
-        window.openChat = function(id, name, email) {
-          if (!talkSession) return alert("Chat not ready yet");
-          const other = new Talk.User({ id, name, email: email || null });
-          const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, other));
-          convo.setParticipant(talkSession.me);
-          convo.setParticipant(other);
-          convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
-          talkSession.createChatbox(convo).mount(document.getElementById('talkjs-container'));
-          document.getElementById('talkjs-container').style.display = 'block';
-        };
-      });
+        const chatbox = talkSession.createChatbox(conversation);
+        chatbox.mount(document.getElementById('talkjs-container'));
+        document.getElementById('talkjs-container').style.display = 'block';
+      };
     });
   }
 </script>
-
 </body>
 </html>
