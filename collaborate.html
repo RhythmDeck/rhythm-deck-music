@@ -74,11 +74,9 @@
   let currentUser = null;
   let talkSession = null;
 
-  // MAIN START
-  (async function init() {
+  (async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return location.href = 'login.html';
-
     currentUser = user;
 
     const { data: profile } = await supabase
@@ -93,88 +91,102 @@
     }
 
     await loadArtists();
-    loadTalkJS(); // Safe to load now
+    loadTalkJS();
   })();
 
   async function loadArtists() {
-    const { data: artists, error } = await supabase
-      .from('profiles')
-      .select('id, name, logo_url, banner_url, email, subdomain')
-      .eq('collaboration_opt_in', true)
-      .neq('id', currentUser.id);
+    try {
+      const { data: artists } = await supabase
+        .from('profiles')
+        .select('id, name, logo_url, banner_url, email, subdomain')
+        .eq('collaboration_opt_in', true)
+        .neq('id', currentUser.id);
 
-    if (error || !artists?.length) {
-      document.getElementById('noArtists').classList.remove('hidden');
-      return;
-    }
+      const grid = document.getElementById('artistsGrid');
+      grid.innerHTML = '';
 
-    const grid = document.getElementById('artistsGrid');
-    grid.innerHTML = '';
+      if (!artists || artists.length === 0) {
+        document.getElementById('noArtists').classList.remove('hidden');
+        return;
+      }
 
-    for (const a of artists) {
-      const logo = a.logo_url ? supabase.storage.from('media').getPublicUrl(a.logo_url).data.publicUrl : 'logo-placeholder.png';
-      const banner = a.banner_url ? supabase.storage.from('media').getPublicUrl(a.banner_url).data.publicUrl : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
+      for (const a of artists) {
+        const logo = a.logo_url 
+          ? supabase.storage.from('media').getPublicUrl(a.logo_url).data.publicUrl 
+          : 'logo-placeholder.png';
 
-      const { data: videos } = await supabase
-        .from('user_videos')
-        .select('title, video_url')
-        .eq('user_id', a.id);
+        const banner = a.banner_url 
+          ? supabase.storage.from('media').getPublicUrl(a.banner_url).data.publicUrl 
+          : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
 
-      const tracks = videos?.length
-        ? videos.map(v => `<div class="song-item" onclick="playVideo('${supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl}')">${v.title || 'Untitled'}</div>`).join('')
-        : '<p class="text-gray-500 text-xs">No tracks yet</p>';
+        const { data: videos } = await supabase
+          .from('user_videos')
+          .select('title, video_url')
+          .eq('user_id', a.id);
 
-      // THIS IS THE KEY FIX: use subdomain if exists, fallback to UUID
-      const profileId = a.subdomain?.trim() || a.id;
+        const tracks = videos?.length > 0
+          ? videos.map(v => {
+              const url = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+              return `<div class="song-item" onclick="playVideo('${url}')">${v.title || 'Untitled'}</div>`;
+            }).join('')
+          : '<p class="text-gray-500 text-xs">No tracks yet</p>';
 
-      grid.innerHTML += `
-        <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
-          <div class="h-40 bg-cover bg-center" style="background-image:url('${banner}')"></div>
-          <div class="p-6 -mt-20 relative z-10 text-center">
-            <img src="${logo}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover">
-            <h3 class="text-2xl font-black mt-4">${a.name}</h3>
-            <p class="email-hover text-green-300 text-sm mt-1">Email: ${a.email}</p>
-            <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
-            <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
+        const profileId = a.subdomain?.trim() || a.id;
 
-            <a href="https://rhythm-deck-music.onrender.com/public-profile.html?id=${profileId}" target="_blank" class="block mt-5">
-              <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
-                View Public Profile
+        grid.innerHTML += `
+          <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
+            <div class="h-40 bg-cover bg-center" style="background-image:url('${banner}')"></div>
+            <div class="p-6 -mt-20 relative z-10 text-center">
+              <img src="${logo}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover" onerror="this.src='logo-placeholder.png'">
+              <h3 class="text-2xl font-black mt-4">${a.name || 'Unknown Artist'}</h3>
+              <p class="email-hover text-green-300 text-sm mt-1">Email: ${a.email || 'hidden'}</p>
+              <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
+              <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
+
+              <a href="https://rhythm-deck-music.onrender.com/public-profile.html?id=${profileId}" target="_blank" class="block mt-5">
+                <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
+                  View Public Profile
+                </button>
+              </a>
+
+              <button onclick="openChat('${a.id}', '${(a.name || '').replace(/'/g, "\\'")}', '${a.email || ''}')"
+                class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
+                Message for Collab
               </button>
-            </a>
-
-            <button onclick="openChat('${a.id}', '${a.name.replace(/'/g, "\\'")}', '${a.email}')"
-              class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
-              Message for Collab
-            </button>
-          </div>
-        </div>`;
+            </div>
+          </div>`;
+      }
+    } catch (err) {
+      console.error("Error loading artists:", err);
+      document.getElementById('noArtists').textContent = "Error loading artists. Check internet or try again.";
+      document.getElementById('noArtists').classList.remove('hidden');
     }
   }
 
   function playVideo(url) {
-    const modal = document.getElementById('videoModal');
     const video = document.getElementById('modalVideo');
     video.src = url;
-    modal.classList.add('active');
-    video.play();
+    document.getElementById('videoModal').classList.add('active');
+    video.play().catch(() => {});
   }
 
   function closeModal() {
     const modal = document.getElementById('videoModal');
-    const video.pause();
+    const video = document.getElementById('modalVideo');
+    video.pause();
     video.src = '';
     modal.classList.remove('active');
   }
 
-  document.getElementById('videoModal').onclick = e => e.target === e.currentTarget && closeModal();
+  document.getElementById('videoModal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
 
   async function logout() {
     await supabase.auth.signOut();
     location.href = 'login.html';
   }
 
-  // TALKJS — LOADED ONLY AFTER USER IS KNOWN
   function loadTalkJS() {
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
@@ -193,23 +205,19 @@
           signature
         });
 
-        // Pre-mount so chat opens instantly
         talkSession.createInbox().mount(document.getElementById('talkjs-container'));
       }).catch(console.error);
     };
     document.head.appendChild(script);
   }
 
-  // CHAT OPEN — WORKS 100%
   function openChat(id, name, email) {
     if (!talkSession) return setTimeout(() => openChat(id, name, email), 300);
-
     const other = new Talk.User({ id, name, email: email || null });
     const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(talkSession.me, other));
     convo.setParticipant(talkSession.me);
     convo.setParticipant(other);
     convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
-
     talkSession.createChatbox(convo).mount(document.getElementById('talkjs-container'));
     document.getElementById('talkjs-container').style.display = 'block';
   }
