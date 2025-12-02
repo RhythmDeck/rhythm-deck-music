@@ -53,7 +53,7 @@
 
 <section class="max-w-7xl mx-auto px-6 pb-20">
   <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
-  <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists yet.</p>
+  <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists available yet. Be the first!</p>
 </section>
 
 <div id="talkjs-container" style="position:fixed;bottom:20px;right:20px;width:380px;height:580px;z-index:9999;display:none;background:white;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,.9);border:5px solid #10b981;"></div>
@@ -79,31 +79,49 @@
     if (!user) return location.href = 'login.html';
     currentUser = user;
 
-    // BULLETPROOF CHECK — uses .maybeSingle() so it never crashes
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('open_to_collab')
-      .eq('id', user.id)
-      .maybeSingle();
+    // SUPER ROBUST CHECK — retries up to 3 times with delay
+    let profile = null;
+    for (let i = 0; i < 3; i++) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('open_to_collab')
+        .eq('id', user.id)
+        .maybeSingle();
 
-    // If profile doesn't exist yet, create it with open_to_collab = false
+      if (data) {
+        profile = data;
+        break;
+      }
+      if (i < 2) await new Promise(r => setTimeout(r, 800)); // wait before retry
+    }
+
+    // Still no profile? Create one
     if (!profile) {
       await supabase.from('profiles').upsert({ 
         id: user.id, 
-        open_to_collab: false,
-        collaboration_opt_in: true  // keep old column for backward compat
+        open_to_collab: false 
       });
-      alert("Welcome! Please go to your profile and turn on 'Open to Collaboration' to join the network.");
+      alert("Profile created! Now go to your dashboard and turn on 'Open to Collaboration' to join.");
       return location.href = 'profile-admin-pro.html';
     }
 
-    // If it's false, redirect with clear message
+    // CHECK IF USER JUST TURNED IT ON VIA URL PARAM
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.get('collab') === 'enabled') {
+      // Force update and reload
+      await supabase.from('profiles').update({ open_to_collab: true }).eq('id', user.id);
+      location.href = 'collaborate.html'; // clean reload
+      return;
+    }
+
+    // FINAL CHECK
     if (!profile.open_to_collab) {
-      alert("You must turn on 'Open to Collaboration' in your profile to access this page!");
-      return location.href = 'profile-admin-pro.html';
+      alert("You must turn on 'Open to Collaboration' in your profile first!");
+      location.href = 'profile-admin-pro.html';
+      return;
     }
 
-    // SUCCESS — user is allowed in
+    // SUCCESS — YOU'RE IN
     await loadArtists();
     loadTalkJS();
   })();
@@ -121,29 +139,16 @@
 
       if (!artists || artists.length === 0) {
         document.getElementById('noArtists').classList.remove('hidden');
-        document.getElementById('noArtists').textContent = "No artists available for collab yet. Be the first!";
         return;
       }
 
       for (const a of artists) {
-        const logo = a.logo_url
-          ? supabase.storage.from('media').getPublicUrl(a.logo_url).data.publicUrl
-          : 'logo-placeholder.png';
+        const logo = a.logo_url ? supabase.storage.from('media').getPublicUrl(a.logo_url).data.publicUrl : 'logo-placeholder.png';
+        const banner = a.banner_url ? supabase.storage.from('media').getPublicUrl(a.banner_url).data.publicUrl : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
 
-        const banner = a.banner_url
-          ? supabase.storage.from('media').getPublicUrl(a.banner_url).data.publicUrl
-          : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
-
-        const { data: videos } = await supabase
-          .from('user_videos')
-          .select('title, video_url')
-          .eq('user_id', a.id);
-
+        const { data: videos } = await supabase.from('user_videos').select('title, video_url').eq('user_id', a.id);
         const tracks = videos?.length > 0
-          ? videos.map(v => {
-              const url = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
-              return `<div class="song-item" onclick="playVideo('${url}')">${v.title || 'Untitled'}</div>`;
-            }).join('')
+          ? videos.map(v => `<div class="song-item" onclick="playVideo('${supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl}')">${v.title || 'Untitled'}</div>`).join('')
           : '<p class="text-gray-500 text-xs">No tracks yet</p>';
 
         const profileId = a.subdomain?.trim() || a.id;
@@ -157,13 +162,11 @@
               <p class="email-hover text-green-300 text-sm mt-1">Email: ${a.email || 'hidden'}</p>
               <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
               <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
-
               <a href="https://rhythm-deck-music.onrender.com/public-profile.html?id=${profileId}" target="_blank" class="block mt-5">
                 <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
                   View Public Profile
                 </button>
               </a>
-
               <button onclick="openChat('${a.id}', '${(a.name || '').replace(/'/g, "\\'")}', '${a.email || ''}')"
                 class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
                 Message for Collab
@@ -172,8 +175,8 @@
           </div>`;
       }
     } catch (err) {
-      console.error("Load artists failed:", err);
-      document.getElementById('noArtists').textContent = "Failed to load artists. Refresh the page.";
+      console.error(err);
+      document.getElementById('noArtists').textContent = "Error loading artists. Try again.";
       document.getElementById('noArtists').classList.remove('hidden');
     }
   }
@@ -186,16 +189,12 @@
   }
 
   function closeModal() {
-    const modal = document.getElementById('videoModal');
     const video = document.getElementById('modalVideo');
-    video.pause();
-    video.src = '';
-    modal.classList.remove('active');
+    video.pause(); video.src = '';
+    document.getElementById('videoModal').classList.remove('active');
   }
 
-  document.getElementById('videoModal').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeModal();
-  });
+  document.getElementById('videoModal').addEventListener('click', e => e.target === e.currentTarget && closeModal());
 
   async function logout() {
     await supabase.auth.signOut();
@@ -207,9 +206,7 @@
     script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
     script.onload = () => {
       Talk.ready.then(() => {
-        const signature = CryptoJS.HmacSHA256(`tLZqiXQU:${currentUser.id}`, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1')
-                               .toString(CryptoJS.enc.Base64url);
-
+        const signature = CryptoJS.HmacSHA256(`tLZqiXQU:${currentUser.id}`, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1').toString(CryptoJS.enc.Base64url);
         talkSession = new Talk.Session({
           appId: 'tLZqiXQU',
           me: new Talk.User({
@@ -219,9 +216,8 @@
           }),
           signature
         });
-
         talkSession.createInbox().mount(document.getElementById('talkjs-container'));
-      }).catch(console.error);
+      });
     };
     document.head.appendChild(script);
   }
