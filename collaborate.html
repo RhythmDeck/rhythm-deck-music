@@ -79,14 +79,15 @@
     if (!user) return location.href = 'login.html';
     currentUser = user;
 
+    // FIXED: Now checking the correct column
     const { data: profile } = await supabase
       .from('profiles')
-      .select('collaboration_opt_in')
+      .select('open_to_collab')
       .eq('id', user.id)
       .single();
 
-    if (!profile?.collaboration_opt_in) {
-      alert("Please join the collaboration network first!");
+    if (!profile?.open_to_collab) {
+      alert("Please turn on 'Open to Collaboration' in your profile first!");
       return location.href = 'profile-admin-pro.html';
     }
 
@@ -96,10 +97,11 @@
 
   async function loadArtists() {
     try {
+      // FIXED: Now using the correct column to show artists
       const { data: artists } = await supabase
         .from('profiles')
         .select('id, name, logo_url, banner_url, email, subdomain')
-        .eq('collaboration_opt_in', true)
+        .eq('open_to_collab', true)        // ← THIS WAS THE BUG
         .neq('id', currentUser.id);
 
       const grid = document.getElementById('artistsGrid');
@@ -111,12 +113,12 @@
       }
 
       for (const a of artists) {
-        const logo = a.logo_url 
-          ? supabase.storage.from('media').getPublicUrl(a.logo_url).data.publicUrl 
+        const logo = a.logo_url
+          ? supabase.storage.from('media').getPublicUrl(a.logo_url).data.publicUrl
           : 'logo-placeholder.png';
 
-        const banner = a.banner_url 
-          ? supabase.storage.from('media').getPublicUrl(a.banner_url).data.publicUrl 
+        const banner = a.banner_url
+          ? supabase.storage.from('media').getPublicUrl(a.banner_url).data.publicUrl
           : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist';
 
         const { data: videos } = await supabase
@@ -158,7 +160,7 @@
       }
     } catch (err) {
       console.error("Error loading artists:", err);
-      document.getElementById('noArtists').textContent = "Error loading artists. Check internet or try again.";
+      document.getElementById('noArtists').textContent = "Error loading artists. Try refreshing.";
       document.getElementById('noArtists').classList.remove('hidden');
     }
   }
