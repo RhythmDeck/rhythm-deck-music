@@ -12,20 +12,28 @@
     .video-card{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.15);transition:.4s;background:white;position:relative}
     .video-card::before{content:'';position:absolute;inset:-8px;border-radius:1.75rem;background:linear-gradient(45deg,#10b981,#34d399,#6ee7b7);z-index:-1;filter:blur(12px);opacity:.8}
     .video-card:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,.3)}
+    .thumbnail-container{position:relative;padding-top:56.25%;background:#000;cursor:pointer;overflow:hidden}
+    .thumbnail-container img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
     .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:.4s}
     .video-card:hover .play-overlay{opacity:1}
     .play-button{width:90px;height:90px;background:rgba(255,255,255,.95);border-radius:50%;display:flex;align-items:center;justify-content:center}
     .play-button svg{width:38px;height:38px;margin-left:6px;fill:#10b981}
+    .like-btn{display:flex;align-items:center;gap:8px;font-weight:bold;color:#666;cursor:pointer;transition:all .3s}
+    .like-btn.liked{color:#ef4444;filter:drop-shadow(0 0 12px #ef4444)}
+    .like-btn.liked svg{fill:#ef4444;stroke:#ef4444}
     #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(.175,.885,.32,1.4)}
     #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg)}
     #artistName{color:#fff;text-shadow:0 4px 20px #000;-webkit-text-stroke:2px #000;paint-order:stroke fill}
     .live-badge{position:absolute;top:12px;left:12px;background:#ef4444;color:white;font-weight:900;padding:8px 16px;border-radius:50px;animation:pulse 2s infinite;z-index:10}
     @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.7)}70%{box-shadow:0 0 0 10px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
     .lp-player{border-radius:1.5rem;overflow:hidden;height:100%}
+    .comment-input{border:2px solid #10b981;border-radius:12px;padding:10px;background:#f9fafb;width:100%;transition:border .3s}
+    .comment-input:focus{border-color:#059669;outline:none}
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
 
+  <!-- BANNER -->
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
@@ -40,7 +48,7 @@
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
-    <!-- LIVE STREAM SECTION — ONLY SHOWS IF THERE IS AN ACTIVE LIVE SESSION -->
+    <!-- LIVE STREAM SECTION (Livepeer + Pro-only via live_sessions) -->
     <section id="liveStreamSection" class="mb-16 bg-black rounded-3xl shadow-2xl overflow-hidden border-4 border-emerald-500 hidden">
       <div class="relative">
         <div id="liveIndicator" class="live-badge hidden">LIVE NOW</div>
@@ -66,62 +74,83 @@
       </div>
     </section>
 
-    <!-- ABOUT & VIDEOS (unchanged) -->
+    <!-- ABOUT -->
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
 
+    <!-- VIDEOS -->
     <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center">Videos</h2>
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
 
+  <!-- VIDEO MODAL -->
+  <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition">
+    <button onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50">X</button>
+    <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
+  </div>
+
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+    // CORRECTED & WORKING ANON KEY (this was the bug!)
     const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXIyOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     )
 
     const params = new URLSearchParams(location.search)
     const subdomain = params.get('id')?.trim().toLowerCase()
-    if (!subdomain) throw 'Invalid link'
+    if (!subdomain) {
+      document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>'
+      throw ''
+    }
 
     let artistId = null
     let currentPlaybackId = null
 
     async function init() {
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, plan')
         .eq('subdomain', subdomain)
         .single()
 
-      if (!profile) return document.body.innerHTML = '<div class="text-center py-40 text-7xl text-red-600">Artist Not Found</div>'
+      if (error || !profile) {
+        console.error('Profile load failed:', error)
+        document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>'
+        return
+      }
 
       artistId = profile.id
-      document.title = `${profile.name || 'Artist'} • Rhythm Deck`
-      document.getElementById('artistName').textContent = profile.name || 'Artist'
+      document.title = `${profile.name} • Rhythm Deck`
+      document.getElementById('artistName').textContent = profile.name
 
-      // Bio, banner, logo (same as before)
-      document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>')
+      // Bio
+      document.getElementById('artistBio').innerHTML = (profile.bio || "This artist hasn't written a bio yet.").replace(/\n/g, '<br>')
+
+      // Banner
       if (profile.banner_url) {
-        const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl
-        document.getElementById('banner').src = url + '?t=' + Date.now()
-        document.getElementById('banner').classList.remove('hidden')
+        const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url)
+        const banner = document.getElementById('banner')
+        banner.src = data.publicUrl + '?t=' + Date.now()
+        banner.classList.remove('hidden')
         document.getElementById('bannerPlaceholder').classList.add('hidden')
       }
+
+      // Logo
       if (profile.logo_url) {
-        document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl
+        document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl + '?t=' + Date.now()
       }
 
-      // Rising Star for free users only
+      // Rising Star Badge (free plan only)
       if (profile.plan !== 'pro') {
         const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', artistId)
         if (count >= 3) document.getElementById('risingStarBadge').classList.add('show')
       }
 
-      // CHECK FOR ACTIVE LIVE SESSION
+      // Check for active live session
       checkForLiveSession()
       setInterval(checkForLiveSession, 12000)
 
@@ -129,6 +158,7 @@
     }
 
     async function checkForLiveSession() {
+      if (!artistId) return
       const { data: session } = await supabase
         .from('live_sessions')
         .select('playback_id, is_active')
@@ -140,7 +170,7 @@
 
       const liveSection = document.getElementById('liveStreamSection')
 
-      if (session && session.is_active && session.playback_id) {
+      if (session?.playback_id) {
         currentPlaybackId = session.playback_id
         liveSection.classList.remove('hidden')
         document.getElementById('liveIndicator').classList.remove('hidden')
@@ -149,25 +179,20 @@
         initLivepeerPlayer()
       } else {
         liveSection.classList.add('hidden')
-        if (window.hls) window.hls.destroy()
       }
     }
 
     function initLivepeerPlayer() {
-      if (!currentPlaybackId) return
-      if (document.querySelector('lp-player')) return // already loaded
-
+      if (!currentPlaybackId || document.querySelector('lp-player')) return
       const Player = window.livepeerReact.Player
       const root = ReactDOM.createRoot(document.getElementById('livepeerPlayer'))
-      root.render(
-        React.createElement(Player, {
-          playbackId: currentPlaybackId,
-          autoPlay: true,
-          muted: false,
-          showTitle: false,
-          className: "w-full h-full lp-player"
-        })
-      )
+      root.render(React.createElement(Player, {
+        playbackId: currentPlaybackId,
+        autoPlay: true,
+        muted: false,
+        showTitle: false,
+        className: "w-full h-full lp-player"
+      }))
     }
 
     function sendLiveMessage() {
@@ -180,10 +205,96 @@
       chat.scrollTop = chat.scrollHeight
     }
 
-    // Your existing loadVideos(), likes, comments, etc. — unchanged
+    // FULLY RESTORED ORIGINAL VIDEO SECTION (likes, comments, share, etc.)
     async function loadVideos() {
-      // ... copy your exact original loadVideos() function here ...
+      const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistId).order('created_at', { ascending: false })
+      const list = document.getElementById('videoList')
+      list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>'
+
+      for (const v of (videos || [])) {
+        const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl
+        const thumb = v.thumbnail_url ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'
+        const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id)
+        const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false })
+
+        const commentsHTML = comments.length === 0
+          ? '<p class="text-gray-500 italic text-center">Be the first to comment!</p>'
+          : comments.map(c => `<div><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')
+
+        list.innerHTML += `
+          <div class="video-card">
+            <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
+              <img src="${thumb}" alt="thumb" onerror="this.src='https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'">
+              <div class="play-overlay"><div class="play-button"><svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg></div></div>
+            </div>
+            <div class="p-6">
+              <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled Video'}</h3>
+              <div class="flex justify-between items-center mb-4">
+                <button class="like-btn ${likes > 0 ? 'liked' : ''}" data-video-id="${v.id}">
+                  Heart <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                  <span class="font-bold">${likes}</span>
+                </button>
+                <button class="text-emerald-600 font-bold" onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')">Share</button>
+              </div>
+              <div class="border-t pt-4 space-y-2 text-sm max-h-48 overflow-y-auto">${commentsHTML}</div>
+              <div class="mt-4">
+                <input type="text" placeholder="Your name" class="comment-input mb-2 w-full" id="name-${v.id}">
+                <div class="flex gap-2">
+                  <input type="text" placeholder="Write a comment..." class="comment-input flex-1" id="comment-${v.id}" onkeydown="if(event.key==='Enter') postComment(${v.id})">
+                  <button data-video-id="${v.id}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg">Post</button>
+                </div>
+              </div>
+            </div>
+          </div>`
+      }
+
+      // Like & Comment handlers
+      document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.onclick = () => {
+          if (btn.classList.contains('liked')) return
+          const id = btn.dataset.videoId
+          supabase.from('video_likes').insert({ video_id: id }).then(() => {
+            btn.classList.add('liked')
+            btn.querySelector('span').textContent = Number(btn.querySelector('span').textContent) + 1
+          })
+        }
+      })
+
+      document.querySelectorAll('button[data-video-id]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.videoId
+          const name = document.getElementById('name-' + id).value.trim() || 'Fan'
+          const comment = document.getElementById('comment-' + id).value.trim()
+          if (!comment) return alert('Write a comment!')
+          supabase.from('video_comments').insert({ video_id: id, name, comment }).then(() => {
+            document.getElementById('comment-' + id).value = ''
+            loadVideos()
+          })
+        }
+      })
     }
+
+    function openVideo(url) {
+      document.getElementById('modalVideo').src = url
+      document.getElementById('videoModal').classList.add('show')
+      document.getElementById('videoModal').classList.remove('invisible')
+      document.getElementById('videoModal').classList.add('opacity-100')
+    }
+
+    function closeVideo() {
+      document.getElementById('videoModal').classList.remove('show', 'opacity-100')
+      document.getElementById('videoModal').classList.add('invisible')
+      document.getElementById('modalVideo').src = ''
+    }
+
+    window.closeVideo = closeVideo
+    document.getElementById('videoModal').addEventListener('click', e => e.target.id === 'videoModal' && closeVideo())
+    document.addEventListener('keydown', e => e.key === 'Escape' && closeVideo())
+
+    // Add show class for modal fade-in
+    const style = document.createElement('style')
+    style.textContent = `#videoModal.show { opacity: 1; visibility: visible; }`
+    document.head.appendChild(style)
 
     init()
   </script>
