@@ -11,27 +11,26 @@
   <style>
     .video-card{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.15);transition:.4s;background:white;position:relative}
     .video-card::before{content:'';position:absolute;inset:-8px;border-radius:1.75rem;background:linear-gradient(45deg,#10b981,#34d399,#6ee7b7);z-index:-1;filter:blur(12px);opacity:.8}
-    .video-card:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px60pxrgba(0,0,0,.3)}
+    .video-card:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,.3)}
     .thumbnail-container{position:relative;padding-top:56.25%;background:#000;cursor:pointer;overflow:hidden}
     .thumbnail-container img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
     .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:.4s}
     .video-card:hover .play-overlay{opacity:1}
     .play-button{width:90px;height:90px;background:rgba(255,255,255,.95);border-radius:50%;display:flex;align-items:center;justify-content:center}
     .play-button svg{width:38px;height:38px;margin-left:6px;fill:#10b981}
-    .like-btn{display:flex;align-items:center;gap:8px;font-weight:bold;color:#666;cursor:pointer;transition:all.3s}
+    .like-btn{display:flex;align-items:center;gap:8px;font-weight:bold;color:#666;cursor:pointer;transition:all .3s}
     .like-btn.liked{color:#ef4444;filter:drop-shadow(0 0 12px #ef4444)}
     .like-btn.liked svg{fill:#ef4444;stroke:#ef4444}
-    #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all.8s cubic-bezier(.175,.885,.32,1.4)}
+    #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(.175,.885,.32,1.4)}
     #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg)}
-    #artistName{color:#fff;text-shadow:04px20px#000;-webkit-text-stroke:2px#000;paint-order:stroke fill}
-    .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px24px;border-radius:50px;animation:pulse2sinfinite;z-index:10;font-size:1.2rem}
-    @keyframes pulse{0%{box-shadow:00 0 0rgba(239,68,68,.8)}70%{box-shadow:00 0 16pxrgba(239,68,68,0)}100%{box-shadow:00 0 0rgba(239,68,68,0)}}
-    .offline-placeholder{background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:white;text-align:center;padding:3rem;border-radius:1.5rem}
+    #artistName{color:#fff;text-shadow:0 4px 20px #000;-webkit-text-stroke:2px #000;paint-order:stroke fill}
+    .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+    .offline-placeholder{background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:white;text-align:center;padding:3rem}
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
 
-  <!-- BANNER -->
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
@@ -46,7 +45,7 @@
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
-    <!-- LIVE STREAM + CHAT — ONLY FOR PRO USERS -->
+    <!-- LIVE STREAM SECTION — WILL NOW APPEAR FOR PRO USERS -->
     <section id="liveStreamSection" class="mb-20 hidden">
       <div class="bg-black rounded-3xl shadow-2xl overflow-hidden border-4 border-emerald-500">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-0">
@@ -69,7 +68,7 @@
             </div>
             <div class="flex gap-3">
               <input type="text" id="chatNameInput" placeholder="Your name" class="flex-1 p-3 rounded-lg bg-white/10 text-white placeholder-gray-400 border border-emerald-500">
-              <input type="text" id="chatMessageInput" placeholder="Send a message..." class="flex-1 p-3 rounded-lg bg-white/10 text-white placeholder-gray-400 border border-emerald-500" onkeydown="if(event.key==='Enter')sendLiveMessage()">
+              <input type="text" id="chatMessageInput" placeholder="Send a message..." class="flex-1 p-3 rounded-lg bg-white/10 text-white placeholder-gray-400 border border-emerald-500" onkeydown="if(event.key==='Enter') sendLiveMessage()">
               <button onclick="sendLiveMessage()" class="bg-emerald-600 hover:bg-emerald-700 px-6 py-3 rounded-lg font-bold">Send</button>
             </div>
           </div>
@@ -77,18 +76,15 @@
       </div>
     </section>
 
-    <!-- ABOUT -->
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
 
-    <!-- VIDEOS -->
     <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center">Videos</h2>
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
 
-  <!-- VIDEO MODAL -->
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
     <button onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
@@ -123,7 +119,9 @@
         document.getElementById('banner').classList.remove('hidden')
         document.getElementById('bannerPlaceholder').classList.add('hidden')
       }
-      if (profile.logo_url) document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl
+      if (profile.logo_url) {
+        document.getElementById('logo').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl
+      }
 
       if (!isProUser) {
         const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', artistId)
@@ -188,7 +186,6 @@
       chat.scrollTop = chat.scrollHeight
     }
 
-    // FULL VIDEO SECTION — YOUR ORIGINAL CODE 100% INTACT
     async function loadVideos() {
       if (!artistId) return
       const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistId).order('created_at', { ascending: false })
@@ -223,8 +220,8 @@
               <div class="mt-6">
                 <input type="text" placeholder="Your name" class="border-2 border-emerald-500 rounded-lg p-2 w-full mb-2" id="name-${v.id}">
                 <div class="flex gap-2">
-                  <input type="text" placeholder="Write a comment..." class="border-2 border-emerald-500 rounded-lg p-2 flex-1" id="comment-${v.id}">
-                  <button data-id="${v.id}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg">Post</button>
+                  <input type="text" placeholder="Write a comment..." class="border-2 border-emerald-500 rounded-lg p-2 flex-1" id="comment-${v.id}" onkeydown="if(event.key==='Enter') this.parentElement.nextElementSibling.click()">
+                  <button data-id="${v.id}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg post-comment">Post</button>
                 </div>
               </div>
             </div>
@@ -240,7 +237,7 @@
         }
       })
 
-      document.querySelectorAll('button[data-id]').forEach(btn => {
+      document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id
           const name = document.getElementById('name-' + id).value.trim() || 'Fan'
@@ -266,8 +263,12 @@
     }
 
     window.closeVideo = closeVideo
-    document.getElementById('videoModal').onclick = e => e.target.id === 'videoModal' && closeVideo()
-    document.addEventListener('keydown', e => e.key === 'Escape' && closeVideo())
+    document.getElementById('videoModal').onclick = (e) => {
+      if (e.target.id === 'videoModal') closeVideo()
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeVideo()
+    })
 
     init()
   </script>
