@@ -31,17 +31,10 @@
     video::-webkit-media-controls-download-button,
     video::-webkit-media-controls-picture-in-picture-button,
     video::-webkit-media-controls-fullscreen-button {display:none!important;}
-    .toggle-switch {position:relative;display:inline-block;width:80px;height:40px;}
-    .toggle-switch input {opacity:0;width:0;height:0;}
-    .slider {position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;transition:.4s;border-radius:40px;}
-    .slider:before {position:absolute;content:"";height:32px;width:32px;left:4px;bottom:4px;background-color:white;transition:.4s;border-radius:50%;}
-    input:checked + .slider {background-color:#10b981;}
-    input:checked + .slider:before {transform:translateX(40px);}
-    .slider.round {border-radius:34px;}
-    .slider.round:before {border-radius:50%;}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Logo" class="w-10 h-10 rounded-full">
@@ -52,13 +45,15 @@
   </div>
   <nav class="space-x-4">
     <a href="index.html" class="hover:underline">Home</a>
-    <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-lg font-bold">Collaboration Network</a>
+    <a href="collab-network.html" class="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-lg font-bold">Collaboration Network</a>
     <a href="pricing.html" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-lg font-bold hover:from-green-600 hover:to-emerald-700 shadow-lg">Upgrade to Pro</a>
     <button onclick="logout()" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300 font-medium">Logout</button>
   </nav>
 </header>
 
 <main class="flex-grow">
+
+  <!-- LIVE STREAM + CHAT SECTION – FULL WINDOW + RIGHT CHAT (BACK EXACTLY AS YESTERDAY) -->
   <section class="max-w-7xl mx-auto px-4 py-12">
     <h2 class="text-5xl font-black text-center mb-10 bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
       Your Live Stream & Chat
@@ -85,6 +80,7 @@
     </div>
   </section>
 
+  <!-- ORIGINAL PROFILE CONTENT STARTS HERE -->
   <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
     <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-4xl font-bold opacity-70">Your Banner Image Here</div>
@@ -110,25 +106,11 @@
           <input type="text" id="artistNameInput" class="w-full border border-gray-300 p-3 rounded-lg mb-3" placeholder="Enter your name">
           <button onclick="saveArtistName()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold">Save Name</button>
         </div>
-
-        <div class="bg-gray-50 p-5 rounded-xl shadow">
-          <label class="block text-lg font-bold text-gray-800 mb-4">Open to Collaboration?</label>
-          <div class="flex items-center justify-between">
-            <span class="text-gray-700">Join the network</span>
-            <label class="toggle-switch">
-              <input type="checkbox" id="collabToggle">
-              <span class="slider round"></span>
-            </label>
-          </div>
-          <p class="text-xs text-gray-600 mt-3">When ON, you appear in the Collaboration Network and can message others.</p>
-        </div>
-
         <div class="bg-gray-50 p-5 rounded-xl shadow">
           <label class="block text-sm font-bold text-gray-700 mb-2">Bio</label>
           <textarea id="bioInput" placeholder="Tell your story..." class="w-full border border-gray-300 p-3 rounded-lg h-40 resize-none"></textarea>
           <button onclick="saveBio()" class="mt-3 w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 font-bold">Save Bio</button>
         </div>
-
         <div class="bg-green-50 p-5 rounded-xl shadow text-center">
           <p class="text-sm text-gray-600">Your Public Page:</p>
           <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
@@ -159,6 +141,7 @@
       </div>
     </div>
 
+    <!-- DANGER ZONE -->
     <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
       <details class="group">
         <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
@@ -188,26 +171,10 @@
     "https://bxoqhmfnseskwqkywppg.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
   );
+
   let currentUser = null;
 
-  // COLLABORATION TOGGLE — THE MAGIC
-  async function toggleCollaboration(enabled) {
-    const toggle = document.getElementById('collabToggle');
-    toggle.disabled = true;
-    await supabase.from('profiles').update({ open_to_collab: enabled }).eq('id', currentUser.id);
-    if (enabled) {
-      location.href = 'collaborate.html?collab=enabled';
-    } else {
-      alert('You are now hidden from the Collaboration Network');
-      toggle.disabled = false;
-    }
-  }
-
-  document.getElementById('collabToggle').addEventListener('change', function() {
-    toggleCollaboration(this.checked);
-  });
-
-  // Rest of your existing functions (unchanged)
+  // LIVE CHAT (simple demo version)
   function sendLiveMessage() {
     const input = document.getElementById('liveChatInput');
     const msg = input.value.trim();
@@ -233,8 +200,6 @@
     if (error) alert("Failed: " + error.message);
     else alert("Bio saved!");
   }
-
-  // ... [rest of your uploadAndPublish, loadVideos, etc. functions remain 100% unchanged] ...
 
   async function uploadAndPublish() {
     const videoFile = document.getElementById('videoInput').files[0];
@@ -362,6 +327,7 @@
     location.href = 'index.html';
   }
 
+  // DANGER ZONE
   document.getElementById('deleteConfirmInput')?.addEventListener('input', (e) => {
     const input = e.target.value.trim();
     const btn = document.getElementById('deleteAccountBtn');
@@ -384,40 +350,38 @@
     }
   });
 
-  // INIT — NOW LOADS COLLAB TOGGLE STATE
+  // INIT
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return location.href = 'login.html';
     currentUser = user;
 
-    const { data: profile } = await supabase.from('profiles').select('subdomain, name, bio, banner_url, logo_url, plan, open_to_collab').eq('id', currentUser.id).maybeSingle();
-    
+    let { data: profile } = await supabase.from('profiles').select('subdomain, name, bio, banner_url, logo_url, plan').eq('id', currentUser.id).maybeSingle();
     if (!profile) {
-      await supabase.from('profiles').insert({ id: currentUser.id, open_to_collab: false });
+      await supabase.from('profiles').insert({ id: currentUser.id });
+      profile = { subdomain: null, name: null, bio: null, banner_url: null, logo_url: null, plan: 'free' };
     }
 
-    const currentCollab = profile?.open_to_collab || false;
-    document.getElementById('collabToggle').checked = currentCollab;
-
-    // ... rest of your init code (subdomain, name, bio, etc.) unchanged ...
-
-    let subdomain = (profile?.subdomain || '').toString().trim().toLowerCase();
+    let subdomain = (profile.subdomain || '').toString().trim().toLowerCase();
     if (!subdomain) {
       subdomain = 'user' + currentUser.id.slice(-8).toLowerCase();
       await supabase.from('profiles').update({ subdomain }).eq('id', currentUser.id);
     }
+
     const publicUrl = `${location.origin}/public-profile.html?id=${subdomain}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
-    if (profile?.name) document.getElementById('artistNameInput').value = profile.name;
-    if (profile?.bio) document.getElementById('bioInput').value = profile.bio;
-    if (profile?.banner_url) {
+
+    if (profile.name) document.getElementById('artistNameInput').value = profile.name;
+    if (profile.bio) document.getElementById('bioInput').value = profile.bio;
+
+    if (profile.banner_url) {
       const url = supabase.storage.from('media').getPublicUrl(profile.banner_url).data.publicUrl;
       document.getElementById('bannerPreview').src = url;
       document.getElementById('bannerPreview').classList.remove('hidden');
       document.getElementById('bannerPlaceholder').classList.add('hidden');
     }
-    if (profile?.logo_url) {
+    if (profile.logo_url) {
       document.getElementById('logoPreview').src = supabase.storage.from('media').getPublicUrl(profile.logo_url).data.publicUrl;
     }
 
