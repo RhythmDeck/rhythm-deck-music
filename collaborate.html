@@ -79,29 +79,41 @@
     if (!user) return location.href = 'login.html';
     currentUser = user;
 
-    // FIXED: Now checking the correct column
-    const { data: profile } = await supabase
+    // BULLETPROOF CHECK — uses .maybeSingle() so it never crashes
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('open_to_collab')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
-    if (!profile?.open_to_collab) {
-      alert("Please turn on 'Open to Collaboration' in your profile first!");
+    // If profile doesn't exist yet, create it with open_to_collab = false
+    if (!profile) {
+      await supabase.from('profiles').upsert({ 
+        id: user.id, 
+        open_to_collab: false,
+        collaboration_opt_in: true  // keep old column for backward compat
+      });
+      alert("Welcome! Please go to your profile and turn on 'Open to Collaboration' to join the network.");
       return location.href = 'profile-admin-pro.html';
     }
 
+    // If it's false, redirect with clear message
+    if (!profile.open_to_collab) {
+      alert("You must turn on 'Open to Collaboration' in your profile to access this page!");
+      return location.href = 'profile-admin-pro.html';
+    }
+
+    // SUCCESS — user is allowed in
     await loadArtists();
     loadTalkJS();
   })();
 
   async function loadArtists() {
     try {
-      // FIXED: Now using the correct column to show artists
       const { data: artists } = await supabase
         .from('profiles')
         .select('id, name, logo_url, banner_url, email, subdomain')
-        .eq('open_to_collab', true)        // ← THIS WAS THE BUG
+        .eq('open_to_collab', true)
         .neq('id', currentUser.id);
 
       const grid = document.getElementById('artistsGrid');
@@ -109,6 +121,7 @@
 
       if (!artists || artists.length === 0) {
         document.getElementById('noArtists').classList.remove('hidden');
+        document.getElementById('noArtists').textContent = "No artists available for collab yet. Be the first!";
         return;
       }
 
@@ -159,8 +172,8 @@
           </div>`;
       }
     } catch (err) {
-      console.error("Error loading artists:", err);
-      document.getElementById('noArtists').textContent = "Error loading artists. Try refreshing.";
+      console.error("Load artists failed:", err);
+      document.getElementById('noArtists').textContent = "Failed to load artists. Refresh the page.";
       document.getElementById('noArtists').classList.remove('hidden');
     }
   }
