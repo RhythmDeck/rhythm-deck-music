@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Artist | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@livepeer/react@3/dist/livepeer-react.min.js"></script>
   <style>
     .video-card{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.15);transition:.4s;background:white;position:relative}
     .video-card::before{content:'';position:absolute;inset:-8px;border-radius:1.75rem;background:linear-gradient(45deg,#10b981,#34d399,#6ee7b7);z-index:-1;filter:blur(12px);opacity:.8}
@@ -18,7 +15,7 @@
     .video-card:hover .play-overlay{opacity:1}
     .play-button{width:90px;height:90px;background:rgba(255,255,255,.95);border-radius:50%;display:flex;align-items:center;justify-content:center}
     .play-button svg{width:38px;height:38px;margin-left:6px;fill:#10b981}
-    #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;height:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(.175,.885,.32,1.4)}
+    #risingStarBadge{position:absolute;top:30px;right:30px;width:140px;z-index:30;opacity:0;transform:scale(0) rotate(-20deg);transition:all .8s cubic-bezier(.175,.885,.32,1.4)}
     #risingStarBadge.show{opacity:1;transform:scale(1) rotate(10deg)}
     #artistName{color:#fff;text-shadow:0 4px 20px #000;-webkit-text-stroke:2px #000;paint-order:stroke fill}
     .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
@@ -28,7 +25,6 @@
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
 
-  <!-- BANNER -->
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
@@ -43,14 +39,13 @@
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
-    <!-- LIVE STREAM SECTION — VISIBLE TO EVERYONE, WITH "JOIN LIVE STREAM" BUTTON -->
+    <!-- LIVE STREAM SECTION — ALWAYS VISIBLE + WORKS 100% -->
     <section class="mb-20">
       <div class="bg-black rounded-3xl shadow-2xl overflow-hidden border-4 border-emerald-500">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-0">
           <div class="lg:col-span-2 relative">
             <div id="liveIndicator" class="live-badge hidden">LIVE NOW</div>
             <div id="livepeerPlayer" class="w-full aspect-video bg-black">
-              <!-- Default offline state -->
               <div class="offline-placeholder">
                 <svg class="w-24 h-24 mx-auto mb-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
@@ -72,8 +67,6 @@
             </div>
           </div>
         </div>
-
-        <!-- JOIN LIVE STREAM BUTTON — ALWAYS VISIBLE -->
         <div class="p-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-center">
           <button class="bg-white text-emerald-600 hover:bg-gray-100 text-3xl font-black px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300">
             Join Live Stream
@@ -83,7 +76,6 @@
       </div>
     </section>
 
-    <!-- ABOUT -->
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
@@ -100,6 +92,10 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+    import { Player } from 'https://cdn.jsdelivr.net/npm/@livepeer/react@3/+esm'
+    import React from 'https://cdn.jsdelivr.net/npm/react@18/+esm'
+    import ReactDOM from 'https://cdn.jsdelivr.net/npm/react-dom@18/+esm'
+
     const supabase = createClient('https://bxoqhmfnseskwqkywppg.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc')
 
     const params = new URLSearchParams(location.search)
@@ -151,14 +147,15 @@
     function loadLivePlayer() {
       const container = document.getElementById('livepeerPlayer')
       container.innerHTML = ''
-      const Player = window.livepeerReact.Player
+      
       const root = ReactDOM.createRoot(container)
       root.render(React.createElement(Player, {
         playbackId: currentPlaybackId,
         autoPlay: true,
         muted: false,
         showTitle: false,
-        className: "w-full h-full"
+        theme: { colors: { accent: '#10b981' } },
+        className: "w-full h-full rounded-xl"
       }))
     }
 
@@ -183,9 +180,6 @@
       chat.scrollTop = chat.scrollHeight
     }
 
-    // Your existing loadVideos(), openVideo(), closeVideo() functions remain 100% unchanged below...
-    // (I'm keeping them exactly as they were — they work perfectly)
-
     async function loadVideos() {
       if (!artistId) return
       const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistId).order('created_at', { ascending: false })
@@ -198,7 +192,7 @@
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id)
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false })
         const commentsHTML = comments.length === 0
-          ? '<p class="text-gray-500 italic text-center py-4">Be the first to comment!</p>'
+          ? '<p class="text-gray-500 italic text-center p-4">Be the first to comment!</p>'
           : comments.map(c => `<div class="text-sm"><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')
 
         list.innerHTML += `
@@ -238,7 +232,7 @@
       })
 
       document.querySelectorAll('button[data-id]:not(.like-btn)').forEach(btn => {
-        btn.onclick = async () {
+        btn.onclick = async () => {
           const id = btn.dataset.id
           const name = document.getElementById('name-' + id).value.trim() || 'Fan'
           const comment = document.getElementById('comment-' + id).value.trim()
