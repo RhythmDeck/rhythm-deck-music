@@ -22,7 +22,6 @@
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-
 <header class="bg-black/90 backdrop-blur-lg border-b border-purple-600 p-6 shadow-2xl">
   <div class="max-w-7xl mx-auto flex justify-between items-center">
     <div class="flex items-center space-x-4">
@@ -35,28 +34,23 @@
     </nav>
   </div>
 </header>
-
 <section class="text-center py-20 px-6">
   <h2 class="text-6xl font-black mb-6 bg-gradient-to-r from-green-400 to-purple-500 bg-clip-text text-transparent">
     Collaboration Network
   </h2>
   <p class="text-xl max-w-3xl mx-auto opacity-90">Connect • Listen • Collab</p>
 </section>
-
 <section class="max-w-7xl mx-auto px-6 pb-20">
   <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
   <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists available yet. Be the first!</p>
 </section>
-
 <div id="talkjs-container" style="position:fixed;bottom:20px;right:20px;width:400px;height:600px;z-index:9999;display:none;background:white;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,.9);border:6px solid #10b981;"></div>
-
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
     <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
     <video id="modalVideo" controls class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
   </div>
 </div>
-
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
   const supabase = createClient(
@@ -88,25 +82,32 @@
     loadTalkJS();
   })();
 
-  // FIXED QUERY — now returns Black Birds + everyone
   async function loadArtists() {
+    console.log('Starting loadArtists...'); // DEBUG LINE 1
+
     // Query 1: collaboration_opt_in = true
-    const { data: optInArtists } = await supabase
+    const { data: optInArtists, error: optInError } = await supabase
       .from('profiles')
       .select('id, name, logo_url, banner_url, email, subdomain')
       .eq('collaboration_opt_in', true)
       .neq('id', currentUser.id);
 
-    // Query 2: open_to_collab = true (for legacy)
-    const { data: legacyArtists } = await supabase
+    console.log('Query 1 (collaboration_opt_in):', optInArtists, optInError); // DEBUG LINE 2
+
+    // Query 2: open_to_collab = true
+    const { data: legacyArtists, error: legacyError } = await supabase
       .from('profiles')
       .select('id, name, logo_url, banner_url, email, subdomain')
       .eq('open_to_collab', true)
       .neq('id', currentUser.id);
 
+    console.log('Query 2 (open_to_collab):', legacyArtists, legacyError); // DEBUG LINE 3
+
     // Combine and dedupe
     const allArtists = [...(optInArtists || []), ...(legacyArtists || [])];
     const uniqueArtists = allArtists.filter((a, idx) => allArtists.findIndex(b => b.id === a.id) === idx);
+
+    console.log('Final unique artists:', uniqueArtists); // DEBUG LINE 4
 
     const grid = document.getElementById('artistsGrid');
     grid.innerHTML = '';
@@ -143,6 +144,8 @@
       // FIXED: subdomain trim + fallback to ID
       const profileId = a.subdomain?.trim() && a.subdomain.trim().length > 0 ? a.subdomain.trim() : a.id;
       const publicLink = `${location.origin}/public-profile.html?id=${profileId}`;
+
+      console.log(`Artist ${a.name} - Profile ID: ${profileId}, Link: ${publicLink}`); // DEBUG LINE 5
 
       grid.innerHTML += `
         <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
@@ -189,7 +192,7 @@
     location.href = 'login.html';
   };
 
-  // TalkJS — FIXED with correct test credentials
+  // TalkJS — FIXED with official test setup
   function loadTalkJS() {
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
@@ -206,14 +209,13 @@
       });
 
       talkSession = new Talk.Session({
-        appId: 'tLZqiXQU',  // Your test app ID
+        appId: 'tLZqiXQU',
         me: me
       });
 
-      // Test secret key (from your dashboard)
-      const signature = Talk.sign(talkSession.me, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1');
+      // Use official test signature (no CryptoJS needed)
+      talkSession.sign(me, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1');
 
-      // Mount inbox
       const inbox = talkSession.createInbox();
       inbox.mount(document.getElementById('talkjs-container'));
 
@@ -224,12 +226,10 @@
           name: otherName,
           email: otherEmail || undefined
         });
-
         const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(me, other));
         convo.setParticipant(me);
         convo.setParticipant(other);
         convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
-
         const chatbox = talkSession.createChatbox(convo);
         chatbox.mount(document.getElementById('talkjs-container'));
         document.getElementById('talkjs-container').style.display = 'block';
