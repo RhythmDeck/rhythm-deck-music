@@ -478,5 +478,32 @@
     document.getElementById('messageBadge').classList.remove('hidden');
   }
 </script>
+
+<!-- AUTO UPGRADE TO PRO — RUNS ONLY ONCE AFTER SUCCESSFUL PAYMENT -->
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+  const supabase = createClient(
+    'https://bxoqhmfnseskwqkywppg.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  );
+
+  // Only run if this is a fresh redirect from Stripe Checkout
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('session_id') && !sessionStorage.getItem('pro_upgraded')) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ plan: 'pro', paid: true })
+        .eq('id', user.id);
+
+      // Prevent running twice
+      sessionStorage.setItem('pro_upgraded', 'true');
+      
+      // Clean URL (optional — looks nicer)
+      window.history.replaceState({}, '', 'profile-admin-pro.html');
+    }
+  }
+</script>
 </body>
 </html>
