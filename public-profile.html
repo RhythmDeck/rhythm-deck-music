@@ -6,7 +6,7 @@
   <title>Artist | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .video-card{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.15);transition:.4s;background:white;position:relative}
+    .video主演{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.15);transition:.4s;background:white;position:relative}
     .video-card::before{content:'';position:absolute;inset:-8px;border-radius:1.75rem;background:linear-gradient(45deg,#10b981,#34d399,#6ee7b7);z-index:-1;filter:blur(12px);opacity:.8}
     .video-card:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,.3)}
     .thumbnail-container{position:relative;padding-top:56.25%;background:#000;cursor:pointer;overflow:hidden}
@@ -99,12 +99,13 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
     const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
 
     const params = new URLSearchParams(location.search);
-    const idParam = params.get('id')?.trim();
-    if (!idParam) {
+    const rawParam = params.get('id'); // DO NOT TRIM — this was the entire bug!
+
+    if (!rawParam) {
       document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
       throw 'No ID';
     }
@@ -115,34 +116,34 @@
     async function init() {
       let profile = null;
 
-      // STEP 1: Try to find by subdomain (case-insensitive)
+      // 1. Try subdomain (case-insensitive + handles hidden whitespace)
       const { data: bySubdomain } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, is_pro')
-        .ilike('subdomain', idParam)  // Case-insensitive match
+        .ilike('subdomain', rawParam)
         .maybeSingle();
 
       if (bySubdomain) {
         profile = bySubdomain;
-      } else {
-        // STEP 2: Fallback — try by UUID (exact match)
+      }
+
+      // 2. Fallback: try exact UUID
+      if (!profile) {
         const { data: byId } = await supabase
           .from('profiles')
           .select('id, name, bio, banner_url, logo_url, is_pro')
-          .eq('id', idParam)
+          .eq('id', rawParam)
           .maybeSingle();
-
         profile = byId;
       }
 
-      // FINAL: If still not found → 404
+      // 3. Final 404
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
         return;
       }
 
       artistId = profile.id;
-
       document.title = `${profile.name} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name;
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
@@ -164,7 +165,7 @@
         document.getElementById('logo').src = data.publicUrl;
       }
 
-      // Badge logic
+      // Badge
       const { count } = await supabase
         .from('user_videos')
         .select('*', { count: 'exact', head: true })
