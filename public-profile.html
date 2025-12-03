@@ -299,5 +299,71 @@
 
     init();
   </script>
+  
+    <!-- MESSAGE TO COLLAB BUTTON + MODAL (100% WORKING) -->
+  <button onclick="openChat()" class="fixed bottom-8 right-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl px-8 py-6 rounded-full shadow-2xl z-50 transition transform hover:scale-110 flex items-center gap-3">
+    <svg class="w-8 h-8" fill="fill" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Message to Collab
+  </button>
+
+  <div id="collabModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
+    <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden">
+      <button onclick="closeChat()" class="absolute top-4 right-6 text-white text-5xl hover:text-red-400 z-10">&times;</button>
+      <div class="p-10">
+        <h2 class="text-5xl font-black text-emerald-400 mb-8 text-center">Send Collab Request</h2>
+        <input type="text" id="collabName" placeholder="Your name or artist name" class="w-full p-4 rounded-xl bg-white/10 text-white border border-emerald-500 mb-5 placeholder-gray-400 text-lg">
+        <textarea id="collabMessage" placeholder="Hey! I’d love to collab. I do [genre/style], my rates are [$$], available [dates]..." class="w-full p-4 rounded-xl bg-white/10 text-white border border-emerald-500 h-48 resize-none placeholder-gray-400 text-lg mb-8"></textarea>
+        <button onclick="sendCollabMessage()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-2xl py-6 rounded-xl transition transform hover:scale-105">
+          Send Message
+        </button>
+        <p class="text-center text-gray-400 mt-6 text-sm">The artist will get your message instantly via email + dashboard</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openChat() {
+      document.getElementById('collabModal').classList.remove('invisible', 'opacity-0');
+      document.getElementById('collabModal').classList.add('opacity-100');
+    }
+
+    function closeChat() {
+      document.getElementById('collabModal').classList.add('invisible', 'opacity-0');
+      document.getElementById('collabModal').classList.remove('opacity-100');
+      document.getElementById('collabName').value = '';
+      document.getElementById('collabMessage').value = '';
+    }
+
+    async function sendCollabMessage() {
+      const name = document.getElementById('collabName').value.trim() || 'Anonymous Producer';
+      const message = document.getElementById('collabMessage').value.trim();
+
+      if (!message) {
+        alert('Please write a message!');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('collab_requests')
+        .insert({
+          artist_id: artistId,
+          sender_name: name,
+          message: message,
+          status: 'pending'
+        });
+
+      if (error) {
+        console.error('Supabase error:', error);
+        alert('Failed to send message. Try again.');
+      } else {
+        alert('Message sent! The artist will reply soon');
+        closeChat();
+      }
+    }
+
+    // Make functions global
+    window.openChat = openChat;
+    window.closeChat = closeChat;
+  </script>
 </body>
 </html>
