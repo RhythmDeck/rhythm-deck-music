@@ -42,22 +42,36 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
 
-<header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
+<header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg gap-4">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
-    <div><h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1><p class="text-sm text-gray-300">Pro Plan</p></div>
+    <div>
+      <h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+      <p class="text-sm text-gray-300">Pro Plan</p>
+    </div>
   </div>
-  <nav class="space-x-6">
-    <a href="index.html" class="hover:underline">Home</a>
-    <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold text-lg">Collaboration Network</a>
-    <button onclick="logout()" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300 font-medium">Logout</button>
+
+  <nav class="flex flex-wrap items-center justify-center gap-4 text-lg">
+    <a href="index.html" class="hover:text-emerald-400 transition">Home</a>
     
-    <a href="message-dashboard.html" id="messagesBtn" class="relative bg-emerald-600 hover:bg-emerald-700 px-6 py-3 rounded-lg font-black flex items-center gap-3">
-  Messages
-  <span id="messageBadge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center animate-pulse hidden">
-    0
-  </span>
-</a>
+    <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold transition">
+      Collaboration Network
+    </a>
+
+    <!-- MESSAGES BUTTON - PERFECTLY CENTERED & INLINE -->
+    <a href="message-dashboard.html" id="messagesBtn" class="relative bg-emerald-600 hover:bg-emerald-700 px-6 py-2 rounded-lg font-black flex items-center gap-2 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-16"/>
+      </svg>
+      Messages
+      <span id="messageBadge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center animate-pulse hidden font-bold">
+        0
+      </span>
+    </a>
+
+    <button onclick="logout()" class="bg-white text-black px-6 py-2 rounded-lg hover:bg-gray-200 font-bold transition">
+      Logout
+    </button>
   </nav>
 </header>
 
