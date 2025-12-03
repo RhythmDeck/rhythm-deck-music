@@ -20,8 +20,6 @@
     @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
     .offline-placeholder{background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:white;text-align:center;padding:3rem}
     .liked svg{fill:#ef4444;stroke:none}
-
-    /* BADGE IN TOP-RIGHT CORNER */
     #badge-container {
       position: absolute;
       top: 20px;
@@ -40,24 +38,19 @@
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
-
-  <!-- BANNER WITH BADGE OVERLAY -->
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
       Artist Banner
     </div>
-    <!-- BADGE TOP-RIGHT -->
     <div id="badge-container"></div>
   </div>
-
   <div class="max-w-7xl mx-auto p-6 -mt-20 relative z-10">
     <div class="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
       <img id="logo" src="https://via.placeholder.com/400" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
-    <!-- LIVE STREAM -->
     <section class="mb-20">
       <div class="bg-black rounded-3xl shadow-2xl overflow-hidden border-4 border-emerald-500">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-0">
@@ -97,7 +90,6 @@
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
 
-  <!-- Video Modal -->
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
     <button onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
@@ -105,102 +97,147 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
-    const supabase = createClient('https://bxoqhmfnseskwqkywppg.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc')
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
 
-    const params = new URLSearchParams(location.search)
-    const subdomain = params.get('id')?.trim().toLowerCase()
-    if (!subdomain) { document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>'; throw '' }
+    const params = new URLSearchParams(location.search);
+    const idParam = params.get('id')?.trim();
+    if (!idParam) {
+      document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
+      throw 'No ID';
+    }
 
-    let artistId = null
-    let currentPlaybackId = null
+    let artistId = null;
+    let currentPlaybackId = null;
 
     async function init() {
-      const { data: profile } = await supabase.from('profiles').select('id,name,bio,banner_url,logo_url,is_pro').eq('subdomain', subdomain).single()
-      if (!profile) { document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>'; return }
+      let profile = null;
 
-      artistId = profile.id
-      document.title = `${profile.name} • Rhythm Deck`
-      document.getElementById('artistName').textContent = profile.name
-      document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>')
+      // STEP 1: Try to find by subdomain (case-insensitive)
+      const { data: bySubdomain } = await supabase
+        .from('profiles')
+        .select('id, name, bio, banner_url, logo_url, is_pro')
+        .ilike('subdomain', idParam)  // Case-insensitive match
+        .maybeSingle();
 
-      // Load banner
+      if (bySubdomain) {
+        profile = bySubdomain;
+      } else {
+        // STEP 2: Fallback — try by UUID (exact match)
+        const { data: byId } = await supabase
+          .from('profiles')
+          .select('id, name, bio, banner_url, logo_url, is_pro')
+          .eq('id', idParam)
+          .maybeSingle();
+
+        profile = byId;
+      }
+
+      // FINAL: If still not found → 404
+      if (!profile) {
+        document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
+        return;
+      }
+
+      artistId = profile.id;
+
+      document.title = `${profile.name} • Rhythm Deck`;
+      document.getElementById('artistName').textContent = profile.name;
+      document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
+
+      // Banner
       if (profile.banner_url) {
-        const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url)
-        const banner = document.getElementById('banner')
-        banner.src = data.publicUrl
+        const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
+        const banner = document.getElementById('banner');
+        banner.src = data.publicUrl;
         banner.onload = () => {
-          banner.classList.remove('hidden')
-          document.getElementById('bannerPlaceholder').classList.add('hidden')
-        }
+          banner.classList.remove('hidden');
+          document.getElementById('bannerPlaceholder').classList.add('hidden');
+        };
       }
 
-      // Load logo
+      // Logo
       if (profile.logo_url) {
-        const { data } = supabase.storage.from('media').getPublicUrl(profile.logo_url)
-        document.getElementById('logo').src = data.publicUrl
+        const { data } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
+        document.getElementById('logo').src = data.publicUrl;
       }
 
-      // BADGE LOGIC: Show correct badge based on plan + video count
-      const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', artistId)
-      
-      const badgeContainer = document.getElementById('badge-container')
-      badgeContainer.innerHTML = ''
+      // Badge logic
+      const { count } = await supabase
+        .from('user_videos')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', artistId);
 
+      const badgeContainer = document.getElementById('badge-container');
+      badgeContainer.innerHTML = '';
       if (count >= 3) {
         const badgeUrl = profile.is_pro
           ? 'https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png'
-          : 'https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-star.png'
-
-        badgeContainer.innerHTML = `
-          <img src="${badgeUrl}" alt="${profile.is_pro ? 'Pro Artist' : 'Rising Artist'} Badge">
-        `
+          : 'https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-star.png';
+        badgeContainer.innerHTML = `<img src="${badgeUrl}" alt="Badge">`;
       }
 
-      checkLiveStatus()
-      setInterval(checkLiveStatus, 7000)
-      loadVideos()
+      checkLiveStatus();
+      setInterval(checkLiveStatus, 7000);
+      loadVideos();
     }
 
-    // Rest of your functions unchanged (checkLiveStatus, sendLiveMessage, loadVideos, openVideo, closeVideo)
     async function checkLiveStatus() {
-      if (!artistId) return
-      const { data: session } = await supabase.from('live_sessions').select('playback_id').eq('user_id', artistId).eq('is_active', true).maybeSingle()
+      if (!artistId) return;
+      const { data: session } = await supabase
+        .from('live_sessions')
+        .select('playback_id')
+        .eq('user_id', artistId)
+        .eq('is_active', true)
+        .maybeSingle();
+
       if (session?.playback_id && session.playback_id !== currentPlaybackId) {
-        currentPlaybackId = session.playback_id
-        document.getElementById('liveIndicator').classList.remove('hidden')
-        document.getElementById('livepeerPlayer').innerHTML = `<iframe src="https://lvpr.tv?v=${currentPlaybackId}" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" class="w-full h-full"></iframe>`
+        currentPlaybackId = session.playback_id;
+        document.getElementById('liveIndicator').classList.remove('hidden');
+        document.getElementById('livepeerPlayer').innerHTML = `<iframe src="https://lvpr.tv?v=${currentPlaybackId}" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" class="w-full h-full"></iframe>`;
       } else if (!session && currentPlaybackId) {
-        currentPlaybackId = null
-        document.getElementById('liveIndicator').classList.add('hidden')
-        document.getElementById('livepeerPlayer').innerHTML = `<div class="offline-placeholder"><svg class="w-24 h-24 mx-auto mb-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg><p class="text-5xl font-black mb-4">Stream Offline</p><p class="text-xl text-gray-400">The artist will appear here when live</p></div>`
+        currentPlaybackId = null;
+        document.getElementById('liveIndicator').classList.add('hidden');
+        document.getElementById('livepeerPlayer').innerHTML = `<div class="offline-placeholder"><svg class="w-24 h-24 mx-auto mb-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg><p class="text-5xl font-black mb-4">Stream Offline</p><p class="text-xl text-gray-400">The artist will appear here when live</p></div>`;
       }
     }
 
     function sendLiveMessage() {
-      const name = document.getElementById('chatNameInput').value.trim() || 'Fan'
-      const msg = document.getElementById('chatMessageInput').value.trim()
-      if (!msg) return
-      const chat = document.getElementById('liveChatMessages')
-      chat.insertAdjacentHTML('beforeend', `<div class="bg-emerald-900/60 text-white p-3 rounded-lg max-w-xs"><strong class="text-emerald-300">${name}:</strong> ${msg}</div>`)
-      document.getElementById('chatMessageInput').value = ''
-      chat.scrollTop = chat.scrollHeight
+      const name = document.getElementById('chatNameInput').value.trim() || 'Fan';
+      const msg = document.getElementById('chatMessageInput').value.trim();
+      if (!msg) return;
+      const chat = document.getElementById('liveChatMessages');
+      chat.insertAdjacentHTML('beforeend', `<div class="bg-emerald-900/60 text-white p-3 rounded-lg max-w-xs"><strong class="text-emerald-300">${name}:</strong> ${msg}</div>`);
+      document.getElementById('chatMessageInput').value = '';
+      chat.scrollTop = chat.scrollHeight;
     }
 
     async function loadVideos() {
-      if (!artistId) return
-      const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistId).order('created_at', { ascending: false })
-      const list = document.getElementById('videoList')
-      list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>'
+      if (!artistId) return;
+      const { data: videos } = await supabase
+        .from('user_videos')
+        .select('*')
+        .eq('user_id', artistId)
+        .order('created_at', { ascending: false });
+
+      const list = document.getElementById('videoList');
+      list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>';
+
       for (const v of (videos || [])) {
-        const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl
-        const thumb = v.thumbnail_url ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb'
-       
-        const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id)
-        const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false })
-       
+        const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+        const thumb = v.thumbnail_url
+          ? supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl
+          : 'https://via.placeholder.com/600x338/10b981/ffffff?text=No+Thumb';
+
+        const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
+        const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false });
+
         const commentsHTML = comments.length === 0
           ? '<p class="text-gray-500 italic text-center py-4">Be the first to comment!</p>'
-          : comments.map(c => `<div class="text-sm"><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')
+          : comments.map(c => `<div class="text-sm"><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('');
+
         list.innerHTML += `
           <div class="video-card">
             <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
@@ -225,43 +262,45 @@
                 </div>
               </div>
             </div>
-          </div>`
+          </div>`;
       }
+
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
-          if (btn.classList.contains('liked')) return
-          await supabase.from('video_likes').insert({ video_id: btn.dataset.id })
-          btn.classList.add('liked')
-          const span = btn.querySelector('span')
-          span.textContent = Number(span.textContent) + 1
-        }
-      })
+          if (btn.classList.contains('liked')) return;
+          await supabase.from('video_likes').insert({ video_id: btn.dataset.id });
+          btn.classList.add('liked');
+          btn.querySelector('span').textContent = Number(btn.querySelector('span').textContent) + 1;
+        };
+      });
+
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
-          const id = btn.dataset.id
-          const name = document.getElementById(`name-${id}`).value.trim() || 'Fan'
-          const comment = document.getElementById(`comment-${id}`).value.trim()
-          if (!comment) return
-          await supabase.from('video_comments').insert({ video_id: id, name, comment })
-          document.getElementById(`comment-${id}`).value = ''
-          loadVideos()
-        }
-      })
+          const id = btn.dataset.id;
+          const name = document.getElementById(`name-${id}`).value.trim() || 'Fan';
+          const comment = document.getElementById(`comment-${id}`).value.trim();
+          if (!comment) return;
+          await supabase.from('video_comments').insert({ video_id: id, name, comment });
+          document.getElementById(`comment-${id}`).value = '';
+          loadVideos();
+        };
+      });
     }
 
     function openVideo(url) {
-      document.getElementById('modalVideo').src = url
-      document.getElementById('videoModal').classList.remove('invisible', 'opacity-0')
-      document.getElementById('videoModal').classList.add('opacity-100')
+      document.getElementById('modalVideo').src = url;
+      document.getElementById('videoModal').classList.remove('invisible', 'opacity-0');
+      document.getElementById('videoModal').classList.add('opacity-100');
     }
-    window.openVideo = openVideo
-    window.closeVideo = () => {
-      document.getElementById('videoModal').classList.add('invisible', 'opacity-0')
-      document.getElementById('videoModal').classList.remove('opacity-100')
-      document.getElementById('modalVideo').src = ''
-    }
+    window.openVideo = openVideo;
 
-    init()
+    window.closeVideo = () => {
+      document.getElementById('videoModal').classList.add('invisible', 'opacity-0');
+      document.getElementById('videoModal').classList.remove('opacity-100');
+      document.getElementById('modalVideo').src = '';
+    };
+
+    init();
   </script>
 </body>
 </html>
