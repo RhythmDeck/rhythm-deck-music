@@ -51,6 +51,13 @@
     <a href="index.html" class="hover:underline">Home</a>
     <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold text-lg">Collaboration Network</a>
     <button onclick="logout()" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300 font-medium">Logout</button>
+    
+    <a href="message-dashboard.html" id="messagesBtn" class="relative bg-emerald-600 hover:bg-emerald-700 px-6 py-3 rounded-lg font-black flex items-center gap-3">
+  Messages
+  <span id="messageBadge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center animate-pulse hidden">
+    0
+  </span>
+</a>
   </nav>
 </header>
 
@@ -431,6 +438,31 @@
     });
     document.getElementById('deleteAccountBtn').addEventListener('click', deleteAccount);
   });
+</script>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+  const supabase = createClient(
+    'https://bxoqhmfnseskwqkywppg.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).single();
+  if (!profile) return;
+
+  const { count } = await supabase
+    .from('collab_requests')
+    .select('*', { count: 'exact', head: true })
+    .eq('artist_id', profile.id)
+    .eq('status', 'pending');
+
+  if (count > 0) {
+    document.getElementById('messageBadge').textContent = count;
+    document.getElementById('messageBadge').classList.remove('hidden');
+  }
 </script>
 </body>
 </html>
