@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Artist | Rhythm Deck</title>
-  <link rel="icon" href="data:,"> <!-- kills favicon 404 -->
+  <link rel="icon" href="data:,">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .video-card{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.15);transition:.4s;background:white;position:relative}
@@ -22,7 +22,7 @@
     .offline-placeholder{background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:white;text-align:center;padding:3rem}
     .liked svg{fill:#ef4444;stroke:none}
     #badge-container{position:absolute;top:20px;right:20px;z-index:30}
-    #badge-container img{width:110px;height:110px;filter:drop-shadow(0 0 25px rgba(255,215,0,.8));transition:all .4s}
+    #badge-container img{width:110px;height:110px;filter:drop-shadow(0 0 25px rgba(255,215,0,0.8));transition:all .4s}
     #badge-container img:hover{transform:scale(1.2) rotate(12deg)}
   </style>
 </head>
@@ -38,7 +38,7 @@
 
   <div class="max-w-7xl mx-auto p-6 -mt-20 relative z-10">
     <div class="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
-      <img id="logo" src="https://placehold.co/400x400/emerald/white?text=RD&font=roboto" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
+      <img id="logo" src="https://placehold.co/400x400/emerald/white?text=Artist&font=roboto" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
@@ -110,7 +110,7 @@
       // 1. Try exact subdomain match (most common case)
       const { data: exact } = await supabase
         .from('profiles')
-        .select('id, name, bio, banner_url, logo_url, is_pro')
+        .select('id, name, bio, banner_url, logo_url, plan')  // FIXED: 'plan' instead of 'is_pro'
         .eq('subdomain', rawParam)
         .maybeSingle();
 
@@ -120,7 +120,7 @@
       if (!profile) {
         const { data: fuzzy } = await supabase
           .from('profiles')
-          .select('id, name, bio, banner_url, logo_url, is_pro')
+          .select('id, name, bio, banner_url, logo_url, plan')  // FIXED: 'plan'
           .ilike('subdomain', rawParam)
           .maybeSingle();
         if (fuzzy) profile = fuzzy;
@@ -130,7 +130,7 @@
       if (!profile && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(rawParam)) {
         const { data: byId } = await supabase
           .from('profiles')
-          .select('id, name, bio, banner_url, logo_url, is_pro')
+          .select('id, name, bio, banner_url, logo_url, plan')  // FIXED: 'plan'
           .eq('id', rawParam)
           .maybeSingle();
         if (byId) profile = byId;
@@ -163,12 +163,15 @@
         document.getElementById('logo').src = data.publicUrl;
       }
 
-      // Badge logic (unchanged)
-      const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', artistId);
+      // Badge
+      const { count } = await supabase
+        .from('user_videos')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', artistId);
       const badgeContainer = document.getElementById('badge-container');
       badgeContainer.innerHTML = '';
       if (count >= 3) {
-        const badgeUrl = profile.is_pro
+        const badgeUrl = profile.plan === 'pro'  // FIXED: Use 'plan' column
           ? 'https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png'
           : 'https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-star.png';
         badgeContainer.innerHTML = `<img src="${badgeUrl}" alt="Badge">`;
@@ -179,9 +182,6 @@
       loadVideos();
     }
 
-    // All your existing functions below (checkLiveStatus, loadVideos, etc.) remain 100% unchanged and work perfectly
-    // I'm keeping them exactly as you had them — they are already perfect
-
     async function checkLiveStatus() {
       if (!artistId) return;
       const { data: session } = await supabase
@@ -190,7 +190,6 @@
         .eq('user_id', artistId)
         .eq('is_active', true)
         .maybeSingle();
-
       if (session?.playback_id && session.playback_id !== currentPlaybackId) {
         currentPlaybackId = session.playback_id;
         document.getElementById('liveIndicator').classList.remove('hidden');
@@ -198,13 +197,7 @@
       } else if (!session && currentPlaybackId) {
         currentPlaybackId = null;
         document.getElementById('liveIndicator').classList.add('hidden');
-        document.getElementById('livepeerPlayer').innerHTML = `<div class="offline-placeholder">
-          <svg class="w-24 h-24 mx-auto mb-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-          </svg>
-          <p class="text-5xl font-black mb-4">Stream Offline</p>
-          <p class="text-xl text-gray-400">The artist will appear here when live</p>
-        </div>`;
+        document.getElementById('livepeerPlayer').innerHTML = `<div class="offline-placeholder"><svg class="w-24 h-24 mx-auto mb-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg><p class="text-5xl font-black mb-4">Stream Offline</p><p class="text-xl text-gray-400">The artist will appear here when live</p></div>`;
       }
     }
 
