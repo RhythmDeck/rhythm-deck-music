@@ -34,23 +34,45 @@
     </nav>
   </div>
 </header>
+
 <section class="text-center py-20 px-6">
   <h2 class="text-6xl font-black mb-6 bg-gradient-to-r from-green-400 to-purple-500 bg-clip-text text-transparent">
     Collaboration Network
   </h2>
   <p class="text-xl max-w-3xl mx-auto opacity-90">Connect • Listen • Collab</p>
 </section>
+
 <section class="max-w-7xl mx-auto px-6 pb-20">
   <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
   <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists available yet. Be the first!</p>
 </section>
-<div id="talkjs-container" style="position:fixed;bottom:20px;right:20px;width:400px;height:600px;z-index:9999;display:none;background:white;border-radius:16px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,.9);border:6px solid #10b981;"></div>
+
+<!-- VIDEO MODAL -->
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
     <button onclick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
     <video id="modalVideo" controls class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
   </div>
 </div>
+
+<!-- COLLAB MESSAGE MODAL (ONE FOR ALL ARTISTS) -->
+<div id="collabModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
+  <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden">
+    <button onclick="closeCollabModal()" class="absolute top-4 right-6 text-white text-5xl hover:text-red-400 z-10">×</button>
+    <div class="p-10">
+      <h2 class="text-5xl font-black text-emerald-400 mb-8 text-center">
+        Message <span id="targetArtistName">Artist</span>
+      </h2>
+      <input type="text" id="collabName" placeholder="Your name or artist name" class="w-full p-4 rounded-xl bg-white/10 text-white border border-emerald-500 mb-5 placeholder-gray-400 text-lg">
+      <textarea id="collabMessage" placeholder="Hey! I’d love to collab. I do [genre/style], my rates are [$$], available [dates]..." class="w-full p-4 rounded-xl bg-white/10 text-white border border-emerald-500 h-48 resize-none placeholder-gray-400 text-lg mb-8"></textarea>
+      <button onclick="sendCollabMessage()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-2xl py-6 rounded-xl transition transform hover:scale-105">
+        Send Message
+      </button>
+      <p class="text-center text-gray-400 mt-6 text-sm">The artist will get your message instantly</p>
+    </div>
+  </div>
+</div>
+
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
   const supabase = createClient(
@@ -59,8 +81,56 @@
   );
 
   let currentUser = null;
-  let talkSession = null;
+  let targetArtistId = null;
+  let targetArtistName = null;
 
+  // Global functions for modal
+  window.openCollabModal = function(artistId, artistName) {
+    targetArtistId = artistId;
+    targetArtistName = artistName;
+    document.getElementById('targetArtistName').textContent = artistName;
+    document.getElementById('collabModal').classList.remove('invisible', 'opacity-0');
+    document.getElementById('collabModal').classList.add('opacity-100');
+  };
+
+  window.closeCollabModal = function() {
+    document.getElementById('collabModal').classList.add('invisible', 'opacity-0');
+    document.getElementById('collabModal').classList.remove('opacity-100');
+    document.getElementById('collabName').value = '';
+    document.getElementById('collabMessage').value = '';
+    targetArtistId = null;
+  };
+
+  window.sendCollabMessage = async function() {
+    if (!targetArtistId) return;
+
+    const name = document.getElementById('collabName').value.trim() || 'Anonymous Producer';
+    const message = document.getElementById('collabMessage').value.trim();
+
+    if (!message) {
+      alert('Please write a message!');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('collab_requests')
+      .insert({
+        artist_id: targetArtistId,
+        sender_name: name,
+        message: message,
+        status: 'pending'
+      });
+
+    if (error) {
+      console.error('Send error:', error);
+      alert('Failed to send. Try again.');
+    } else {
+      alert(`Message sent to ${targetArtistName}! They'll reply soon`);
+      closeCollabModal();
+    }
+  };
+
+  // Load artists
   (async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return location.href = 'login.html';
@@ -79,51 +149,27 @@
     }
 
     await loadArtists();
-    loadTalkJS();
   })();
 
   async function loadArtists() {
-    console.log('Starting loadArtists...'); // DEBUG LINE 1
-
-    // Query 1: collaboration_opt_in = true
-    const { data: optInArtists, error: optInError } = await supabase
+    const { data: artists } = await supabase
       .from('profiles')
       .select('id, name, logo_url, banner_url, email, subdomain')
-      .eq('collaboration_opt_in', true)
+      .or('collaboration_opt_in.eq.true,open_to_collab.eq.true')
       .neq('id', currentUser.id);
-
-    console.log('Query 1 (collaboration_opt_in):', optInArtists, optInError); // DEBUG LINE 2
-
-    // Query 2: open_to_collab = true
-    const { data: legacyArtists, error: legacyError } = await supabase
-      .from('profiles')
-      .select('id, name, logo_url, banner_url, email, subdomain')
-      .eq('open_to_collab', true)
-      .neq('id', currentUser.id);
-
-    console.log('Query 2 (open_to_collab):', legacyArtists, legacyError); // DEBUG LINE 3
-
-    // Combine and dedupe
-    const allArtists = [...(optInArtists || []), ...(legacyArtists || [])];
-    const uniqueArtists = allArtists.filter((a, idx) => allArtists.findIndex(b => b.id === a.id) === idx);
-
-    console.log('Final unique artists:', uniqueArtists); // DEBUG LINE 4
 
     const grid = document.getElementById('artistsGrid');
     grid.innerHTML = '';
 
-    if (uniqueArtists.length === 0) {
+    if (!artists || artists.length === 0) {
       document.getElementById('noArtists').classList.remove('hidden');
       return;
     }
 
-    document.getElementById('noArtists').classList.add('hidden');
-
-    for (const a of uniqueArtists) {
+    for (const a of artists) {
       const logo = a.logo_url
         ? supabase.storage.from('media').getPublicUrl(a.logo_url).data.publicUrl
         : 'logo-placeholder.png';
-
       const banner = a.banner_url
         ? supabase.storage.from('media').getPublicUrl(a.banner_url).data.publicUrl
         : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist+Banner';
@@ -141,11 +187,8 @@
           }).join('')
         : '<p class="text-gray-500 text-xs">No tracks yet</p>';
 
-      // FIXED: subdomain trim + fallback to ID
       const profileId = a.subdomain?.trim() && a.subdomain.trim().length > 0 ? a.subdomain.trim() : a.id;
       const publicLink = `${location.origin}/public-profile.html?id=${profileId}`;
-
-      console.log(`Artist ${a.name} - Profile ID: ${profileId}, Link: ${publicLink}`); // DEBUG LINE 5
 
       grid.innerHTML += `
         <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
@@ -161,7 +204,7 @@
                 View Public Profile
               </button>
             </a>
-            <button onclick="openChat('${a.id}', '${(a.name || 'Artist').replace(/'/g, "\\'")}', '${a.email || ''}')"
+            <button onclick="openCollabModal('${a.id}', '${(a.name || 'Artist').replace(/'/g, "\\'")}')"
               class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
               Message for Collab
             </button>
@@ -191,51 +234,6 @@
     await supabase.auth.signOut();
     location.href = 'login.html';
   };
-
-  // TalkJS — FIXED with official test setup
-  function loadTalkJS() {
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/talkjs@0.16.8/dist/talkjs.all.min.js';
-    script.onload = initTalkJS;
-    document.head.appendChild(script);
-  }
-
-  function initTalkJS() {
-    Talk.ready.then(() => {
-      const me = new Talk.User({
-        id: currentUser.id,
-        name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
-        email: currentUser.email
-      });
-
-      talkSession = new Talk.Session({
-        appId: 'tLZqiXQU',
-        me: me
-      });
-
-      // Use official test signature (no CryptoJS needed)
-      talkSession.sign(me, 'sk_test_IEmPfWI8f9gVZUhShLIv8NibfXnXsZI1');
-
-      const inbox = talkSession.createInbox();
-      inbox.mount(document.getElementById('talkjs-container'));
-
-      window.openChat = function(otherId, otherName, otherEmail) {
-        if (!talkSession) return alert("Chat loading...");
-        const other = new Talk.User({
-          id: otherId,
-          name: otherName,
-          email: otherEmail || undefined
-        });
-        const convo = talkSession.getOrCreateConversation(Talk.oneOnOneId(me, other));
-        convo.setParticipant(me);
-        convo.setParticipant(other);
-        convo.setAttributes({ subject: "Collab Request – Rhythm Deck" });
-        const chatbox = talkSession.createChatbox(convo);
-        chatbox.mount(document.getElementById('talkjs-container'));
-        document.getElementById('talkjs-container').style.display = 'block';
-      };
-    });
-  }
 </script>
 </body>
 </html>
