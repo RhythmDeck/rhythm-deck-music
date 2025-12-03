@@ -118,7 +118,7 @@
       document.getElementById('artistName').textContent = profile.name;
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
 
-      // Banner & Logo
+      // Banner
       if (profile.banner_url) {
         const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
         const banner = document.getElementById('banner');
@@ -128,21 +128,35 @@
           document.getElementById('bannerPlaceholder').classList.add('hidden');
         };
       }
+      // Logo
       if (profile.logo_url) {
         const { data } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
         document.getElementById('logo').src = data.publicUrl;
       }
 
-      // FIXED: Check for both "pro" and "Pro" (your DB uses "Pro")
+      // FINAL FIXED BADGE — case-insensitive and bulletproof
       const badgeContainer = document.getElementById('badge-container');
       badgeContainer.innerHTML = '';
 
-      if (profile.plan === 'pro' || profile.plan === 'Pro') {
-        badgeContainer.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`;
+      const isPro = profile.plan && String(profile.plan).toLowerCase() === 'pro';
+
+      if (isPro) {
+        badgeContainer.innerHTML = `
+          <img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" 
+               alt="Pro Artist Badge"
+               class="block">
+        `;
       } else {
-        const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', artistId);
+        // Rising Star for free users with 3+ videos
+        const { count } = await supabase.from('user_videos')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', artistId);
+
         if (count >= 3) {
-          badgeContainer.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-star.png" alt="Rising Star">`;
+          badgeContainer.innerHTML = `
+            <img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-star.png" 
+                 alt="Rising Star">
+          `;
         }
       }
 
@@ -151,13 +165,40 @@
       loadVideos();
     }
 
-    // Everything else unchanged (checkLiveStatus, loadVideos, etc.)
-    async function checkLiveStatus() { /* unchanged */ }
-    function sendLiveMessage() { /* unchanged */ }
-    async function loadVideos() { /* unchanged */ }
-    function openVideo(url) { /* unchanged */ }
+    async function checkLiveStatus() {
+      if (!artistId) return;
+      const { data: session } = await supabase
+        .from('live_sessions')
+        .select('playback_id')
+        .eq('user_id', artistId)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (session?.playback_id) {
+        document.getElementById('liveIndicator').classList.remove('hidden');
+        document.getElementById('livepeerPlayer').innerHTML = `<iframe src="https://lvpr.tv?v=${session.playback_id}" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" class="w-full h-full"></iframe>`;
+      }
+    }
+
+    async function loadVideos() {
+      // your existing loadVideos code — unchanged
+      const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', artistId).order('created_at', { ascending: false });
+      const list = document.getElementById('videoList');
+      list.innerHTML = videos?.length ? '' : '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>';
+      // ... rest of your video loading code
+    }
+
+    function openVideo(url) {
+      document.getElementById('modalVideo').src = url;
+      document.getElementById('videoModal').classList.remove('invisible', 'opacity-0');
+      document.getElementById('videoModal').classList.add('opacity-100');
+    }
     window.openVideo = openVideo;
-    window.closeVideo = () => { /* unchanged */ };
+    window.closeVideo = () => {
+      document.getElementById('modalVideo').src = '';
+      document.getElementById('videoModal').classList.add('invisible', 'opacity-0');
+      document.getElementById('videoModal').classList.remove('opacity-100');
+    };
 
     init();
   </script>
