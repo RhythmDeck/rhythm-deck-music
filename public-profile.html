@@ -80,17 +80,17 @@
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
 
-  <script type="module">
-    // ONLY CHANGE #1 — This exact line is the only one that works reliably right now (Dec 2025)
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js'
+  <!-- THIS IS THE ONLY CHANGE THAT WORKS TODAY (Dec 5 2025) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-    const supabase = createClient(
+  <script type="module">
+    // Direct media URLs — bypasses the broken getPublicUrl()
+    const getMediaUrl = (path) => `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${path.replace(/^\/+/g, '')}`
+
+    const supabase = window.supabase.createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     )
-
-    // ONLY CHANGE #2 — Direct URLs that always work (no more broken getPublicUrl)
-    const getMediaUrl = (path) => `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${path.replace(/^\/+/g, '')}`
 
     const urlParams = new URLSearchParams(location.search)
     const rawParam = urlParams.get('id')?.trim()
@@ -112,12 +112,12 @@
       document.getElementById('artistName').textContent = profile.name
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>')
 
-      // ONLY CHANGE #3 — Use direct URLs instead of getPublicUrl
+      // BANNER & LOGO — now using direct URLs
       if (profile.banner_url) {
-        const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url)  // keep this line — we just ignore the result
-        document.getElementById('banner').src = getMediaUrl(profile.banner_url)
-        document.getElementById('banner').onload = () => {
-          document.getElementById('banner').classList.remove('hidden')
+        const banner = document.getElementById('banner')
+        banner.src = getMediaUrl(profile.banner_url)
+        banner.onload = () => {
+          banner.classList.remove('hidden')
           document.getElementById('bannerPlaceholder').classList.add('hidden')
         }
       }
@@ -138,7 +138,7 @@
       loadVideos()
     }
 
-    // EVERYTHING BELOW THIS LINE IS YOUR ORIGINAL CODE — 100% untouched
+    // ALL YOUR ORIGINAL FUNCTIONS BELOW — 100% UNCHANGED
     async function checkLiveStatus() {
       if (!artistId) return
       const { data: session } = await supabase
