@@ -3,229 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Collaboration Network | Rhythm Deck</title>
+  <title>Collab Messages | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .artist-card:hover {transform: translateY(-8px);transition:all .3s;box-shadow:0 20px 40px rgba(0,0,0,.9);}
-    .email-hover {opacity:0;transition:opacity .4s;}
-    .artist-card:hover .email-hover {opacity:1;}
-    .song-item {
-      padding: 10px 12px; border-radius: 8px; margin: 3px 0;
-      background: rgba(139,92,246,0.1); transition: all .2s; cursor: pointer;
-      font-weight: 500; border: 1px solid #a855f7;
-    }
-    .song-item:hover {background: #a855f7; color: white; transform: translateX(4px);}
-    .modal {display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98);
-            z-index: 99999; justify-content: center; align-items: center;}
-    .modal.active {display: flex;}
-    video { outline: none; }
-  </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-<header class="bg-black/90 backdrop-blur-lg border-b border-purple-600 p-6 shadow-2xl">
-  <div class="max-w-7xl mx-auto flex justify-between items-center">
-    <div class="flex items-center space-x-4">
-      <img src="logo-1-sm.jpg" alt="Logo" class="w-12 h-12 rounded-full">
-      <h1 class="text-4xl font-black tracking-wider">RHYTHM DECK</h1>
+  <div class="max-w-5xl mx-auto p-8">
+    <div class="flex justify-between items-center mb-10">
+      <h1 class="text-5xl font-black bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
+        Collab Messages
+      </h1>
+      <a href="profile-admin-pro.html" class="text-xl underline hover:text-emerald-400">Back to Dashboard</a>
     </div>
-    <nav class="space-x-8">
-      <a href="profile-admin-pro.html" class="hover:text-purple-400 transition">Dashboard</a>
-      <button onClick="logout()" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold">Logout</button>
-    </nav>
-  </div>
-</header>
-
-<section class="text-center py-20 px-6">
-  <h2 class="text-6xl font-black mb-6 bg-gradient-to-r from-green-400 to-purple-500 bg-clip-text text-transparent">
-    Collaboration Network
-  </h2>
-  <p class="text-xl max-w-3xl mx-auto opacity-90">Connect • Listen • Collab</p>
-</section>
-
-<section class="max-w-7xl mx-auto px-6 pb-20">
-  <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
-  <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists available yet. Be the first!</p>
-</section>
-
-<!-- VIDEO MODAL -->
-<div id="videoModal" class="modal">
-  <div class="relative max-w-5xl w-full p-8">
-    <button onClick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
-    <video id="modalVideo" controls class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
-  </div>
-</div>
-
-<!-- COLLAB MESSAGE MODAL -->
-<div id="collabModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
-  <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden">
-    <button onClick="closeCollabModal()" class="absolute top-4 right-6 text-white text-5xl hover:text-red-400 z-10">×</button>
-    <div class="p-10">
-      <h2 class="text-5xl font-black text-emerald-400 mb-8 text-center">
-        Message <span id="targetArtistName">Artist</span>
-      </h2>
-      <input type="text" id="collabName" placeholder="Your name or artist name" class="w-full p-4 rounded-xl bg-white/10 text-white border border-emerald-500 mb-5 placeholder-gray-400 text-lg">
-      <textarea id="collabMessage" placeholder="Hey! I’d love to collab. I do [genre/style], my rates are [$$], available [dates]..." class="w-full p-4 rounded-xl bg-white/10 text-white border border-emerald-500 h-48 resize-none placeholder-gray-400 text-lg mb-8"></textarea>
-      <button onClick="sendCollabMessage()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-2xl py-6 rounded-xl transition transform hover:scale-105">
-        Send Message
-      </button>
-      <p class="text-center text-gray-400 mt-6 text-sm">The artist will get your message instantly</p>
+    <div id="messagesList" class="space-y-6">
+      <p class="text-center text-gray-400 text-xl">Loading your messages...</p>
     </div>
   </div>
-</div>
 
-<!-- WORKING SUPABASE (December 2025) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- Working Supabase UMD (Dec 2025) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-<script>
-  // DIRECT MEDIA URL — fixes broken getPublicUrl()
-  const getMediaUrl = (path) => `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${path.replace(/^\/+/g, '')}`
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
 
-  const supabase = window.supabase.createClient(
-    'https://bxoqhmfnseskwqkywppg.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-  );
+    (async () => {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        location.href = 'login.html';
+        return;
+      }
 
-  let currentUser = null;
-  let targetArtistId = null;
-  let targetArtistName = null;
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
 
-  window.openCollabModal = function(artistId, artistName) {
-    targetArtistId = artistId;
-    targetArtistName = artistName;
-    document.getElementById('targetArtistName').textContent = artistName;
-    document.getElementById('collabModal').classList.remove('invisible', 'opacity-0');
-    document.getElementById('collabModal').classList.add('opacity-100');
-  };
+      if (profileError || !profile) {
+        document.getElementById('messagesList').innerHTML = '<p class="text-red-400 text-center">Profile not found.</p>';
+        return;
+      }
 
-  window.closeCollabModal = function() {
-    document.getElementById('collabModal').classList.add('invisible', 'opacity-0');
-    document.getElementById('collabModal').classList.remove('opacity-100');
-    document.getElementById('collabName').value = '';
-    document.getElementById('collabMessage').value = '';
-    targetArtistId = null;
-  };
+      const { data: messages, error } = await supabase
+        .from('collab_requests')
+        .select('*')
+        .eq('artist_id', profile.id)
+        .order('created_at', { ascending: false });
 
-  window.sendCollabMessage = async function() {
-    if (!targetArtistId) return;
-    const name = document.getElementById('collabName').value.trim() || 'Anonymous Producer';
-    const message = document.getElementById('collabMessage').value.trim();
-    if (!message) return alert('Please write a message!');
+      const list = document.getElementById('messagesList');
+      list.innerHTML = '';
 
-    const { error } = await supabase
-      .from('collab_requests')
-      .insert({
-        artist_id: targetArtistId,
-        sender_name: name,
-        message: message,
-        status: 'pending'
-      });
+      if (!messages || messages.length === 0) {
+        list.innerHTML = '<p class="text-center text-gray-400 text-2xl">No messages yet. When someone contacts you, it will appear here!</p>';
+        return;
+      }
 
-    if (error) {
-      console.error('Send error:', error);
-      alert('Failed to send. Try again.');
-    } else {
-      alert(`Message sent to ${targetArtistName}!`);
-      closeCollabModal();
-    }
-  };
-
-  (async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return location.href = 'login.html';
-    currentUser = user;
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('collaboration_opt_in')
-      .eq('id', currentUser.id)
-      .single();
-
-    if (!profile?.collaboration_opt_in) {
-      alert("Turn on 'Open to Collaboration' in your profile first!");
-      location.href = 'profile-admin-pro.html';
-      return;
-    }
-
-    await loadArtists();
-  })();
-
-  async function loadArtists() {
-    const { data: artists } = await supabase
-      .from('profiles')
-      .select('id, name, logo_url, banner_url, email, subdomain')
-      .or('collaboration_opt_in.eq.true,open_to_collab.eq.true')
-      .neq('id', currentUser.id);
-
-    const grid = document.getElementById('artistsGrid');
-    grid.innerHTML = '';
-    if (!artists || artists.length === 0) {
-      document.getElementById('noArtists').classList.remove('hidden');
-      return;
-    }
-
-    for (const a of artists) {
-      const logo = a.logo_url ? getMediaUrl(a.logo_url) : 'logo-placeholder.png';
-      const banner = a.banner_url ? getMediaUrl(a.banner_url) : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist+Banner';
-
-      const { data: videos } = await supabase
-        .from('user_videos')
-        .select('title, video_url')
-        .eq('user_id', a.id)
-        .limit(10);
-
-      const tracks = videos?.length > 0
-        ? videos.map(v => {
-            const url = getMediaUrl(v.video_url);
-            return `<div class="song-item" onclick="playVideo('${url}')">${v.title || 'Untitled'}</div>`;
-          }).join('')
-        : '<p class="text-gray-500 text-xs">No tracks yet</p>';
-
-      const profileId = a.subdomain?.trim() ? a.subdomain.trim() : a.id;
-      const publicLink = `${location.origin}/public-profile.html?id=${profileId}`;
-
-      grid.innerHTML += `
-        <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
-          <div class="h-40 bg-cover bg-center" style="background-image:url('${banner}')"></div>
-          <div class="p-6 -mt-20 relative z-10 text-center">
-            <img src="${logo}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover" onerror="this.src='logo-placeholder.png'">
-            <h3 class="text-2xl font-black mt-4">${a.name || 'Unknown Artist'}</h3>
-            <p class="email-hover text-green-300 text-sm mt-1">Email: ${a.email || 'hidden'}</p>
-            <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
-            <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
-            <a href="${publicLink}" target="_blank" class="block mt-5">
-              <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
-                View Public Profile
-              </button>
-            </a>
-            <button onclick="openCollabModal('${a.id}', '${(a.name || 'Artist').replace(/'/g, "\\'")}')"
-              class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
-              Message for Collab
-            </button>
+      list.innerHTML = messages.map(m => `
+        <div class="bg-black/50 rounded-2xl p-8 border ${m.status === 'pending' ? 'border-emerald-500 shadow-lg shadow-emerald-500/20' : 'border-gray-700'}">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-2xl font-black text-emerald-400">${m.sender_name || 'Anonymous'}</p>
+              <p class="text-sm text-gray-300 mt-1">Email: ${m.email || 'Not provided'}</p>
+              <p class="text-sm text-gray-400">${new Date(m.created_at).toLocaleString()}</p>
+            </div>
+            ${m.status === 'pending' ? '<span class="bg-emerald-600 px-4 py-2 rounded-full text-sm font-bold">NEW</span>' : ''}
           </div>
-        </div>`;
-    }
-  }
-
-  window.playVideo = function(url) {
-    document.getElementById('modalVideo').src = url;
-    document.getElementById('videoModal').classList.add('active');
-    document.getElementById('modalVideo').play();
-  };
-
-  window.closeModal = function() {
-    document.getElementById('modalVideo').pause();
-    document.getElementById('modalVideo').src = '';
-    document.getElementById('videoModal').classList.remove('active');
-  };
-
-  document.getElementById('videoModal').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeModal();
-  });
-
-  window.logout = async function() {
-    await supabase.auth.signOut();
-    location.href = 'login.html';
-  };
-</script>
+          <p class="text-lg whitespace-pre-line mt-4">${m.message || ''}</p>
+          <div class="mt-6">
+            <a href="mailto:${m.email || ''}?subject=Re: Collab Request&body=Hey ${m.sender_name},%0A%0A"
+               class="inline-block bg-emerald-600 hover:bg-emerald-700 px-8 py-4 rounded-xl font-bold transition">
+              ${m.email ? 'Reply via Email' : 'No Email Provided'}
+            </a>
+          </div>
+        </div>
+      `).join('');
+    })();
+  </script>
 </body>
 </html>
