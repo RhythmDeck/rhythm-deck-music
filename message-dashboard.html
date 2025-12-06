@@ -19,17 +19,54 @@
     </div>
   </div>
 
-  <!-- FIXED: Use working UMD version (no more +esm errors) -->
+  <!-- Working Supabase UMD (Dec 2025) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <script>
-    // This works 100% in December 2025
     const supabase = window.supabase.createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
 
-    // Run when page loads
+    let currentUserId = null;
+
+    // Mark message as read
+    async function markAsRead(messageId, element) {
+      const { error } = await supabase
+        .from('collab_requests')
+        .update({ status: 'read' })
+        .eq('id', messageId)
+        .eq('artist_id', currentUserId);
+
+      if (error) {
+        console.error('Mark as read error:', error);
+        alert('Failed to mark as read.');
+      } else {
+        element.remove(); // Remove the "NEW" badge
+      }
+    }
+
+    // Delete message
+    async function deleteMessage(messageId) {
+      if (!confirm('Delete this message permanently?')) return;
+
+      const { error } = await supabase
+        .from('collab_requests')
+        .delete()
+        .eq('id', messageId)
+        .eq('artist_id', currentUserId);
+
+      if (error) {
+        console.error('Delete error:', error);
+        alert('Failed to delete.');
+      } else {
+        document.getElementById(`msg-${messageId}`).remove();
+        if (!document.querySelector('#messagesList > div')) {
+          document.getElementById('messagesList').innerHTML = '<p class="text-center text-gray-400 text-2xl">No messages yet. When someone contacts you, it will appear here!</p>';
+        }
+      }
+    }
+
     (async () => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
@@ -37,7 +74,8 @@
         return;
       }
 
-      // Get current artist's profile ID (this is the artist_id in collab_requests)
+      currentUserId = user.id;
+
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
@@ -49,7 +87,6 @@
         return;
       }
 
-      // Fetch all messages sent TO this artist
       const { data: messages, error } = await supabase
         .from('collab_requests')
         .select('*')
@@ -57,7 +94,6 @@
         .order('created_at', { ascending: false });
 
       const list = document.getElementById('messagesList');
-
       list.innerHTML = '';
 
       if (!messages || messages.length === 0) {
@@ -66,17 +102,29 @@
       }
 
       list.innerHTML = messages.map(m => `
-        <div class="bg-black/50 rounded-2xl p-8 border ${m.status === 'pending' ? 'border-emerald-500 shadow-lg shadow-emerald-500/20' : 'border-gray-700'}">
+        <div id="msg-${m.id}" class="bg-black/50 rounded-2xl p-8 border ${m.status === 'pending' ? 'border-emerald-500 shadow-lg shadow-emerald-500/20' : 'border-gray-700'}">
           <div class="flex justify-between items-start mb-4">
             <div>
               <p class="text-2xl font-black text-emerald-400">${m.sender_name || 'Anonymous'}</p>
               <p class="text-sm text-gray-400">${new Date(m.created_at).toLocaleString()}</p>
             </div>
-            ${m.status === 'pending' ? '<span class="bg-emerald-600 px-4 py-2 rounded-full text-sm font-bold">NEW</span>' : ''}
+            <div class="flex gap-3">
+              ${m.status === 'pending' 
+                ? `<button onclick="markAsRead('${m.id}', this)" 
+                       class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold transition">
+                       Mark as Read
+                   </button>`
+                : '<span class="bg-gray-600 px-4 py-2 rounded-full text-sm font-bold opacity-70">Read</span>'
+              }
+              <button onclick="deleteMessage('${m.id}')" 
+                      class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold transition">
+                Delete
+              </button>
+            </div>
           </div>
           <p class="text-lg whitespace-pre-line mt-4">${m.message || ''}</p>
           <div class="mt-6">
-            <a href="mailto:${(m.sender_email || '').trim() || m.sender_name.replace(/ /g,'') + '@example.com'}?subject=Re: Collab Request&body=Hey ${m.sender_name},%0A%0A" 
+            <a href="mailto:${(m.sender_email || '').trim() || m.sender_name.replace(/ /g,'') + '@example.com'}?subject=Re: Collab Request&body=Hey ${m.sender_name},%0A%0A"
                class="inline-block bg-emerald-600 hover:bg-emerald-700 px-8 py-4 rounded-xl font-bold transition">
               Reply via Email
             </a>
