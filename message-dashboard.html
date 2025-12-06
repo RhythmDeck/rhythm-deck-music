@@ -19,7 +19,25 @@
     </div>
   </div>
 
-  <!-- Working Supabase UMD (Dec 2025) -->
+  <!-- REPLY MODAL -->
+  <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
+    <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
+      <button onclick="closeReplyModal()" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl transition">
+        ×
+      </button>
+      <div class="p-8 pt-16">
+        <h2 class="text-4xl font-black text-emerald-400 mb-6 text-center">
+          Reply to <span id="replyTargetName">Artist</span>
+        </h2>
+        <textarea id="replyMessage" rows="6" placeholder="Write your reply..." required
+                  class="w-full p-4 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
+        <button onclick="sendReply()" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition shadow-xl transform hover:scale-105">
+          Send Reply
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <script>
@@ -29,108 +47,111 @@
     );
 
     let currentUserId = null;
+    let replyTargetId = null;
+    let replyTargetName = null;
 
-    // Mark message as read
-    async function markAsRead(messageId, element) {
+    function openReplyModal(targetId, name) {
+      replyTargetId = targetId;
+      replyTargetName = name;
+      document.getElementById('replyTargetName').textContent = name;
+      document.getElementById('replyModal').classList.remove('invisible', 'opacity-0');
+      document.getElementById('replyModal').classList.add('opacity-100');
+    }
+
+    function closeReplyModal() {
+      document.getElementById('replyModal').classList.add('invisible', 'opacity-0');
+      document.getElementById('replyModal').classList.remove('opacity-100');
+      document.getElementById('replyMessage').value = '';
+    }
+
+    async function sendReply() {
+      const message = document.getElementById('replyMessage').value.trim();
+      if (!message) return alert('Please write a reply!');
+
       const { error } = await supabase
         .from('collab_requests')
-        .update({ status: 'read' })
-        .eq('id', messageId)
-        .eq('artist_id', currentUserId);
+        .insert({
+          artist_id: replyTargetId,
+          sender_name: 'You',
+          sender_email: null,  // optional
+          message: message,
+          status: 'pending'
+        })
+        .select();
 
       if (error) {
-        console.error('Mark as read error:', error);
-        alert('Failed to mark as read.');
+        console.error('Reply failed:', error);
+        alert('Failed to send reply.');
       } else {
-        element.remove(); // Remove the "NEW" badge
+        alert('Reply sent!');
+        closeReplyModal();
       }
     }
 
-    // Delete message
+    async function markAsRead(messageId, element) {
+      await supabase.from('collab_requests').update({ status: 'read' }).eq('id', messageId);
+      element.remove();
+    }
+
     async function deleteMessage(messageId) {
-      if (!confirm('Delete this message permanently?')) return;
-
-      const { error } = await supabase
-        .from('collab_requests')
-        .delete()
-        .eq('id', messageId)
-        .eq('artist_id', currentUserId);
-
-      if (error) {
-        console.error('Delete error:', error);
-        alert('Failed to delete.');
-      } else {
+      if (!confirm('Delete permanently?')) return;
+      const { error } = await supabase.from('collab_requests').delete().eq('id', messageId).eq('artist_id', currentUserId).select();
+      if (!error) {
         document.getElementById(`msg-${messageId}`).remove();
         if (!document.querySelector('#messagesList > div')) {
-          document.getElementById('messagesList').innerHTML = '<p class="text-center text-gray-400 text-2xl">No messages yet. When someone contacts you, it will appear here!</p>';
+          document.getElementById('messagesList').innerHTML = '<p class="text-center text-gray-400 text-2xl">No messages yet.</p>';
         }
       }
     }
 
     (async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        location.href = 'login.html';
-        return;
-      }
-
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return location.href = 'login.html';
       currentUserId = user.id;
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
+      const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).single();
+      if (!profile) return document.getElementById('messagesList').innerHTML = '<p class="text-red-400">Profile not found.</p>';
 
-      if (profileError || !profile) {
-        document.getElementById('messagesList').innerHTML = '<p class="text-red-400 text-center">Profile not found.</p>';
-        return;
-      }
-
-      const { data: messages, error } = await supabase
+      const { data: messages } = await supabase
         .from('collab_requests')
         .select('*')
         .eq('artist_id', profile.id)
         .order('created_at', { ascending: false });
 
       const list = document.getElementById('messagesList');
-      list.innerHTML = '';
+      list.innerHTML = messages?.length ? '' : '<p class="text-center text-gray-400 text-2xl">No messages yet.</p>';
 
-      if (!messages || messages.length === 0) {
-        list.innerHTML = '<p class="text-center text-gray-400 text-2xl">No messages yet. When someone contacts you, it will appear here!</p>';
-        return;
-      }
-
-      list.innerHTML = messages.map(m => `
-        <div id="msg-${m.id}" class="bg-black/50 rounded-2xl p-8 border ${m.status === 'pending' ? 'border-emerald-500 shadow-lg shadow-emerald-500/20' : 'border-gray-700'}">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <p class="text-2xl font-black text-emerald-400">${m.sender_name || 'Anonymous'}</p>
-              <p class="text-sm text-gray-400">${new Date(m.created_at).toLocaleString()}</p>
+      messages?.forEach(m => {
+        const hasEmail = m.sender_email && m.sender_email.trim() !== '';
+        list.innerHTML += `
+          <div id="msg-${m.id}" class="bg-black/50 rounded-2xl p-8 border ${m.status === 'pending' ? 'border-emerald-500 shadow-lg shadow-emerald-500/20' : 'border-gray-700'}">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <p class="text-2xl font-black text-emerald-400">${m.sender_name || 'Anonymous'}</p>
+                ${hasEmail ? `<p class="text-sm text-gray-300 mt-1">Email: ${m.sender_email}</p>` : ''}
+                <p class="text-sm text-gray-400">${new Date(m.created_at).toLocaleString()}</p>
+              </div>
+              <div class="flex gap-3">
+                ${m.status === 'pending' ? `<button onclick="markAsRead('${m.id}', this)" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold">Mark as Read</button>` : ''}
+                <button onclick="deleteMessage('${m.id}')" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold">Delete</button>
+              </div>
             </div>
-            <div class="flex gap-3">
-              ${m.status === 'pending' 
-                ? `<button onclick="markAsRead('${m.id}', this)" 
-                       class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold transition">
-                       Mark as Read
-                   </button>`
-                : '<span class="bg-gray-600 px-4 py-2 rounded-full text-sm font-bold opacity-70">Read</span>'
-              }
-              <button onclick="deleteMessage('${m.id}')" 
-                      class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold transition">
-                Delete
+            <p class="text-lg whitespace-pre-line mt-4">${m.message}</p>
+
+            <!-- EXACTLY WHAT YOU WANTED -->
+            <div class="mt-6">
+              ${hasEmail ? `
+                <p class="text-gray-400 text-sm mb-3">
+                  Reply via Email above or
+                </p>
+              ` : ''}
+              <button onclick="openReplyModal('${m.original_sender_id || m.artist_id}', '${(m.sender_name || 'Artist').replace(/'/g, "\\'")}')"
+                      class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black px-8 py-4 rounded-xl text-lg transition transform hover:scale-105 shadow-xl">
+                Reply via Message
               </button>
             </div>
-          </div>
-          <p class="text-lg whitespace-pre-line mt-4">${m.message || ''}</p>
-          <div class="mt-6">
-            <a href="mailto:${(m.sender_email || '').trim() || m.sender_name.replace(/ /g,'') + '@example.com'}?subject=Re: Collab Request&body=Hey ${m.sender_name},%0A%0A"
-               class="inline-block bg-emerald-600 hover:bg-emerald-700 px-8 py-4 rounded-xl font-bold transition">
-              Reply via Email
-            </a>
-          </div>
-        </div>
-      `).join('');
+          </div>`;
+      });
     })();
   </script>
 </body>
