@@ -16,6 +16,7 @@
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
 
+<!-- YOUR HEADER & CONTENT (unchanged) -->
 <header class="bg-black/90 backdrop-blur-lg border-b border-purple-600 p-6 shadow-2xl">
   <div class="max-w-7xl mx-auto flex justify-between items-center">
     <div class="flex items-center space-x-4">
@@ -49,11 +50,14 @@
   </div>
 </div>
 
-<!-- CLEAN MESSAGE MODAL WITH REQUIRED FIELDS -->
+<!-- MESSAGE MODAL WITH RED X CLOSE BUTTON -->
 <div id="collabModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
   <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-2xl mx-4 relative overflow-hidden">
-    <button onClick="closeCollabModal()" class="absolute top-4 right-6 text-white text-5xl hover:text-red-400 z-10">×</button>
-    <div class="p-10">
+    <!-- RED X CLOSE BUTTON -->
+    <button onClick="closeCollabModal()" class="absolute top-6 right-6 text-red-500 hover:text-red-400 text-5xl font-bold z-20 transition">
+      ×
+    </button>
+    <div class="p-10 pt-16"> <!-- pt-16 to make room for the X -->
       <h2 class="text-5xl font-black text-emerald-400 mb-8 text-center">
         Message <span id="targetArtistName">Artist</span>
       </h2>
@@ -136,7 +140,7 @@
       .insert({
         artist_id: targetArtistId,
         sender_name: name,
-        email: email,           // This matches your actual column
+        email: email,
         message: message,
         status: 'pending'
       });
@@ -150,23 +154,17 @@
     }
   };
 
+  // YOUR ORIGINAL loadArtists(), playVideo(), etc. — unchanged and working
   (async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return location.href = 'login.html';
     currentUser = user;
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('collaboration_opt_in')
-      .eq('id', currentUser.id)
-      .single();
-
+    const { data: profile } = await supabase.from('profiles').select('collaboration_opt_in').eq('id', currentUser.id).single();
     if (!profile?.collaboration_opt_in) {
       alert("Turn on 'Open to Collaboration' in your profile first!");
       location.href = 'profile-admin-pro.html';
       return;
     }
-
     await loadArtists();
   })();
 
@@ -188,11 +186,7 @@
       const logo = a.logo_url ? getMediaUrl(a.logo_url) : 'logo-placeholder.png';
       const banner = a.banner_url ? getMediaUrl(a.banner_url) : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist+Banner';
 
-      const { data: videos } = await supabase
-        .from('user_videos')
-        .select('title, video_url')
-        .eq('user_id', a.id)
-        .limit(10);
+      const { data: videos } = await supabase.from('user_videos').select('title, video_url').eq('user_id', a.id).limit(10);
 
       const tracks = videos?.length > 0
         ? videos.map(v => {
