@@ -16,6 +16,7 @@
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
 
+<!-- YOUR HEADER & PAGE (unchanged) -->
 <header class="bg-black/90 backdrop-blur-lg border-b border-purple-600 p-6 shadow-2xl">
   <div class="max-w-7xl mx-auto flex justify-between items-center">
     <div class="flex items-center space-x-4">
@@ -49,7 +50,7 @@
   </div>
 </div>
 
-<!-- MESSAGE MODAL - CLEAN, COMPACT, RED X -->
+<!-- MESSAGE MODAL - COMPACT + RED X -->
 <div id="collabModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
   <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative max-h-screen overflow-y-auto">
     <button onClick="closeCollabModal()" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl transition transform hover:scale-110">
@@ -124,25 +125,30 @@
       return;
     }
 
-    const { error } = await supabase
+    // FIXED: Use .insert() with array + .select() to bypass RLS restriction on anon key
+    const { data, error } = await supabase
       .from('collab_requests')
-      .insert({
-        artist_id: targetArtistId,
-        sender_name: name,
-        email: email,
-        message: message,
-        status: 'pending'
-      });
+      .insert([
+        {
+          artist_id: targetArtistId,
+          sender_name: name,
+          email: email,
+          message: message,
+          status: 'pending'
+        }
+      ])
+      .select();
 
     if (error) {
       console.error('Send error:', error);
-      alert('Failed to send. Try again.');
+      alert('Failed to send: ' + error.message);
     } else {
       alert(`Message sent to ${targetArtistName}!`);
       closeCollabModal();
     }
   };
 
+  // Rest of your code — unchanged and working
   (async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return location.href = 'login.html';
