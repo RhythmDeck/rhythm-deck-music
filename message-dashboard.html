@@ -75,8 +75,7 @@
           sender_name: 'You',
           message: message,
           status: 'pending'
-        })
-        .select();
+        });
 
       if (error) {
         console.error('Reply failed:', error);
@@ -87,13 +86,6 @@
       }
     }
 
-    // MARK AS READ
-    async function markAsRead(messageId, element) {
-      await supabase.from('collab_requests').update({ status: 'read' }).eq('id', messageId);
-      element.remove();
-    }
-
-    // DELETE — NOW WORKS PERMANENTLY
     async function deleteMessage(messageId) {
       if (!confirm('Delete this message permanently?')) return;
 
@@ -101,12 +93,11 @@
         .from('collab_requests')
         .delete()
         .eq('id', messageId)
-        .eq('artist_id', currentUserId)
-        .select(); // THIS LINE FIXES DELETION WITH ANON KEY + RLS
+        .eq('artist_id', currentUserId);
 
       if (error) {
         console.error('Delete failed:', error);
-        alert('Delete failed. Try again.');
+        alert('Delete failed: ' + error.message);
       } else {
         document.getElementById(`msg-${messageId}`).remove();
         if (!document.querySelector('#messagesList > div')) {
@@ -140,7 +131,7 @@
               <div>
                 <p class="text-2xl font-black text-emerald-400">${m.sender_name || 'Anonymous'}</p>
                 ${hasEmail ? `<p class="text-sm text-gray-300 mt-1">Email: ${m.sender_email}</p>` : ''}
-                <p class="text-sm text-gray-400">${new Date(m.created_at).toLocaleString()}</p>
+                <p class="text-sm text-gray-400">${, ${new Date(m.created_at).toLocaleString()}</p>
               </div>
               <div class="flex gap-3">
                 ${m.status === 'pending' ? `<button onclick="markAsRead('${m.id}', this)" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold">Mark as Read</button>` : ''}
@@ -148,7 +139,6 @@
               </div>
             </div>
             <p class="text-lg whitespace-pre-line mt-4">${m.message}</p>
-
             <div class="mt-6">
               ${hasEmail ? `<p class="text-gray-400 text-sm mb-3">Reply via Email above or</p>` : ''}
               <button onclick="openReplyModal('${m.original_sender_id || m.artist_id}', '${(m.sender_name || 'Artist').replace(/'/g, "\\'")}')"
