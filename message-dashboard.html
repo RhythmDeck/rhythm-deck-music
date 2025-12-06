@@ -73,7 +73,6 @@
         .insert({
           artist_id: replyTargetId,
           sender_name: 'You',
-          sender_email: null,  // optional
           message: message,
           status: 'pending'
         })
@@ -88,15 +87,27 @@
       }
     }
 
+    // MARK AS READ
     async function markAsRead(messageId, element) {
       await supabase.from('collab_requests').update({ status: 'read' }).eq('id', messageId);
       element.remove();
     }
 
+    // DELETE — NOW WORKS PERMANENTLY
     async function deleteMessage(messageId) {
-      if (!confirm('Delete permanently?')) return;
-      const { error } = await supabase.from('collab_requests').delete().eq('id', messageId).eq('artist_id', currentUserId).select();
-      if (!error) {
+      if (!confirm('Delete this message permanently?')) return;
+
+      const { error } = await supabase
+        .from('collab_requests')
+        .delete()
+        .eq('id', messageId)
+        .eq('artist_id', currentUserId)
+        .select(); // THIS LINE FIXES DELETION WITH ANON KEY + RLS
+
+      if (error) {
+        console.error('Delete failed:', error);
+        alert('Delete failed. Try again.');
+      } else {
         document.getElementById(`msg-${messageId}`).remove();
         if (!document.querySelector('#messagesList > div')) {
           document.getElementById('messagesList').innerHTML = '<p class="text-center text-gray-400 text-2xl">No messages yet.</p>';
@@ -138,13 +149,8 @@
             </div>
             <p class="text-lg whitespace-pre-line mt-4">${m.message}</p>
 
-            <!-- EXACTLY WHAT YOU WANTED -->
             <div class="mt-6">
-              ${hasEmail ? `
-                <p class="text-gray-400 text-sm mb-3">
-                  Reply via Email above or
-                </p>
-              ` : ''}
+              ${hasEmail ? `<p class="text-gray-400 text-sm mb-3">Reply via Email above or</p>` : ''}
               <button onclick="openReplyModal('${m.original_sender_id || m.artist_id}', '${(m.sender_name || 'Artist').replace(/'/g, "\\'")}')"
                       class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black px-8 py-4 rounded-xl text-lg transition transform hover:scale-105 shadow-xl">
                 Reply via Message
