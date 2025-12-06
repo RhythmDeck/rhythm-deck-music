@@ -6,10 +6,9 @@
   <title>Collab Messages | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .msg-item:hover { background: rgba(255,255,255,0.08); }
-    .msg-item.unread { font-weight: bold; border-left: 4px solid #10b981; background: rgba(16,185,129,0.05); }
+    .msg-item:hover { background: rgba(255,255,255,0.05); }
+    .msg-item.unread { font-weight: bold; border-left: 4px solid #10b981; }
     .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
-    .selected { background: rgba(255,255,255,0.1) !important; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -31,7 +30,7 @@
       </div>
 
       <!-- RIGHT: Selected Message -->
-      <div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 flex flex-col">
+      <div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 hidden lg:flex flex-col">
         <p class="text-gray-400 text-center">Select a message to read</p>
       </div>
     </div>
@@ -57,7 +56,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
   <script>
     const supabase = window.supabase.createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
@@ -66,7 +64,7 @@
 
     let currentUserId = null;
     let currentUserName = null;
-    let replyTargetId = null;
+    let selectedMessage = null;
 
     function openReplyModal(targetId, name) {
       replyTargetId = targetId;
@@ -95,47 +93,41 @@
       if (!error) {
         alert('Reply sent!');
         closeReplyModal();
-        loadMessages();
+        loadMessages(); // Refresh
       }
     }
 
     async function deleteMessage(id) {
-      if (!confirm('Delete this message permanently?')) return;
+      if (!confirm('Delete permanently?')) return;
       const { error } = await supabase.from('collab_requests').delete().eq('id', id).eq('artist_id', currentUserId).select();
       if (!error) loadMessages();
     }
 
     function showMessage(msg) {
+      selectedMessage = msg;
       const hasEmail = msg.sender_email?.trim();
       const isFromMe = msg.sender_name === currentUserName;
 
       document.getElementById('messageView').innerHTML = `
         <div class="flex-1 overflow-y-auto">
-          <div class="flex justify-between items-start mb-6">
-            <div>
-              <h2 class="text-3xl font-black text-emerald-400">${isFromMe ? 'You' : msg.sender_name}</h2>
-              ${hasEmail ? `<p class="text-gray-300 mt-1">Email: ${msg.sender_email}</p>` : ''}
-              <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
-            </div>
-            <button onclick="deleteMessage('${msg.id}')" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold">
-              Delete
-            </button>
+          <div class="mb-6">
+            <h2 class="text-3xl font-black text-emerald-400">${isFromMe ? 'You → ' + msg.sender_name : msg.sender_name}</h2>
+            ${hasEmail ? `<p class="text-gray-300">Email: ${msg.sender_email}</p>` : ''}
+            <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
           </div>
-          <div class="bg-black/30 rounded-2xl p-6 text-lg whitespace-pre-line mb-8">
+          <div class="bg-black/30 rounded-2xl p-6 text-lg whitespace-pre-line">
             ${msg.message}
           </div>
-          <div class="flex items-center gap-4">
-            ${hasEmail ? `<p class="text-gray-400 text-sm">Reply via Email above or</p>` : ''}
-            <button onclick="openReplyModal('${msg.artist_id}', '${msg.sender_name}')"
+          <div class="mt-8 flex gap-4">
+            ${hasEmail ? `<p class="text-gray-400 text-sm self-center">Reply via Email above or</p>` : ''}
+            <button onclick="openReplyModal('${msg.original_sender_id || msg.artist_id}', '${msg.sender_name}')"
                     class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black px-8 py-4 rounded-xl text-lg transition transform hover:scale-105 shadow-xl">
               Reply via Message
             </button>
           </div>
         </div>`;
-
-      // Highlight selected in list
-      document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('selected'));
-      document.querySelector(`[data-id="${msg.id}"]`)?.classList.add('selected');
+      document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('bg-white/10'));
+      document.querySelector(`[data-id="${msg.id}"]`)?.classList.add('bg-white/10');
     }
 
     async function loadMessages() {
@@ -158,14 +150,14 @@
       messages?.forEach(m => {
         const hasEmail = m.sender_email?.trim();
         const isUnread = m.status === 'pending';
-        const displayName = m.sender_name === currentUserName ? 'You' : m.sender_name;
+        const sender = m.sender_name === currentUserName ? 'You' : m.sender_name;
 
         list.innerHTML += `
-          <div data-id="${m.id}" onclick='showMessage(${JSON.stringify(m)})' 
+          <div data-id="${m.id}" onclick="showMessage(${JSON.stringify(m).replace(/'/g, "\\'")})" 
                class="msg-item ${isUnread ? 'unread' : ''} p-4 border-b border-gray-800 cursor-pointer">
             <div class="flex justify-between items-start">
               <div class="flex-1">
-                <p class="font-bold text-lg">${displayName}</p>
+                <p class="font-bold text-lg">${sender}</p>
                 ${hasEmail ? `<p class="text-xs text-gray-400">Email: ${m.sender_email}</p>` : ''}
                 <p class="text-sm text-gray-400">${new Date(m.created_at).toLocaleDateString()}</p>
                 <p class="text-sm text-gray-300 msg-preview mt-1">${m.message}</p>
@@ -175,6 +167,8 @@
           </div>`;
       });
 
+
+      // Auto-select first message on desktop
       if (messages?.length && window.innerWidth >= 1024) {
         showMessage(messages[0]);
       }
