@@ -16,7 +16,6 @@
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
 
-<!-- HEADER & CONTENT (unchanged) -->
 <header class="bg-black/90 backdrop-blur-lg border-b border-purple-600 p-6 shadow-2xl">
   <div class="max-w-7xl mx-auto flex justify-between items-center">
     <div class="flex items-center space-x-4">
@@ -50,53 +49,39 @@
   </div>
 </div>
 
-<!-- CLEAN & COMPACT MESSAGE MODAL -->
+<!-- MESSAGE MODAL - CLEAN, COMPACT, RED X -->
 <div id="collabModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
   <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative max-h-screen overflow-y-auto">
-    
-    <!-- RED X — BIG AND VISIBLE -->
-    <button 
-      onClick="closeCollabModal()" 
-      class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl transition transform hover:scale-110">
+    <button onClick="closeCollabModal()" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl transition transform hover:scale-110">
       ×
     </button>
-
     <div class="p-8 pt-16">
       <h2 class="text-4xl font-black text-emerald-400 mb-6 text-center">
         Message <span id="targetArtistName">Artist</span>
       </h2>
-
       <div class="space-y-5">
         <div>
           <label class="block text-base font-bold mb-1">Artist / Band Name *</label>
-          <input type="text" id="collabName" placeholder="Your name or band" required
-                 class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 focus:outline-none focus:border-emerald-400">
+          <input type="text" id="collabName" placeholder="Your name or band" required class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 focus:outline-none focus:border-emerald-400">
         </div>
-
         <div>
           <label class="block text-base font-bold mb-1">Email Address *</label>
-          <input type="email" id="collabEmail" placeholder="you@example.com" required
-                 class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 focus:outline-none focus:border-emerald-400">
+          <input type="email" id="collabEmail" placeholder="you@example.com" required class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 focus:outline-none focus:border-emerald-400">
         </div>
-
         <div>
           <label class="block text-base font-bold mb-1">Message *</label>
-          <textarea id="collabMessage" rows="5" placeholder="Hey! Love your sound..." required
-                    class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
+          <textarea id="collabMessage" rows="5" placeholder="Hey! Love your sound..." required class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
         </div>
       </div>
-
-      <button onClick="sendCollabMessage()"
-              class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition transform hover:scale-105 shadow-xl">
+      <button onClick="sendCollabMessage()" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition transform hover:scale-105 shadow-xl">
         Send Message
       </button>
-
       <p class="text-center text-gray-400 mt-4 text-sm">The artist will get your message instantly</p>
     </div>
   </div>
 </div>
 
-<!-- SUPABASE UMD -->
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
@@ -109,7 +94,7 @@
 
   let currentUser = null;
   let targetArtistId = null;
-  targetArtistName = null;
+  let targetArtistName = null;
 
   window.openCollabModal = function(artistId, artistName) {
     targetArtistId = artistId;
@@ -158,23 +143,92 @@
     }
   };
 
-  // Your existing loadArtists(), playVideo(), logout() etc. remain exactly the same
-  // (only the modal is smaller and cleaner now)
-
   (async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return location.href = 'login.html';
     currentUser = user;
-    const { data: profile } = await supabase.from('profiles').select('collaboration_opt_in').eq('id', currentUser.id).single();
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('collaboration_opt_in')
+      .eq('id', currentUser.id)
+      .single();
+
     if (!profile?.collaboration_opt_in) {
       alert("Turn on 'Open to Collaboration' in your profile first!");
       location.href = 'profile-admin-pro.html';
       return;
     }
+
     await loadArtists();
   })();
 
-  // ... rest of your working code unchanged ...
+  async function loadArtists() {
+    const { data: artists } = await supabase
+      .from('profiles')
+      .select('id, name, logo_url, banner_url, email, subdomain')
+      .or('collaboration_opt_in.eq.true,open_to_collab.eq.true')
+      .neq('id', currentUser.id);
+
+    const grid = document.getElementById('artistsGrid');
+    grid.innerHTML = '';
+    if (!artists || artists.length === 0) {
+      document.getElementById('noArtists').classList.remove('hidden');
+      return;
+    }
+
+    for (const a of artists) {
+      const logo = a.logo_url ? getMediaUrl(a.logo_url) : 'logo-placeholder.png';
+      const banner = a.banner_url ? getMediaUrl(a.banner_url) : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist+Banner';
+      const { data: videos } = await supabase.from('user_videos').select('title, video_url').eq('user_id', a.id).limit(10);
+      const tracks = videos?.length > 0
+        ? videos.map(v => `<div class="song-item" onclick="playVideo('${getMediaUrl(v.video_url)}')">${v.title || 'Untitled'}</div>`).join('')
+        : '<p class="text-gray-500 text-xs">No tracks yet</p>';
+      const profileId = a.subdomain?.trim() ? a.subdomain.trim() : a.id;
+      const publicLink = `${location.origin}/public-profile.html?id=${profileId}`;
+
+      grid.innerHTML += `
+        <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
+          <div class="h-40 bg-cover bg-center" style="background-image:url('${banner}')"></div>
+          <div class="p-6 -mt-20 relative z-10 text-center">
+            <img src="${logo}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover" onerror="this.src='logo-placeholder.png'">
+            <h3 class="text-2xl font-black mt-4">${a.name || 'Unknown Artist'}</h3>
+            <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
+            <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
+            <a href="${publicLink}" target="_blank" class="block mt-5">
+              <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
+                View Public Profile
+              </button>
+            </a>
+            <button onclick="openCollabModal('${a.id}', '${(a.name || 'Artist').replace(/'/g, "\\'")}')"
+              class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
+              Message for Collab
+            </button>
+          </div>
+        </div>`;
+    }
+  }
+
+  window.playVideo = function(url) {
+    document.getElementById('modalVideo').src = url;
+    document.getElementById('videoModal').classList.add('active');
+    document.getElementById('modalVideo').play();
+  };
+
+  window.closeModal = function() {
+    document.getElementById('modalVideo').pause();
+    document.getElementById('modalVideo').src = '';
+    document.getElementById('videoModal').classList.remove('active');
+  };
+
+  document.getElementById('videoModal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  window.logout = async function() {
+    await supabase.auth.signOut();
+    location.href = 'login.html';
+  };
 </script>
 </body>
 </html>
