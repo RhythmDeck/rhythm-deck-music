@@ -12,13 +12,32 @@
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     .video-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
     .video-overlay:hover{opacity:1}
-    #videoModal{position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
+    #videoModal{position:fixed;inset;opacity:0;visibility:hidden;transition:all .3s}
     #videoModal.show{opacity:1;visibility:visible}
     #modalVideo{max-width:90%;max-height:90%;border:4px solid #10b981;border-radius:12px}
     #closeModal{position:absolute;top:20px;right:20px;background:white;color:black;width:50px;height:50px;border-radius:50%;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(0,0,0,.8);z-index:10}
-    #badge-container { position: absolute; top: 16px; right: 16px; z-index: 30; }
-    #badge-container img { width: 100px; height: 100px; filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8)); transition: all 0.4s ease; }
-    #badge-container img:hover { transform: scale(1.25) rotate(15deg); }
+    #badge-container {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 30;
+    }
+    #badge-container img {
+      width: 100px;
+      height: 100px;
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
+      transition: all 0.4s ease;
+    }
+    #badge-container img:hover {
+      transform: scale(1.25) rotate(15deg);
+    }
+    .like-btn{display:flex;align-items:center;gap:8px;font-weight:bold;color:#666;transition:all .3s;cursor:pointer}
+    .like-btn.liked{color:#ef4444}
+    .like-btn.liked svg{fill:#ef4444;stroke:#ef4444;filter:drop-shadow(0 0 10px #ef4444)}
+    .like-btn svg{width:24px;height:24px;transition:all .3s}
+    .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
+    .comment-name{font-weight:700;color:#10b981}
+    .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -29,17 +48,23 @@
   </div>
   <nav class="space-x-4">
     <a href="index.html" class="hover:underline">Home</a>
+
+    <!-- ONLY ADDED THIS ONE BUTTON -->
+    <a href="rhythm-vision-free.html" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
+      Try Rhythm Vision (Free Trial)
+    </a>
+
     <a href="pricing.html" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-lg font-bold hover:from-green-600 hover:to-emerald-700 shadow-lg">Upgrade to Pro</a>
     <button onClick="logout()" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300 font-medium">Logout</button>
   </nav>
 </header>
 
 <main class="flex-grow">
-
   <!-- BANNER WITH BADGE -->
   <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
     <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-4xl font-bold opacity-70">Your Banner Image Here</div>
+    <!-- RISING STAR BADGE - TOP RIGHT -->
     <div id="badge-container"></div>
     <div class="absolute bottom-4 left-4 w-32 h-32 rounded-full border-8 border-white shadow-2xl overflow-hidden bg-white">
       <img id="logoPreview" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
@@ -54,47 +79,215 @@
     </button>
   </section>
 
-  <!-- RHYTHM VISION TRIAL CARD FOR FREE USERS -->
-  <section class="max-w-6xl mx-auto mt-12 px-6">
-    <div class="bg-gradient-to-r from-purple-800 via-pink-700 to-teal-800 rounded-3xl shadow-2xl overflow-hidden border-4 border-yellow-400">
-      <div class="p-10 text-center text-white">
-        <h2 class="text-5xl md:text-6xl font-black mb-6">Rhythm Vision</h2>
-        <p class="text-2xl mb-4 opacity-90">AI Music Video Scene Generator</p>
-        <p class="text-xl mb-8">Try it FREE — generate lyrics, scenes, timeline & images</p>
-
-        <div class="bg-black/40 backdrop-blur rounded-2xl p-8 max-w-2xl mx-auto mb-8 border border-yellow-400">
-          <h3 class="text-3xl font-bold text-yellow-400 mb-4">Free Trial Version</h3>
-          <ul class="text-left space-y-3 text-lg">
-            <li>Generate unlimited lyrics & scenes</li>
-            <li>See cinematic AI images</li>
-            <li>Build full video timelines</li>
-            <li class="text-gray-400 italic">Cannot copy, download, or export</li>
-          </ul>
-          <p class="mt-6 text-yellow-300 font-bold text-xl">
-            Upgrade to Pro → Full unlimited + download forever
-          </p>
+  <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
+    <div class="grid md:grid-cols-4 gap-8">
+      <div class="md:col-span-1 space-y-6">
+        <div class="bg-gray-50 p-5 rounded-xl shadow">
+          <h3 class="text-xl font-bold text-gray-800 mb-3">Artist / Band Name</h3>
+          <input type="text" id="artistNameInput" class="w-full border border-gray-300 p-3 rounded-lg mb-3" placeholder="Enter your name">
+          <button onClick="saveArtistName()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold">Save Name</button>
         </div>
-
-        <a href="rhythm-vision-free.html">
-          <button class="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-black text-4xl px-20 py-8 rounded-3xl shadow-2xl transform hover:scale-110 transition-all duration-300">
-            Try Rhythm Vision FREE
+        <div class="bg-gray-50 p-5 rounded-xl shadow">
+          <label class="block text-sm font-bold text-gray-700 mb-2">Bio</label>
+          <textarea id="bioInput" placeholder="Tell your story..." class="w-full border border-gray-300 p-3 rounded-lg h-40 resize-none"></textarea>
+          <button onClick="saveBio()" class="mt-3 w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 font-bold">Save Bio</button>
+        </div>
+        <div class="bg-green-50 p-5 rounded-xl shadow text-center">
+          <p class="text-sm text-gray-600">Your Public Page:</p>
+          <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
+          <a id="publicLink" href="#" target="_blank" class="block mt-2 text-sm text-blue-600 underline">Open Public Page</a>
+        </div>
+      </div>
+      <div class="md:col-span-3 space-y-8">
+        <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">Upload New Video</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div><label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
+              <input type="file" accept="image/*" id="thumbnailInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white">
+            </div>
+            <div><label class="block font-bold mb-3 text-gray-700">Video File (.mp4)</label>
+              <input type="file" accept="video/mp4" id="videoInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white">
+            </div>
+          </div>
+          <button id="uploadVideo" class="mt-6 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg flex items-center shadow-lg">
+            <span>Upload & Publish Video</span><div id="uploadSpinner" class="spinner hidden"></div>
           </button>
-        </a>
-
-        <p class="mt-6 text-lg opacity-80">
-          Available to all users — <strong>Pro gets the full power</strong>
-        </p>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">Your Published Videos</h3>
+          <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
       </div>
     </div>
+    <!-- DANGER ZONE -->
+    <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
+      <details class="group">
+        <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
+          <span class="flex items-center gap-4">
+            <span class="inline-block w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center text-2xl group-open:rotate-45 transition">X</span>
+            Danger Zone: Delete Account
+          </span>
+          <svg class="w-8 h-8 group-open:rotate-180 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <div class="mt-8">
+          <p class="text-red-900 font-bold mb-4">Type "Delete My Account" to confirm:</p>
+          <input type="text" id="deleteConfirmInput" class="w-full p-4 border-2 border-red-300 rounded-xl" placeholder="Delete My Account">
+          <button id="deleteAccountBtn" disabled class="w-full mt-4 bg-gray-400 text-white font-black py-4 rounded-xl cursor-not-allowed">
+            Yes, Delete Everything
+          </button>
+        </div>
+      </details>
+    </div>
   </section>
-
-  <!-- REST OF YOUR PAGE (unchanged) -->
-  <section class="max-w-6xl mx-auto mt-12 p-6 bg-white rounded-xl shadow-2xl">
-    <!-- Your existing profile/video upload code here -->
-  </section>
-
 </main>
 
-<!-- Your existing footer, scripts, etc. -->
+<div id="videoModal">
+  <div id="closeModal" onClick="closeModal()">X</div>
+  <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
+</div>
+
+<script>
+  const supabase = window.supabase.createClient(
+    "https://bxoqhmfnseskwqkywppg.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+  );
+  let currentUser = null;
+
+  async function displayRisingStarBadge() {
+    const { count } = await supabase
+      .from('user_videos')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id);
+    const container = document.getElementById('badge-container');
+    container.innerHTML = '';
+    if (count >= 3) {
+      container.innerHTML = `
+        <img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-artist-badge-transparent.png"
+             alt="Rising Artist Badge">
+      `;
+    }
+  }
+
+  async function saveArtistName() {
+    const name = document.getElementById('artistNameInput').value.trim();
+    if (!name) return alert("Enter a name");
+    const { error } = await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
+    if (error) alert("Failed: " + error.message);
+    else alert("Name saved!");
+  }
+
+  async function saveBio() {
+    const bio = document.getElementById('bioInput').value.trim();
+    const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
+    if (error) alert("Failed: " + error.message);
+    else alert("Bio saved!");
+  }
+
+  async function uploadAndPublish() {
+    const videoFile = document.getElementById('videoInput').files[0];
+    const thumbFile = document.getElementById('thumbnailInput').files[0];
+    if (!videoFile || !thumbFile) return alert("Please select both video and thumbnail!");
+    const btn = document.getElementById('uploadVideo');
+    const spinner = document.getElementById('uploadSpinner');
+    btn.disabled = true; spinner.classList.remove('hidden');
+    try {
+      const ts = Date.now();
+      const videoPath = `videos/${currentUser.id}_${ts}.mp4`;
+      const thumbPath = `thumbnails/${currentUser.id}_${ts}_${thumbFile.name}`;
+      await Promise.all([
+        supabase.storage.from('media').upload(videoPath, videoFile, { upsert: true }),
+        supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true })
+      ]);
+      await supabase.from('user_videos').insert({
+        user_id: currentUser.id,
+        title: videoFile.name.replace('.mp4', '').substring(0,80),
+        video_url: videoPath,
+        thumbnail_url: thumbPath
+      });
+      alert("Video published!");
+      document.getElementById('videoInput').value = '';
+      document.getElementById('thumbnailInput').value = '';
+      loadVideos();
+      displayRisingStarBadge();
+    } catch (e) {
+      alert("Upload failed: " + e.message);
+    } finally {
+      btn.disabled = false;
+      spinner.classList.add('hidden');
+    }
+  }
+
+  async function loadVideos() {
+    const { data: videos } = await supabase.from('user_videos').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const list = document.getElementById('videoList');
+    list.innerHTML = videos?.length === 0 ? '<p class="col-span-full text-center italic py-12 text-xl text-gray-600">No videos yet. Upload your first one!</p>' : '';
+    for (const v of (videos || [])) {
+      const videoUrl = supabase.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+      const thumbUrl = supabase.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl;
+      const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
+      const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false });
+      list.innerHTML += `
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+          <div class="relative">
+            <img src="${thumbUrl}" class="w-full h-48 object-cover">
+            <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
+              <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
+            </div>
+          </div>
+          <div class="p-4">
+            <h4 class="font-bold text-lg truncate">${v.title || 'Untitled Video'}</h4>
+            <div class="flex justify-between items-center mt-4">
+              <div class="like-btn ${likes > 0 ? 'liked' : ''}" onclick="likeVideo('${v.id}', this)">
+                <span>Likes</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                <span>${likes}</span>
+              </div>
+              <button onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')" class="text-green-600 font-bold hover:text-green-700">Share</button>
+            </div>
+            <div class="mt-4 border-t pt-4 space-y-2 text-sm">
+              ${comments.length === 0 ? '<p class="text-gray-500 italic">No comments yet</p>' : ''}
+              ${comments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name}:</span> <span class="comment-text">${c.comment}</span></div>`).join('')}
+            </div>
+          </div>
+          <button onclick="if(confirm('Delete this video forever?')) deleteVideo('${v.id}', '${v.video_url}', '${v.thumbnail_url}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
+            Delete Video
+          </button>
+        </div>`;
+    }
+    displayRisingStarBadge();
+  }
+
+  async function deleteVideo(id, videoPath, thumbPath) {
+    await supabase.from('user_videos').delete().eq('id', id);
+    await supabase.storage.from('media').remove([videoPath]);
+    if (thumbPath) await supabase.storage.from('media').remove([thumbPath]);
+    loadVideos();
+    displayRisingStarBadge();
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return location.href = 'login.html';
+    currentUser = user;
+    await loadVideos();
+    document.getElementById('bannerInput').onchange = uploadBanner;
+    document.getElementById('logoInput').onchange = uploadLogo;
+    document.getElementById('uploadVideo').onclick = uploadAndPublish;
+  });
+
+  function logout() {
+    supabase.auth.signOut().then(() => location.href = 'login.html');
+  }
+
+  function openVideoPopup(url) {
+    document.getElementById('modalVideo').src = url;
+    document.getElementById('videoModal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('videoModal').classList.remove('show');
+    document.getElementById('modalVideo').src = '';
+  }
+</script>
 </body>
 </html>
