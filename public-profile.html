@@ -62,7 +62,7 @@
               <p class="text-gray-500 text-center italic">Chat appears when the artist is live</p>
             </div>
             <div class="flex gap-3">
-              <input type="text" id="chatNameInput" placeholder="Your name" class="flex-1 p-3 rounded-lg bg-white/10 text-white placeholder-gray-400 border border-emerald-500">
+              <input type="text" id="chatNameInput" placeholder="Your name" class="flex-1 p-3 rounded-lg bg-white/10 text-white placeholder-gray-400 border border border-emerald-500">
               <input type="text" id="chatMessageInput" placeholder="Send a message..." class="flex-1 p-3 rounded-lg bg-white/10 text-white placeholder-gray-400 border border-emerald-500" onkeydown="if(event.key==='Enter') sendLiveMessage()">
               <button onclick="sendLiveMessage()" class="bg-emerald-600 hover:bg-emerald-700 px-6 py-3 rounded-lg font-bold">Send</button>
             </div>
@@ -84,6 +84,7 @@
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
 
+  <!-- THIS LINE FIXES EVERYTHING IN DECEMBER 2025 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
     const getMediaUrl = (path) => `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${path.replace(/^\/+/g, '')}`
@@ -100,6 +101,16 @@
     let artistId = null
     let isPro = false
 
+    // Anonymous user ID for likes (prevents double-liking)
+    function getUserId() {
+      let id = localStorage.getItem('rhythmdeck_anon_id')
+      if (!id) {
+        id = 'anon_' + Math.random().toString(36).substr(2, 12)
+        localStorage.setItem('rhythmdeck_anon_id', id)
+      }
+      return id
+    }
+
     async function init() {
       let profile = null
       const { data: exact } = await supabase.from('profiles').select('id, name, bio, banner_url, logo_url, plan').eq('subdomain', rawParam).maybeSingle()
@@ -115,7 +126,6 @@
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>'
         return
-
       }
 
       artistId = profile.id
@@ -143,18 +153,14 @@
       badge.innerHTML = ''
       if (isPro) {
         badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`
-      } else {
-        const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', artistId)
-        if (count >= 3) {
-          badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-artist-badge-transparent.png" alt="Rising Star">`
-        }
-      }
-
-      // SHOW LIVE STREAM ONLY FOR PRO USERS
-      if (isPro) {
         document.getElementById('liveStreamSection').classList.remove('hidden')
         checkLiveStatus()
         setInterval(checkLiveStatus, 7000)
+      } else {
+        const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', artistId)
+        if (count >= 3) {
+          badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-star.png" alt="Rising Star">`
+        }
       }
 
       loadVideos()
@@ -169,14 +175,14 @@
         return
       }
       list.innerHTML = ''
+      const anonId = getUserId()
+
       for (const v of videos) {
         const videoUrl = getMediaUrl(v.video_url)
         const thumb = v.thumbnail_url ? getMediaUrl(v.thumbnail_url) : 'https://placehold.co/600x338/emerald/white?text=No+Thumb'
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id)
-        const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false })
-        const commentsHTML = comments.length === 0
-          ? '<p class="text-gray-500 italic text-center py-4">Be the first to comment!</p>'
-          : comments.map(c => `<div class="text-sm"><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')
+        const { data: userLike } = await supabase.from('video_likes').select('id').eq('video_id', v.id).eq('user_id', anonId).maybeSingle()
+
         list.innerHTML += `
           <div class="video-card">
             <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
@@ -186,16 +192,16 @@
             <div class="p-6">
               <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled'}</h3>
               <div class="flex justify-between items-center mb-4">
-                <button class="flex items-center gap-2 font-bold text-lg ${likes > 0 ? 'text-red-600' : 'text-gray-600'} hover:text-red-600 transition" data-id="${v.id}">
-                  Heart 
-                  <svg class="w-7 h-7 ${likes > 0 ? 'fill-red-600' : 'fill-none'} stroke-current" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                  </svg>
-                  ${likes}
+                <button class="like-btn flex items-center gap-2 font-bold text-lg ${userLike ? 'liked text-red-600' : 'text-gray-600'} hover:text-red-600 transition" data-id="${v.id}">
+                  Heart<svg class="w-7 h-7 ${userLike ? 'fill-red-600' : 'fill-none'} stroke-current" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                  <span class="like-count">${likes}</span>
                 </button>
                 <button class="text-emerald-600 font-bold" onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')">Share</button>
               </div>
-              <div class="border-t pt-4 space-y-2 text-sm max-h-48 overflow-y-auto">${commentsHTML}</div>
+              <!-- comments section -->
+              <div class="border-t pt-4 space-y-2 text-sm max-h-48 overflow-y-auto">
+                ${comments.length === 0 ? '<p class="text-gray-500 italic text-center py-4">Be the first to comment!</p>' : comments.map(c => `<div class="text-sm"><strong class="text-emerald-600">${c.name}:</strong> ${c.comment}</div>`).join('')}
+              </div>
               <div class="mt-6">
                 <input type="text" placeholder="Your name" class="border-2 border-emerald-500 rounded-lg p-2 w-full mb-2" id="name-${v.id}">
                 <div class="flex gap-2">
@@ -206,6 +212,29 @@
             </div>
           </div>`
       }
+
+      // FIXED LIKE BUTTONS — TOGGLE PROPERLY
+      document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.onclick = async () => {
+          const videoId = btn.dataset.id
+          const userId = getUserId()
+          const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id', videoId).eq('user_id', userId).maybeSingle()
+
+          if (existing) {
+            await supabase.from('video_likes').delete().eq('id', existing.id)
+            btn.classList.remove('liked', 'text-red-600')
+            btn.querySelector('svg').classList.remove('fill-red-600')
+            btn.querySelector('.like-count').textContent = Number(btn.querySelector('.like-count').textContent) - 1
+          } else {
+            await supabase.from('video_likes').insert({ video_id: videoId, user_id: userId })
+            btn.classList.add('liked', 'text-red-600')
+            btn.querySelector('svg').classList.add('fill-red-600')
+            btn.querySelector('.like-count').textContent = Number(btn.querySelector('.like-count').textContent) + 1
+          }
+        }
+      })
+
+      // COMMENT POSTING
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id
