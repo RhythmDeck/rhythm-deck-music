@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhythm Vision • Free Trial | Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
+    .block-select { user-select: none !important; -webkit-user-select: none !important; pointer-events: none !important; }
+    .blur-pro { filter: blur(10px); pointer-events: none; }
+    .pro-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; border-radius: 1.5rem;
+    }
+    .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="bg-black/90 backdrop-blur border-b border-purple-600">
+    <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <img src="logo-1-sm.jpg" alt="Rhythm Deck" class="w-12 h-12 rounded-full">
+        <div>
+          <h1 class="text-4xl font-black text-teal-400">Rhythm Vision</h1>
+          <p class="text-lg text-purple-300">Free Trial Version</p>
+        </div>
+      </div>
+      <a href="profile-admin.html" class="bg-purple-600 hover:bg-purple-700 px-8 py-4 rounded-xl font-bold text-xl transition">
+        Back to Dashboard
+      </a>
+    </div>
+  </header>
+
+  <main class="flex-1 container max-w-5xl mx-auto p-6 mt-12">
+    <!-- FREE TRIAL BANNER -->
+    <div class="text-center mb-12 p-10 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-3xl shadow-2xl border-4 border-yellow-400">
+      <h2 class="text-5xl font-black mb-4">FREE TRIAL MODE</h2>
+      <p class="text-2xl mb-6">Generate everything — but cannot copy, download, or export</p>
+      <a href="pricing.html" class="inline-block bg-black text-yellow-400 px-12 py-6 rounded-2xl font-black text-3xl hover:bg-gray-900 transition transform hover:scale-105">
+        Upgrade to Pro → Full Access Forever
+      </a>
+    </div>
+
+    <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-purple-600">
+
+      <!-- INPUTS -->
+      <div class="space-y-8">
+        <input type="text" id="videoTitle" placeholder="Video Title (e.g. Midnight Dreams)" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl">
+
+        <input type="number" id="videoDuration" placeholder="Duration in seconds (e.g. 210)" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5">
+
+        <!-- Lyric Generator -->
+        <div class="bg-gray-800/70 rounded-2xl p-8 border border-purple-500">
+          <h3 class="text-3xl font-bold text-purple-300 mb-6">Generate Lyrics from Idea (Optional)</h3>
+          <textarea id="songConcept" rows="4" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5" placeholder="e.g. A heartbroken trap song about lost love in the city..."></textarea>
+          <div class="grid grid-cols-2 gap-6 mt-6">
+            <input type="text" id="musicGenre" placeholder="Genre" class="bg-gray-900 border border-gray-700 rounded-xl p-5">
+            <input type="number" id="numVerses" value="3" class="bg-gray-900 border border-gray-700 rounded-xl p-5">
+          </div>
+          <div class="flex gap-8 mt-6 text-lg">
+            <label><input type="checkbox" id="hasBridge" checked class="mr-3 w-6 h-6"> Include Bridge</label>
+            <label><input type="checkbox" id="hasOutro" checked class="mr-3 w-6 h-6"> Include Outro</label>
+          </div>
+          <button onclick="generateLyrics()" class="mt-8 w-full bg-gradient-to-r from-purple-600 to-pink-600 py-6 rounded-xl font-black text-2xl hover:scale-105 transition shadow-2xl">
+            Generate Lyrics
+          </button>
+        </div>
+
+        <!-- Lyrics Output - BLOCKED -->
+        <div class="relative">
+          <textarea id="lyrics" rows="12" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg block-select" placeholder="Lyrics will appear here..."></textarea>
+          <div class="pro-overlay">
+            <div class="text-center">
+              <p class="text-4xl font-black text-yellow-400 mb-4">COPY BLOCKED</p>
+              <p class="text-2xl">Pro Feature</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <button onclick="generateFromLyrics()" class="bg-gradient-to-r from-purple-600 to-pink-600 py-8 rounded-2xl font-black text-3xl hover:scale-105 transition shadow-2xl">
+            Generate Scenes
+          </button>
+          <button onclick="generateTimeline()" class="bg-gradient-to-r from-teal-600 to-cyan-600 py-8 rounded-2xl font-black text-3xl hover:scale-105 transition shadow-2xl">
+            Generate Timeline
+          </button>
+          <button onclick="generateImages()" class="bg-gradient-to-r from-emerald-600 to-teal-600 py-8 rounded-2xl font-black text-3xl hover:scale-105 transition shadow-2xl">
+            Generate Images
+          </button>
+        </div>
+
+        <!-- Scenes - BLOCKED -->
+        <div id="scenesContainer" class="space-y-6 mt-12"></div>
+        <div class="relative mt-8">
+          <button onclick="addScene()" class="text-purple-300 hover:text-white text-xl">+ Add Scene</button>
+          <div class="pro-overlay pointer-events-auto cursor-not-allowed">
+            <p class="text-4xl font-black text-yellow-400">EDIT & DOWNLOAD BLOCKED</p>
+          </div>
+        </div>
+
+        <!-- Timeline - BLOCKED -->
+        <div id="timelineOutput" class="mt-16 p-10 bg-gray-800 rounded-2xl hidden relative">
+          <h3 class="text-4xl font-bold text-teal-400 mb-8 text-center">Video Timeline</h3>
+          <div id="timelineContent" class="space-y-6 text-lg"></div>
+          <div class="pro-overlay">
+            <p class="text-5xl font-black text-yellow-400">COPY & EXPORT BLOCKED</p>
+          </div>
+        </div>
+
+        <!-- Images - BLOCKED -->
+        <div id="imagesOutput" class="mt-16 hidden">
+          <h3 class="text-4xl font-bold text-teal-400 mb-10 text-center">Generated Images</h3>
+          <div id="imagesContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+          <div class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden" id="imageBlock">
+            <p class="text-6xl font-black text-yellow-400">SAVE IMAGE BLOCKED<br><span class="text-3xl">Pro Feature</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Loading / Message Modal -->
+  <div id="messageBox" class="fixed inset-0 bg-black/95 flex items-center justify-center z-[9999] hidden">
+    <div class="bg-gray-900 rounded-3xl p-12 text-center max-w-lg border border-purple-600">
+      <div id="loading" class="hidden"><div class="spinner"></div><p class="mt-6 text-2xl text-teal-400">Working magic...</p></div>
+      <p id="messageText" class="text-3xl font-bold"></p>
+      <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="mt-10 bg-teal-600 hover:bg-teal-700 px-12 py-5 rounded-xl font-black text-2xl">
+        OK
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
+
+    let sceneCounter = 0;
+
+    function showMessage(text, loading = false) {
+      document.getElementById('messageText').textContent = text;
+      document.getElementById('loading').classList.toggle('hidden', !loading);
+      document.getElementById('messageBox').classList.remove('hidden');
+    }
+
+    async function callGemini(prompt, model = 'gemini-1.5-flash') {
+      const { data: key } = await supabase.rpc('get_gemini_key');
+      if (!key) throw new Error('No API key');
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const json = await res.json();
+      return json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
+
+    async function generateLyrics() {
+      const concept = document.getElementById('songConcept').value.trim();
+      if (!concept) return showMessage('Enter a song idea first');
+      showMessage('Generating lyrics...', true);
+      try {
+        const genre = document.getElementById('musicGenre').value || 'pop';
+        const prompt = `Write a full ${genre} song about: "${concept}". Include verses, chorus, ${document.getElementById('hasBridge').checked ? 'bridge,' : ''} ${document.getElementById('hasOutro').checked ? 'and outro' : ''}. Format clearly with [Verse 1], [Chorus], etc.`;
+        const lyrics = await callGemini(prompt);
+        document.getElementById('lyrics').value = lyrics;
+        showMessage('Lyrics generated! Now click Generate Scenes');
+      } catch (e) { showMessage('Error: ' + e.message); }
+    }
+
+    async function generateFromLyrics() {
+      const lyrics = document.getElementById('lyrics').value.trim();
+      if (!lyrics) return showMessage('No lyrics to analyze');
+      showMessage('Creating cinematic scenes...', true);
+      try {
+        const prompt = `Break this song into 5 powerful music video scenes. Return ONLY valid JSON array:\n[{"title":"amazing cinematic scene description","images":2}, ...]\n\nLyrics:\n${lyrics}`;
+        const text = await callGemini(prompt, 'gemini-1.5-pro');
+        const scenes = JSON.parse(text);
+        document.getElementById('scenesContainer').innerHTML = '';
+        sceneCounter = 0;
+        scenes.forEach(s => addScene(s.title, s.images || 1));
+        showMessage('Scenes ready! Generate images now');
+      } catch (e) { showMessage('Parse error. Try again.'); }
+    }
+
+    function addScene(title = '', count = 1) {
+      sceneCounter++;
+      const div = document.createElement('div');
+      div.className = 'bg-gray-800 rounded-2xl p-8 border border-purple-600 relative';
+      div.innerHTML = `
+        <h4 class="text-2xl font-bold text-teal-300 mb-4">Scene ${sceneCounter}</h4>
+        <input type="text" value="${title}" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 mb-4 block-select">
+        <input type="number" value="${count}" min="1" max="5" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 block-select">
+        <div class="pro-overlay"><p class="text-4xl font-black text-yellow-400">EDIT BLOCKED</p></div>
+      `;
+      document.getElementById('scenesContainer').appendChild(div);
+    }
+
+    function generateTimeline() {
+      const scenes = Array.from(document.querySelectorAll('#scenesContainer > div')).map(d => ({
+        title: d.querySelector('input').value,
+        images: parseInt(d.querySelector('input[type=number]').value) || 1
+      }));
+      if (scenes.length === 0) return showMessage('No scenes to timeline');
+      const duration = parseInt(document.getElementById('videoDuration').value) || 180;
+      const totalImages = scenes.reduce((a,b) => a + b.images, 0);
+      const secPerImage = duration / totalImages;
+      let time = 0;
+      const content = document.getElementById('timelineContent');
+      content.innerHTML = '';
+      scenes.forEach((s, i) => {
+        const sceneDur = s.images * secPerImage;
+        content.innerHTML += `
+          <div class="bg-gray-900/70 p-6 rounded-xl border border-teal-600">
+            <p class="text-xl font-bold text-teal-300">Scene ${i+1}: ${s.title}</p>
+            <p class="text-lg mt-2">Duration: ${sceneDur.toFixed(1)}s | ${time.toFixed(1)}s – ${(time+sceneDur).toFixed(1)}s</p>
+          </div>`;
+        time += sceneDur;
+      });
+      document.getElementById('timelineOutput').classList.remove('hidden');
+      showMessage('Timeline generated!');
+    }
+
+    async function generateImages() {
+      const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
+      if (scenes.length === 0) return showMessage('No scenes');
+      document.getElementById('imagesOutput').classList.remove('hidden');
+      document.getElementById('imagesContent').innerHTML = '';
+      for (const scene of scenes) {
+        const prompt = scene.querySelector('input').value;
+        const count = parseInt(scene.querySelector('input[type=number]').value) || 1;
+        for (let i = 0; i < count; i++) {
+          showMessage(`Generating image ${i+1}/${count}...`, true);
+          // In real version you'd call Gemini Vision API here
+          // For demo, we just show placeholder
+          setTimeout(() => {
+            document.getElementById('imagesContent').innerHTML += `
+              <div class="relative">
+                <img src="https://placehold.co/800x450/teal/white?text=${encodeURIComponent(prompt.substring(0,40))}..." class="w-full rounded-2xl shadow-2xl">
+                <div class="pro-overlay"><p class="text-5xl font-black text-yellow-400">SAVE BLOCKED</p></div>
+              </div>`;
+          }, 1000);
+        }
+      }
+      setTimeout(() => showMessage('All images generated! (Pro = downloadable)'), 1500);
+    }
+
+    window.onload = () => {
+      addScene();
+    };
+  </script>
+</body>
+</html>
