@@ -44,28 +44,26 @@
     </div>
 
     <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-purple-600">
-
       <div class="space-y-10">
 
-        <!-- VIDEO INFO -->
         <input type="text" id="videoTitle" placeholder="Video Title" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl">
         <input type="number" id="videoDuration" placeholder="Duration (seconds)" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5" value="180">
 
-        <!-- TABS: Generate Lyrics OR Paste Lyrics -->
+        <!-- TABS -->
         <div class="bg-gray-800/70 rounded-2xl p-8 border border-purple-500">
           <div class="flex justify-center gap-8 mb-8">
             <button id="tabGenerate" class="px-8 py-4 rounded-xl font-black text-2xl bg-purple-600 text-white shadow-lg">Generate Lyrics</button>
             <button id="tabPaste" class="px-8 py-4 rounded-xl font-black text-2xl bg-gray-700 text-gray-300 hover:bg-gray-600 transition">Paste Your Own</button>
           </div>
 
-          <!-- GENERATE LYRICS PANEL -->
+          <!-- GENERATE PANEL -->
           <div id="panelGenerate">
             <h3 class="text-3xl font-bold text-purple-300 mb-6 text-center">Create Lyrics with AI</h3>
             <textarea id="songConcept" rows="4" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 mb-6" placeholder="e.g. A heartbroken trap song about lost love in the rain..."></textarea>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block text-lg font-bold mb-2">Genre</label>
-                <input type="text" id="musicGenre" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4" placeholder="e.g. Trap, Pop, Rock" value="trap">
+                <input type="text" id="musicGenre" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4" value="trap">
               </div>
               <div>
                 <label class="block text-lg font-bold mb-2">Number of Verses</label>
@@ -81,7 +79,7 @@
             </button>
           </div>
 
-          <!-- PASTE LYRICS PANEL -->
+          <!-- PASTE PANEL -->
           <div id="panelPaste" class="hidden">
             <h3 class="text-3xl font-bold text-purple-300 mb-6 text-center">Paste Your Existing Lyrics</h3>
             <textarea id="pasteLyrics" rows="10" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5" placeholder="Paste your full lyrics here..."></textarea>
@@ -91,7 +89,7 @@
           </div>
         </div>
 
-        <!-- LYRICS DISPLAY — BLOCKED FROM COPY -->
+        <!-- LYRICS DISPLAY -->
         <div class="relative">
           <textarea id="lyrics" rows="14" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg blocked" placeholder="Your lyrics will appear here..."></textarea>
           <div class="pro-overlay">
@@ -112,19 +110,14 @@
           </button>
         </div>
 
-        <!-- SCENES -->
         <div id="scenesContainer" class="space-y-8 mt-12"></div>
 
-        <!-- TIMELINE -->
         <div id="timelineOutput" class="mt-16 p-10 bg-gray-800 rounded-2xl hidden relative">
           <h3 class="text-4xl font-bold text-teal-400 mb-8 text-center">Video Timeline</h3>
           <div id="timelineContent" class="space-y-6 text-lg"></div>
-          <div class="pro-overlay">
-            <p class="text-5xl font-black text-yellow-400">COPY BLOCKED</p>
-          </div>
+          <div class="pro-overlay"><p class="text-5xl font-black text-yellow-400">COPY BLOCKED</p></div>
         </div>
 
-        <!-- IMAGES -->
         <div id="imagesOutput" class="mt-16 hidden">
           <h3 class="text-4xl font-bold text-teal-400 mb-10 text-center">Generated Images</h3>
           <div id="imagesContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
@@ -139,22 +132,44 @@
     <div class="bg-gray-900 rounded-3xl p-12 text-center max-w-lg border border-purple-600">
       <div id="loading" class="hidden"><div class="spinner"></div><p class="mt-6 text-2xl text-teal-400">Working...</p></div>
       <p id="messageText" class="text-3xl font-bold"></p>
-      <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="mt-10 bg-teal-600 hover:bg-teal-700 px-12 py-5 rounded-xl font-black text-2xl">
-        OK
-      </button>
+      <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="mt-10 bg-teal-600 hover:bg-teal-700 px-12 py-5 rounded-xl font-black text-2xl">OK</button>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
-      'https://bxoqhmfnseskwqkywppg.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-    );
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+    // PASTE YOUR REAL GEMINI API KEY HERE
+    const GEMINI_API_KEY = 'YOUR_REAL_API_KEY_HERE';   // ← CHANGE THIS LINE ONLY
+    // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 
     let sceneCounter = 0;
 
-    // Tab switching
+    function showMessage(text, loading = false) {
+      document.getElementById('messageText').textContent = text;
+      document.getElementById('loading').classList.toggle('hidden', !loading);
+      document.getElementById('messageBox').classList.remove('hidden');
+    }
+
+    async function callGemini(prompt, model = 'gemini-1.5-flash') {
+      if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AizaSyC4vbq2Hc0Gbj5IS39Szm45L_SMG3P4vNw') {
+        showMessage('Missing Gemini API key');
+        throw new Error('No key');
+      }
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.9, topK: 40, topP: 0.95, maxOutputTokens: 2048 }
+        })
+      });
+      if (!res.ok) throw new Error('Gemini API error');
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
+    }
+
+    // TAB SWITCHING
     document.getElementById('tabGenerate').onclick = () => {
       document.getElementById('tabGenerate').className = 'px-8 py-4 rounded-xl font-black text-2xl bg-purple-600 text-white shadow-lg';
       document.getElementById('tabPaste').className = 'px-8 py-4 rounded-xl font-black text-2xl bg-gray-700 text-gray-300 hover:bg-gray-600 transition';
@@ -168,53 +183,109 @@
       document.getElementById('panelGenerate').classList.add('hidden');
     };
 
-    function showMessage(text, loading = false) {
-      document.getElementById('messageText').textContent = text;
-      document.getElementById('loading').classList.toggle('hidden', !loading);
-      document.getElementById('messageBox').classList.remove('hidden');
-    }
-
-    async function callGemini(prompt, model = 'gemini-1.5-flash') {
-      const { data: key } = await supabase.rpc('get_gemini_key');
-      if (!key) throw new Error('Missing API key');
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-      });
-      if (!res.ok) throw new Error('API error');
-      const json = await res.json();
-      return json.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    }
-
     async function generateLyrics() {
       const concept = document.getElementById('songConcept').value.trim();
-      if (!concept) return showMessage('Enter a song concept');
+      if (!concept) return showMessage('Enter a song idea');
       showMessage('Generating lyrics...', true);
       try {
         const genre = document.getElementById('musicGenre').value || 'pop';
         const verses = document.getElementById('numVerses').value;
-        const prompt = `Write a complete ${genre} song about "${concept}" with exactly ${verses} verses. Include chorus${document.getElementById('hasBridge').checked ? ', bridge' : ''}${document.getElementById('hasOutro').checked ? ', and outro' : ''}. Format clearly with [Verse 1], [Chorus], etc.`;
+        const prompt = `Write a full ${genre} song about "${concept}" with exactly ${verses} verses and a strong chorus. ${document.getElementById('hasBridge').checked ? 'Include a bridge. ' : ''}${document.getElementById('hasOutro').checked ? 'End with an outro. ' : ''}Make it emotional and cinematic. Format with [Verse 1], [Chorus], etc.`;
         const lyrics = await callGemini(prompt);
-        document.getElementById('lyrics').value = lyrics;
+        document.getElementById('lyrics').value = lyrics.trim();
         showMessage('Lyrics generated!');
       } catch (e) {
-        showMessage('Failed. Try again.');
+        showMessage('Failed — check your API key');
+        console.error(e);
       }
     }
 
     function usePastedLyrics() {
-      const pasted = document.getElementById('pasteLyrics').value.trim();
-      if (!pasted) return showMessage('Paste your lyrics first');
-      document.getElementById('lyrics').value = pasted;
+      const text = document.getElementById('pasteLyrics').value.trim();
+      if (!text) return showMessage('Paste lyrics first');
+      document.getElementById('lyrics').value = text;
       showMessage('Your lyrics loaded!');
     }
 
-    // Rest of your working functions (generateFromLyrics, addScene, generateTimeline, generateImages) stay exactly the same
-    // ... (same as previous working version)
+    async function generateFromLyrics() {
+      const lyrics = document.getElementById('lyrics').value.trim();
+      if (!lyrics) return showMessage('No lyrics');
+      showMessage('Creating scenes...', true);
+      try {
+        const prompt = `Break this song into 5-6 cinematic music video scenes. Return ONLY valid JSON array:\n[{"title":"...","images":2}, ...]\nLyrics:\n${lyrics}`;
+        const text = await callGemini(prompt, 'gemini-1.5-pro');
+        const scenes = JSON.parse(text);
+        document.getElementById('scenesContainer').innerHTML = '';
+        sceneCounter = 0;
+        scenes.forEach(s => addScene(s.title || 'Epic scene', s.images || 2));
+        showMessage('Scenes ready!');
+      } catch (e) {
+        showMessage('Scene generation failed');
+        console.error(e);
+      }
+    }
+
+    function addScene(title, images) {
+      sceneCounter++;
+      const div = document.createElement('div');
+      div.className = 'bg-gray-800 rounded-2xl p-8 border border-purple-600 relative';
+      div.innerHTML = `
+        <h4 class="text-2xl font-bold text-teal-300 mb-4">Scene ${sceneCounter}</h4>
+        <input type="text" value="${title}" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 mb-4 blocked">
+        <input type="number" value="${images}" min="1" max="5" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 blocked">
+        <div class="pro-overlay"><p class="text-4xl font-black text-yellow-400">EDIT BLOCKED</p></div>`;
+      document.getElementById('scenesContainer').appendChild(div);
+    }
+
+    function generateTimeline() {
+      const scenes = Array.from(document.querySelectorAll('#scenesContainer > div')).map(d => ({
+        title: d.querySelector('input').value,
+        images: parseInt(d.querySelector('input[type=number]').value) || 1
+      }));
+      if (scenes.length === 0) return showMessage('No scenes');
+      const duration = parseInt(document.getElementById('videoDuration').value) || 180;
+      const total = scenes.reduce((a,b) => a + b.images, 0);
+      const perImg = duration / total;
+      let time = 0;
+      const out = document.getElementById('timelineContent');
+      out.innerHTML = '';
+      scenes.forEach((s,i) => {
+        const dur = s.images * perImg;
+        out.innerHTML += `
+          <div class="bg-gray-900/70 p-6 rounded-xl border border-teal-600">
+            <p class="text-xl font-bold text-teal-300">Scene ${i+1}: ${s.title}</p>
+            <p class="text-lg mt-2">Duration: ${dur.toFixed(1)}s → ${time.toFixed(1)}s – ${(time+dur).toFixed(1)}s</p>
+          </div>`;
+        time += dur;
+      });
+      document.getElementById('timelineOutput').classList.remove('hidden');
+      showMessage('Timeline created!');
+    }
+
+    async function generateImages() {
+      const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
+      if (scenes.length === 0) return showMessage('No scenes');
+      document.getElementById('imagesOutput').classList.remove('hidden');
+      document.getElementById('imagesContent').innerHTML = '<p class="col-span-full text-center text-2xl text-gray-400 py-20">Generating images...</p>';
+      setTimeout(() => {
+        document.getElementById('imagesContent').innerHTML = '';
+        scenes.forEach(scene => {
+          const prompt = scene.querySelector('input').value;
+          const count = parseInt(scene.querySelector('input[type=number]').value) || 1;
+          for (let i = 0; i < count; i++) {
+            document.getElementById('imagesContent').innerHTML += `
+              <div class="relative group">
+                <img src="https://placehold.co/800x450/teal/white?text=${encodeURIComponent(prompt.substring(0,30))}..." class="w-full rounded-2xl shadow-2xl">
+                <div class="pro-overlay"><p class="text-5xl font-black text-yellow-400">SAVE BLOCKED</p></div>
+              </div>`;
+          }
+        });
+        showMessage('Images generated! (Pro = downloadable)');
+      }, 2000);
+    }
 
     window.onload = () => {
-      addScene('Opening cinematic shot', 2);
+      addScene('Cinematic opening shot', 2);
     };
   </script>
 </body>
