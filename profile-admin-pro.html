@@ -21,7 +21,6 @@
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
     .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;opacity:0.8}
     .like-display svg{width:28px;height:28px;stroke:#ef4444;fill:none}
-
     /* GOLD BADGE — TOP RIGHT CORNER */
     #badge-container {
       position: absolute;
@@ -41,7 +40,6 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
-
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg gap-4">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -50,14 +48,17 @@
       <p class="text-sm text-gray-300">Pro Plan</p>
     </div>
   </div>
-
   <nav class="flex flex-wrap items-center justify-center gap-4 text-lg">
     <a href="index.html" class="hover:text-emerald-400 transition">Home</a>
-    
+
+    <!-- RHYTHM VISION BUTTON ADDED HERE -->
+    <a href="rhythm-vision-pro.html" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
+      Rhythm Vision
+    </a>
+   
     <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold transition">
       Collaboration Network
     </a>
-
     <!-- MESSAGES BUTTON - PERFECTLY CENTERED & INLINE -->
     <a href="message-dashboard.html" id="messagesBtn" class="relative bg-emerald-600 hover:bg-emerald-700 px-6 py-2 rounded-lg font-black flex items-center gap-2 transition">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,13 +69,11 @@
         0
       </span>
     </a>
-
     <button onClick="logout()" class="bg-white text-black px-6 py-2 rounded-lg hover:bg-gray-200 font-bold transition">
       Logout
     </button>
   </nav>
 </header>
-
 <main class="flex-grow">
   <!-- BANNER WITH BADGE -->
   <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
@@ -88,18 +87,16 @@
     <div id="badge-container"></div>
     <input type="file" id="bannerInput" accept="image/*" class="hidden">
     <button onClick="document.getElementById('bannerInput').click()" class="absolute bottom-4 right-4 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg">Upload Banner</button>
-
     <input type="file" id="logoInput" accept="image/*" class="hidden">
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
-
   <!-- LIVE STREAM SECTION — untouched -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
       <h3 class="text-3xl font-black text-purple-800 mb-4">Go Live with Your Fans</h3>
       <div class="grid lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2">
-          <div id="liveStreamContainer" class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
+          <div id="liveStreamContainer" class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text TECHNICAL-2xl font-bold">
             <div id="offlineMessage" class="text-center">When you are ready - Click the Go Live Now button</div>
             <video id="previewVideo" class="hidden w-full h-full object-cover" autoplay playsinline muted></video>
             <div id="livepeer-player" class="hidden w-full h-full"></div>
@@ -122,7 +119,6 @@
       </div>
     </div>
   </section>
-
   <!-- PROFILE & VIDEOS -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
@@ -147,7 +143,7 @@
           <p class="text-sm opacity-90 mb-5">Let other Pro artists discover you</p>
           <label class="flex items-center space-x-4 cursor-pointer text-lg">
             <input type="checkbox" id="collaborationOptIn" class="w-7 h-7 rounded accent-white">
-            <span>Show my profile to other Pro artists, Producers $ Distributors</span>
+            <span>Show my profile to other Pro artists, Producers & Distributors</span>
           </label>
           <button onClick="saveCollaborationOptIn()" class="mt-5 w-full bg-white text-purple-700 font-black py-3 rounded-lg hover:bg-gray-100 transition">
             Save & Join Network
@@ -170,7 +166,6 @@
         <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
     </div>
-
     <!-- DANGER ZONE -->
     <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
       <details class="group">
@@ -192,19 +187,14 @@
     </div>
   </section>
 </main>
-
 <div id="videoModal"><div id="closeModal" onClick="closeModal()">X</div><video id="modalVideo" controls autoplay class="shadow-2xl"></video></div>
-
 <footer class="bg-black text-white mt-auto p-6 text-center"><p class="text-sm">© 2025 Rhythm Deck Music. All rights reserved.</p></footer>
-
 <script>
   const supabase = window.supabase.createClient(
     "https://bxoqhmfnseskwqkywppg.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
   );
-
   let currentUser = null;
-
   // GOLD PRO ARTIST BADGE — shows only after 3+ videos
   async function displayProBadge() {
     if (!currentUser) return;
@@ -212,18 +202,15 @@
       .from('user_videos')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', currentUser.id);
-
     const badgeContainer = document.getElementById('badge-container');
     badgeContainer.innerHTML = '';
-
     if (count >= 3) {
       badgeContainer.innerHTML = `
-        <img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" 
+        <img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png"
              alt="Pro Artist Badge">
       `;
     }
   }
-
   async function saveArtistName() {
     const name = document.getElementById('artistNameInput').value.trim();
     if (!name) return alert("Enter a name");
@@ -231,21 +218,17 @@
     if (error) alert("Failed: " + error.message);
     else alert("Name saved!");
   }
-
   async function saveBio() {
     const bio = document.getElementById('bioInput').value.trim();
     const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
     if (error) alert("Failed: " + error.message);
     else alert("Bio saved!");
   }
-
   async function loadProfileData() {
     const { data: profile, error } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
     if (error) return console.error(error);
-
     document.getElementById('artistNameInput').value = profile.name || '';
     document.getElementById('bioInput').value = profile.bio || '';
-
     if (profile.banner_url) {
       const { data } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
       document.getElementById('bannerPreview').src = data.publicUrl + '?t=' + Date.now();
@@ -256,36 +239,29 @@
       const { data } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
       document.getElementById('logoPreview').src = data.publicUrl + '?t=' + Date.now();
     }
-
     const publicUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${profile.subdomain || 'unknown'}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
   }
-
   async function loadVideos() {
     const { data: videos } = await supabase
       .from('user_videos')
       .select('id, video_url, thumbnail_url, title')
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false });
-
     const container = document.getElementById('videoList');
     container.innerHTML = '';
-
     if (!videos || videos.length === 0) {
       container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No videos uploaded yet.</p>';
       return;
     }
-
     for (const video of videos) {
       const videoUrl = supabase.storage.from('media').getPublicUrl(video.video_url).data.publicUrl;
       const thumbUrl = video.thumbnail_url
         ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl
         : 'https://via.placeholder.com/400x225/10b981/ffffff?text=Video';
-
       const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', video.id);
       const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', video.id).order('created_at', { ascending: false });
-
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
           <div class="relative">
@@ -318,7 +294,6 @@
         </div>`;
     }
   }
-
   async function deleteVideo(id, videoPath, thumbPath) {
     await supabase.from('user_videos').delete().eq('id', id);
     await supabase.storage.from('media').remove([videoPath]);
@@ -326,18 +301,15 @@
     loadVideos();
     displayProBadge();
   }
-
   async function loadCollaborationStatus() {
     const { data } = await supabase.from('profiles').select('collaboration_opt_in').eq('id', currentUser.id).single();
     document.getElementById('collaborationOptIn').checked = !!data?.collaboration_opt_in;
   }
-
   async function saveCollaborationOptIn() {
     const checked = document.getElementById('collaborationOptIn').checked;
     await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
     alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
   }
-
   async function uploadAndPublish() {
     const videoFile = document.getElementById('videoInput').files[0];
     const thumbFile = document.getElementById('thumbnailInput').files[0];
@@ -366,7 +338,6 @@
       spinner.classList.add('hidden');
     }
   }
-
   async function uploadBanner(e) {
     const file = e.target.files[0];
     const path = `banners/${currentUser.id}`;
@@ -374,7 +345,6 @@
     await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
     loadProfileData();
   }
-
   async function uploadLogo(e) {
     const file = e.target.files[0];
     const path = `logos/${currentUser.id}`;
@@ -382,22 +352,18 @@
     await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
     loadProfileData();
   }
-
   function openVideoPopup(url) {
     document.getElementById('modalVideo').src = url;
     document.getElementById('videoModal').classList.add('show');
   }
-
   function closeModal() {
     document.getElementById('videoModal').classList.remove('show');
     document.getElementById('modalVideo').src = '';
   }
-
   async function logout() {
     await supabase.auth.signOut();
     window.location.href = 'login.html';
   }
-
   async function deleteAccount() {
     if (confirm('Delete EVERYTHING forever?')) {
       await supabase.from('profiles').delete().eq('id', currentUser.id);
@@ -405,19 +371,16 @@
       window.location.href = 'index.html';
     }
   }
-
   // LIVE STREAM PLACEHOLDERS
   async function initLiveStream() {}
   async function goLiveInBrowser() { alert('Live stream coming soon!'); }
   async function endLive() {}
   function sendChatMessage() {}
-
   // MAIN INIT
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('Login required'); window.location.href = 'login.html'; return; }
     currentUser = user;
-
     await Promise.all([
       loadProfileData(),
       loadVideos(),
@@ -425,7 +388,6 @@
       loadCollaborationStatus(),
       displayProBadge()
     ]);
-
     // Event listeners
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
@@ -434,7 +396,6 @@
     document.getElementById('endStream').addEventListener('click', endLive);
     document.getElementById('sendMessage').addEventListener('click', sendChatMessage);
     document.getElementById('chatInput').addEventListener('keydown', e => e.key === 'Enter' && sendChatMessage());
-
     // Delete account confirmation
     document.getElementById('deleteConfirmInput').addEventListener('input', e => {
       const val = e.target.value.trim();
@@ -454,32 +415,26 @@
     document.getElementById('deleteAccountBtn').addEventListener('click', deleteAccount);
   });
 </script>
-
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
-
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-
   const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).single();
   if (!profile) return;
-
   const { count } = await supabase
     .from('collab_requests')
     .select('*', { count: 'exact', head: true })
     .eq('artist_id', profile.id)
     .eq('status', 'pending');
-
   if (count > 0) {
     document.getElementById('messageBadge').textContent = count;
     document.getElementById('messageBadge').classList.remove('hidden');
   }
 </script>
-
 <!-- AUTO UPGRADE TO PRO — RUNS ONLY ONCE AFTER SUCCESSFUL PAYMENT -->
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -487,7 +442,6 @@
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
-
   // Only run if this is a fresh redirect from Stripe Checkout
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('session_id') && !sessionStorage.getItem('pro_upgraded')) {
@@ -497,10 +451,9 @@
         .from('profiles')
         .update({ plan: 'pro', paid: true })
         .eq('id', user.id);
-
       // Prevent running twice
       sessionStorage.setItem('pro_upgraded', 'true');
-      
+     
       // Clean URL (optional — looks nicer)
       window.history.replaceState({}, '', 'profile-admin-pro.html');
     }
