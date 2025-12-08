@@ -39,7 +39,9 @@
       <img id="logo" src="https://placehold.co/400x400/emerald/white?text=Artist&font=roboto" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
-    <section class="mb-20">
+
+    <!-- LIVE STREAM SECTION — ONLY FOR PRO USERS -->
+    <div id="liveStreamSection" class="mb-20 hidden">
       <div class="bg-black rounded-3xl shadow-2xl overflow-hidden border-4 border-emerald-500">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-0">
           <div class="lg:col-span-2 relative">
@@ -67,7 +69,8 @@
           </div>
         </div>
       </div>
-    </section>
+    </div>
+
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
@@ -75,54 +78,49 @@
     <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center">Videos</h2>
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
+
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
     <button onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
 
-  <!-- THIS LINE FIXES EVERYTHING IN DECEMBER 2025 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
   <script>
-    // Direct media URLs (no more broken getPublicUrl)
     const getMediaUrl = (path) => `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${path.replace(/^\/+/g, '')}`
-
     const supabase = window.supabase.createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     )
-
     const urlParams = new URLSearchParams(location.search)
     const rawParam = urlParams.get('id')?.trim()
     if (!rawParam) {
       document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>'
       throw ''
     }
-
     let artistId = null
+    let isPro = false
 
     async function init() {
       let profile = null
-
       const { data: exact } = await supabase.from('profiles').select('id, name, bio, banner_url, logo_url, plan').eq('subdomain', rawParam).maybeSingle()
       if (exact) profile = exact
-
       if (!profile) {
         const { data: fuzzy } = await supabase.from('profiles').select('id, name, bio, banner_url, logo_url, plan').ilike('subdomain', rawParam).maybeSingle()
         if (fuzzy) profile = fuzzy
       }
-
       if (!profile && /^[0-9a-fA-F-]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(rawParam)) {
         const { data: byId } = await supabase.from('profiles').select('id, name, bio, banner_url, logo_url, plan').eq('id', rawParam).maybeSingle()
         if (byId) profile = byId
       }
-
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>'
         return
+
       }
 
       artistId = profile.id
+      isPro = profile.plan === 'pro'
+
       document.title = `${profile.name} • Rhythm Deck`
       document.getElementById('artistName').textContent = profile.name
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>')
@@ -136,16 +134,14 @@
           document.getElementById('bannerPlaceholder').classList.add('hidden')
         }
       }
-
       // LOGO
       if (profile.logo_url) {
         document.getElementById('logo').src = getMediaUrl(profile.logo_url)
       }
-
       // BADGE
       const badge = document.getElementById('badge-container')
       badge.innerHTML = ''
-      if (profile.plan === 'pro') {
+      if (isPro) {
         badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`
       } else {
         const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', artistId)
@@ -154,9 +150,14 @@
         }
       }
 
+      // SHOW LIVE STREAM ONLY FOR PRO USERS
+      if (isPro) {
+        document.getElementById('liveStreamSection').classList.remove('hidden')
+        checkLiveStatus()
+        setInterval(checkLiveStatus, 7000)
+      }
+
       loadVideos()
-      checkLiveStatus()
-      setInterval(checkLiveStatus, 7000)
     }
 
     async function loadVideos() {
@@ -185,9 +186,12 @@
             <div class="p-6">
               <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled'}</h3>
               <div class="flex justify-between items-center mb-4">
-                <button class="like-btn flex items-center gap-2 font-bold text-lg ${likes > 0 ? 'liked' : ''}" data-id="${v.id}">
-                  Heart<svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                  <span>${likes}</span>
+                <button class="flex items-center gap-2 font-bold text-lg ${likes > 0 ? 'text-red-600' : 'text-gray-600'} hover:text-red-600 transition" data-id="${v.id}">
+                  Heart 
+                  <svg class="w-7 h-7 ${likes > 0 ? 'fill-red-600' : 'fill-none'} stroke-current" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
+                  ${likes}
                 </button>
                 <button class="text-emerald-600 font-bold" onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')">Share</button>
               </div>
@@ -202,16 +206,6 @@
             </div>
           </div>`
       }
-
-      document.querySelectorAll('.like-btn').forEach(btn => {
-        btn.onclick = async () => {
-          if (btn.classList.contains('liked')) return
-          await supabase.from('video_likes').insert({ video_id: btn.dataset.id })
-          btn.classList.add('liked')
-          btn.querySelector('span').textContent = Number(btn.querySelector('span').textContent) + 1
-        }
-      })
-
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id
@@ -226,7 +220,7 @@
     }
 
     async function checkLiveStatus() {
-      if (!artistId) return
+      if (!artistId || !isPro) return
       const { data: session } = await supabase
         .from('live_sessions')
         .select('playback_id')
