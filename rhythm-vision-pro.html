@@ -5,90 +5,170 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rhythm Vision Pro • Full Access | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
-    .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: linear-gradient(to bottom, #0f172a, #1e1b4b); 
+      color: #e2e8f0; 
+      min-height: 100vh; 
+    }
+    .spinner { 
+      border: 4px solid #334155; 
+      border-top: 4px solid #5eead4; 
+      border-radius: 50%; 
+      width: 40px; 
+      height: 40px; 
+      animation: spin 1s linear infinite; 
+      margin: 0 auto; 
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .scene-card {
+      background: rgba(30, 41, 59, 0.8);
+      border: 2px solid #334155;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .scene-card:hover {
+      border-color: #5eead4;
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(94, 234, 212, 0.2);
+    }
+    .download-btn {
+      background: linear-gradient(to right, #10b981, #34d399);
+      color: black;
+      font-weight: 900;
+    }
+    .copy-btn {
+      background: linear-gradient(to right, #8b5cf6, #a78bfa);
+    }
+    img { user-select: none; -webkit-user-drag: none; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-
-  <header class="bg-black/90 backdrop-blur border-b border-yellow-600">
-    <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <img src="logo-1-sm.jpg" alt="Rhythm Deck" class="w-12 h-12 rounded-full">
+  <header class="bg-black/90 backdrop-blur border-b-4 border-yellow-500">
+    <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-6">
+        <img src="logo-1-sm.jpg" alt="Rhythm Deck" class="w-16 h-16 rounded-full ring-4 ring-yellow-500">
         <div>
-          <h1 class="text-4xl font-black text-teal-400">Rhythm Vision Pro</h1>
-          <p class="text-xl text-yellow-400 font-bold">Full Access • Copy • Download • Export</p>
+          <h1 class="text-5xl font-black text-teal-400 tracking-tight">Rhythm Vision Pro</h1>
+          <p class="text-2xl text-yellow-400 font-bold">Full Access • Copy • Download • Export</p>
         </div>
       </div>
-      <a href="profile-admin-pro.html" class="bg-yellow-600 hover:bg-yellow-700 px-8 py-4 rounded-xl font-bold text-xl text-black transition">
-        Back to Pro Dashboard
+      <a href="profile-admin-pro.html" class="bg-yellow-500 hover:bg-yellow-400 text-black px-10 py-5 rounded-2xl font-black text-xl transition shadow-2xl">
+        ← Back to Pro Dashboard
       </a>
     </div>
   </header>
 
-  <main class="flex-1 container max-w-5xl mx-auto p-6 mt-12">
-    <div class="text-center mb-12 p-10 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-3xl shadow-2xl border-4 border-yellow-400">
-      <h2 class="text-5xl font-black mb-4">RHYTHM VISION PRO</h2>
-      <p class="text-2xl">Full AI Music Video Creator — No Limits</p>
+  <main class="flex-1 container max-w-6xl mx-auto p-8">
+    <!-- HERO TITLE -->
+    <div class="text-center mb-12 p-12 bg-gradient-to-r from-yellow-600 via-orange-600 to-pink-600 rounded-3xl shadow-2xl border-4 border-yellow-400">
+      <h2 class="text-7xl font-black mb-4 leading-tight">RHYTHM VISION PRO</h2>
+      <p class="text-3xl font-bold">Your Full AI Music Video Creator — No Limits</p>
     </div>
 
-    <!-- FULLY UNLOCKED — SAME LAYOUT AS FREE BUT NO BLOCKS -->
-    <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
-      <!-- All your inputs, tabs, lyrics, scenes, timeline, images — EXACT same code as free version -->
-      <!-- BUT remove ALL .pro-overlay and .blocked classes -->
-      <!-- Allow copy, right-click, download, edit -->
+    <!-- MAIN EDITOR — FULLY UNLOCKED -->
+    <div class="bg-gray-900/95 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border-4 border-teal-500">
+      <!-- Video Title -->
+      <div class="mb-10">
+        <label class="block text-2xl font-bold mb-4 text-teal-400">Video Title</label>
+        <input type="text" id="videoTitle" class="w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-5 text-2xl font-bold text-white focus:border-teal-500 focus:outline-none transition" placeholder="Enter your song title...">
+      </div>
 
-      <!-- Example: Lyrics textarea — FULLY EDITABLE -->
-      <textarea id="lyrics" rows="14" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg"></textarea>
+      <!-- Lyrics -->
+      <div class="mb-10">
+        <div class="flex justify-between items-center mb-4">
+          <label class="text-2xl font-bold text-teal-400">Lyrics</label>
+          <button onclick="copyToClipboard(document.getElementById('lyrics').value)" class="copy-btn text-white px-6 py-3 rounded-xl font-black text-lg transition hover:scale-105">
+            Copy Lyrics
+          </button>
+        </div>
+        <textarea id="lyrics" rows="16" class="w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-6 text-lg resize-none focus:border-teal-500 focus:outline-none transition" placeholder="Paste or write your full lyrics here..."></textarea>
+      </div>
 
-      <!-- Example: Image — DOWNLOADABLE -->
-      <img src="generated-image.jpg" class="w-full rounded-2xl shadow-2xl cursor-pointer" onclick="downloadImage(this.src, 'scene1.jpg')">
+      <!-- Scenes & Images -->
+      <div class="mb-10">
+        <h3 class="text-3xl font-bold mb-8 text-teal-400 text-center">Your Generated Scenes</h3>
+        <div id="scenesContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Example scene — repeat as needed -->
+          <div class="scene-card">
+            <img src="https://via.placeholder.com/600x800/1e293b/5eead4?text=Scene+1" alt="AI Scene" class="w-full h-64 object-cover">
+            <div class="p-6">
+              <input type="text" value="Intro Verse" class="w-full bg-gray-800 text-white p-3 rounded-lg mb-4 text-center font-bold">
+              <input type="number" value="3" min="1" max="10" class="w-full bg-gray-800 text-white p-3 rounded-lg text-center mb-4">
+              <button onclick="downloadImage(this.closest('.scene-card').querySelector('img').src, 'scene-1.jpg')" class="download-btn w-full py-4 rounded-xl font-black text-lg transition hover:scale-105">
+                Download Image
+              </button>
+            </div>
+          </div>
+          <!-- Add more scenes dynamically or statically -->
+        </div>
+      </div>
 
-      <!-- Add download buttons, copy buttons, export JSON, etc. -->
-      <button onclick="copyToClipboard(document.getElementById('lyrics').value)" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl">
-        Copy Lyrics
-      </button>
-      <button onclick="exportProject()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-xl">
-        Export Project (.json)
-      </button>
+      <!-- Export & Actions -->
+      <div class="flex flex-wrap justify-center gap-6 mt-12">
+        <button onclick="exportProject()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black text-2xl px-12 py-6 rounded-2xl shadow-2xl transition transform hover:scale-105">
+          Export Full Project (.json)
+        </button>
+        <button onclick="alert('Final video rendering coming soon!')" class="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-black font-black text-2xl px-12 py-6 rounded-2xl shadow-2xl transition transform hover:scale-105">
+          Render Final Video
+        </button>
+      </div>
     </div>
   </main>
 
+  <footer class="bg-black/80 text-center py-8 mt-16 border-t-4 border-yellow-500">
+    <p class="text-xl">© 2025 Rhythm Deck • <span class="text-yellow-400 font-bold">Rhythm Vision Pro</span> — Full Creative Control</p>
+  </footer>
+
   <script>
-    // SAME AI CODE (Hugging Face or your final choice)
-    // But now allow full copy/download/export
+    // Enable right-click & download on all images
+    document.addEventListener('contextmenu', e => e.stopPropagation(), true);
+    document.addEventListener('dragstart', e => e.preventDefault(), true);
 
     function copyToClipboard(text) {
-      navigator.clipboard.writeText(text);
-      alert("Copied to clipboard!");
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Lyrics copied to clipboard!");
+      });
     }
 
     function downloadImage(url, filename) {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
+      fetch(url)
+        .then(resp => resp.blob())
+        .then(blob => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        });
     }
 
     function exportProject() {
       const data = {
-        title: document.getElementById('videoTitle').value,
+        title: document.getElementById('videoTitle').value || "Untitled Song",
         lyrics: document.getElementById('lyrics').value,
-        scenes: Array.from(document.querySelectorAll('#scenesContainer > div')).map(d => ({
-          title: d.querySelector('input').value,
-          images: parseInt(d.querySelector('input[type=number]').value)
+        generatedAt: new Date().toISOString(),
+        scenes: Array.from(document.querySelectorAll('.scene-card')).map(card => ({
+          prompt: card.querySelector('input[type=text]').value,
+          images: parseInt(card.querySelector('input[type=number]').value),
+          imageUrl: card.querySelector('img').src
         }))
       };
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'rhythm-vision-project.json';
+      a.download = `${data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_rhythm_vision_pro.json`;
       a.click();
+      URL.revokeObjectURL(url);
+      alert("Project exported successfully!");
     }
+
+    // Optional: Load from URL or localStorage later
   </script>
 </body>
 </html>
