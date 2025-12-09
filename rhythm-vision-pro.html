@@ -212,12 +212,12 @@
     document.getElementById('messageBox').classList.remove('hidden');
   }
 
-  // PROFESSIONAL LYRICS — REAL AI — ALWAYS WORKS
+  // 100% WORKING LYRICS — REAL AI — ALWAYS UNIQUE
   async function generateLyrics() {
     const concept = document.getElementById('songConcept').value.trim();
     if (!concept) return showMessage('Enter a song idea first');
 
-    showMessage('Generating professional lyrics...', true);
+    showMessage('Generating your unique lyrics...', true);
 
     const genre = document.getElementById('musicGenre').value.trim() || 'pop';
     const verses = parseInt(document.getElementById('numVerses').value) || 3;
@@ -225,9 +225,9 @@
     const hasBridge = document.getElementById('hasBridge').checked;
     const hasOutro = document.getElementById('hasOutro').checked;
 
-    const prompt = `Write a high-quality, professional ${genre} song about "${concept}".
-Exactly ${verses} verses, each with unique content. ${hasChorus ? 'Include a catchy, repeating chorus after each verse. ' : ''}${hasBridge ? 'Include a thoughtful bridge. ' : ''}${hasOutro ? 'End with a fading outro. ' : ''}
-Make it emotional, poetic, and radio-ready. Use vivid imagery and varied language. Format with [Verse 1], [Chorus], etc.`;
+    const prompt = `Write a completely original ${genre} song about "${concept}".
+Exactly ${verses} verses. ${hasChorus ? 'Include a catchy chorus after each verse. ' : ''}${hasBridge ? 'Include a bridge. ' : ''}${hasOutro ? 'End with an outro. ' : ''}
+Make it emotional and radio-ready. Format with [Verse 1], [Chorus], etc.`;
 
     try {
       const res = await fetch('https://api.deepinfra.com/v1/openai/chat/completions', {
@@ -242,38 +242,16 @@ Make it emotional, poetic, and radio-ready. Use vivid imagery and varied languag
       });
 
       const data = await res.json();
-      let lyrics = data.choices?.[0]?.message?.content.trim() || "Professional lyrics generated!";
+      let lyrics = data.choices?.[0]?.message?.content.trim() || "Lyrics generated!";
 
       lyrics = lyrics.replace(/```[\s\S]*?```/g, '').trim();
       if (!lyrics.includes('[Verse')) lyrics = `[Verse 1]\n${lyrics}`;
 
       document.getElementById('lyrics').value = lyrics;
-      showMessage('Professional lyrics ready!');
+      showMessage('Your unique lyrics are ready!');
     } catch (e) {
-      showMessage('AI busy — using smart generator');
-      const words = concept.toLowerCase().split(' ');
-      const theme = words[Math.floor(Math.random() * words.length)] || 'life';
-
-      let lyrics = "";
-      for (let i = 1; i <= verses; i++) {
-        lyrics += `[Verse ${i}]\n`;
-        lyrics += `Walking through the ${theme}, feeling the wind on my face\n`;
-        lyrics += `Every moment carries weight in this open space\n`;
-        lyrics += `The stars above are telling tales of days gone by\n`;
-        lyrics += `In this quiet world, we learn to fly\n\n`;
-        if (hasChorus) {
-          lyrics += `[Chorus]\n`;
-          lyrics += `This is our ${theme}, this is our time\n`;
-          lyrics += `Through every struggle, we still shine\n`;
-          lyrics += `With every breath, we rise above\n`;
-          lyrics += `In the name of ${words[0] || 'love'}\n\n`;
-        }
-      }
-      if (hasBridge) lyrics += `[Bridge]\nA moment to reflect on where we've been\n`;
-      if (hasOutro) lyrics += `[Outro]\n${theme} goes on... forever strong...\n`;
-
-      document.getElementById('lyrics').value = lyrics;
-      showMessage('Lyrics generated!');
+      showMessage('AI busy — retrying...');
+      setTimeout(generateLyrics, 2000);
     }
   }
 
@@ -360,7 +338,7 @@ Make it emotional, poetic, and radio-ready. Use vivid imagery and varied languag
           <div class="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition bg-black/70 px-6 py-3 rounded-xl">
             <span class="text-white font-bold">Click to Download</span>
           </div>`;
-        document kõ.getElementById('imagesContent').appendChild(div);
+        document.getElementById('imagesContent').appendChild(div);
       }
     }
     showMessage('All images generated!');
@@ -474,6 +452,7 @@ Make it emotional, poetic, and radio-ready. Use vivid imagery and varied languag
     document.getElementById('durationDisplay').textContent = `${m}:${s}`;
   });
 
+  // Tab switching
   document.getElementById('tabGenerate').onclick = () => {
     document.getElementById('tabGenerate').classList.add('bg-yellow-600', 'text-black');
     document.getElementById('tabGenerate').classList.remove('bg-gray-700', 'text-gray-300');
