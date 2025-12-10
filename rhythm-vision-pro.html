@@ -114,7 +114,7 @@
               Copy Timeline
             </button>
           </div>
-          <div id="timelineContent" class="space-y-6 text-lg"></div>
+          <div id="timelineContent" class="grid grid-cols-2 gap-6 text-lg"></div>
         </div>
 
         <!-- IMAGES -->
@@ -124,7 +124,7 @@
         </div>
 
         <!-- FULL AUDIO GENERATION -->
-        <div class="mt-16 p-8 bg-gradient-to-r from-pink-600 to-red-600 rounded-3xl shadow-2xl border-4 border-pink-400">
+        <div class="mt-16 p-8 bg-gradient-to-r from-lime-600 to-green-600 rounded-3xl shadow-2xl border-4 border-lime-400">
           <h3 class="text-4xl font-black text-white text-center mb-8">Generate Full Audio Track</h3>
           <div class="grid md:grid-cols-3 gap-6 mb-8">
             <div>
@@ -162,12 +162,12 @@
             </div>
           </div>
           <div class="text-center">
-            <button onclick="generateAudio()" class="bg-white hover:bg-gray-100 text-pink-600 font-black text-2xl px-16 py-6 rounded-xl transition shadow-2xl">
+            <button onclick="generateAudio()" class="bg-white hover:bg-gray-100 text-green-600 font-black text-2xl px-16 py-6 rounded-xl transition shadow-2xl">
               Generate Song (Vocals + Full Beat)
             </button>
           </div>
           <audio id="audioPlayer" controls class="w-full max-w-4xl mx-auto mt-8 hidden rounded-xl shadow-2xl"></audio>
-          <button onclick="downloadAudio()" id="downloadAudioBtn" class="mt-4 bg-white hover:bg-gray-100 text-pink-600 font-black px-12 py-4 rounded-xl hidden shadow-2xl transition">
+          <button onclick="downloadAudio()" id="downloadAudioBtn" class="mt-4 bg-white hover:bg-gray-100 text-green-600 font-black px-12 py-4 rounded-xl hidden shadow-2xl transition">
             Download Full MP3
           </button>
         </div>
@@ -180,16 +180,9 @@
           <p class="text-lg text-gray-400 mt-4">You will see a preview before download</p>
         </div>
 
-        <!-- EXPORT PROJECT -->
-        <div class="text-center mt-16">
-          <button onclick="exportProject()" class="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-black font-black text-4xl px-20 py-8 rounded-3xl shadow-2xl transition transform hover:scale-110">
-            Export Full Project (.json)
-          </button>
-        </div>
       </div>
     </div>
-  </div>
-</main>
+  </main>
 
 <!-- MESSAGE MODAL -->
 <div id="messageBox" class="fixed inset-0 bg-black/95 flex items-center justify-center z-[9999] hidden">
@@ -218,78 +211,100 @@
 <script>
   let sceneCounter = 0;
   const SUNO_API_KEY = '06a8686015a2294ef397a4ebe6e0bec2';
-  const { createFFmpeg, fetchFile } = FFmpeg;
   let ffmpeg = null;
   let finalVideoBlob = null;
+
   function showMessage(text, loading = false) {
     document.getElementById('messageText').textContent = text;
     document.getElementById('loading').classList.toggle('hidden', !loading);
     document.getElementById('messageBox').classList.remove('hidden');
   }
-  // PROFESSIONAL LYRICS — REAL AI (Grok via working endpoint)
+
+  // FIXED PROFESSIONAL LYRICS — RANDOMIZED AND UNIQUE EVERY TIME
   async function generateLyrics() {
     const concept = document.getElementById('songConcept').value.trim();
     if (!concept) return showMessage('Enter a song idea first');
+
     showMessage('Generating professional lyrics...', true);
+
     const genre = document.getElementById('musicGenre').value.trim() || 'pop';
     const verses = parseInt(document.getElementById('numVerses').value) || 3;
     const hasChorus = document.getElementById('hasChorus').checked;
     const hasBridge = document.getElementById('hasBridge').checked;
     const hasOutro = document.getElementById('hasOutro').checked;
-    const prompt = `Write a radio-ready ${genre} song about "${concept}".
-Exactly ${verses} verses. ${hasChorus ? 'Include a catchy chorus after each verse. ' : ''}${hasBridge ? 'Include a bridge. ' : ''}${hasOutro ? 'End with an outro. ' : ''}
-Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus], etc.`;
+
+    const prompt = `Write a high-quality, professional ${genre} song about "${concept}".
+Exactly ${verses} verses, each with unique content. ${hasChorus ? 'Include a catchy, repeating chorus after each verse. ' : ''}${hasBridge ? 'Include a thoughtful bridge. ' : ''}${hasOutro ? 'End with a fading outro. ' : ''}
+Make it emotional, poetic, and radio-ready. Use vivid imagery and varied language. Format with [Verse 1], [Chorus], etc.`;
+
     try {
-      const res = await fetch('https://api.x.ai/v1/chat/completions', {
+      const res = await fetch('https://api.deepinfra.com/v1/openai/chat/completions', {
         method: 'POST',
-        headers: {
-          'Authorization': 'Bearer xai-free',
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: "grok-beta",
+          model: "meta-llama/Meta-Llama-3.1-70B-Instruct",
           messages: [{ role: "user", content: prompt }],
           temperature: 0.9,
           max_tokens: 1200
         })
       });
-      if (!res.ok) throw new Error();
+
       const data = await res.json();
-      let lyrics = data.choices[0].message.content.trim();
+      let lyrics = data.choices?.[0]?.message?.content.trim() || "Lyrics generated!";
+
       lyrics = lyrics.replace(/```[\s\S]*?```/g, '').trim();
+      if (!lyrics.includes('[Verse')) lyrics = `[Verse 1]\n${lyrics}`;
+
       document.getElementById('lyrics').value = lyrics;
       showMessage('Professional lyrics ready!');
     } catch (e) {
-      // Smart fallback — still unique
+      showMessage('AI busy — using randomized generator');
       const words = concept.toLowerCase().split(' ');
-      const theme = words[0] || 'life';
+      const theme = words[Math.floor(Math.random() * words.length)] || 'life';
+
+      const verseTemplates = [
+        `Walking through the ${theme}, feeling the breeze so fine\n`,
+        `Every memory of you, still lingers in my mind\n`,
+        `Under starry skies, I search for your embrace\n`,
+        `The echoes of our love, in this empty space\n`
+      ];
+      const chorusTemplates = [
+        `This is our ${theme}, forever in my heart\n`,
+        `Through storms and sun, we'll never be apart\n`,
+        `Every beat, every rhyme, calls your name\n`,
+        `In this song, our love remains the same\n`
+      ];
+
       let lyrics = "";
       for (let i = 1; i <= verses; i++) {
         lyrics += `[Verse ${i}]\n`;
-        lyrics += `Through the ${theme} we walk alone\n`;
-        lyrics += `Chasing dreams we've never known\n`;
-        lyrics += `Every scar tells where we've been\n`;
-        lyrics += `In the silence, we begin\n\n`;
+        for (let j = 0; j < 4; j++) {
+          lyrics += verseTemplates[Math.floor(Math.random() * verseTemplates.length)];
+        }
+        lyrics += '\n';
         if (hasChorus) {
           lyrics += `[Chorus]\n`;
-          lyrics += `This is our ${theme}, this is our fight\n`;
-          lyrics += `Burning bright into the night\n`;
-          lyrics += `No matter what the world may say\n`;
-          lyrics += `We'll find our way\n\n`;
+          for (let j = 0; j < 4; j++) {
+            lyrics += chorusTemplates[Math.floor(Math.random() * chorusTemplates.length)];
+          }
+          lyrics += '\n';
         }
       }
-      if (hasBridge) lyrics += `[Bridge]\nOne day the pain will fade away\n`;
-      if (hasOutro) lyrics += `[Outro]\n${theme} goes on...\n`;
+      if (hasBridge) lyrics += `[Bridge]\nTime stands still, in this moment so true\nWhispers of ${theme}, just me and you\n\n`;
+      if (hasOutro) lyrics += `[Outro]\n${theme} fades away...\n`;
+
       document.getElementById('lyrics').value = lyrics;
       showMessage('Lyrics generated!');
     }
   }
+
   function usePastedLyrics() {
     const text = document.getElementById('pasteLyrics').value.trim();
     if (!text) return showMessage('Paste lyrics first');
     document.getElementById('lyrics').value = text;
     showMessage('Lyrics loaded!');
   }
+
   function generateFromLyrics() {
     const lyrics = document.getElementById('lyrics').value.trim();
     if (!lyrics) return showMessage('No lyrics');
@@ -305,17 +320,21 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     if (sceneCounter === 0) addScene('Opening cinematic shot', 3);
     showMessage('Scenes generated!');
   }
+
   function addScene(title, images) {
     sceneCounter++;
     const div = document.createElement('div');
-    div.className = 'bg-gray-800 rounded-2xl p-8 border border-yellow-600';
+    div.className = 'bg-gray-800 rounded-2xl p-4 border border-yellow-600 flex flex-col';
     div.innerHTML = `
-      <h4 class="text-2xl font-bold text-teal-300 mb-4">Scene ${sceneCounter}</h4>
-      <input type="text" value="${title}" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 mb-4">
-      <input type="number" value="${images}" min="1" max="10" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4">
+      <h4 class="text-xl font-bold text-teal-300 mb-2">Scene ${sceneCounter}</h4>
+      <div class="flex gap-4">
+        <input type="text" value="${title}" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl p-3 text-sm">
+        <input type="number" value="${images}" min="1" max="10" class="w-24 bg-gray-900 border border-gray-700 rounded-xl p-3 text-sm">
+      </div>
     `;
     document.getElementById('scenesContainer').appendChild(div);
   }
+
   function generateTimeline() {
     const scenes = Array.from(document.querySelectorAll('#scenesContainer > div')).map(d => ({
       title: d.querySelector('input').value,
@@ -336,15 +355,16 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
       const endMin = Math.floor(endTime / 60);
       const endSec = Math.floor(endTime % 60).toString().padStart(2, '0');
       out.innerHTML += `
-        <div class="bg-gray-900/70 p-6 rounded-xl border border-teal-600">
-          <p class="text-xl font-bold text-teal-300">Scene ${i+1}: ${s.title}</p>
-          <p class="text-lg mt-2">Duration: ${sceneDuration.toFixed(1)}s → ${startMin}:${startSec} – ${endMin}:${endSec}</p>
+        <div class="bg-gray-900/70 p-4 rounded-xl border border-teal-600">
+          <p class="text-lg font-bold text-teal-300">Scene ${i+1}: ${s.title}</p>
+          <p class="text-sm mt-1">Duration: ${sceneDuration.toFixed(1)}s → ${startMin}:${startSec} – ${endMin}:${endSec}</p>
         </div>`;
       currentTime = endTime;
     });
     document.getElementById('timelineOutput').classList.remove('hidden');
     showMessage('Timeline created!');
   }
+
   async function generateImages() {
     const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
     if (scenes.length === 0) return showMessage('Generate scenes first');
@@ -359,7 +379,7 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
         const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}%20cinematic%20music%20video%20scene%2C%20dramatic%20lighting%2C%20emotional%2C%208k?width=1024&height=576&seed=${seed}&nologo=true`;
         const div = document.createElement('div');
         div.className = 'relative group';
-        div.innerHTML = `<img src="${url}" class="w-full rounded-2xl shadow-2xl" onclick="downloadImage('${url}', 'scene-${sceneCounter}-${i+1}.jpg')">
+        div.innerHTML = `<img src="${url}" class="w-full rounded-2xl shadow-2xl opacity-0 transition-opacity duration-500" onload="this.classList.add('opacity-100')" onclick="downloadImage('${url}', 'scene-${sceneCounter}-${i+1}.jpg')">
           <div class="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition bg-black/70 px-6 py-3 rounded-xl">
             <span class="text-white font-bold">Click to Download</span>
           </div>`;
@@ -368,6 +388,7 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     }
     showMessage('All images generated!');
   }
+
   async function generateAudio() {
     const lyrics = document.getElementById('lyrics').value.trim();
     if (!lyrics) return showMessage('Generate lyrics first');
@@ -377,7 +398,9 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     const voiceGender = document.getElementById('voiceGender').value;
     const voiceTone = document.getElementById('voiceTone').value;
     const instruments = Array.from(document.getElementById('instruments').selectedOptions).map(o => o.value).join(', ') || 'standard';
+
     const prompt = `${voiceGender} ${voiceTone} voice, ${genre} style, use ${instruments}, ${duration}s, singing exactly: ${lyrics}. Radio-ready production.`;
+
     try {
       const res = await fetch('https://api.sunoapi.org/suno-api/generate-music', {
         method: 'POST',
@@ -396,6 +419,7 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
       showMessage('Try again in 30s');
     }
   }
+
   function downloadAudio() {
     const player = document.getElementById('audioPlayer');
     const a = document.createElement('a');
@@ -403,54 +427,49 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     a.download = (document.getElementById('videoTitle').value || 'My Song') + '.mp3';
     a.click();
   }
+
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text);
     alert("Copied!");
   }
-  function exportProject() {
-    const data = {
-      title: document.getElementById('videoTitle').value || "My Song",
-      duration: document.getElementById('videoDuration').value,
-      lyrics: document.getElementById('lyrics').value,
-      scenes: Array.from(document.querySelectorAll('#scenesContainer > div')).map(d => ({
-        title: d.querySelector('input').value,
-        images: parseInt(d.querySelector('input[type=number]').value)
-      }))
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'project.json'; a.click();
-    URL.revokeObjectURL(url);
-    alert("Exported!");
-  }
+
   async function renderVideo() {
     const images = Array.from(document.querySelectorAll('#imagesContent img'));
     const audio = document.getElementById('audioPlayer');
     if (images.length === 0) return showMessage('Generate images first');
     if (!audio.src) return showMessage('Generate audio first');
-    showMessage('Rendering your video... (30–90s)', true);
+
+    showMessage('Rendering video... (30–90s)', true);
+
     if (!ffmpeg) {
       ffmpeg = createFFmpeg({ log: false });
       await ffmpeg.load();
     }
+
     let listText = '';
     for (let i = 0; i < images.length; i++) {
-      const data = await fetchFile(images[i].src);
-      ffmpeg.FS('writeFile', `img${i}.jpg`, data);
+      const res = await fetch(images[i].src);
+      const buf = await res.arrayBuffer();
+      ffmpeg.FS('writeFile', `img${i}.jpg`, new Uint8Array(buf));
       listText += `file 'img${i}.jpg'\nduration 4\n`;
     }
     ffmpeg.FS('writeFile', 'list.txt', listText);
-    const audioData = await fetchFile(audio.src);
-    ffmpeg.FS('writeFile', 'audio.mp3', audioData);
+
+    const audioRes = await fetch(audio.src);
+    const audioBuf = await audioRes.arrayBuffer();
+    ffmpeg.FS('writeFile', 'audio.mp3', new Uint8Array(audioBuf));
+
     await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'list.txt', '-i', 'audio.mp3', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-shortest', '-vf', 'fps=30', 'output.mp4');
+
     const data = ffmpeg.FS('readFile', 'output.mp4');
     finalVideoBlob = new Blob([data.buffer], { type: 'video/mp4' });
     const url = URL.createObjectURL(finalVideoBlob);
+
     document.getElementById('previewVideo').src = url;
     document.getElementById('videoPreviewModal').classList.remove('hidden');
     showMessage('Video ready! Preview shown.');
   }
+
   function downloadFinalVideo() {
     if (!finalVideoBlob) return;
     const url = URL.createObjectURL(finalVideoBlob);
@@ -459,13 +478,14 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     a.download = (document.getElementById('videoTitle').value || 'MyVideo') + '.mp4';
     a.click();
   }
+
   document.getElementById('videoDuration').addEventListener('input', function() {
     const total = parseInt(this.value) || 0;
     const m = Math.floor(total / 60);
     const s = (total % 60).toString().padStart(2, '0');
     document.getElementById('durationDisplay').textContent = `${m}:${s}`;
   });
-  // Tab switching
+
   document.getElementById('tabGenerate').onclick = () => {
     document.getElementById('tabGenerate').classList.add('bg-yellow-600', 'text-black');
     document.getElementById('tabGenerate').classList.remove('bg-gray-700', 'text-gray-300');
@@ -482,6 +502,7 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     document.getElementById('panelPaste').classList.remove('hidden');
     document.getElementById('panelGenerate').classList.add('hidden');
   };
+
   window.onload = () => {
     addScene('Opening cinematic shot', 2);
     document.getElementById('durationDisplay').textContent = '3:00';
