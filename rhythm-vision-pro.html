@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rhythm Deck • Rhythm Vision</title>
+  <title>Rhythm Vision • Full AI Music Video Creator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
     .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
@@ -13,225 +14,355 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-  <!-- Header -->
+
   <header class="bg-black/90 backdrop-blur border-b border-yellow-600 py-6">
     <div class="max-w-7xl mx-auto px-6 flex items-center gap-6">
-      <img src="logo-1-sm.jpg" alt="Rhythm Vision Logo" class="w-16 h-16 rounded-full shadow-2xl">
+      <img src="logo-1-sm.jpg" alt="Logo" class="w-16 h-16 rounded-full shadow-2xl">
       <div>
         <h1 class="text-5xl font-black text-teal-400">Rhythm Vision</h1>
-        <p class="text-2xl text-yellow-400 font-bold">Rhythm Deck</p>
+        <p class="text-2xl text-yellow-400 font-bold">AI Music Video Creator • Full Export</p>
       </div>
     </div>
   </header>
-  <!-- Banner - Original +25% taller (h-80), image only -->
+
   <div class="relative w-full h-80 overflow-hidden">
-    <img src="rhythm-vision-banner.png" alt="Rhythm Vision Banner" class="w-full h-full object-cover">
+    <img src="rhythm-vision-banner.png" alt="Banner" class="w-full h-full object-cover">
   </div>
-  <main class="flex-1 container max-w-4xl mx-auto p-8">
+
+  <main class="flex-1 container max-w-5xl mx-auto p-8">
     <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
-      <!-- Song Title & Duration -->
-      <div class="grid md:grid-cols-2 gap-6 mb-8">
+
+      <!-- Song Info -->
+      <div class="grid md:grid-cols-2 gap-8 mb-10">
         <div>
           <label class="block text-lg font-bold text-teal-300 mb-3">Song Title</label>
-          <input type="text" id="songTitle" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg placeholder-gray-500 focus:border-teal-500" placeholder="e.g. Street Dreams">
+          <input type="text" id="songTitle" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl" placeholder="e.g. Street Dreams">
         </div>
-        <div class="flex items-center gap-4">
-          <input type="number" id="songDuration" class="w-32 bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" value="180" min="30" max="600">
-          <span class="text-2xl font-bold text-yellow-400">Duration (seconds)</span>
-        </div>
-      </div>
-      <!-- Tabs -->
-      <div class="flex justify-center gap-8 mb-10">
-        <button id="tabGenerate" class="px-10 py-4 rounded-xl font-black text-2xl bg-yellow-600 text-black shadow-lg">Generate Lyrics</button>
-        <button id="tabPaste" class="px-10 py-4 rounded-xl font-black text-2xl bg-gray-700 text-gray-300 hover:bg-gray-600 transition">Add Your Own</button>
-      </div>
-      <!-- Generate Panel -->
-      <div id="panelGenerate">
-        <div class="text-center mb-12">
-          <h3 class="text-4xl font-black text-teal-400 mb-4">Generate Professional Lyrics</h3>
-          <p class="text-xl text-gray-300">Describe your song — get unique lyrics instantly with AI tools (free to test).</p>
-        </div>
-        <div class="space-y-8">
+        <div class="flex items-end gap-4">
           <div>
-            <label class="block text-lg font-bold text-teal-300 mb-3">Song Concept / Idea</label>
-            <textarea id="songConcept" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg placeholder-gray-500" placeholder="e.g. A trap song about rising from the streets..."></textarea>
+            <label class="block text-lg font-bold text-teal-300 mb-3">Duration (seconds)</label>
+            <input type="number" id="songDuration" value="180" min="60" max="600" class="w-32 bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl">
           </div>
-          <div class="grid md:grid-cols-3 gap-6">
-            <div>
-              <label class="block text-lg font-bold text-teal-300 mb-3">Genre</label>
-              <input type="text" id="musicGenre" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" placeholder="trap, pop, country..." value="">
-            </div>
-            <div>
-              <label class="block text-lg font-bold text-teal-300 mb-3">Number of Verses</label>
-              <input type="number" id="numVerses" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" value="3" min="1" max="6">
-            </div>
-            <div class="flex flex-col justify-end space-y-4">
-              <label class="flex items-center text-lg"><input type="checkbox" id="hasChorus" checked class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Chorus</span></label>
-              <label class="flex items-center text-lg"><input type="checkbox" id="hasBridge" checked class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Bridge</span></label>
-              <label class="flex items-center text-lg"><input type="checkbox" id="hasOutro" checked class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Outro</span></label>
-            </div>
-          </div>
-          <!-- Generator Buttons -->
-          <div class="text-center space-y-4">
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-              <button onclick="generateWithGrok()" class="bg-gradient-to-r from-slate-600 to-gray-700 hover:from-slate-700 hover:to-gray-800 text-white font-black text-xl px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition w-full sm:w-auto">
-                Generate with Grok
-              </button>
-              <button onclick="generateWithGemini()" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-xl px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition w-full sm:w-auto">
-                Generate with Gemini
-              </button>
-              <button onclick="generateLyrics()" class="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-black font-black text-xl px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition w-full sm:w-auto">
-                Generate with MakeSong
-              </button>
-            </div>
-            <p class="text-sm text-gray-400">Pick an AI/tool above. All transfer your song details automatically!</p>
-          </div>
+          <span class="text-3xl font-bold text-yellow-400" id="durationDisplay">3:00</span>
         </div>
       </div>
-      <!-- Paste Panel -->
-      <div id="panelPaste" class="hidden">
-        <div class="text-center mb-12">
-          <h3 class="text-4xl font-black text-teal-400 mb-4">Add Your Own Lyrics</h3>
-          <p class="text-xl text-gray-300">Paste your lyrics and continue.</p>
+
+      <!-- Lyrics Section -->
+      <div class="bg-gray-800/60 rounded-3xl p-8 border border-yellow-500 mb-12">
+        <div class="flex justify-center gap-8 mb-8">
+          <button id="tabGenerate" class="px-10 py-4 rounded-xl font-black text-2xl bg-yellow-600 text-black shadow-lg">Generate Lyrics</button>
+          <button id="tabPaste" class="px-10 py-4 rounded-xl font-black text-2xl bg-gray-700 text-gray-300 hover:bg-gray-600">Paste Lyrics</button>
         </div>
-        <textarea id="pasteLyrics" rows="16" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste your full lyrics here..."></textarea>
-        <div class="text-center mt-8">
-          <button onclick="usePastedLyrics()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-black font-black text-2xl px-20 py-7 rounded-2xl shadow-2xl transform hover:scale-105 transition">
-            Use These Lyrics
-          </button>
+
+        <div id="panelGenerate">
+          <textarea id="songConcept" rows="4" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 text-lg mb-6" placeholder="Describe your song idea..."></textarea>
+          <div class="grid md:grid-cols-4 gap-6 mb-8">
+            <input type="text" id="musicGenre" placeholder="Genre" class="bg-gray-900 border border-gray-700 rounded-xl p-5">
+            <input type="number" id="numVerses" value="3" min="1" max="6" placeholder="Verses" class="bg-gray-900 border border-gray-700 rounded-xl p-5">
+            <label class="flex items-center"><input type="checkbox" id="hasChorus" checked class="mr-3"><span class="text-teal-300 font-bold">Chorus</span></label>
+            <label class="flex items-center"><input type="checkbox" id="hasBridge" checked class="mr-3"><span class="text-teal-300 font-bold">Bridge</span></label>
+          </div>
+          <div class="flex justify-center gap-6 flex-wrap">
+            <button onclick="generateWithGrok()" class="bg-gradient-to-r from-gray-700 to-slate-800 text-white font-black px-8 py-5 rounded-xl shadow-2xl hover:scale-105">Grok</button>
+            <button onclick="generateWithGemini()" class="bg-gradient-to-r from-green-600 to-emerald-700 text-white font-black px-8 py-5 rounded-xl shadow-2xl hover:scale-105">Gemini</button>
+            <button onclick="generateWithMakeSong()" class="bg-gradient-to-r from-teal-500 to-cyan-600 text-black font-black px-8 py-5 rounded-xl shadow-2xl hover:scale-105">MakeSong</button>
+          </div>
+        </div>
+
+        <div id="panelPaste" class="hidden">
+          <textarea id="pasteLyrics" rows="16" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 font-mono" placeholder="Paste lyrics here..."></textarea>
+          <button onclick="usePastedLyrics()" class="mt-6 w-full bg-gradient-to-r from-emerald-500 to-teal-600 py-6 rounded-xl font-black text-2xl">Use These Lyrics</button>
         </div>
       </div>
-      <!-- Lyrics Output -->
-      <div class="mt-16">
-        <label class="block text-2xl font-bold text-teal-400 mb-4">Your Lyrics</label>
-        <textarea id="lyrics" rows="20" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed placeholder-gray-600" placeholder="Your lyrics will appear here... (Copy/paste from AI and proceed to timeline, scenes, images, MP3 music, and MP4 video generation!)"></textarea>
-        <div class="mt-6 flex justify-center gap-6">
-          <button onclick="copyLyrics()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black px-12 py-5 rounded-xl shadow-xl transition">
-            Copy Lyrics
-          </button>
-          <button onclick="clearLyrics()" class="bg-gray-700 hover:bg-gray-600 text-white font-black px-12 py-5 rounded-xl shadow-xl transition">
-            Clear Lyrics
+
+      <!-- Lyrics Display -->
+      <div class="mb-12">
+        <div class="flex justify-between items-center mb-4">
+          <label class="text-3xl font-bold text-teal-400">Lyrics</label>
+          <button onclick="copyLyrics()" class="ml-auto bg-gradient-to-r from-purple-600 to-pink-600 text-white px-10 py-4 rounded-xl font-black">Copy</button>
+        </div>
+        <textarea id="lyrics" rows="18" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 font-mono text-lg"></textarea>
+      </div>
+
+      <!-- Main Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <button onclick="generateScenes()" class="bg-gradient-to-r from-purple-600 to-pink-600 py-8 rounded-2xl font-black text-3xl hover:scale-105">Generate Scenes</button>
+        <button onclick="generateTimeline()" class="bg-gradient-to-r from-teal-600 to-cyan-600 py-8 rounded-2xl font-black text-3xl hover:scale-105">Generate Timeline</button>
+        <button onclick="generateImages()" class="bg-gradient-to-r from-emerald-600 to-teal-600 py-8 rounded-2xl font-black text-3xl hover:scale-105">Generate Images</button>
+      </div>
+
+      <!-- Scenes -->
+      <div id="scenesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12"></div>
+
+      <!-- Timeline -->
+      <div id="timelineOutput" class="p-10 bg-gray-800/70 rounded-3xl hidden border border-teal-600 mb-12">
+        <h3 class="text-4xl font-bold text-teal-400 text-center mb-8">Video Timeline</h3>
+        <div id="timelineContent" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg"></div>
+      </div>
+
+      <!-- Images -->
+      <div id="imagesOutput" class="hidden mb-12">
+        <h3 class="text-4xl font-bold text-teal-400 text-center mb-10">Generated Images (click to download)</h3>
+        <div id="imagesContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+      </div>
+
+      <!-- Audio Generation (YOUR SUNO KEY) -->
+      <div class="p-10 bg-gradient-to-r from-lime-600 to-green-600 rounded-3xl shadow-2xl border-4 border-lime-400 mb-12">
+        <h3 class="text-4xl font-black text-center mb-8">Generate Full Song (Vocals + Beat)</h3>
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+          <select id="voiceGender" class="bg-gray-800 border border-gray-700 rounded-xl p-5">
+            <option value="male">Male Voice</option>
+            <option value="female">Female Voice</option>
+          </select>
+          <input type="text" id="customStyle" placeholder="Custom style, mood, instruments..." class="bg-gray-800 border border-gray-700 rounded-xl p-5">
+          <button onclick="generateAudio()" class="col-span-1 md:col-span-1 bg-white text-green-600 font-black text-2xl py-6 rounded-xl hover:bg-gray-100">
+            Generate Song Now
           </button>
         </div>
+        <audio id="audioPlayer" controls class="w-full hidden mt-6 rounded-xl shadow-2xl"></audio>
+        <button onclick="downloadAudio()" id="downloadAudioBtn" class="mt-4 w-full bg-white text-green-600 font-black py-5 rounded-xl hidden">Download MP3</button>
+      </div>
+
+      <!-- Final Export -->
+      <div class="text-center my-20">
+        <button onclick="renderVideo()" class="bg-gradient-to-r from-cyan-500 to-purple-700 text-white font-black text-5xl px-32 py-10 rounded-3xl shadow-2xl hover:scale-110">
+          Export Final Video (MP4)
+        </button>
       </div>
     </div>
   </main>
-  <!-- Message Modal -->
+
+  <!-- Modals -->
   <div id="messageBox" class="fixed inset-0 bg-black/95 flex items-center justify-center z-50 hidden">
     <div class="bg-gray-900 rounded-3xl p-12 text-center max-w-lg border border-yellow-600">
-      <div id="loading" class="hidden"><div class="spinner"></div><p class="mt-6 text-2xl text-teal-400">Generating your lyrics...</p></div>
+      <div id="loading" class="hidden"><div class="spinner"></div><p class="mt-6 text-2xl text-teal-400">Please wait...</p></div>
       <p id="messageText" class="text-3xl font-bold text-white"></p>
-      <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="mt-8 bg-teal-600 hover:bg-teal-700 text-black font-black px-14 py-5 rounded-xl text-2xl">OK</button>
+      <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="mt-8 bg-teal-600 text-black font-black px-14 py-5 rounded-xl text-2xl">OK</button>
     </div>
   </div>
+
+  <div id="videoPreview" class="fixed inset-0 bg-black/95 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-900 rounded-3xl p-8 max-w-6xl w-full border border-yellow-600">
+      <video id="previewVideo" controls class="w-full rounded-2xl shadow-2xl" style="max-height:85vh;"></video>
+      <div class="flex justify-center gap-8 mt-8">
+        <button onclick="downloadFinalVideo()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black text-2xl px-12 py-5 rounded-xl">Download MP4</button>
+        <button onclick="document.getElementById('videoPreview').classList.add('hidden')" class="bg-gray-700 text-white font-black text-2xl px-12 py-5 rounded-xl">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Tab switching
-    document.getElementById('tabGenerate').onclick = () => {
-      document.getElementById('tabGenerate').classList.add('bg-yellow-600', 'text-black');
-      document.getElementById('tabGenerate').classList.remove('bg-gray-700', 'text-gray-300');
-      document.getElementById('tabPaste').classList.remove('bg-yellow-600', 'text-black');
-      document.getElementById('tabPaste').classList.add('bg-gray-700', 'text-gray-300');
-      document.getElementById('panelGenerate').classList.remove('hidden');
-      document.getElementById('panelPaste').classList.add('hidden');
-    };
-    document.getElementById('tabPaste').onclick = () => {
-      document.getElementById('tabPaste').classList.add('bg-yellow-600', 'text-black');
-      document.getElementById('tabPaste').classList.remove('bg-gray-700', 'text-gray-300');
-      document.getElementById('tabGenerate').classList.remove('bg-yellow-600', 'text-black');
-      document.getElementById('tabGenerate').classList.add('bg-gray-700', 'text-gray-300');
-      document.getElementById('panelPaste').classList.remove('hidden');
-      document.getElementById('panelGenerate').classList.add('hidden');
-    };
+    const SUNO_API_KEY = "06a8686015a2294ef397a4ebe6e0bec2";  // ← Your working key
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    let ffmpeg = null;
+    let finalVideoBlob = null;
+
     function showMessage(text, loading = false) {
       document.getElementById('messageText').textContent = text;
       document.getElementById('loading').classList.toggle('hidden', !loading);
       document.getElementById('messageBox').classList.remove('hidden');
     }
 
-    // Build detailed prompt with all form data
     function buildLyricsPrompt() {
-      const title = document.getElementById('songTitle').value.trim();
-      const duration = document.getElementById('songDuration').value;
-      const genre = document.getElementById('musicGenre').value.trim();
-      const numVerses = document.getElementById('numVerses').value;
-      const hasChorus = document.getElementById('hasChorus').checked;
-      const hasBridge = document.getElementById('hasBridge').checked;
-      const hasOutro = document.getElementById('hasOutro').checked;
-      const concept = document.getElementById('songConcept').value.trim();
-
-      if (!concept) {
-        showMessage('Please enter a song concept first!');
-        return null;
-      }
-
-      let structure = `${numVerses} verses`;
-      if (hasChorus) structure += ', a chorus';
-      if (hasBridge) structure += ', a bridge';
-      if (hasOutro) structure += ', an outro';
-
-      const genreStr = genre ? `${genre} ` : '';
-      const titleStr = title ? `titled "${title}"` : 'with a creative title';
-      return `Generate professional song lyrics for a ${genreStr}song ${titleStr}, approximately ${duration} seconds long. Structure: ${structure}. Concept/Idea: ${concept}. Format with clear section labels like [Verse 1], [Chorus], [Bridge], [Outro], etc. Make it original, engaging, and ready to produce.`;
+      const title = document.getElementById('songTitle').value.trim() || "My Song";
+      const concept = document.getElementById('songConcept').value.trim() || "love and life";
+      const genre = document.getElementById('musicGenre').value.trim() || "pop";
+      const verses = document.getElementById('numVerses').value;
+      const parts = [];
+      if (document.getElementById('hasChorus').checked) parts.push("catchy repeating chorus");
+      if (document.getElementById('hasBridge').checked) parts.push("emotional bridge");
+      return `Write professional ${genre} song lyrics titled "${title}" about: ${concept}. ${verses} verses, ${parts.join(", ")}. Format with [Verse 1], [Chorus], etc. Make it radio-ready.`;
     }
 
-    // Generate with Grok
-    function generateWithGrok() {
-      const prompt = buildLyricsPrompt();
-      if (!prompt) return;
-      navigator.clipboard.writeText(prompt).then(() => {
-        window.open('https://grok.com', '_blank');
-        showMessage('Prompt copied! Paste into Grok, generate lyrics, then copy them back here to continue with timeline, scenes, images, MP3, and MP4.');
-      }).catch(() => {
-        showMessage(`Manual copy: ${prompt}\n\nThen visit https://grok.com and paste.`);
-      });
-    }
-
-    // Generate with Gemini
-    function generateWithGemini() {
-      const prompt = buildLyricsPrompt();
-      if (!prompt) return;
-      navigator.clipboard.writeText(prompt).then(() => {
-        window.open('https://gemini.google.com', '_blank');
-        showMessage('Prompt copied! Paste into Gemini, generate lyrics, then copy them back here to continue with timeline, scenes, images, MP3, and MP4.');
-      }).catch(() => {
-        showMessage(`Manual copy: ${prompt}\n\nThen visit https://gemini.google.com and paste.`);
-      });
-    }
-
-    // Original MakeSong embed
-    function generateLyrics() {
-      const concept = document.getElementById('songConcept').value.trim();
-      if (!concept) return showMessage('Please enter a song concept first!');
-      showMessage('Opening lyrics generator...', true);
-      // Embed MakeSong iframe - free, no key, unique lyrics every time
+    function generateWithGrok() { const p = buildLyricsPrompt(); navigator.clipboard.writeText(p); window.open('https://grok.x.ai', '_blank'); showMessage('Prompt copied! Paste → generate → copy back'); }
+    function generateWithGemini() { const p = buildLyricsPrompt(); navigator.clipboard.writeText(p); window.open('https://gemini.google.com', '_blank'); showMessage('Prompt copied! Paste → generate → copy back'); }
+    function generateWithMakeSong() {
+      const c = document.getElementById('songConcept').value || "song";
       const iframe = document.createElement('iframe');
-      iframe.src = 'https://www.makesong.com/lyrics-generator?prompt=' + encodeURIComponent(concept);
-      iframe.width = '100%';
-      iframe.height = '600';
-      iframe.style.border = 'none';
-      iframe.style.borderRadius = '12px';
-      iframe.onload = () => showMessage('Lyrics generator ready! Enter your prompt and hit generate.');
-      const lyricsDiv = document.getElementById('lyrics');
-      lyricsDiv.innerHTML = '';
-      lyricsDiv.appendChild(iframe);
+      iframe.src = `https://www.makesong.com/lyrics-generator?prompt=` + encodeURIComponent(c);
+      iframe.style = "width:100%;height:700px;border:none;border-radius:16px;";
+      document.getElementById('lyrics').innerHTML = ''; document.getElementById('lyrics').appendChild(iframe);
+      showMessage('Generate inside the frame → copy result');
     }
 
     function usePastedLyrics() {
-      const text = document.getElementById('pasteLyrics').value.trim();
-      if (!text) return showMessage('Please paste your lyrics first!');
-      document.getElementById('lyrics').value = text;
-      showMessage('Your lyrics loaded successfully!');
+      const t = document.getElementById('pasteLyrics').value.trim();
+      if (!t) return showMessage('Nothing to paste');
+      document.getElementById('lyrics').value = t;
+      showMessage('Lyrics loaded!');
     }
+
     function copyLyrics() {
+      const t = document.getElementById('lyrics').value;
+      if (!t) return showMessage('No lyrics');
+      navigator.clipboard.writeText(t);
+      showMessage('Copied!');
+    }
+
+    function generateScenes() {
       const lyrics = document.getElementById('lyrics').value;
-      if (!lyrics) return showMessage('No lyrics to copy!');
-      navigator.clipboard.writeText(lyrics);
-      showMessage('Lyrics copied to clipboard!');
+      if (!lyrics) return showMessage('Need lyrics first');
+      document.getElementById('scenesContainer').innerHTML = '';
+      const sections = lyrics.match(/\[.*?\]/g) || ['[Intro]'];
+      sections.forEach((s, i) => addScene(s.replace(/[\[\]]/g,'').trim() || `Scene ${i+1}`, 3));
+      if (sections.length === 0) addScene('Cinematic Opening', 4);
+      showMessage('Scenes ready!');
     }
-    function clearLyrics() {
-      document.getElementById('lyrics').value = '';
-      showMessage('Lyrics cleared!');
+
+    function addScene(title, count) {
+      const d = document.createElement('div');
+      d.className = 'bg-gray-800/80 rounded-2xl p-6 border border-yellow-600';
+      d.innerHTML = `<h4 class="text-xl font-bold text-teal-300 mb-4">${title}</h4>
+        <input type="text" value="${title}" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 mb-3">
+        <input type="number" value="${count}" min="1" max="15" class="w-24 bg-gray-900 border border-gray-700 rounded-xl p-4"> images`;
+      document.getElementById('scenesContainer').appendChild(d);
     }
+
+    function generateTimeline() {
+      const scenes = document.querySelectorAll('#scenesContainer > div');
+      if (scenes.length===0) return showMessage('Generate scenes first');
+      const totalSec = parseInt(document.getElementById('songDuration').value) || 180;
+      const totalImg = Array.from(scenes).reduce((a,s) => a + parseInt(s.querySelector('input[type=number]').value), 0);
+      const secPer = totalSec / totalImg;
+      let time = 0;
+      document.getElementById('timelineContent').innerHTML = '';
+      scenes.forEach((s,i) => {
+        const title = s.querySelector('input[type=text]').value;
+        const cnt = parseInt(s.querySelector('input[type=number]').value);
+        const dur = cnt * secPer;
+        const start = Math.floor(time/60)+':'+(Math.floor(time%60)+'').padStart(2,'0');
+        const end = Math.floor((time+dur)/60)+':'+(Math.floor((time+dur)%60)+'').padStart(2,'0');
+        document.getElementById('timelineContent').innerHTML += 
+          `<div class="bg-gray-900/70 p-6 rounded-xl border border-teal-600"><p class="font-bold text-teal-300">Scene ${i+1}: ${title}</p><p>${start} → ${end} (${dur.toFixed(1)}s)</p></div>`;
+        time += dur;
+      });
+      document.getElementById('timelineOutput').classList.remove('hidden');
+    }
+
+    async function generateImages() {
+      const scenes = document.querySelectorAll('#scenesContainer > div');
+      if (scenes.length===0) return showMessage('Create scenes first');
+      document.getElementById('imagesOutput').classList.remove('hidden');
+      document.getElementById('imagesContent').innerHTML = '<p class="col-span-full text-center py-20 text-4xl text-teal-400">Creating visuals...</p>';
+      document.getElementById('imagesContent').innerHTML = '';
+      for (const s of scenes) {
+        const prompt = s.querySelector('input[type=text]').value + ", cinematic music video scene, dramatic lighting, ultra realistic, 4k";
+        const count = parseInt(s.querySelector('input[type=number]').value) || 1;
+        for (let i=0; i<count; i++) {
+          const seed = Date.now() + i*12345;
+          const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}&width=1024&height=576&seed=${seed}&nologo=true`;
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = "w-full rounded-2xl shadow-2xl cursor-pointer hover:scale-105 transition";
+          img.onclick = () => { const a=document.createElement('a'); a.href=url; a.download=`${prompt.slice(0,30)}-${i}.jpg`; a.click(); };
+          document.getElementById('imagesContent').appendChild(img);
+        }
+      }
+      showMessage('All images ready!');
+    }
+
+    async function generateAudio() {
+      const lyrics = document.getElementById('lyrics').value.trim();
+      if (!lyrics) return showMessage('Need lyrics first');
+      showMessage('Generating song with Suno... (30–90s)', true);
+
+      const title = document.getElementById('songTitle').value || "My Song";
+      const custom = document.getElementById('customStyle').value || "cinematic, emotional";
+      const gender = document.getElementById('voiceGender').value;
+
+      try {
+        const res = await fetch("https://api.suno.ai/v1/generate", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${SUNO_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "chirp-v3-5",
+            prompt: `${gender} voice, ${custom}, high quality production`,
+            lyrics: lyrics,
+            title: title,
+            tags: custom,
+            make_instrumental: false
+          })
+        });
+
+        const data = await res.json();
+        const audioUrl = data?.[0]?.audio_url || data?.audio_url;
+        if (!audioUrl) throw new Error("No URL");
+
+        document.getElementById('audioPlayer').src = audioUrl;
+        document.getElementById('audioPlayer').classList.remove('hidden');
+        document.getElementById('downloadAudioBtn').classList.remove('hidden');
+        showMessage('Song ready! Playing now');
+      } catch (e) {
+        showMessage('Suno error — try again in 30s or check key');
+      }
+    }
+
+    function downloadAudio() {
+      const a = document.createElement('a');
+      a.href = document.getElementById('audioPlayer').src;
+      a.download = (document.getElementById('songTitle').value || 'song') + '.mp3';
+      a.click();
+    }
+
+    async function renderVideo() {
+      const imgs = document.querySelectorAll('#imagesContent img');
+      const audio = document.getElementById('audioPlayer');
+      if (imgs.length === 0 || !audio.src) return showMessage('Generate images + audio first');
+
+      showMessage('Rendering final video... (30–120s)', true);
+      if (!ffmpeg) { ffmpeg = createFFmpeg({ log: false }); await ffmpeg.load(); }
+
+      for (let i=0; i<imgs.length; i++) {
+        const data = await fetchFile(imgs[i].src);
+        ffmpeg.FS('writeFile', `img${i}.jpg`, data);
+      }
+      const audioData = await fetchFile(audio.src);
+      ffmpeg.FS('writeFile', 'audio.mp3', audioData);
+
+      let list = '';
+      for (let i=0; i<imgs.length; i++) list += `file 'img${i}.jpg'\nduration 4\n`;
+      list += `file 'img${imgs.length-1}.jpg'`;
+      ffmpeg.FS('writeFile', 'list.txt', list);
+
+      await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'list.txt', '-i', 'audio.mp3', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-shortest', '-r', '30', 'output.mp4');
+
+      const data = ffmpeg.FS('readFile', 'output.mp4');
+      finalVideoBlob = new Blob([data.buffer], {type: 'video/mp4'});
+      document.getElementById('previewVideo').src = URL.createObjectURL(finalVideoBlob);
+      document.getElementById('videoPreview').classList.remove('hidden');
+      showMessage('Video ready!');
+    }
+
+    function downloadFinalVideo() {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(finalVideoBlob);
+      a.download = (document.getElementById('songTitle').value || 'video') + '.mp4';
+      a.click();
+    }
+
+    // UI helpers
+    document.getElementById('songDuration').addEventListener('input', e => {
+      const s = parseInt(e.target.value)||0;
+      document.getElementById('durationDisplay').textContent = Math.floor(s/60)+':'+(s%60+'').padStart(2,'0');
+    });
+
+    document.getElementById('tabGenerate').onclick = () => {
+      document.getElementById('tabGenerate').classList.add('bg-yellow-600','text-black');
+      document.getElementById('tabGenerate').classList.remove('bg-gray-700');
+      document.getElementById('tabPaste').classList.remove('bg-yellow-600','text-black');
+      document.getElementById('panelGenerate').classList.remove('hidden');
+      document.getElementById('panelPaste').classList.add('hidden');
+    };
+    document.getElementById('tabPaste').onclick = () => {
+      document.getElementById('tabPaste').classList.add('bg-yellow-600','text-black');
+      document.getElementById('tabPaste').classList.remove('bg-gray-700');
+      document.getElementById('tabGenerate').classList.remove('bg-yellow-600');
+      document.getElementById('panelPaste').classList.remove('hidden');
+      document.getElementById('panelGenerate').classList.add('hidden');
+    };
   </script>
 </body>
 </html>
