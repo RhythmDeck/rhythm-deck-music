@@ -13,7 +13,6 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-
   <!-- Header -->
   <header class="bg-black/90 backdrop-blur border-b border-yellow-600 py-6">
     <div class="max-w-7xl mx-auto px-6 flex items-center gap-6">
@@ -24,15 +23,12 @@
       </div>
     </div>
   </header>
-
   <!-- Banner - Original +25% taller (h-80), image only -->
   <div class="relative w-full h-80 overflow-hidden">
     <img src="rhythm-vision-banner.png" alt="Rhythm Vision Banner" class="w-full h-full object-cover">
   </div>
-
   <main class="flex-1 container max-w-4xl mx-auto p-8">
     <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
-
       <!-- Song Title & Duration -->
       <div class="grid md:grid-cols-2 gap-6 mb-8">
         <div>
@@ -44,26 +40,22 @@
           <span class="text-2xl font-bold text-yellow-400">Duration (seconds)</span>
         </div>
       </div>
-
       <!-- Tabs -->
       <div class="flex justify-center gap-8 mb-10">
         <button id="tabGenerate" class="px-10 py-4 rounded-xl font-black text-2xl bg-yellow-600 text-black shadow-lg">Generate Lyrics</button>
         <button id="tabPaste" class="px-10 py-4 rounded-xl font-black text-2xl bg-gray-700 text-gray-300 hover:bg-gray-600 transition">Add Your Own</button>
       </div>
-
       <!-- Generate Panel -->
       <div id="panelGenerate">
         <div class="text-center mb-12">
           <h3 class="text-4xl font-black text-teal-400 mb-4">Generate Professional Lyrics</h3>
-          <p class="text-xl text-gray-300">Describe your song — get unique lyrics instantly (free test).</p>
+          <p class="text-xl text-gray-300">Describe your song — get unique lyrics instantly with AI tools (free to test).</p>
         </div>
-
         <div class="space-y-8">
           <div>
             <label class="block text-lg font-bold text-teal-300 mb-3">Song Concept / Idea</label>
             <textarea id="songConcept" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg placeholder-gray-500" placeholder="e.g. A trap song about rising from the streets..."></textarea>
           </div>
-
           <div class="grid md:grid-cols-3 gap-6">
             <div>
               <label class="block text-lg font-bold text-teal-300 mb-3">Genre</label>
@@ -79,15 +71,23 @@
               <label class="flex items-center text-lg"><input type="checkbox" id="hasOutro" checked class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Outro</span></label>
             </div>
           </div>
-
-          <div class="text-center">
-            <button onclick="generateLyrics()" class="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-black font-black text-2xl px-24 py-8 rounded-2xl shadow-2xl transform hover:scale-105 transition">
-              Generate Professional Lyrics
-            </button>
+          <!-- Generator Buttons -->
+          <div class="text-center space-y-4">
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+              <button onclick="generateWithGrok()" class="bg-gradient-to-r from-slate-600 to-gray-700 hover:from-slate-700 hover:to-gray-800 text-white font-black text-xl px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition w-full sm:w-auto">
+                Generate with Grok
+              </button>
+              <button onclick="generateWithGemini()" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-xl px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition w-full sm:w-auto">
+                Generate with Gemini
+              </button>
+              <button onclick="generateLyrics()" class="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-black font-black text-xl px-8 py-4 rounded-xl shadow-xl transform hover:scale-105 transition w-full sm:w-auto">
+                Generate with MakeSong
+              </button>
+            </div>
+            <p class="text-sm text-gray-400">Pick an AI/tool above. All transfer your song details automatically!</p>
           </div>
         </div>
       </div>
-
       <!-- Paste Panel -->
       <div id="panelPaste" class="hidden">
         <div class="text-center mb-12">
@@ -101,11 +101,10 @@
           </button>
         </div>
       </div>
-
       <!-- Lyrics Output -->
       <div class="mt-16">
         <label class="block text-2xl font-bold text-teal-400 mb-4">Your Lyrics</label>
-        <textarea id="lyrics" rows="20" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed placeholder-gray-600" placeholder="Your lyrics will appear here..."></textarea>
+        <textarea id="lyrics" rows="20" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed placeholder-gray-600" placeholder="Your lyrics will appear here... (Copy/paste from AI and proceed to timeline, scenes, images, MP3 music, and MP4 video generation!)"></textarea>
         <div class="mt-6 flex justify-center gap-6">
           <button onclick="copyLyrics()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black px-12 py-5 rounded-xl shadow-xl transition">
             Copy Lyrics
@@ -115,10 +114,8 @@
           </button>
         </div>
       </div>
-
     </div>
   </main>
-
   <!-- Message Modal -->
   <div id="messageBox" class="fixed inset-0 bg-black/95 flex items-center justify-center z-50 hidden">
     <div class="bg-gray-900 rounded-3xl p-12 text-center max-w-lg border border-yellow-600">
@@ -127,7 +124,6 @@
       <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="mt-8 bg-teal-600 hover:bg-teal-700 text-black font-black px-14 py-5 rounded-xl text-2xl">OK</button>
     </div>
   </div>
-
   <script>
     // Tab switching
     document.getElementById('tabGenerate').onclick = () => {
@@ -146,20 +142,67 @@
       document.getElementById('panelPaste').classList.remove('hidden');
       document.getElementById('panelGenerate').classList.add('hidden');
     };
-
     function showMessage(text, loading = false) {
       document.getElementById('messageText').textContent = text;
       document.getElementById('loading').classList.toggle('hidden', !loading);
       document.getElementById('messageBox').classList.remove('hidden');
     }
 
-    // Embed MakeSong free tool - generates unique lyrics matching prompt, no errors
+    // Build detailed prompt with all form data
+    function buildLyricsPrompt() {
+      const title = document.getElementById('songTitle').value.trim();
+      const duration = document.getElementById('songDuration').value;
+      const genre = document.getElementById('musicGenre').value.trim();
+      const numVerses = document.getElementById('numVerses').value;
+      const hasChorus = document.getElementById('hasChorus').checked;
+      const hasBridge = document.getElementById('hasBridge').checked;
+      const hasOutro = document.getElementById('hasOutro').checked;
+      const concept = document.getElementById('songConcept').value.trim();
+
+      if (!concept) {
+        showMessage('Please enter a song concept first!');
+        return null;
+      }
+
+      let structure = `${numVerses} verses`;
+      if (hasChorus) structure += ', a chorus';
+      if (hasBridge) structure += ', a bridge';
+      if (hasOutro) structure += ', an outro';
+
+      const genreStr = genre ? `${genre} ` : '';
+      const titleStr = title ? `titled "${title}"` : 'with a creative title';
+      return `Generate professional song lyrics for a ${genreStr}song ${titleStr}, approximately ${duration} seconds long. Structure: ${structure}. Concept/Idea: ${concept}. Format with clear section labels like [Verse 1], [Chorus], [Bridge], [Outro], etc. Make it original, engaging, and ready to produce.`;
+    }
+
+    // Generate with Grok
+    function generateWithGrok() {
+      const prompt = buildLyricsPrompt();
+      if (!prompt) return;
+      navigator.clipboard.writeText(prompt).then(() => {
+        window.open('https://grok.com', '_blank');
+        showMessage('Prompt copied! Paste into Grok, generate lyrics, then copy them back here to continue with timeline, scenes, images, MP3, and MP4.');
+      }).catch(() => {
+        showMessage(`Manual copy: ${prompt}\n\nThen visit https://grok.com and paste.`);
+      });
+    }
+
+    // Generate with Gemini
+    function generateWithGemini() {
+      const prompt = buildLyricsPrompt();
+      if (!prompt) return;
+      navigator.clipboard.writeText(prompt).then(() => {
+        window.open('https://gemini.google.com', '_blank');
+        showMessage('Prompt copied! Paste into Gemini, generate lyrics, then copy them back here to continue with timeline, scenes, images, MP3, and MP4.');
+      }).catch(() => {
+        showMessage(`Manual copy: ${prompt}\n\nThen visit https://gemini.google.com and paste.`);
+      });
+    }
+
+    // Original MakeSong embed
     function generateLyrics() {
       const concept = document.getElementById('songConcept').value.trim();
       if (!concept) return showMessage('Please enter a song concept first!');
-
       showMessage('Opening lyrics generator...', true);
-
       // Embed MakeSong iframe - free, no key, unique lyrics every time
       const iframe = document.createElement('iframe');
       iframe.src = 'https://www.makesong.com/lyrics-generator?prompt=' + encodeURIComponent(concept);
@@ -168,7 +211,6 @@
       iframe.style.border = 'none';
       iframe.style.borderRadius = '12px';
       iframe.onload = () => showMessage('Lyrics generator ready! Enter your prompt and hit generate.');
-
       const lyricsDiv = document.getElementById('lyrics');
       lyricsDiv.innerHTML = '';
       lyricsDiv.appendChild(iframe);
@@ -180,14 +222,12 @@
       document.getElementById('lyrics').value = text;
       showMessage('Your lyrics loaded successfully!');
     }
-
     function copyLyrics() {
       const lyrics = document.getElementById('lyrics').value;
       if (!lyrics) return showMessage('No lyrics to copy!');
       navigator.clipboard.writeText(lyrics);
       showMessage('Lyrics copied to clipboard!');
     }
-
     function clearLyrics() {
       document.getElementById('lyrics').value = '';
       showMessage('Lyrics cleared!');
