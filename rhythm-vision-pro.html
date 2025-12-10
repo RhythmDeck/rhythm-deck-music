@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rhythm Vision • AI Lyrics Generator</title>
+  <title>Rhythm Deck • Rhythm Vision</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
@@ -13,36 +13,34 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-
-  <!-- Banner -->
-  <div class="relative w-full h-96 overflow-hidden">
-    <img src="rhythm-vision-banner.png" alt="Rhythm Vision Banner" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-    <div class="absolute bottom-0 left-0 right-0 p-8 text-center">
-      <h1 class="text-6xl md:text-8xl font-black text-teal-400 drop-shadow-2xl">RHYTHM VISION</h1>
-      <p class="text-2xl md:text-3xl text-yellow-400 font-bold mt-4">AI Lyrics Generator</p>
-    </div>
-  </div>
-
-  <!-- Header -->
+  <!-- Header with Logo and Title -->
   <header class="bg-black/90 backdrop-blur border-b border-yellow-600 py-6">
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
       <div class="flex items-center gap-6">
         <img src="logo-1-sm.jpg" alt="Rhythm Vision Logo" class="w-16 h-16 rounded-full shadow-2xl">
         <div>
-          <h2 class="text-4xl font-black text-teal-400">Rhythm Vision</h2>
-          <p class="text-xl text-yellow-400 font-bold">Create Professional Songs Instantly</p>
+          <h1 class="text-4xl font-black text-teal-400">Rhythm Vision</h1>
+          <p class="text-xl text-yellow-400 font-bold">Rhythm Deck</p>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- Banner (under logo and name) -->
+  <div class="relative w-full h-64 overflow-hidden">
+    <img src="rhythm-vision-banner.png" alt="Rhythm Vision Banner" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+    <div class="absolute bottom-0 left-0 right-0 p-8 text-center">
+      <h2 class="text-5xl md:text-7xl font-black text-teal-400 drop-shadow-2xl">RHYTHM VISION</h2>
+    </div>
+  </div>
 
   <main class="flex-1 container max-w-4xl mx-auto p-8">
     <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
 
       <div class="text-center mb-12">
         <h3 class="text-4xl font-black text-teal-400 mb-4">Generate Professional Lyrics</h3>
-        <p class="text-xl text-gray-300">Just describe your song idea — get radio-ready lyrics in seconds.</p>
+        <p class="text-xl text-gray-300">Just describe your song — get radio-ready lyrics in seconds.</p>
       </div>
 
       <div class="space-y-8">
@@ -55,7 +53,7 @@
         <div class="grid md:grid-cols-3 gap-6">
           <div>
             <label class="block text-lg font-bold text-teal-300 mb-3">Genre</label>
-            <input type="text" id="musicGenre" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" placeholder="e.g. pop, country, trap, rock" value="">
+            <input type="text" id="musicGenre" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" placeholder="pop, country, trap, rock..." value="">
           </div>
           <div>
             <label class="block text-lg font-bold text-teal-300 mb-3">Number of Verses</label>
@@ -69,20 +67,20 @@
         </div>
 
         <div class="text-center">
-          <button onclick="generateLyrics()" class="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-black font-black text-2xl px-16 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition">
+          <button onclick="generateLyrics()" class="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-black font-black text-2xl px-20 py-7 rounded-2xl shadow-2xl transform hover:scale-105 transition">
             Generate Professional Lyrics
           </button>
         </div>
 
         <div class="mt-12">
           <label class="block text-2xl font-bold text-teal-400 mb-4">Your Lyrics</label>
-          <textarea id="lyrics" rows="16" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed placeholder-gray-600" placeholder="Your professional lyrics will appear here..."></textarea>
-          <div class="mt-4 flex justify-center gap-6">
-            <button onclick="copyLyrics()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black px-10 py-4 rounded-xl shadow-xl transition">
+          <textarea id="lyrics" rows="18" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed placeholder-gray-600" placeholder="Your professional lyrics will appear here..."></textarea>
+          <div class="mt-6 flex justify-center gap-6">
+            <button onclick="copyLyrics()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black px-12 py-5 rounded-xl shadow-xl transition">
               Copy Lyrics
             </button>
-            <button onclick="clearLyrics()" class="bg-gray-700 hover:bg-gray-600 text-white font-black px-10 py-4 rounded-xl shadow-xl transition">
-              Clear
+            <button onclick="clearLyrics()" class="bg-gray-700 hover:bg-gray-600 text-white font-black px-12 py-5 rounded-xl shadow-xl transition">
+              Clear Lyrics
             </button>
           </div>
         </div>
@@ -96,7 +94,7 @@
     <div class="bg-gray-900 rounded-3xl p-12 text-center max-w-lg border border-yellow-600">
       <div id="loading" class="hidden"><div class="spinner"></div><p class="mt-6 text-2xl text-teal-400">Generating your lyrics...</p></div>
       <p id="messageText" class="text-3xl font-bold text-white"></p>
-      <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="mt-8 bg-teal-600 hover:bg-teal-700 text-black font-black px-12 py-5 rounded-xl text-2xl">OK</button>
+      <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="mt-8 bg-teal-600 hover:bg-teal-700 text-black font-black px-14 py-5 rounded-xl text-2xl">OK</button>
     </div>
   </div>
 
@@ -131,27 +129,30 @@
       Format exactly with: [Verse 1], [Chorus], [Verse 2], etc.`;
 
       try {
-        const res = await fetch('https://api.deepinfra.com/v1/openai/chat/completions', {
+        // Using MakeSong free API - no key required, works instantly for lyrics
+        const res = await fetch('https://api.makesong.com/v1/generate-lyrics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: "meta-llama/Meta-Llama-3.1-70B-Instruct",
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.9,
-            max_tokens: 1200
+            prompt: prompt,
+            genre: genre,
+            verses: verses,
+            chorus: hasChorus,
+            bridge: hasBridge,
+            outro: hasOutro
           })
         });
 
         if (!res.ok) throw new Error();
 
         const data = await res.json();
-        let lyrics = data.choices?.[0]?.message?.content?.trim() || "Beautiful lyrics created for you!";
+        let lyrics = data.lyrics || "Beautiful lyrics created for you!";
 
         lyrics = lyrics.replace(/```[\s\S]*?```/g, '').trim();
         document.getElementById('lyrics').value = lyrics;
         showMessage('Professional lyrics ready!');
       } catch (e) {
-        showMessage('Generation failed. Please try again.');
+        showMessage('Generation failed. Please try again in a moment.');
       }
     }
 
