@@ -221,30 +221,24 @@
   const { createFFmpeg, fetchFile } = FFmpeg;
   let ffmpeg = null;
   let finalVideoBlob = null;
-
   function showMessage(text, loading = false) {
     document.getElementById('messageText').textContent = text;
     document.getElementById('loading').classList.toggle('hidden', !loading);
     document.getElementById('messageBox').classList.remove('hidden');
   }
-
   // PROFESSIONAL LYRICS — REAL AI (Grok via working endpoint)
   async function generateLyrics() {
     const concept = document.getElementById('songConcept').value.trim();
     if (!concept) return showMessage('Enter a song idea first');
-
     showMessage('Generating professional lyrics...', true);
-
     const genre = document.getElementById('musicGenre').value.trim() || 'pop';
     const verses = parseInt(document.getElementById('numVerses').value) || 3;
     const hasChorus = document.getElementById('hasChorus').checked;
     const hasBridge = document.getElementById('hasBridge').checked;
     const hasOutro = document.getElementById('hasOutro').checked;
-
-    const prompt = `Write a radio-ready ${genre} song about "${concept}". 
+    const prompt = `Write a radio-ready ${genre} song about "${concept}".
 Exactly ${verses} verses. ${hasChorus ? 'Include a catchy chorus after each verse. ' : ''}${hasBridge ? 'Include a bridge. ' : ''}${hasOutro ? 'End with an outro. ' : ''}
 Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus], etc.`;
-
     try {
       const res = await fetch('https://api.x.ai/v1/chat/completions', {
         method: 'POST',
@@ -259,7 +253,6 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
           max_tokens: 1200
         })
       });
-
       if (!res.ok) throw new Error();
       const data = await res.json();
       let lyrics = data.choices[0].message.content.trim();
@@ -291,14 +284,12 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
       showMessage('Lyrics generated!');
     }
   }
-
   function usePastedLyrics() {
     const text = document.getElementById('pasteLyrics').value.trim();
     if (!text) return showMessage('Paste lyrics first');
     document.getElementById('lyrics').value = text;
     showMessage('Lyrics loaded!');
   }
-
   function generateFromLyrics() {
     const lyrics = document.getElementById('lyrics').value.trim();
     if (!lyrics) return showMessage('No lyrics');
@@ -314,7 +305,6 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     if (sceneCounter === 0) addScene('Opening cinematic shot', 3);
     showMessage('Scenes generated!');
   }
-
   function addScene(title, images) {
     sceneCounter++;
     const div = document.createElement('div');
@@ -326,7 +316,6 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     `;
     document.getElementById('scenesContainer').appendChild(div);
   }
-
   function generateTimeline() {
     const scenes = Array.from(document.querySelectorAll('#scenesContainer > div')).map(d => ({
       title: d.querySelector('input').value,
@@ -356,7 +345,6 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     document.getElementById('timelineOutput').classList.remove('hidden');
     showMessage('Timeline created!');
   }
-
   async function generateImages() {
     const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
     if (scenes.length === 0) return showMessage('Generate scenes first');
@@ -380,7 +368,6 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     }
     showMessage('All images generated!');
   }
-
   async function generateAudio() {
     const lyrics = document.getElementById('lyrics').value.trim();
     if (!lyrics) return showMessage('Generate lyrics first');
@@ -409,7 +396,6 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
       showMessage('Try again in 30s');
     }
   }
-
   function downloadAudio() {
     const player = document.getElementById('audioPlayer');
     const a = document.createElement('a');
@@ -417,12 +403,10 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     a.download = (document.getElementById('videoTitle').value || 'My Song') + '.mp3';
     a.click();
   }
-
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text);
     alert("Copied!");
   }
-
   function exportProject() {
     const data = {
       title: document.getElementById('videoTitle').value || "My Song",
@@ -440,20 +424,16 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     URL.revokeObjectURL(url);
     alert("Exported!");
   }
-
   async function renderVideo() {
     const images = Array.from(document.querySelectorAll('#imagesContent img'));
     const audio = document.getElementById('audioPlayer');
     if (images.length === 0) return showMessage('Generate images first');
     if (!audio.src) return showMessage('Generate audio first');
-
     showMessage('Rendering your video... (30–90s)', true);
-
     if (!ffmpeg) {
       ffmpeg = createFFmpeg({ log: false });
       await ffmpeg.load();
     }
-
     let listText = '';
     for (let i = 0; i < images.length; i++) {
       const data = await fetchFile(images[i].src);
@@ -461,21 +441,16 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
       listText += `file 'img${i}.jpg'\nduration 4\n`;
     }
     ffmpeg.FS('writeFile', 'list.txt', listText);
-
     const audioData = await fetchFile(audio.src);
     ffmpeg.FS('writeFile', 'audio.mp3', audioData);
-
     await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'list.txt', '-i', 'audio.mp3', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-shortest', '-vf', 'fps=30', 'output.mp4');
-
     const data = ffmpeg.FS('readFile', 'output.mp4');
     finalVideoBlob = new Blob([data.buffer], { type: 'video/mp4' });
     const url = URL.createObjectURL(finalVideoBlob);
-
     document.getElementById('previewVideo').src = url;
     document.getElementById('videoPreviewModal').classList.remove('hidden');
     showMessage('Video ready! Preview shown.');
   }
-
   function downloadFinalVideo() {
     if (!finalVideoBlob) return;
     const url = URL.createObjectURL(finalVideoBlob);
@@ -484,14 +459,13 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     a.download = (document.getElementById('videoTitle').value || 'MyVideo') + '.mp4';
     a.click();
   }
-
   document.getElementById('videoDuration').addEventListener('input', function() {
     const total = parseInt(this.value) || 0;
     const m = Math.floor(total / 60);
     const s = (total % 60).toString().padStart(2, '0');
     document.getElementById('durationDisplay').textContent = `${m}:${s}`;
   });
-
+  // Tab switching
   document.getElementById('tabGenerate').onclick = () => {
     document.getElementById('tabGenerate').classList.add('bg-yellow-600', 'text-black');
     document.getElementById('tabGenerate').classList.remove('bg-gray-700', 'text-gray-300');
@@ -508,7 +482,6 @@ Make it emotional, poetic, professional. Format exactly with [Verse 1], [Chorus]
     document.getElementById('panelPaste').classList.remove('hidden');
     document.getElementById('panelGenerate').classList.add('hidden');
   };
-
   window.onload = () => {
     addScene('Opening cinematic shot', 2);
     document.getElementById('durationDisplay').textContent = '3:00';
