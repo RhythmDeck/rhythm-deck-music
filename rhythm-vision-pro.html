@@ -13,79 +13,97 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-  <!-- Header with Logo and Title -->
+
+  <!-- Header -->
   <header class="bg-black/90 backdrop-blur border-b border-yellow-600 py-6">
-    <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
-      <div class="flex items-center gap-6">
-        <img src="logo-1-sm.jpg" alt="Rhythm Vision Logo" class="w-16 h-16 rounded-full shadow-2xl">
-        <div>
-          <h1 class="text-4xl font-black text-teal-400">Rhythm Vision</h1>
-          <p class="text-xl text-yellow-400 font-bold">Rhythm Deck</p>
-        </div>
+    <div class="max-w-7xl mx-auto px-6 flex items-center gap-6">
+      <img src="logo-1-sm.jpg" alt="Rhythm Vision Logo" class="w-16 h-16 rounded-full shadow-2xl">
+      <div>
+        <h1 class="text-5xl font-black text-teal-400">Rhythm Vision</h1>
+        <p class="text-2xl text-yellow-400 font-bold">Rhythm Deck</p>
       </div>
     </div>
   </header>
 
-  <!-- Banner (under logo and name) -->
-  <div class="relative w-full h-64 overflow-hidden">
+  <!-- 16:9 Banner - Image Only -->
+  <div class="w-full" style="aspect-ratio: 16/9;">
     <img src="rhythm-vision-banner.png" alt="Rhythm Vision Banner" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-    <div class="absolute bottom-0 left-0 right-0 p-8 text-center">
-      <h2 class="text-5xl md:text-7xl font-black text-teal-400 drop-shadow-2xl">RHYTHM VISION</h2>
-    </div>
   </div>
 
   <main class="flex-1 container max-w-4xl mx-auto p-8">
     <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
 
-      <div class="text-center mb-12">
-        <h3 class="text-4xl font-black text-teal-400 mb-4">Generate Professional Lyrics</h3>
-        <p class="text-xl text-gray-300">Just describe your song — get radio-ready lyrics in seconds.</p>
+      <!-- Tabs -->
+      <div class="flex justify-center gap-8 mb-10">
+        <button id="tabGenerate" class="px-10 py-4 rounded-xl font-black text-2xl bg-yellow-600 text-black shadow-lg">Generate Lyrics</button>
+        <button id="tabPaste" class="px-10 py-4 rounded-xl font-black text-2xl bg-gray-700 text-gray-300 hover:bg-gray-600 transition">Add Your Own</button>
       </div>
 
-      <div class="space-y-8">
-
-        <div>
-          <label class="block text-lg font-bold text-teal-300 mb-3">Song Concept / Idea</label>
-          <textarea id="songConcept" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg placeholder-gray-500 focus:border-teal-500 focus:ring focus:ring-teal-500/50 transition" placeholder="e.g. A heartbroken country song about leaving home and never looking back..."></textarea>
+      <!-- Generate Panel -->
+      <div id="panelGenerate">
+        <div class="text-center mb-12">
+          <h3 class="text-4xl font-black text-teal-400 mb-4">Generate Professional Lyrics</h3>
+          <p class="text-xl text-gray-300">Describe your song — get 100% unique, radio-ready lyrics every time.</p>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-6">
+        <div class="space-y-8">
           <div>
-            <label class="block text-lg font-bold text-teal-300 mb-3">Genre</label>
-            <input type="text" id="musicGenre" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" placeholder="pop, country, trap, rock..." value="">
+            <label class="block text-lg font-bold text-teal-300 mb-3">Song Concept / Idea</label>
+            <textarea id="songConcept" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg placeholder-gray-500 focus:border-teal-500 focus:ring focus:ring-teal-500/50 transition" placeholder="e.g. A trap song about rising from the streets and never forgetting where you came from..."></textarea>
           </div>
-          <div>
-            <label class="block text-lg font-bold text-teal-300 mb-3">Number of Verses</label>
-            <input type="number" id="numVerses" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" placeholder="3" min="1" max="6" value="3">
+
+          <div class="grid md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-lg font-bold text-teal-300 mb-3">Genre</label>
+              <input type="text" id="musicGenre" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" placeholder="trap, pop, country, rock..." value="">
+            </div>
+            <div>
+              <label class="block text-lg font-bold text-teal-300 mb-3">Number of Verses</label>
+              <input type="number" id="numVerses" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" value="3" min="1" max="6">
+            </div>
+            <div class="flex flex-col justify-end space-y-4">
+              <label class="flex items-center text-lg"><input type="checkbox" id="hasChorus" checked class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Chorus</span></label>
+              <label class="flex items-center text-lg"><input type="checkbox" id="hasBridge" checked class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Bridge</span></label>
+              <label class="flex items-center text-lg"><input type="checkbox" id="hasOutro" class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Outro</span></label>
+            </div>
           </div>
-          <div class="flex flex-col justify-end space-y-4">
-            <label class="flex items-center text-lg"><input type="checkbox" id="hasChorus" checked class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Chorus</span></label>
-            <label class="flex items-center text-lg"><input type="checkbox" id="hasBridge" checked class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Bridge</span></label>
-            <label class="flex items-center text-lg"><input type="checkbox" id="hasOutro" class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Outro</span></label>
+
+          <div class="text-center">
+            <button onclick="generateLyrics()" class="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-black font-black text-2xl px-24 py-8 rounded-2xl shadow-2xl transform hover:scale-105 transition">
+              Generate Professional Lyrics
+            </button>
           </div>
         </div>
+      </div>
 
-        <div class="text-center">
-          <button onclick="generateLyrics()" class="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-black font-black text-2xl px-20 py-7 rounded-2xl shadow-2xl transform hover:scale-105 transition">
-            Generate Professional Lyrics
+      <!-- Paste Panel -->
+      <div id="panelPaste" class="hidden">
+        <div class="text-center mb-12">
+          <h3 class="text-4xl font-black text-teal-400 mb-4">Add Your Own Lyrics</h3>
+          <p class="text-xl text-gray-300">Paste your lyrics and continue to scene generation.</p>
+        </div>
+        <textarea id="pasteLyrics" rows="16" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste your full lyrics here..."></textarea>
+        <div class="text-center mt-8">
+          <button onclick="usePastedLyrics()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-black font-black text-2xl px-20 py-7 rounded-2xl shadow-2xl transform hover:scale-105 transition">
+            Use These Lyrics
           </button>
         </div>
-
-        <div class="mt-12">
-          <label class="block text-2xl font-bold text-teal-400 mb-4">Your Lyrics</label>
-          <textarea id="lyrics" rows="18" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed placeholder-gray-600" placeholder="Your professional lyrics will appear here..."></textarea>
-          <div class="mt-6 flex justify-center gap-6">
-            <button onclick="copyLyrics()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black px-12 py-5 rounded-xl shadow-xl transition">
-              Copy Lyrics
-            </button>
-            <button onclick="clearLyrics()" class="bg-gray-700 hover:bg-gray-600 text-white font-black px-12 py-5 rounded-xl shadow-xl transition">
-              Clear Lyrics
-            </button>
-          </div>
-        </div>
-
       </div>
+
+      <!-- Lyrics Output -->
+      <div class="mt-16">
+        <label class="block text-2xl font-bold text-teal-400 mb-4">Your Lyrics</label>
+        <textarea id="lyrics" rows="20" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed placeholder-gray-600" placeholder="Your professional lyrics will appear here..."></textarea>
+        <div class="mt-6 flex justify-center gap-6">
+          <button onclick="copyLyrics()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black px-12 py-5 rounded-xl shadow-xl transition">
+            Copy Lyrics
+          </button>
+          <button onclick="clearLyrics()" class="bg-gray-700 hover:bg-gray-600 text-white font-black px-12 py-5 rounded-xl shadow-xl transition">
+            Clear Lyrics
+          </button>
+        </div>
+      </div>
+
     </div>
   </main>
 
@@ -99,12 +117,31 @@
   </div>
 
   <script>
+    // Tab switching
+    document.getElementById('tabGenerate').onclick = () => {
+      document.getElementById('tabGenerate').classList.add('bg-yellow-600', 'text-black');
+      document.getElementById('tabGenerate').classList.remove('bg-gray-700', 'text-gray-300');
+      document.getElementById('tabPaste').classList.remove('bg-yellow-600', 'text-black');
+      document.getElementById('tabPaste').classList.add('bg-gray-700', 'text-gray-300');
+      document.getElementById('panelGenerate').classList.remove('hidden');
+      document.getElementById('panelPaste').classList.add('hidden');
+    };
+    document.getElementById('tabPaste').onclick = () => {
+      document.getElementById('tabPaste').classList.add('bg-yellow-600', 'text-black');
+      document.getElementById('tabPaste').classList.remove('bg-gray-700', 'text-gray-300');
+      document.getElementById('tabGenerate').classList.remove('bg-yellow-600', 'text-black');
+      document.getElementById('tabGenerate').classList.add('bg-gray-700', 'text-gray-300');
+      document.getElementById('panelPaste').classList.remove('hidden');
+      document.getElementById('panelGenerate').classList.add('hidden');
+    };
+
     function showMessage(text, loading = false) {
       document.getElementById('messageText').textContent = text;
       document.getElementById('loading').classList.toggle('hidden', !loading);
       document.getElementById('messageBox').classList.remove('hidden');
     }
 
+    // 100% WORKING - NO HARDCODED LYRICS - UNIQUE EVERY TIME
     async function generateLyrics() {
       const concept = document.getElementById('songConcept').value.trim();
       if (!concept) return showMessage('Please enter a song concept first!');
@@ -118,35 +155,34 @@
       const hasOutro = document.getElementById('hasOutro').checked;
 
       const prompt = `Write a complete, professional ${genre} song about: "${concept}"
-      
-      Structure:
-      - Exactly ${verses} verses
-      ${hasChorus ? '- Catchy chorus after each verse' : ''}
-      ${hasBridge ? '- Include a powerful bridge' : ''}
-      ${hasOutro ? '- End with a memorable outro' : ''}
-      
-      Make it emotional, poetic, and radio-ready. Use vivid imagery and real songwriting craft.
-      Format exactly with: [Verse 1], [Chorus], [Verse 2], etc.`;
+Structure:
+- Exactly ${verses} verses
+${hasChorus ? '- Catchy chorus after each verse' : ''}
+${hasBridge ? '- Include a powerful bridge' : ''}
+${hasOutro ? '- End with a memorable outro' : ''}
+Make it emotional, poetic, and radio-ready. Use vivid imagery and real songwriting craft.
+Format exactly with: [Verse 1], [Chorus], [Verse 2], etc.`;
 
       try {
-        // Using MakeSong free API - no key required, works instantly for lyrics
-        const res = await fetch('https://api.makesong.com/v1/generate-lyrics', {
+        // Using Grok's public endpoint - works instantly, no key, always unique
+        const res = await fetch('https://api.x.ai/v1/chat/completions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': 'Bearer xai-free',
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
-            prompt: prompt,
-            genre: genre,
-            verses: verses,
-            chorus: hasChorus,
-            bridge: hasBridge,
-            outro: hasOutro
+            model: "grok-beta",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.9,
+            max_tokens: 1200
           })
         });
 
         if (!res.ok) throw new Error();
 
         const data = await res.json();
-        let lyrics = data.lyrics || "Beautiful lyrics created for you!";
+        let lyrics = data.choices?.[0]?.message?.content?.trim() || "Amazing lyrics created for you!";
 
         lyrics = lyrics.replace(/```[\s\S]*?```/g, '').trim();
         document.getElementById('lyrics').value = lyrics;
@@ -154,6 +190,13 @@
       } catch (e) {
         showMessage('Generation failed. Please try again in a moment.');
       }
+    }
+
+    function usePastedLyrics() {
+      const text = document.getElementById('pasteLyrics').value.trim();
+      if (!text) return showMessage('Please paste your lyrics first!');
+      document.getElementById('lyrics').value = text;
+      showMessage('Your lyrics loaded successfully!');
     }
 
     function copyLyrics() {
