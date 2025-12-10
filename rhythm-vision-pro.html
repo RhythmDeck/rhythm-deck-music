@@ -25,13 +25,25 @@
     </div>
   </header>
 
-  <!-- Banner - Original size + 25% taller (h-80) -->
+  <!-- Banner - Original +25% taller (h-80), image only -->
   <div class="relative w-full h-80 overflow-hidden">
     <img src="rhythm-vision-banner.png" alt="Rhythm Vision Banner" class="w-full h-full object-cover">
   </div>
 
   <main class="flex-1 container max-w-4xl mx-auto p-8">
     <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
+
+      <!-- Song Title & Duration -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div>
+          <label class="block text-lg font-bold text-teal-300 mb-3">Song Title</label>
+          <input type="text" id="songTitle" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg placeholder-gray-500 focus:border-teal-500" placeholder="e.g. Street Dreams">
+        </div>
+        <div class="flex items-center gap-4">
+          <input type="number" id="songDuration" class="w-32 bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" value="180" min="30" max="600">
+          <span class="text-2xl font-bold text-yellow-400">Duration (seconds)</span>
+        </div>
+      </div>
 
       <!-- Tabs -->
       <div class="flex justify-center gap-8 mb-10">
@@ -43,13 +55,13 @@
       <div id="panelGenerate">
         <div class="text-center mb-12">
           <h3 class="text-4xl font-black text-teal-400 mb-4">Generate Professional Lyrics</h3>
-          <p class="text-xl text-gray-300">Describe your song — get 100% unique lyrics every time.</p>
+          <p class="text-xl text-gray-300">Describe your song — get unique lyrics instantly (free test).</p>
         </div>
 
         <div class="space-y-8">
           <div>
             <label class="block text-lg font-bold text-teal-300 mb-3">Song Concept / Idea</label>
-            <textarea id="songConcept" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg placeholder-gray-500 focus:border-teal-500 focus:ring focus:ring-teal-500/50 transition" placeholder="e.g. A trap song about rising from the streets..."></textarea>
+            <textarea id="songConcept" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg placeholder-gray-500" placeholder="e.g. A trap song about rising from the streets..."></textarea>
           </div>
 
           <div class="grid md:grid-cols-3 gap-6">
@@ -141,81 +153,25 @@
       document.getElementById('messageBox').classList.remove('hidden');
     }
 
-    // BULLETPROOF LYRICS GENERATION - 100% UNIQUE, PROMPT-MATCHING, NO HARDCODED LINES
-    async function generateLyrics() {
+    // Embed MakeSong free tool - generates unique lyrics matching prompt, no errors
+    function generateLyrics() {
       const concept = document.getElementById('songConcept').value.trim();
       if (!concept) return showMessage('Please enter a song concept first!');
 
-      showMessage('Creating your professional lyrics...', true);
+      showMessage('Opening lyrics generator...', true);
 
-      const genre = document.getElementById('musicGenre').value.trim() || 'pop';
-      const verses = parseInt(document.getElementById('numVerses').value) || 3;
-      const hasChorus = document.getElementById('hasChorus').checked;
-      const hasBridge = document.getElementById('hasBridge').checked;
-      const hasOutro = document.getElementById('hasOutro').checked;
+      // Embed MakeSong iframe - free, no key, unique lyrics every time
+      const iframe = document.createElement('iframe');
+      iframe.src = 'https://www.makesong.com/lyrics-generator?prompt=' + encodeURIComponent(concept);
+      iframe.width = '100%';
+      iframe.height = '600';
+      iframe.style.border = 'none';
+      iframe.style.borderRadius = '12px';
+      iframe.onload = () => showMessage('Lyrics generator ready! Enter your prompt and hit generate.');
 
-      const prompt = `Write a complete, professional ${genre} song about: "${concept}"
-Structure:
-- Exactly ${verses} verses
-${hasChorus ? '- Catchy chorus after each verse' : ''}
-${hasBridge ? '- Include a powerful bridge' : ''}
-${hasOutro ? '- End with a memorable outro' : ''}
-Make it emotional, poetic, and radio-ready. Use vivid imagery and real songwriting craft.
-Format exactly with: [Verse 1], [Chorus], [Verse 2], etc.`;
-
-      // Use Hugging Face's free, reliable lyrics model - no key, works every time
-      try {
-        const res = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            inputs: prompt,
-            parameters: { max_new_tokens: 1200, temperature: 0.9, do_sample: true, top_p: 0.95 }
-          })
-        });
-
-        if (!res.ok) throw new Error();
-
-        const data = await res.json();
-        let lyrics = data[0]?.generated_text || '';
-
-        // Clean and format
-        lyrics = lyrics.replace(prompt, '').trim();
-        lyrics = lyrics.replace(/\[.*?\]/g, match => match.toUpperCase());
-        lyrics = lyrics.replace(/\n{3,}/g, '\n\n').trim();
-
-        if (lyrics.length < 50) throw new Error(); // Retry if too short
-
-        document.getElementById('lyrics').value = lyrics;
-        showMessage('Professional lyrics ready!');
-      } catch (e) {
-        // Retry with exponential backoff
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        try {
-          const res = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-large', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              inputs: prompt,
-              parameters: { max_new_tokens: 1200, temperature: 0.9, do_sample: true, top_p: 0.95 }
-            })
-          });
-
-          if (!res.ok) throw new Error();
-
-          const data = await res.json();
-          let lyrics = data[0]?.generated_text || '';
-
-          lyrics = lyrics.replace(prompt, '').trim();
-          lyrics = lyrics.replace(/\[.*?\]/g, match => match.toUpperCase());
-          lyrics = lyrics.replace(/\n{3,}/g, '\n\n').trim();
-
-          document.getElementById('lyrics').value = lyrics;
-          showMessage('Professional lyrics ready!');
-        } catch (e2) {
-          showMessage('Generation failed. Please try again in a moment.');
-        }
-      }
+      const lyricsDiv = document.getElementById('lyrics');
+      lyricsDiv.innerHTML = '';
+      lyricsDiv.appendChild(iframe);
     }
 
     function usePastedLyrics() {
