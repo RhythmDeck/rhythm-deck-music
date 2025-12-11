@@ -299,7 +299,7 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       document.getElementById('timelineOutput').classList.remove('hidden');
       showMessage('Timeline created perfectly!');
     }
-    // PERFECT IMAGE LOADING - ALL DIFFERENT, MATCH LYRICS
+    // FIXED IMAGE LOADING WITH AI HORDE TEXT-TO-IMAGE GENERATION
     async function generateImages() {
       const scenes = document.querySelectorAll('#scenesContainer > div');
       if (scenes.length === 0) return showMessage('Generate scenes first!');
@@ -318,32 +318,70 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       });
       let idx = 0;
       for (const scene of scenes) {
-        let prompt = scene.querySelector('input[type=text]').value.trim() || "cinematic music video";
+        let prompt = scene.querySelector('input[type=text]').value.trim();
+        if (!prompt) prompt = "cinematic music video scene";
         const count = parseInt(scene.querySelector('input[type=number]').value) || 1;
         for (let i = 0; i < count; i++) {
-          const uniqueSeed = Date.now() + idx + Math.random() * 10000;
-          const imgUrl = `https://source.unsplash.com/featured/1024x576?${encodeURIComponent(prompt)}&sig=${uniqueSeed}`;
-          const img = new Image();
-          img.onload = () => {
-            const container = placeholders[idx];
-            container.innerHTML = '';
-            container.classList.remove('img-placeholder');
-            container.className = "relative group rounded-2xl overflow-hidden";
-            img.className = "w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500";
-            const overlay = document.createElement('div');
-            overlay.className = "absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center";
-            overlay.innerHTML = `<span class="text-white font-bold text-xl">Download</span>`;
-            img.onclick = () => window.open(imgUrl, '_blank');
-            container.appendChild(img);
-            container.appendChild(overlay);
-          };
-          img.onerror = () => img.src = "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1024&q=80";
-          img.src = imgUrl;
+          try {
+            // Submit generation request
+            const res = await fetch("https://aihorde.net/api/v2/generate/async", {
+              method: "POST",
+              headers: {
+                "apikey": "0000000000",
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                prompt: prompt + " cinematic dramatic high quality",
+                params: {
+                  sampler_name: "k_euler_a",
+                  steps: 20,
+                  cfg_scale: 7.5,
+                  width: 1024,
+                  height: 576
+                },
+                models: ["Stable Diffusion v1.5"]
+              })
+            });
+            const data = await res.json();
+            const jobId = data.id;
+
+            // Poll for result
+            let imgUrl = null;
+            while (!imgUrl) {
+              await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5s
+              const statusRes = await fetch(`https://aihorde.net/api/v2/generate/status/${jobId}`);
+              const statusData = await statusRes.json();
+              if (statusData.done) {
+                imgUrl = statusData.generations[0].img;
+                break;
+              }
+            }
+
+            const img = new Image();
+            img.onload = () => {
+              const container = placeholders[idx];
+              container.innerHTML = '';
+              container.classList.remove('img-placeholder');
+              container.className = "relative group rounded-2xl overflow-hidden";
+              img.className = "w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500";
+              const overlay = document.createElement('div');
+              overlay.className = "absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center";
+              overlay.innerHTML = `<span class="text-white font-bold text-xl">Download</span>`;
+              img.onclick = () => window.open(imgUrl, '_blank');
+              container.appendChild(img);
+              container.appendChild(overlay);
+            };
+            img.src = imgUrl;
+          } catch (err) {
+            console.error(err);
+            placeholders[idx].innerHTML = '<div class="w-full h-full bg-gray-700 flex items-center justify-center rounded-2xl"><span class="text-gray-400">Image generation failed - try again</span></div>';
+          }
           idx++;
         }
       }
-      showMessage('All unique images loaded — perfectly matched to your lyrics!');
+      showMessage('All AI-generated images loaded — perfectly matched to your lyrics!');
     }
+
     async function generateAudio() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return showMessage('Add lyrics first!');
@@ -455,6 +493,7 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       };
       input.click();
     }
+    // Tab switching
     document.getElementById('tabGenerate').onclick = () => {
       document.getElementById('tabGenerate').classList.add('bg-yellow-600', 'text-black');
       document.getElementById('tabGenerate').classList.remove('bg-gray-700', 'text-gray-300');
@@ -471,6 +510,7 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       document.getElementById('panelPaste').classList.remove('hidden');
       document.getElementById('panelGenerate').classList.add('hidden');
     };
+    // Initialize duration
     document.getElementById('durationDisplay').textContent = "3:00";
   </script>
 </body>
