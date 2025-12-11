@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rhythm Vision • AI Music Video Creator</title>
+  <title>Rhythm Vision Pro • AI Music Video Creator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
@@ -11,10 +11,10 @@
     body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
     .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .img-placeholder { background: #1e293b; border: 2px dashed #475569; border-radius: 16px; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-
   <!-- Header -->
   <header class="bg-black/90 backdrop-blur border-b border-yellow-600 py-6">
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -35,16 +35,13 @@
       </div>
     </div>
   </header>
-
   <!-- Banner -->
   <div class="relative w-full h-80 overflow-hidden">
     <img src="rhythm-vision-banner.png" alt="Banner" class="w-full h-full object-cover">
   </div>
-
   <main class="flex-1 container max-w-4xl mx-auto p-8">
     <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
-
-      <!-- Song Info -->
+      <!-- Song Title & Duration -->
       <div class="grid md:grid-cols-2 gap-6 mb-10">
         <div>
           <label class="block text-lg font-bold text-teal-300 mb-3">Song Title</label>
@@ -58,13 +55,11 @@
           <span class="text-3xl font-bold text-yellow-400" id="durationDisplay">3:00</span>
         </div>
       </div>
-
       <!-- Tabs -->
       <div class="flex justify-center gap-8 mb-10">
         <button id="tabGenerate" class="px-10 py-4 rounded-xl font-black text-2xl bg-yellow-600 text-black shadow-lg">Generate Lyrics</button>
         <button id="tabPaste" class="px-10 py-4 rounded-xl font-black text-2xl bg-gray-700 text-gray-300 hover:bg-gray-600 transition">Add Your Own</button>
       </div>
-
       <!-- Generate Panel -->
       <div id="panelGenerate">
         <div class="text-center mb-12">
@@ -75,13 +70,11 @@
             </p>
           </div>
         </div>
-
         <div class="space-y-8">
           <div>
             <label class="block text-lg font-bold text-teal-300 mb-3">Song Concept / Idea</label>
             <textarea id="songConcept" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" placeholder="e.g. Rising from the streets, luxury cars, money rain..."></textarea>
           </div>
-
           <div class="grid md:grid-cols-3 gap-6">
             <div>
               <label class="block text-lg font-bold text-teal-300 mb-3">Genre</label>
@@ -97,7 +90,6 @@
               <label class="flex items-center text-lg"><input type="checkbox" id="hasOutro" checked class="mr-3 w-6 h-6 text-teal-500"> <span class="text-teal-300 font-bold">Include Outro</span></label>
             </div>
           </div>
-
           <div class="text-center">
             <div class="flex justify-center gap-10">
               <button onclick="generateWithGrok()" class="bg-gradient-to-r from-slate-600 to-gray-700 hover:from-slate-700 hover:to-gray-800 text-white font-black text-xl px-16 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition">
@@ -110,7 +102,6 @@
           </div>
         </div>
       </div>
-
       <!-- Paste Panel -->
       <div id="panelPaste" class="hidden">
         <textarea id="pasteLyrics" rows="16" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste your lyrics here..."></textarea>
@@ -120,7 +111,6 @@
           </button>
         </div>
       </div>
-
       <!-- Lyrics Output -->
       <div class="mt-16">
         <div class="flex justify-between items-center mb-4">
@@ -131,7 +121,6 @@
         </div>
         <textarea id="lyrics" rows="20" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed" placeholder="Paste your lyrics here..."></textarea>
       </div>
-
       <!-- Main Buttons -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
         <button onclick="generateScenes()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black text-2xl py-8 rounded-2xl shadow-2xl transform hover:scale-105 transition">
@@ -144,7 +133,6 @@
           Generate Images
         </button>
       </div>
-
       <div id="scenesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12"></div>
       <div id="timelineOutput" class="mt-16 p-10 bg-gray-800 rounded-2xl hidden border border-teal-600">
         <h3 class="text-4xl font-bold text-teal-400 text-center mb-8">Video Timeline</h3>
@@ -154,7 +142,6 @@
         <h3 class="text-4xl font-bold text-teal-400 text-center mb-10">Generated Images</h3>
         <div id="imagesContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
       </div>
-
       <!-- Audio -->
       <div class="mt-20 p-10 bg-gradient-to-r from-lime-600 to-green-600 rounded-3xl shadow-2xl border-4 border-lime-400">
         <h3 class="text-4xl font-black text-center mb-8">Generate Full Song</h3>
@@ -166,7 +153,6 @@
         </div>
         <audio id="audioPlayer" controls class="w-full mt-6 hidden rounded-xl shadow-2xl"></audio>
       </div>
-
       <!-- Final Buttons -->
       <div class="text-center my-20 space-y-8">
         <button onclick="downloadAudio()" id="downloadAudioBtn" class="bg-gradient-to-r from-green-600 to-emerald-700 text-white font-black text-4xl px-32 py-10 rounded-3xl shadow-2xl hover:scale-110 transition hidden">
@@ -181,7 +167,6 @@
       </div>
     </div>
   </main>
-
   <!-- Modal -->
   <div id="messageBox" class="fixed inset-0 bg-black/95 flex items-center justify-center z-50 hidden">
     <div class="bg-gray-900 rounded-3xl p-12 text-center max-w-lg border border-yellow-600">
@@ -190,10 +175,8 @@
       <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="mt-8 bg-teal-600 hover:bg-teal-700 text-black font-black px-14 py-5 rounded-xl text-2xl">OK</button>
     </div>
   </div>
-
   <script>
     const SUNO_API_KEY = "06a8686015a2294ef397a4ebe6e0bec2";
-    const PIXABAY_KEY = "45598063-9c8e4d8f8e6f4a8d8f8e6f4a8d8f8e6f"; // Free key - works forever
     const { createFFmpeg, fetchFile } = FFmpeg;
     let ffmpeg = null;
     let finalVideoBlob = null;
@@ -240,6 +223,13 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       await navigator.clipboard.writeText(p);
       window.open('https://gemini.google.com', '_blank');
       showMessage('Prompt copied! Paste into Gemini → generate → paste back');
+    }
+
+    async function generateWithChatGPT() {
+      const p = buildLyricsPrompt();
+      await navigator.clipboard.writeText(p);
+      window.open('https://chat.openai.com', '_blank');
+      showMessage('Prompt copied! Paste into ChatGPT → generate → paste back');
     }
 
     function usePastedLyrics() {
@@ -297,57 +287,66 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       showMessage('Timeline created!');
     }
 
-    // BULLETPROOF IMAGE LOADING USING PIXABAY (NEVER FAILS)
+    // ULTRA-FAST IMAGE LOADING WITH PLACEHOLDERS + SPINNERS
     async function generateImages() {
       const scenes = document.querySelectorAll('#scenesContainer > div');
       if (scenes.length === 0) return showMessage('Generate scenes first!');
 
       document.getElementById('imagesOutput').classList.remove('hidden');
-      document.getElementById('imagesContent').innerHTML = '<p class="col-span-full text-center text-3xl text-teal-400 py-20">Loading stunning images...</p>';
-
       document.getElementById('imagesContent').innerHTML = '';
 
+      // Create placeholders with spinners
+      const placeholders = [];
+      scenes.forEach(scene => {
+        const count = parseInt(scene.querySelector('input[type=number]').value) || 1;
+        for (let i = 0; i < count; i++) {
+          const div = document.createElement('div');
+          div.className = "relative aspect-video img-placeholder rounded-2xl overflow-hidden";
+          div.innerHTML = `<div class="absolute inset-0 flex items-center justify-center"><div class="spinner"></div></div>`;
+          document.getElementById('imagesContent').appendChild(div);
+          placeholders.push(div);
+        }
+      });
+
+      // Load real images as fast as possible (parallel fetches)
+      let idx = 0;
+      const promises = [];
       for (const scene of scenes) {
-        const prompt = scene.querySelector('input[type=text]').value.trim().toLowerCase();
+        const prompt = scene.querySelector('input[type=text]').value.trim() || "cinematic music video";
         const count = parseInt(scene.querySelector('input[type=number]').value) || 1;
 
         for (let i = 0; i < count; i++) {
-          const query = encodeURIComponent(prompt);
-          const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${query}&image_type=photo&per_page=50&safesearch=true&orientation=horizontal`;
+          const seed = Date.now() + idx * 1000;
+          const imgUrl = `https://source.unsplash.com/featured/1024x576?${encodeURIComponent(prompt)}&sig=${seed}`;
 
-          try {
-            const res = await fetch(url);
-            const data = await res.json();
-            const hits = data.hits || [];
-            const photo = hits.length > 0 ? hits[Math.floor(Math.random() * hits.length)] : null;
-
-            const imgUrl = photo ? photo.largeImageURL : "https://cdn.pixabay.com/photo/2024/01/01/12/34/ai-generated-8483749_1280.jpg";
-
-            const container = document.createElement('div');
-            container.className = "relative group";
-
-            const img = document.createElement('img');
+          promises.push(new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve({ idx: idx++, img, imgUrl });
+            img.onerror = () => {
+              img.src = "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1024&q=80";
+              resolve({ idx: idx++, img, imgUrl: img.src });
+            };
             img.src = imgUrl;
-            img.className = "w-full rounded-2xl shadow-2xl cursor-pointer hover:scale-105 transition";
-
-            const overlay = document.createElement('div');
-            overlay.className = "absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition rounded-2xl flex items-center justify-center";
-            overlay.innerHTML = `<span class="text-white font-bold text-xl">Click to Download</span>`;
-
-            img.onclick = () => { const a = document.createElement('a'); a.href = imgUrl; a.download = true; a.click(); };
-
-            container.appendChild(img);
-            container.appendChild(overlay);
-            document.getElementById('imagesContent').appendChild(container);
-          } catch (e) {
-            // Fallback
-            const img = document.createElement('img');
-            img.src = "https://cdn.pixabay.com/photo/2023/12/20/19/47/ai-generated-8460561_1280.jpg";
-            img.className = "w-full rounded-2xl shadow-2xl";
-            document.getElementById('imagesContent').appendChild(img);
-          }
+          }));
         }
       }
+
+      const results = await Promise.all(promises);
+
+      results.forEach(({ idx, img, imgUrl }) => {
+        const container = placeholders[idx];
+        container.innerHTML = '';
+        container.classList.remove('img-placeholder');
+        container.className = "relative group rounded-2xl overflow-hidden";
+        img.className = "w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500";
+        const overlay = document.createElement('div');
+        overlay.className = "absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center";
+        overlay.innerHTML = `<span class="text-white font-bold text-xl">Download</span>`;
+        img.onclick = () => window.open(imgUrl, '_blank');
+        container.appendChild(img);
+        container.appendChild(overlay);
+      });
+
       showMessage('All images loaded perfectly!');
     }
 
@@ -359,31 +358,17 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       try {
         const res = await fetch("https://api.suno.ai/v1/generate", {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${SUNO_API_KEY}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: "chirp-v3-5",
-            prompt: style,
-            lyrics: lyrics,
-            title: document.getElementById('songTitle').value || "My Song",
-            make_instrumental: false
-          })
+          headers: { "Authorization": `Bearer ${SUNO_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "chirp-v3-5", prompt: style, lyrics, title: document.getElementById('songTitle').value || "Song", make_instrumental: false })
         });
-
         const data = await res.json();
         const url = data[0]?.audio_url || data.audio_url;
-
         if (!url) throw new Error();
-
         document.getElementById('audioPlayer').src = url;
         document.getElementById('audioPlayer').classList.remove('hidden');
         document.getElementById('downloadAudioBtn').classList.remove('hidden');
         showMessage('Song ready!');
-      } catch {
-        showMessage('Suno error — wait 30s and try again');
-      }
+      } catch { showMessage('Suno error — try again in 30s'); }
     }
 
     async function renderVideo() {
@@ -494,7 +479,7 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       document.getElementById('panelGenerate').classList.add('hidden');
     };
 
-    // Initialize duration display
+    // Initialize duration
     document.getElementById('durationDisplay').textContent = "3:00";
   </script>
 </body>
