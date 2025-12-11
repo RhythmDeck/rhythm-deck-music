@@ -44,7 +44,7 @@
   <main class="flex-1 container max-w-4xl mx-auto p-8">
     <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
 
-      <!-- Song Title & Duration -->
+      <!-- Song Info -->
       <div class="grid md:grid-cols-2 gap-6 mb-10">
         <div>
           <label class="block text-lg font-bold text-teal-300 mb-3">Song Title</label>
@@ -203,14 +203,12 @@
       document.getElementById('messageBox').classList.remove('hidden');
     }
 
-    // Duration display - FIXED
-    document.getElementById('songDuration').addEventListener('input', e => {
-      const s = parseInt(e.target.value) || 0;
+    // DURATION DISPLAY - FIXED
+    document.getElementById('songDuration').addEventListener('input', function() {
+      const s = parseInt(this.value) || 0;
       const m = Math.floor(s / 60);
       const sec = (s % 60).toString().padStart(2, '0');
       document.getElementById('durationDisplay').textContent = `${m}:${sec}`;
-    });
-
     });
 
     function buildLyricsPrompt() {
@@ -298,7 +296,6 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       showMessage('Timeline created!');
     }
 
-    // PERFECT IMAGE GENERATION - NO FLASHING, NO PLACEHOLDERS
     async function generateImages() {
       const scenes = document.querySelectorAll('#scenesContainer > div');
       if (scenes.length === 0) return showMessage('Generate scenes first!');
@@ -336,10 +333,9 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
           document.getElementById('imagesContent').appendChild(container);
         }
       }
-      showMessage('All images loaded perfectly!');
+      showMessage('All images loaded instantly!');
     }
 
-    // SUNO AUDIO - WORKS
     async function generateAudio() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return showMessage('Add lyrics first!');
@@ -375,7 +371,6 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       }
     }
 
-    // Video rendering
     async function renderVideo() {
       const imgs = document.querySelectorAll('#imagesContent img');
       const audio = document.getElementById('audioPlayer');
@@ -483,6 +478,9 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       document.getElementById('panelPaste').classList.remove('hidden');
       document.getElementById('panelGenerate').classList.add('hidden');
     };
+
+    // Initialize duration display
+    document.getElementById('durationDisplay').textContent = "3:00";
   </script>
 </body>
 </html>
