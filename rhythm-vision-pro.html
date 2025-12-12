@@ -209,7 +209,7 @@
   </div>
   <script>
     const SUNO_API_KEY = "06a8686015a2294ef397a4ebe6e0bec2";
-    const PIXABAY_KEY = "53677454-fbbc60b787d657e6c4a193836"; // Free public key - no signup needed
+    const PIXABAY_KEY = "53677454-fbbc60b787d657e6c4a193836"; // Replace with your real Pixabay key
     const { createFFmpeg, fetchFile } = FFmpeg;
     let ffmpeg = null;
     let finalVideoBlob = null;
@@ -306,14 +306,13 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
         const startSec = Math.floor(time % 60).toString().padStart(2, '0');
         const endMin = Math.floor((time + dur) / 60);
         const endSec = Math.floor((time + dur) % 60).toString().padStart(2, '0');
-        document.getElementById('timelineContent').innerHTML += 
+        document.getElementById('timelineContent').innerHTML +=
           `<div class="bg-gray-900/70 p-5 rounded-xl border border-teal-600"><p class="text-lg font-bold text-teal-300">Scene ${i+1}: ${title}</p><p class="text-sm mt-1">${startMin}:${startSec} – ${endMin}:${endSec} (${dur.toFixed(1)}s)</p></div>`;
         time += dur;
       });
       document.getElementById('timelineOutput').classList.remove('hidden');
       showMessage('Timeline created perfectly!');
     }
-
     // FIXED IMAGE LOADING WITH PIXABAY - WORKS 100%
     async function generateImages() {
       const scenes = document.querySelectorAll('#scenesContainer > div');
@@ -368,7 +367,6 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       }
       showMessage('All beautiful images loaded — perfectly matched to your scenes!');
     }
-
     async function generateAudio() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return showMessage('Add lyrics first!');
@@ -395,7 +393,6 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
         showMessage('Song ready! Listen below');
       } catch { showMessage('Suno busy — try again in 30s'); }
     }
-
     async function renderVideo() {
       const imgs = document.querySelectorAll('#imagesContent img');
       const audio = document.getElementById('audioPlayer');
@@ -418,14 +415,12 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       document.getElementById('downloadVideoBtn').classList.remove('hidden');
       showMessage('Your music video is ready!');
     }
-
     function downloadAudio() {
       const a = document.createElement('a');
       a.href = document.getElementById('audioPlayer').src;
       a.download = (document.getElementById('songTitle').value || "song") + ".mp3";
       a.click();
     }
-
     function downloadFinalVideo() {
       if (!finalVideoBlob) return showMessage('Generate video first');
       const a = document.createElement('a');
@@ -433,7 +428,6 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       a.download = (document.getElementById('songTitle').value || "video") + ".mp4";
       a.click();
     }
-
     function saveProject() {
       const data = {
         title: document.getElementById('songTitle').value,
@@ -455,7 +449,6 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       a.click();
       showMessage("Project saved!");
     }
-
     function loadProjectPrompt() {
       const input = document.createElement('input');
       input.type = 'file';
@@ -486,7 +479,6 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       };
       input.click();
     }
-
     // Tab switching
     document.getElementById('tabGenerate').onclick = () => {
       document.getElementById('tabGenerate').classList.add('bg-yellow-600', 'text-black');
