@@ -123,7 +123,7 @@
             Copy Lyrics
           </button>
         </div>
-        <textarea id="lyrics" rows="20" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed" placeholder="Your lyrics will appear here..."></textarea>
+        <textarea id="lyrics" rows="20" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg font-mono leading-relaxed" placeholder="Paste your lyrics here..."></textarea>
       </div>
       <!-- Main Buttons -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
@@ -229,6 +229,7 @@
     }
     songDurationInput.addEventListener('input', updateDurationDisplay);
     songDurationInput.addEventListener('change', updateDurationDisplay);
+    songDurationInput.addEventListener('keyup', updateDurationDisplay);
     updateDurationDisplay();
     function buildLyricsPrompt() {
       const title = document.getElementById('songTitle').value.trim() || "My Song";
@@ -260,7 +261,7 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       navigator.clipboard.writeText(t);
       showMessage('Lyrics copied!');
     }
-    // NEW: Generate Scenes now adds a short visual description for better image matching
+    // FIXED: Generate Scenes with better lyric-based descriptions
     function generateScenes() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return showMessage('Please add lyrics first!');
@@ -270,14 +271,20 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       sections.forEach((section, i) => {
         const headerMatch = section.match(/\[([^\]]+)\]/);
         const header = headerMatch ? headerMatch[1].trim() : `Part ${i+1}`;
-        const content = section.replace(/\[([^\]]+)\]/, '').trim().substring(0, 200);
-        // Generate a short visual description based on content
-        let visualDesc = header.toLowerCase();
-        if (content.includes('street') || content.includes('city')) visualDesc += ", urban night cityscape";
-        if (content.includes('love') || content.includes('heart')) visualDesc += ", romantic scene";
-        if (content.includes('money') || content.includes('rich')) visualDesc += ", luxury cars money rain";
-        if (content.includes('dream')) visualDesc += ", surreal dreamlike";
-        visualDesc += ", cinematic dramatic high quality music video style";
+        const content = section.replace(/\[([^\]]+)\]/, '').trim().toLowerCase();
+        let visualDesc = '';
+        // Expanded keyword matching for better descriptions from lyrics
+        if (content.includes('street') || content.includes('city') || content.includes('hood') || content.includes('block')) visualDesc += 'urban street scene, city lights, gritty neighborhood';
+        else if (content.includes('love') || content.includes('heart') || content.includes('baby') || content.includes('girl')) visualDesc += 'romantic couple, heart symbols, intimate moment';
+        else if (content.includes('money') || content.includes('rich') || content.includes('cash') || content.includes('wealth')) visualDesc += 'luxury cars, money raining, gold chains, mansion';
+        else if (content.includes('dream') || content.includes('vision') || content.includes('future') || content.includes('aspire')) visualDesc += 'surreal dreamscape, floating elements, aspirational vision';
+        else if (content.includes('pain') || content.includes('struggle') || content.includes('hard') || content.includes('fight')) visualDesc += 'emotional struggle, dark alley, fighting pose';
+        else if (content.includes('party') || content.includes('club') || content.includes('dance') || content.includes('fun')) visualDesc += 'vibrant party scene, dancing crowd, club lights';
+        else if (content.includes('nature') || content.includes('sky') || content.includes('mountain') || content.includes('ocean')) visualDesc += 'beautiful nature landscape, mountains ocean sky';
+        else if (content.includes('car') || content.includes('drive') || content.includes('road') || content.includes('ride')) visualDesc += 'fast cars on highway, driving scene';
+        else if (content.includes('family') || content.includes('home') || content.includes('friends') || content.includes('together')) visualDesc += 'warm family gathering, friends at home';
+        else visualDesc += 'abstract music video scene, colorful visuals';
+        visualDesc += ', cinematic dramatic high quality music video style';
         const div = document.createElement('div');
         div.className = 'bg-gray-800/80 rounded-2xl p-6 border border-yellow-600';
         div.innerHTML = `
@@ -288,7 +295,7 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
         `;
         document.getElementById('scenesContainer').appendChild(div);
       });
-      showMessage('Scenes generated with visual descriptions! Edit them for perfect images');
+      showMessage('Scenes generated with lyric-based descriptions! Edit for perfect images');
     }
     function generateTimeline() {
       const scenes = document.querySelectorAll('#scenesContainer > div');
