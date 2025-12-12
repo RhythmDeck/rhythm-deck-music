@@ -42,10 +42,10 @@
       <div class="mb-10 p-8 bg-gray-800 rounded-2xl">
         <h3 class="text-2xl font-bold mb-4 text-teal-300">How to Use:</h3>
         <ol class="space-y-3 text-lg text-gray-300 list-decimal ml-6">
-          <li>Fill idea → click AI → prompt copied + opens</li>
+          <li>Fill idea → click AI → popup + opens</li>
           <li>Paste lyrics → click Generate Scenes</li>
-          <li>Click Generate Images → stunning photos</li>
-          <li>Click Generate Timeline → video plan</li>
+          <li>Click Generate Images → photos load</li>
+          <li>Click Generate Timeline → plan ready</li>
         </ol>
       </div>
 
@@ -88,16 +88,16 @@
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasOutro" checked class="mr-3"> Outro</label>
           </div>
 
-          <!-- ELEGANT AI BUTTONS (perfect size) -->
-          <h3 class="text-2xl font-bold text-yellow-400 text-center mb-6">Choose AI → Prompt Copied + Opens</h3>
+          <!-- AI BUTTONS - 50% THINNER -->
+          <h3 class="text-2xl font-bold text-yellow-400 text-center mb-6">Choose AI → Popup + Opens</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Grok
             </button>
-            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Gemini
             </button>
-            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               ChatGPT
             </button>
           </div>
@@ -155,7 +155,7 @@
       if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 2000);
     }
 
-    // FIXED: Popup + redirect working perfectly
+    // FIXED: Popup first, then redirect
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle').value || "My Song";
       const concept = document.getElementById('songConcept').value || "a heartfelt story";
@@ -173,10 +173,10 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
       navigator.clipboard.writeText(prompt);
 
-      // Your original popup
+      // Popup first
       alert(`Prompt copied to clipboard!\nOpening ${ai.toUpperCase()} in a new tab...`);
 
-      // Open AI
+      // Then redirect
       if (ai === 'grok') window.open('https://grok.x.ai', '_blank');
       if (ai === 'gemini') window.open('https://gemini.google.com', '_blank');
       if (ai === 'chatgpt') window.open('https://chatgpt.com', '_blank');
@@ -270,6 +270,8 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
       scenes.forEach(scene => {
         const prompt = scene.querySelector('textarea').value.trim();
+        // Truncate prompt to avoid 404 (Unsplash limit)
+        const shortPrompt = prompt.split(' ').slice(0, 4).join(' ');
         const num = parseInt(scene.querySelector('input[type=number]').value) || 6;
 
         for (let i = 0; i < num; i++) {
@@ -283,9 +285,10 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
             div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
           };
           img.onerror = () => {
-            div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">Load failed</div>`;
+            // Fallback to a general random image if specific fails
+            img.src = `https://source.unsplash.com/featured/1200x800/?nature&sig=${Date.now()+i}`;
           };
-          img.src = `https://source.unsplash.com/featured/1200x800/?${encodeURIComponent(prompt)}&sig=${Date.now()+i}`;
+          img.src = `https://source.unsplash.com/featured/1200x800/?${encodeURIComponent(shortPrompt)}&sig=${Date.now()+i}`;
         }
       });
     }
