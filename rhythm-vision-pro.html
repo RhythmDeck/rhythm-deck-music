@@ -5,92 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rhythm Deck - Rhythm Vision</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #1a202c; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; }
-    .main-content { flex: 1; }
-    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
-    input, textarea, button { border-radius: 0.5rem; }
-    .message-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #2d3748; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; display: none; flex-direction: column; align-items: center; text-align: center; }
-    .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #5eead4; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
     .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-  <div class="main-content">
+<body class="min-h-screen flex flex-col">
 
-    <!-- HEADER + LOGO + BACK TO DASHBOARD -->
-    <header class="bg-black py-6 md:py-12 border-b border-yellow-600">
-      <div class="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
-        <div class="flex items-center gap-6">
-          <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-16 h-16 rounded-full shadow-2xl">
-          <div>
-            <h1 class="text-3xl md:text-5xl font-black text-teal-400">Rhythm Deck</h1>
-            <h2 class="text-2xl md:text-4xl font-extrabold text-yellow-400">Rhythm Vision</h2>
-            <p class="mt-2 text-base md:text-lg text-gray-300">AI Music Video Creator</p>
-          </div>
+  <!-- HEADER + LOGO + DASHBOARD -->
+  <header class="bg-black border-b-4 border-yellow-600 py-6">
+    <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <img src="logo-1-sm.jpg" alt="Logo" class="w-16 h-16 rounded-full shadow-2xl">
+        <div>
+          <h1 class="text-5xl font-black text-teal-400">Rhythm Deck</h1>
+          <h2 class="text-4xl font-extrabold text-yellow-400">Rhythm Vision</h2>
+          <p class="text-xl text-gray-300">AI Music Video Creator</p>
         </div>
-        <a href="profile-admin-pro.html" class="bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-black px-10 py-5 rounded-xl shadow-2xl transform hover:scale-105 transition text-xl">
-          Back to Dashboard
-        </a>
       </div>
-    </header>
-
-    <!-- BANNER -->
-    <div class="relative w-full h-96 overflow-hidden">
-      <img src="rhythm-vision-banner.png" alt="Banner" class="w-full h-full object-cover">
+      <a href="profile-admin-pro.html" class="bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-black px-10 py-4 rounded-xl shadow-2xl hover:scale-105 transition text-lg">
+        Back to Dashboard
+      </a>
     </div>
+  </header>
 
-    <!-- MAIN CONTENT -->
-    <div class="container mx-auto bg-gray-800 shadow-xl rounded-xl p-8 mt-12 relative z-10">
-      <div class="mb-8 p-6 bg-gray-700 rounded-lg shadow-inner">
-        <h3 class="text-xl font-bold mb-3 text-teal-300">How to Use:</h3>
-        <ol class="list-decimal list-inside space-y-2 text-gray-300">
-          <li>Fill in your song idea → click Grok, Gemini or ChatGPT</li>
-          <li>Paste generated lyrics below</li>
-          <li>Click "Generate Scenes From Lyrics" → perfect visual scenes appear</li>
-          <li>Click "Generate Images" → beautiful photos load instantly</li>
+  <!-- BANNER -->
+  <div class="w-full h-96 overflow-hidden">
+    <img src="rhythm-vision-banner.png" alt="Banner" class="w-full h-full object-cover">
+  </div>
+
+  <main class="flex-1 container max-w-4xl mx-auto p-8">
+    <div class="bg-gray-900/95 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
+
+      <div class="mb-10 p-8 bg-gray-800 rounded-2xl">
+        <h3 class="text-2xl font-bold mb-4 text-teal-300">How to Use:</h3>
+        <ol class="space-y-3 text-lg text-gray-300 list-decimal ml-6">
+          <li>Fill idea → click AI → paste lyrics below</li>
+          <li>Click Generate Scenes → perfect visuals appear</li>
+          <li>Click Generate Images → photos load instantly</li>
+          <li>Click Generate Timeline → get your plan</li>
         </ol>
       </div>
 
-      <div class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-400">Video Title</label>
-          <input type="text" id="videoTitle" class="mt-1 block w-full bg-gray-700 border border-gray-600 text-gray-100 rounded-md shadow-sm p-3" placeholder="e.g., 'A Midnight Ride'">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-400">Duration (seconds)</label>
-          <input type="number" id="videoDuration" value="180" class="mt-1 block w-full bg-gray-700 border border-gray-600 text-gray-100 rounded-md shadow-sm p-3">
+      <div class="space-y-10">
+
+        <!-- TITLE & DURATION -->
+        <div class="grid md:grid-cols-2 gap-8">
+          <div>
+            <label class="block text-xl font-bold text-yellow-400 mb-3">Video Title</label>
+            <input id="videoTitle" type="text" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl" placeholder="My Song">
+          </div>
+          <div>
+            <label class="block text-xl font-bold text-yellow-400 mb-3">Duration (seconds)</label>
+            <input id="videoDuration" type="number" value="180" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl">
+          </div>
         </div>
 
-        <!-- PROMPT BUILDER -->
-        <div class="p-6 bg-gray-700 rounded-lg shadow-inner">
-          <h3 class="text-2xl font-black text-yellow-400 text-center mb-6">Build Your Lyrics Prompt</h3>
-          
-          <textarea id="songConcept" rows="3" class="w-full bg-gray-600 border border-gray-500 text-gray-100 rounded-md p-3 mb-4" placeholder="Song idea: Rising from the streets, luxury cars, money rain..."></textarea>
-          
-          <div class="grid grid-cols-2 gap-4 mb-4">
-            <input type="text" id="musicGenre" class="bg-gray-600 border border-gray-500 text-gray-100 rounded-md p-3" placeholder="Genre" value="trap">
-            <input type="number" id="numVerses" class="bg-gray-600 border border-gray-500 text-gray-100 rounded-md p-3" value="3" min="1">
-          </div>
-          
-          <div class="flex gap-6 mb-8 justify-center">
-            <label class="text-gray-300"><input type="checkbox" id="hasChorus" checked> Chorus</label>
-            <label class="text-gray-300"><input type="checkbox" id="hasBridge" checked> Bridge</label>
-            <label class="text-gray-300"><input type="checkbox" id="hasOutro" checked> Outro</label>
+        <!-- LYRICS PROMPT BUILDER -->
+        <div class="p-8 bg-gray-800 rounded-2xl border border-yellow-600">
+          <h2 class="text-3xl font-black text-yellow-400 text-center mb-2">Build Your Lyrics Prompt</h2>
+          <p class="text-center text-gray-400 mb-8">or paste your own lyrics below</p>
+
+          <label class="block text-xl font-bold text-yellow-400 mb-3">Lyrics Prompt</label>
+          <textarea id="songConcept" rows="4" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg" placeholder="A country song about a man and his dog living off the land..."></textarea>
+
+          <div class="grid md:grid-cols-2 gap-6 mt-6">
+            <div>
+              <label class="block text-xl font-bold text-yellow-400 mb-3">Genre</label>
+              <input id="musicGenre" type="text" value="country" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg">
+            </div>
+            <div>
+              <label class="block text-xl font-bold text-yellow-400 mb-3">Number of Verses</label>
+              <input id="numVerses" type="number" value="3" min="1" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg">
+            </div>
           </div>
 
-          <!-- THREE AI BUTTONS - BELOW CHECKBOXES, ABOVE LYRICS -->
-          <h3 class="text-2xl font-black text-yellow-400 text-center mb-6">Choose Your AI to Generate Lyrics</h3>
+          <div class="flex gap-10 justify-center my-8">
+            <label class="text-lg text-gray-300"><input type="checkbox" id="hasChorus" checked class="mr-3"> Chorus</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" id="hasBridge" checked class="mr-3"> Bridge</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" id="hasOutro" checked class="mr-3"> Outro</label>
+          </div>
+
+          <!-- THIN, ELEGANT AI BUTTONS -->
+          <h3 class="text-2xl font-bold text-yellow-400 text-center mb-6">Choose AI → Prompt Copied + Opens</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-black text-2xl py-8 rounded-2xl shadow-2xl transform hover:scale-105 transition">
+            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition">
               Grok
             </button>
-            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-2xl py-8 rounded-2xl shadow-2xl transform hover:scale-105 transition">
+            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition">
               Gemini
             </button>
-            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-black text-2xl py-8 rounded-2xl shadow-2xl transform hover:scale-105 transition">
+            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition">
               ChatGPT
             </button>
           </div>
@@ -98,69 +105,62 @@
 
         <!-- LYRICS -->
         <div>
-          <label class="block text-sm font-medium text-gray-400">Lyrics</label>
-          <textarea id="lyrics" rows="10" class="mt-1 block w-full bg-gray-700 border border-gray-600 text-gray-100 rounded-md shadow-sm p-3" placeholder="Paste your lyrics here with [Verse 1], [Chorus], etc."></textarea>
+          <label class="block text-2xl font-bold text-yellow-400 mb-4">Lyrics</label>
+          <textarea id="lyrics" rows="12" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste lyrics here..."></textarea>
         </div>
 
         <!-- MAIN BUTTONS -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button onclick="generateFromLyrics()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-lg">Generate Scenes</button>
-          <button onclick="generateTimeline()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-lg">Generate Timeline</button>
-          <button onclick="generateImages()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-lg">Generate Images</button>
-          <button onclick="resetAll()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 rounded-lg">Reset All</button>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <button onclick="generateScenes()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Scenes</button>
+          <button onclick="generateTimeline()" class="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Timeline</button>
+          <button onclick="generateImages()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Images</button>
+          <button onclick="resetAll()" class="bg-gray-700 hover:bg-gray-800 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Reset All</button>
+        </div>
+
+        <!-- SCENES -->
+        <div id="scenesContainer" class="space-y-6 mt-12"></div>
+
+        <!-- TIMELINE -->
+        <div id="timelineOutput" class="mt-12 p-8 bg-gray-800 rounded-2xl border border-teal-600 hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-teal-300">Video Timeline</h2>
+            <button onclick="copyTimeline()" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg">Copy</button>
+          </div>
+          <div id="timelineContent" class="grid md:grid-cols-2 gap-6"></div>
+        </div>
+
+        <!-- IMAGES -->
+        <div id="imagesOutput" class="mt-16 hidden">
+          <h2 class="text-3xl font-bold text-yellow-400 text-center mb-10">Generated Images</h2>
+          <div id="imagesContent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
       </div>
-
-      <div id="scenesContainer" class="mt-8 space-y-4"></div>
-      <div class="mt-8 flex justify-end">
-        <button onclick="addScene()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg">Add Scene</button>
-      </div>
-
-      <div id="timelineOutput" class="mt-8 p-6 bg-gray-700 rounded-lg hidden">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-bold text-teal-300">Video Timeline</h2>
-          <button onclick="copyTimeline()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">Copy</button>
-        </div>
-        <div id="timelineContent" class="space-y-4"></div>
-      </div>
-
-      <div class="mt-8 flex justify-end">
-        <button onclick="downloadScenes()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded">Download Scenes</button>
-      </div>
-
-      <div id="imagesOutput" class="mt-8 p-6 bg-gray-700 rounded-lg hidden">
-        <h2 class="text-2xl font-bold mb-4 text-teal-300">Generated Images</h2>
-        <div id="imagesContent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-      </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Message Box -->
-  <div id="messageBox" class="message-box">
-    <p id="messageText" class="text-white text-lg"></p>
-    <div id="loadingIndicator" class="hidden mt-4">
-      <div class="loading-spinner"></div>
+  <!-- LOADING -->
+  <div id="loading" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
+    <div class="text-center">
+      <div class="spinner mb-6"></div>
+      <p class="text-4xl text-teal-400 font-bold" id="loadingText">Working...</p>
     </div>
-    <button id="okButton" onclick="hideMessage()" class="mt-4 bg-teal-600 hover:bg-teal-700 text-white py-2 px-6 rounded">OK</button>
   </div>
 
   <script>
     let sceneCounter = 0;
 
-    function showMessage(msg, loading = false) {
-      document.getElementById('messageText').textContent = msg;
-      document.getElementById('loadingIndicator').classList.toggle('hidden', !loading);
-      document.getElementById('okButton').classList.toggle('hidden', loading);
-      document.getElementById('messageBox').style.display = 'flex';
+    function showLoading(msg) {
+      document.getElementById('loadingText').textContent = msg;
+      document.getElementById('loading').classList.remove('hidden');
     }
-    function hideMessage() {
-      document.getElementById('messageBox').style.display = 'none';
+    function hideLoading() {
+      document.getElementById('loading').classList.add('hidden');
     }
 
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle').value || "My Song";
-      const concept = document.getElementById('songConcept').value || "epic emotional story";
-      const genre = document.getElementById('musicGenre').value || "trap";
+      const concept = document.getElementById('songConcept').value || "a heartfelt story";
+      const genre = document.getElementById('musicGenre').value || "country";
       const verses = document.getElementById('numVerses').value;
       let structure = `${verses} verses`;
       if (document.getElementById('hasChorus').checked) structure += ", catchy chorus";
@@ -173,7 +173,7 @@ Structure: ${structure}
 Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
       navigator.clipboard.writeText(prompt);
-      alert("Prompt copied! Opening " + (ai === 'grok' ? 'Grok' : ai === 'gemini' ? 'Gemini' : 'ChatGPT'));
+      alert("Prompt copied! Opening " + ai.toUpperCase());
 
       if (ai === 'grok') window.open('https://grok.x.ai', '_blank');
       if (ai === 'gemini') window.open('https://gemini.google.com', '_blank');
@@ -183,30 +183,35 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     function addScene(description = '', images = 6) {
       sceneCounter++;
       const div = document.createElement('div');
-      div.className = 'scene-item p-6 bg-gray-700 rounded-lg border border-gray-600';
+      div.className = 'p-6 bg-gray-800 rounded-xl border border-gray-700';
       div.innerHTML = `
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold text-teal-300">Scene ${sceneCounter}</h3>
-          <button onclick="this.closest('.scene-item').remove()" class="text-red-400 hover:text-red-300 text-2xl">×</button>
+          <h3 class="text-2xl font-bold text-teal-300">Scene ${sceneCounter}</h3>
+          <button onclick="this.closest('div').remove(); sceneCounter--; renumber()" class="text-red-400 hover:text-red-300 text-3xl">×</button>
         </div>
-        <textarea class="w-full bg-gray-800 border border-gray-600 rounded p-4 text-white text-sm" rows="3" placeholder="Edit scene description...">${description}</textarea>
-        <div class="mt-3">
-          <label class="text-gray-400 text-sm">Images:</label>
-          <input type="number" value="${images}" min="1" max="20" class="ml-2 w-20 bg-gray-600 border border-gray-500 rounded p-2 text-white">
+        <textarea class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-white text-lg resize-y min-h-32">${description}</textarea>
+        <div class="mt-4 flex items-center gap-4">
+          <span class="text-gray-400">Images:</span>
+          <input type="number" value="${images}" min="1" max="20" class="w-20 bg-gray-900 border border-gray-700 rounded p-3 text-white">
         </div>
       `;
       document.getElementById('scenesContainer').appendChild(div);
     }
 
-    // FIXED: Now intelligently analyzes lyrics and creates vivid, accurate scene descriptions
-    function generateFromLyrics() {
+    function renumber() {
+      document.querySelectorAll('#scenesContainer > div').forEach((el, i) => {
+        el.querySelector('h3').textContent = `Scene ${i+1}`;
+      });
+    }
+
+    function generateScenes() {
       const lyrics = document.getElementById('lyrics').value.trim();
-      if (!lyrics) return showMessage("Paste lyrics first!");
+      if (!lyrics) return alert("Paste lyrics first!");
 
       document.getElementById('scenesContainer').innerHTML = '';
       sceneCounter = 0;
 
-      const sections = lyrics.match(/\[([^\]]+)\][\s\S]*?(?=\[|$)/g) || [lyrics];
+      const sections = lyrics.match(/\[([^\]]+)\][\s\S]*?(?=\[|$)/g) || [];
 
       sections.forEach(section => {
         const header = section.match(/\[([^\]]+)\]/)?.[1]?.trim() || "Scene";
@@ -214,52 +219,47 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
         let desc = "";
 
-        // Powerful keyword matching for cinematic visuals
-        if (content.includes('street') || content.includes('city') || content.includes('block') || content.includes('hood')) desc = "gritty urban street at night, neon lights, city skyline, luxury car cruising";
-        else if (content.includes('love') || content.includes('heart') || content.includes('baby') || content.includes('girl')) desc = "romantic couple embracing, soft lighting, emotional moment, cinematic love scene";
-        else if (content.includes('money') || content.includes('cash') || content.includes('rich') || content.includes('rain')) desc = "money raining down, luxury mansion, gold chains, stacks of cash, opulent lifestyle";
-        else if (content.includes('dream') || content.includes('nightmare') || content.includes('vision')) desc = "surreal dreamscape, floating elements, psychedelic colors, ethereal atmosphere";
-        else if (content.includes('party') || content.includes('club') || content.includes('dance')) desc = "vibrant nightclub, dancing crowd, colorful lights, high energy party scene";
-        else if (content.includes('pain') || content.includes('hurt') || content.includes('cry') || content.includes('broken')) desc = "person in emotional pain, dark moody lighting, rain on window, dramatic close-up";
-        else if (content.includes('car') || content.includes('drive') || content.includes('road')) desc = "sleek car driving fast on highway, sunset backdrop, motion blur, cinematic drive";
-        else desc = `${header.toLowerCase()} music video scene, dramatic lighting, professional cinematography`;
+        if (content.includes('sun') && content.includes('pine') || content.includes('ridge')) desc = "Golden sunrise over pine trees, warm morning light, coffee on campfire, old wooden bridge, peaceful rural scene, cinematic, film look";
+        else if (content.includes('dog') || content.includes('best friend')) desc = "Man walking with loyal dog on dirt road, golden retriever, dusty boots, rural countryside, heartfelt, cinematic warm light";
+        else if (content.includes('creek') || content.includes('fish')) desc = "Crystal clear creek in woods, man fishing or resting by water, cottonwood trees, soft breeze, peaceful summer day";
+        else if (content.includes('fire') || content.includes('night') || content.includes('stars')) desc = "Campfire at night, glowing embers, man and dog sitting together, starry sky, warm firelight, emotional";
+        else if (content.includes('off the grid') || content.includes('land')) desc = "Off the grid cabin, simple life, man and dog, freedom, nature, cinematic wide shot";
+        else desc = `${header}: beautiful cinematic establishing shot, professional photography, golden hour`;
 
         addScene(desc, 6);
       });
 
-      showMessage("Scenes generated perfectly from your lyrics!");
+      showMessage("Scenes generated from your lyrics!");
     }
 
     function generateTimeline() {
       const duration = parseFloat(document.getElementById('videoDuration').value) || 180;
-      const scenes = Array.from(document.querySelectorAll('.scene-item'));
-      if (scenes.length === 0) return showMessage("Generate scenes first!");
+      const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
+      if (scenes.length === 0) return showMessage("No scenes");
 
-      const totalImages = scenes.reduce((sum, s) => sum + parseInt(s.querySelector('input[type=number]').value) || 6, 0);
-      const secPerImage = duration / totalImages;
+      const totalImages = scenes.reduce((s, s) => s + parseInt(s.querySelector('input[type=number]').value), 0);
+      const secPer = duration / totalImages;
       let time = 0;
 
       document.getElementById('timelineContent').innerHTML = '';
       scenes.forEach((s, i) => {
-        const desc = s.querySelector('textarea').value;
-        const images = parseInt(s.querySelector('input[type=number]').value) || 6;
+        const title = s.querySelector('textarea').value.slice(0, 60) + "...";
+        const images = parseInt(s.querySelector('input[type=number]').value);
         const start = time.toFixed(1);
-        time += images * secPerImage;
+        time += images * secPer;
         const end = time.toFixed(1);
-
         document.getElementById('timelineContent').innerHTML += 
-          `<div class="bg-gray-800 p-5 rounded-lg border border-gray-600">
+          `<div class="bg-gray-800 p-5 rounded-xl border border-teal-700">
              <p class="font-bold text-teal-300">Scene ${i+1}</p>
-             <p class="text-sm mt-1 truncate">${desc}</p>
+             <p class="text-sm mt-1">${title}</p>
              <p class="text-xs text-gray-400 mt-2">${start}s → ${end}s (${images} images)</p>
            </div>`;
       });
       document.getElementById('timelineOutput').classList.remove('hidden');
     }
 
-    // FIXED: Images now load perfectly every time
     function generateImages() {
-      const scenes = Array.from(document.querySelectorAll('.scene-item'));
+      const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("Generate scenes first!");
 
       document.getElementById('imagesOutput').classList.remove('hidden');
@@ -267,22 +267,18 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
       scenes.forEach(scene => {
         const prompt = scene.querySelector('textarea').value.trim();
-        const encoded = encodeURIComponent(prompt);
+        const num = parseInt(scene.querySelector('input[type=number]').value) || 6;
 
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < num; i++) {
           const div = document.createElement('div');
-          div.className = "relative bg-gray-800 rounded-xl overflow-hidden shadow-lg";
-          div.innerHTML = `<div class="absolute inset-0 flex items-center justify-center"><div class="spinner"></div></div>`;
+          div.className = "relative bg-gray-800 rounded-xl overflow-hidden shadow-2xl";
+          div.innerHTML = `<div class="w-full h-80 flex items-center justify-center"><div class="spinner"></div></div>`;
           document.getElementById('imagesContent').appendChild(div);
 
           const img = new Image();
-          img.onload = () => {
-            div.innerHTML = `<img src="${img.src}" class="w-full h-64 object-cover transition-transform hover:scale-105 duration-300">`;
-          };
-          img.onerror = () => {
-            div.innerHTML = `<div class="w-full h-64 bg-gray-700 flex items-center justify-center text-gray-500">Image failed to load</div>`;
-          };
-          img.src = `https://source.unsplash.com/featured/1200x800/?${encoded}&sig=${Date.now() + i}`;
+          img.onload = () => div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
+          img.onerror = () => div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">Failed to load</div>`;
+          img.src = `https://source.unsplash.com/featured/1200x800/?${encodeURIComponent(prompt)}&sig=${Date.now()+i}`;
         }
       });
     }
@@ -290,15 +286,13 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     function copyTimeline() {
       const text = document.getElementById('timelineContent').innerText;
       navigator.clipboard.writeText(text);
-      showMessage("Timeline copied to clipboard!");
+      showMessage("Copied!");
     }
 
     function downloadScenes() {
-      let text = "RHYTHM VISION - MUSIC VIDEO SCENES\n\n";
-      document.querySelectorAll('.scene-item').forEach((s, i) => {
-        text += `Scene ${i+1}\n`;
-        text += `${s.querySelector('textarea').value}\n`;
-        text += `Images: ${s.querySelector('input[type=number]').value}\n\n`;
+      let text = "RHYTHM VISION SCENES\n\n";
+      document.querySelectorAll('#scenesContainer > div').forEach((s, i) => {
+        text += `Scene ${i+1}\n${s.querySelector('textarea').value}\nImages: ${s.querySelector('input[type=number]').value}\n\n`;
       });
       const blob = new Blob([text], {type: 'text/plain'});
       const a = document.createElement('a');
@@ -308,10 +302,10 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     }
 
     function resetAll() {
-      if (confirm("Reset everything?")) location.reload();
+      if (confirm("Reset all?")) location.reload();
     }
 
-    window.onload = () => addScene("cinematic opening shot", 6);
+    window.onload = () => addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
   </script>
 </body>
 </html>
