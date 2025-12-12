@@ -24,9 +24,16 @@
   <main class="flex-1 container max-w-5xl mx-auto p-8">
     <div class="bg-gray-900/90 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
 
-      <!-- Song Title -->
-      <div class="mb-10">
-        <input type="text" id="songTitle" placeholder="Song Title (optional)" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-2xl text-center">
+      <!-- Song Title & Duration -->
+      <div class="grid md:grid-cols-2 gap-6 mb-10">
+        <div>
+          <label class="block text-lg font-bold text-teal-300 mb-3">Song Title</label>
+          <input type="text" id="songTitle" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl" placeholder="e.g. Street Dreams">
+        </div>
+        <div>
+          <label class="block text-lg font-bold text-teal-300 mb-3">Duration (seconds)</label>
+          <input type="number" id="songDuration" value="180" min="60" max="600" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl">
+        </div>
       </div>
 
       <!-- Lyrics Tabs -->
@@ -128,12 +135,13 @@
       const concept = document.getElementById('songConcept').value || "epic story";
       const genre = document.getElementById('musicGenre').value || "hip-hop";
       const verses = document.getElementById('numVerses').value;
+      const duration = document.getElementById('songDuration').value || "180";
       let structure = `${verses} verses`;
       if (document.getElementById('hasChorus').checked) structure += ", catchy chorus";
       if (document.getElementById('hasBridge').checked) structure += ", bridge";
       if (document.getElementById('hasOutro').checked) structure += ", outro";
 
-      const prompt = `Write professional ${genre} lyrics for a song titled "${title}".
+      const prompt = `Write professional ${genre} lyrics for a song titled "${title}" (~${duration}s).
 Concept: ${concept}
 Structure: ${structure}
 Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
@@ -153,12 +161,14 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       document.getElementById('panelPaste').classList.add('hidden');
       document.getElementById('tabGenerate').classList.add('bg-yellow-600', 'text-black');
       document.getElementById('tabPaste').classList.remove('bg-yellow-600', 'text-black');
+      document.getElementById('tabPaste').classList.add('bg-gray-700', 'text-gray-300');
     };
     document.getElementById('tabPaste').onclick = () => {
       document.getElementById('panelPaste').classList.remove('hidden');
       document.getElementById('panelGenerate').classList.add('hidden');
       document.getElementById('tabPaste').classList.add('bg-yellow-600', 'text-black');
       document.getElementById('tabGenerate').classList.remove('bg-yellow-600', 'text-black');
+      document.getElementById('tabGenerate').classList.add('bg-gray-700', 'text-gray-300');
     };
 
     // Generate Scenes
@@ -197,11 +207,12 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
       const style = prompt("Enter music style (e.g., dark trap, emotional piano, future bass):", "dark trap") || "dark trap";
       const title = document.getElementById('songTitle').value || "My Song";
+      const duration = parseInt(document.getElementById('songDuration').value) || 180;
 
       try {
         const res = await fetch("https://api.suno.ai/v1/generate", {
           method: "POST",
-          headers: { 
+          headers: {
             "Authorization": "Bearer 06a8686015a2294ef397a4ebe6e0bec2",
             "Content-Type": "application/json"
           },
@@ -210,7 +221,8 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
             prompt: style,
             lyrics: lyrics,
             title: title,
-            make_instrumental: false
+            make_instrumental: false,
+            duration: duration
           })
         });
 
@@ -265,7 +277,8 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     // Render Video
     async function renderVideo() {
       const imgs = document.querySelectorAll('#imagesContent img');
-      if (imgs.length === 0) return alert("Generate images first!");
+      const audio = document.getElementById('audioPlayer');
+      if (imgs.length === 0 || !audio.src) return alert("Generate images and music first!");
 
       showLoading("Rendering video... (30–90 sec)");
 
@@ -277,14 +290,29 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
         ffmpeg.FS('writeFile', `img${i}.jpg`, data);
       }
 
-      // Create list
+      // Write audio
+      const audioData = await fetchFile(audio.src);
+      ffmpeg.FS('writeFile', 'audio.mp3', audioData);
+
+      // Create image list
       let list = '';
       for (let i = 0; i < imgs.length; i++) list += `file 'img${i}.jpg'\nduration 4\n`;
       list += `file 'img${imgs.length-1}.jpg'`;
       ffmpeg.FS('writeFile', 'list.txt', list);
 
-      // Render
-      await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'list.txt', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', '30', 'output.mp4');
+      // Render video with audio
+      await ffmpeg.run(
+        '-f', 'concat',
+        '-safe', '0',
+        '-i', 'list.txt',
+        '-i', 'audio.mp3',
+        '-c:v', 'libx264',
+        '-c:a', 'aac',
+        '-pix_fmt', 'yuv420p',
+        '-r', '30',
+        '-shortest',
+        'output.mp4'
+      );
 
       const data = ffmpeg.FS('readFile', 'output.mp4');
       videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
@@ -302,10 +330,11 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     function saveProject() {
       const data = {
         title: document.getElementById('songTitle').value,
+        duration: document.getElementById('songDuration').value,
         lyrics: document.getElementById('lyrics').value,
         audioUrl: audioUrl
       };
-      const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -323,6 +352,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
         reader.onload = ev => {
           const d = JSON.parse(ev.target.result);
           document.getElementById('songTitle').value = d.title || '';
+          document.getElementById('songDuration').value = d.duration || 180;
           document.getElementById('lyrics').value = d.lyrics || '';
           if (d.audioUrl) {
             audioUrl = d.audioUrl;
