@@ -8,10 +8,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
   <style>
-    body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2dd4bf; min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
     .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
     @keyframes spin { to { transform: rotate(360deg); } }
     audio { width: 100%; margin-top: 20px; }
+    /* Force all input text to be WHITE */
+    input, textarea { color: white !important; }
+    input::placeholder, textarea::placeholder { color: #94a3b8 !important; opacity: 1; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -60,17 +63,30 @@
 
       <!-- Generate Lyrics Panel -->
       <div id="panelGenerate" class="space-y-8">
-        <textarea id="songConcept" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg" placeholder="Song idea..."></textarea>
+        <h2 class="text-4xl font-black text-yellow-400 text-center mb-8">Lyrics Prompt</h2>
+
+        <div>
+          <label class="block text-lg font-bold text-teal-300 mb-3">Song Concept / Idea</label>
+          <textarea id="songConcept" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 text-lg" placeholder="e.g. Rising from the streets, luxury cars, money rain..."></textarea>
+        </div>
+
         <div class="grid md:grid-cols-3 gap-6">
-          <input type="text" id="musicGenre" class="bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" placeholder="Genre" value="trap">
-          <input type="number" id="numVerses" class="bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" value="3" min="1" max="6">
+          <div>
+            <label class="block text-lg font-bold text-teal-300 mb-3">Genre</label>
+            <input type="text" id="musicGenre" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" placeholder="e.g. trap, pop, rock..." value="trap">
+          </div>
+          <div>
+            <label class="block text-lg font-bold text-teal-300 mb-3">Number of Verses</label>
+            <input type="number" id="numVerses" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-lg" value="3" min="1" max="6">
+          </div>
           <div class="flex gap-6 items-end">
-            <label><input type="checkbox" id="hasChorus" checked> Chorus</label>
-            <label><input type="checkbox" id="hasBridge" checked> Bridge</label>
-            <label><input type="checkbox" id="hasOutro" checked> Outro</label>
+            <label class="text-teal-300"><input type="checkbox" id="hasChorus" checked> Chorus</label>
+            <label class="text-teal-300"><input type="checkbox" id="hasBridge" checked> Bridge</label>
+            <label class="text-teal-300"><input type="checkbox" id="hasOutro" checked> Outro</label>
           </div>
         </div>
-        <div class="text-center space-x-8">
+
+        <div class="text-center space-x-8 mt-10">
           <button onclick="openAIAndCopy('grok')" class="bg-cyan-600 hover:bg-cyan-700 px-12 py-6 rounded-full text-2xl font-bold shadow-2xl transform hover:scale-110 transition">Grok</button>
           <button onclick="openAIAndCopy('gemini')" class="bg-emerald-600 hover:bg-emerald-700 px-12 py-6 rounded-full text-2xl font-bold shadow-2xl transform hover:scale-110 transition">Gemini</button>
           <button onclick="openAIAndCopy('chatgpt')" class="bg-purple-600 hover:bg-purple-700 px-12 py-6 rounded-full text-2xl font-bold shadow-2xl transform hover:scale-110 transition">ChatGPT</button>
@@ -79,7 +95,7 @@
 
       <!-- Paste Panel -->
       <div id="panelPaste" class="hidden">
-        <textarea id="pasteLyrics" rows="16" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 font-mono text-lg" placeholder="Paste lyrics here..."></textarea>
+        <textarea id="pasteLyrics" rows="16" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-6 font-mono text-lg" placeholder="Paste your lyrics here..."></textarea>
         <div class="text-center mt-8">
           <button onclick="usePastedLyrics()" class="bg-emerald-600 hover:bg-emerald-700 px-20 py-6 rounded-2xl text-black font-black text-2xl">Use These Lyrics</button>
         </div>
@@ -98,7 +114,7 @@
         <button onclick="renderVideo()" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-black text-2xl py-8 rounded-2xl shadow-2xl transform hover:scale-110 transition">Render Video</button>
       </div>
 
-      <!-- Generate Music Button (moved here) -->
+      <!-- Generate Music Button -->
       <div class="text-center my-12">
         <button onclick="generateMusic()" class="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white font-black text-3xl px-24 py-8 rounded-3xl shadow-2xl transform hover:scale-110 transition">
           Generate Music (Suno)
@@ -128,7 +144,6 @@
 
       <!-- Download Video -->
       <div id="downloadVideoSection" class="text-center my-20 hidden">
-
         <a id="videoDownloadLink" class="inline-block bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black text-5xl px-32 py-12 rounded-3xl shadow-2xl hover:scale-110 transition transform">
           DOWNLOAD YOUR MUSIC VIDEO
         </a>
@@ -137,7 +152,7 @@
     </div>
   </main>
 
-  <!-- Loading -->
+  <!-- Loading Modal -->
   <div id="loadingModal" class="fixed inset-0 bg-black/95 flex items-center justify-center z-50 hidden">
     <div class="text-center">
       <div class="spinner mb-8"></div>
@@ -158,7 +173,6 @@
       document.getElementById('loadingModal').classList.add('hidden');
     }
 
-    // AI + Copy
     function openAIAndCopy(ai) {
       const title = document.getElementById('songTitle').value || "My Song";
       const concept = document.getElementById('songConcept').value || "epic story";
@@ -197,24 +211,20 @@
       document.getElementById('tabGenerate').classList.remove('bg-yellow-600', 'text-black');
     };
 
-    // GENERATE SCENES — WORKING
     function generateScenes() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return alert("Add lyrics first!");
       document.getElementById('scenesContainer').innerHTML = '';
       const sections = lyrics.match(/\[([^\]]+)\][\s\S]*?(?=\[|$)/g) || [lyrics];
-
       sections.forEach((section, i) => {
         const header = section.match(/\[([^\]]+)\]/)?.[1]?.trim() || `Scene ${i+1}`;
         const content = section.replace(/\[([^\]]+)\]/, '').trim().toLowerCase();
-
         let desc = 'cinematic dramatic music video';
         if (content.includes('street') || content.includes('city')) desc = 'urban street night city lights luxury cars';
         if (content.includes('love') || content.includes('heart')) desc = 'romantic couple love emotional scene';
         if (content.includes('money') || content.includes('cash')) desc = 'money rain luxury cars gold jewelry';
         if (content.includes('party') || content.includes('club')) desc = 'party dancing club lights crowd';
         if (content.includes('dream')) desc = 'surreal dream fantasy floating';
-
         const div = document.createElement('div');
         div.className = 'bg-gray-800/80 rounded-2xl p-6 border border-yellow-600';
         div.innerHTML = `
@@ -225,7 +235,6 @@
       });
     }
 
-    // GENERATE TIMELINE — BACK AND WORKING
     function generateTimeline() {
       const scenes = document.querySelectorAll('#scenesContainer > div');
       if (scenes.length === 0) return alert("Generate scenes first!");
@@ -233,7 +242,6 @@
       let time = 0;
       const totalSec = parseInt(document.getElementById('songDuration').value) || 180;
       const secPerScene = totalSec / scenes.length;
-
       scenes.forEach((s, i) => {
         const title = s.querySelector('h4').textContent.replace(/Scene \d+: /, '');
         const start = Math.floor(time / 60) + ':' + (time % 60).toString().padStart(2, '0');
@@ -248,13 +256,11 @@
       document.getElementById('timelineOutput').classList.remove('hidden');
     }
 
-    // GENERATE IMAGES — WORKING
     async function generateImages() {
       const scenes = document.querySelectorAll('#scenesContainer > div');
       if (scenes.length === 0) return alert("Generate scenes first!");
       document.getElementById('imagesOutput').classList.remove('hidden');
       document.getElementById('imagesContent').innerHTML = '';
-
       scenes.forEach((scene, i) => {
         const prompt = scene.querySelector('textarea').value.trim().replace(/[^a-z0-9\s]/gi, '').replace(/\s+/g, '+');
         for (let j = 0; j < 6; j++) {
@@ -262,7 +268,6 @@
           div.className = "aspect-video rounded-2xl overflow-hidden bg-gray-800";
           div.innerHTML = `<div class="w-full h-full flex items-center justify-center"><div class="spinner"></div></div>`;
           document.getElementById('imagesContent').appendChild(div);
-
           const img = new Image();
           img.onload = () => div.innerHTML = `<img src="${img.src}" class="w-full h-full object-cover">`;
           img.src = `https://source.unsplash.com/featured/1200x675/?${prompt}&sig=${Date.now()+i+j}`;
@@ -270,14 +275,12 @@
       });
     }
 
-    // GENERATE MUSIC — WORKING
     async function generateMusic() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return alert("Add lyrics first!");
       showLoading("Generating music with Suno AI... (30–90 sec)");
       const style = prompt("Music style?", "dark trap") || "dark trap";
       const title = document.getElementById('songTitle').value || "My Song";
-
       try {
         const res = await fetch("https://api.suno.ai/v1/generate", {
           method: "POST",
@@ -302,34 +305,26 @@
       a.click();
     }
 
-    // RENDER VIDEO — WORKING
     async function renderVideo() {
       const imgs = document.querySelectorAll('#imagesContent img');
       const audio = document.getElementById('audioPlayer');
       if (imgs.length === 0 || !audio.src) return alert("Generate images + music first!");
-
       showLoading("Rendering video... (30–90 sec)");
       if (!ffmpeg.isLoaded()) await ffmpeg.load();
-
       for (let i = 0; i < imgs.length; i++) {
         const data = await fetchFile(imgs[i].src);
         ffmpeg.FS('writeFile', `img${i}.jpg`, data);
       }
-
       const audioData = await fetchFile(audio.src);
       ffmpeg.FS('writeFile', 'audio.mp3', audioData);
-
       let list = '';
       for (let i = 0; i < imgs.length; i++) list += `file 'img${i}.jpg'\nduration 4\n`;
       list += `file 'img${imgs.length-1}.jpg'`;
       ffmpeg.FS('writeFile', 'list.txt', list);
-
       await ffmpeg.run('-f', 'concat', '-safe', '0', '-i', 'list.txt', '-i', 'audio.mp3', '-c:v', 'libx264', '-c:a', 'aac', '-pix_fmt', 'yuv420p', '-r', '30', '-shortest', 'output.mp4');
-
       const data = ffmpeg.FS('readFile', 'output.mp4');
       const blob = new Blob([data.buffer], { type: 'video/mp4' });
       const url = URL.createObjectURL(blob);
-
       document.getElementById('videoDownloadLink').href = url;
       document.getElementById('videoDownloadLink').download = (document.getElementById('songTitle').value || "MyVideo") + ".mp4";
       document.getElementById('downloadVideoSection').classList.remove('hidden');
