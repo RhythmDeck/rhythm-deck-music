@@ -42,10 +42,10 @@
       <div class="mb-10 p-8 bg-gray-800 rounded-2xl">
         <h3 class="text-2xl font-bold mb-4 text-teal-300">How to Use:</h3>
         <ol class="space-y-3 text-lg text-gray-300 list-decimal ml-6">
-          <li>Fill idea → click AI → paste lyrics below</li>
-          <li>Click Generate Scenes → perfect visuals appear</li>
-          <li>Click Generate Images → photos load instantly</li>
-          <li>Click Generate Timeline → get your plan</li>
+          <li>Fill idea → click AI → prompt copied + opens</li>
+          <li>Paste lyrics → click Generate Scenes</li>
+          <li>Click Generate Images → stunning photos</li>
+          <li>Click Generate Timeline → video plan</li>
         </ol>
       </div>
 
@@ -88,16 +88,16 @@
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasOutro" checked class="mr-3"> Outro</label>
           </div>
 
-          <!-- THIN, ELEGANT AI BUTTONS -->
+          <!-- ELEGANT AI BUTTONS (perfect size) -->
           <h3 class="text-2xl font-bold text-yellow-400 text-center mb-6">Choose AI → Prompt Copied + Opens</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition">
+            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Grok
             </button>
-            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition">
+            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Gemini
             </button>
-            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition">
+            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               ChatGPT
             </button>
           </div>
@@ -106,7 +106,7 @@
         <!-- LYRICS -->
         <div>
           <label class="block text-2xl font-bold text-yellow-400 mb-4">Lyrics</label>
-          <textarea id="lyrics" rows="12" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste lyrics here..."></textarea>
+          <textarea id="lyrics" rows="12" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste your lyrics here..."></textarea>
         </div>
 
         <!-- MAIN BUTTONS -->
@@ -149,14 +149,13 @@
   <script>
     let sceneCounter = 0;
 
-    function showLoading(msg) {
+    function showMessage(msg, loading = false) {
       document.getElementById('loadingText').textContent = msg;
-      document.getElementById('loading').classList.remove('hidden');
-    }
-    function hideLoading() {
-      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('loading').classList.toggle('hidden', !loading);
+      if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 2000);
     }
 
+    // FIXED: Popup + redirect working perfectly
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle').value || "My Song";
       const concept = document.getElementById('songConcept').value || "a heartfelt story";
@@ -173,8 +172,11 @@ Structure: ${structure}
 Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
       navigator.clipboard.writeText(prompt);
-      alert("Prompt copied! Opening " + ai.toUpperCase());
 
+      // Your original popup
+      alert(`Prompt copied to clipboard!\nOpening ${ai.toUpperCase()} in a new tab...`);
+
+      // Open AI
       if (ai === 'grok') window.open('https://grok.x.ai', '_blank');
       if (ai === 'gemini') window.open('https://gemini.google.com', '_blank');
       if (ai === 'chatgpt') window.open('https://chatgpt.com', '_blank');
@@ -219,17 +221,17 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
         let desc = "";
 
-        if (content.includes('sun') && content.includes('pine') || content.includes('ridge')) desc = "Golden sunrise over pine trees, warm morning light, coffee on campfire, old wooden bridge, peaceful rural scene, cinematic, film look";
-        else if (content.includes('dog') || content.includes('best friend')) desc = "Man walking with loyal dog on dirt road, golden retriever, dusty boots, rural countryside, heartfelt, cinematic warm light";
-        else if (content.includes('creek') || content.includes('fish')) desc = "Crystal clear creek in woods, man fishing or resting by water, cottonwood trees, soft breeze, peaceful summer day";
-        else if (content.includes('fire') || content.includes('night') || content.includes('stars')) desc = "Campfire at night, glowing embers, man and dog sitting together, starry sky, warm firelight, emotional";
-        else if (content.includes('off the grid') || content.includes('land')) desc = "Off the grid cabin, simple life, man and dog, freedom, nature, cinematic wide shot";
-        else desc = `${header}: beautiful cinematic establishing shot, professional photography, golden hour`;
+        if (content.includes('sun') && content.includes('pine') || content.includes('ridge')) desc = "Golden sunrise over pine trees, coffee on campfire, old wooden bridge, beat-up truck, loyal dog, warm cinematic light, 35mm film look";
+        else if (content.includes('dog') || content.includes('best friend') || content.includes('tail waggin')) desc = "Man and his loyal dog walking dirt road at sunrise, golden hour, rural countryside, heartfelt, cinematic, warm tones";
+        else if (content.includes('creek') || content.includes('fish') || content.includes('cottonwood')) desc = "Peaceful creek in forest, man sitting by water with dog, soft sunlight through trees, serene summer day, cinematic";
+        else if (content.includes('fire') || content.includes('night') || content.includes('stars') || content.includes('coyotes')) desc = "Campfire glowing at night, man and dog sitting close, starry sky above, warm firelight, emotional atmosphere";
+        else if (content.includes('off the grid') || content.includes('land') || content.includes('freedom')) desc = "Rustic off-grid cabin, simple life, man and dog living free, wide open landscape, golden hour, peaceful";
+        else desc = `${header} - beautiful cinematic scene, emotional lighting, professional photography`;
 
         addScene(desc, 6);
       });
 
-      showMessage("Scenes generated from your lyrics!");
+      showMessage("Perfect scenes generated from your lyrics!", false);
     }
 
     function generateTimeline() {
@@ -237,21 +239,22 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("No scenes");
 
-      const totalImages = scenes.reduce((s, s) => s + parseInt(s.querySelector('input[type=number]').value), 0);
-      const secPer = duration / totalImages;
+      const totalImages = scenes.reduce((sum, s) => sum + parseInt(s.querySelector('input[type=number]').value || 6, 10), 0);
+      const secPerImage = duration / totalImages;
       let time = 0;
 
       document.getElementById('timelineContent').innerHTML = '';
       scenes.forEach((s, i) => {
-        const title = s.querySelector('textarea').value.slice(0, 60) + "...";
-        const images = parseInt(s.querySelector('input[type=number]').value);
+        const desc = s.querySelector('textarea').value.slice(0, 60) + (s.querySelector('textarea').value.length > 60 ? "..." : "");
+        const images = parseInt(s.querySelector('input[type=number]').value || 6);
         const start = time.toFixed(1);
-        time += images * secPer;
+        time += images * secPerImage;
         const end = time.toFixed(1);
+
         document.getElementById('timelineContent').innerHTML += 
           `<div class="bg-gray-800 p-5 rounded-xl border border-teal-700">
              <p class="font-bold text-teal-300">Scene ${i+1}</p>
-             <p class="text-sm mt-1">${title}</p>
+             <p class="text-sm mt-1">${desc}</p>
              <p class="text-xs text-gray-400 mt-2">${start}s → ${end}s (${images} images)</p>
            </div>`;
       });
@@ -271,13 +274,17 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
         for (let i = 0; i < num; i++) {
           const div = document.createElement('div');
-          div.className = "relative bg-gray-800 rounded-xl overflow-hidden shadow-2xl";
+          div.className = "bg-gray-800 rounded-xl overflow-hidden shadow-2xl";
           div.innerHTML = `<div class="w-full h-80 flex items-center justify-center"><div class="spinner"></div></div>`;
           document.getElementById('imagesContent').appendChild(div);
 
           const img = new Image();
-          img.onload = () => div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
-          img.onerror = () => div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">Failed to load</div>`;
+          img.onload = () => {
+            div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
+          };
+          img.onerror = () => {
+            div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">Load failed</div>`;
+          };
           img.src = `https://source.unsplash.com/featured/1200x800/?${encodeURIComponent(prompt)}&sig=${Date.now()+i}`;
         }
       });
@@ -286,7 +293,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     function copyTimeline() {
       const text = document.getElementById('timelineContent').innerText;
       navigator.clipboard.writeText(text);
-      showMessage("Copied!");
+      showMessage("Timeline copied!");
     }
 
     function downloadScenes() {
@@ -302,7 +309,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     }
 
     function resetAll() {
-      if (confirm("Reset all?")) location.reload();
+      if (confirm("Reset everything?")) location.reload();
     }
 
     window.onload = () => addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
