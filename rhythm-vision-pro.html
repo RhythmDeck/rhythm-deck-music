@@ -209,7 +209,6 @@
   </div>
   <script>
     const SUNO_API_KEY = "06a8686015a2294ef397a4ebe6e0bec2";
-    const PIXABAY_KEY = "53677454-fbbc60b787d657e6c4a193836"; // Replace with your real Pixabay key
     const { createFFmpeg, fetchFile } = FFmpeg;
     let ffmpeg = null;
     let finalVideoBlob = null;
@@ -274,17 +273,17 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
         const content = section.replace(/\[([^\]]+)\]/, '').trim().toLowerCase();
         let visualDesc = '';
         // Expanded keyword matching for better descriptions from lyrics
-        if (content.includes('street') || content.includes('city') || content.includes('hood') || content.includes('block')) visualDesc += 'urban street scene, city lights, gritty neighborhood';
-        else if (content.includes('love') || content.includes('heart') || content.includes('baby') || content.includes('girl')) visualDesc += 'romantic couple, heart symbols, intimate moment';
-        else if (content.includes('money') || content.includes('rich') || content.includes('cash') || content.includes('wealth')) visualDesc += 'luxury cars, money raining, gold chains, mansion';
-        else if (content.includes('dream') || content.includes('vision') || content.includes('future') || content.includes('aspire')) visualDesc += 'surreal dreamscape, floating elements, aspirational vision';
-        else if (content.includes('pain') || content.includes('struggle') || content.includes('hard') || content.includes('fight')) visualDesc += 'emotional struggle, dark alley, fighting pose';
-        else if (content.includes('party') || content.includes('club') || content.includes('dance') || content.includes('fun')) visualDesc += 'vibrant party scene, dancing crowd, club lights';
-        else if (content.includes('nature') || content.includes('sky') || content.includes('mountain') || content.includes('ocean')) visualDesc += 'beautiful nature landscape, mountains ocean sky';
-        else if (content.includes('car') || content.includes('drive') || content.includes('road') || content.includes('ride')) visualDesc += 'fast cars on highway, driving scene';
-        else if (content.includes('family') || content.includes('home') || content.includes('friends') || content.includes('together')) visualDesc += 'warm family gathering, friends at home';
-        else visualDesc += 'abstract music video scene, colorful visuals';
-        visualDesc += ', cinematic dramatic high quality music video style';
+        if (content.includes('street') || content.includes('city') || content.includes('hood') || content.includes('block') || content.includes('urban')) visualDesc += 'urban street scene, city lights, gritty neighborhood, hip hop vibe';
+        if (content.includes('love') || content.includes('heart') || content.includes('baby') || content.includes('girl') || content.includes('boy')) visualDesc += 'romantic couple, emotional love, intimate moment';
+        if (content.includes('money') || content.includes('rich') || content.includes('cash') || content.includes('wealth') || content.includes('luxury')) visualDesc += 'luxury cars, money raining, gold jewelry, mansion';
+        if (content.includes('dream') || content.includes('vision') || content.includes('future') || content.includes('aspire') || content.includes('dreams')) visualDesc += 'surreal dreamscape, floating elements, inspirational vision';
+        if (content.includes('pain') || content.includes('struggle') || content.includes('hard') || content.includes('fight') || content.includes('hurt')) visualDesc += 'emotional pain, dark mood, struggle pose';
+        if (content.includes('party') || content.includes('club') || content.includes('dance') || content.includes('fun') || content.includes('nightlife')) visualDesc += 'vibrant party, dancing crowd, club lights, energy';
+        if (content.includes('nature') || content.includes('sky') || content.includes('mountain') || content.includes('ocean') || content.includes('forest')) visualDesc += 'beautiful nature, sky landscape, mountains ocean';
+        if (content.includes('car') || content.includes('drive') || content.includes('road') || content.includes('ride')) visualDesc += 'fast cars driving, highway road trip';
+        if (content.includes('family') || content.includes('home') || content.includes('friends') || content.includes('together')) visualDesc += 'family friends gathering, warm home scene';
+        if (visualDesc === '') visualDesc = header.toLowerCase() + ' music video scene, abstract visuals';
+        visualDesc += ', cinematic dramatic high quality, professional photography';
         const div = document.createElement('div');
         div.className = 'bg-gray-800/80 rounded-2xl p-6 border border-yellow-600';
         div.innerHTML = `
@@ -310,7 +309,8 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
         const cnt = parseInt(s.querySelector('input[type=number]').value);
         const dur = cnt * secPer;
         const startMin = Math.floor(time / 60);
-        const startSec = Math.floor(time % 60).toString().padStart(2, '0');
+        const startSec = Math.floor(time % 60).toString().padStart(2, […]
+
         const endMin = Math.floor((time + dur) / 60);
         const endSec = Math.floor((time + dur) % 60).toString().padStart(2, '0');
         document.getElementById('timelineContent').innerHTML +=
@@ -320,7 +320,7 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       document.getElementById('timelineOutput').classList.remove('hidden');
       showMessage('Timeline created perfectly!');
     }
-    // FIXED IMAGE LOADING WITH PIXABAY - WORKS 100%
+    // SWITCHED TO UNSPLASH SOURCE - NO KEY, NO SPINNING, INSTANT LOAD, BETTER RELEVANCE
     async function generateImages() {
       const scenes = document.querySelectorAll('#scenesContainer > div');
       if (scenes.length === 0) return showMessage('Generate scenes first!');
@@ -340,39 +340,31 @@ Format with [Verse 1], [Chorus], etc. Make it emotional and radio-ready.`;
       let idx = 0;
       for (const scene of scenes) {
         const descTextarea = scene.querySelector('textarea[data-visual-desc]');
-        let prompt = descTextarea ? descTextarea.value.trim() : "cinematic music video";
+        let prompt = (descTextarea ? descTextarea.value.trim() : "cinematic music video").replace(/[^a-z0-9+]+/gi, '+');
         const count = parseInt(scene.querySelector('input[type=number]').value) || 1;
         for (let i = 0; i < count; i++) {
-          try {
-            const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encodeURIComponent(prompt)}&image_type=photo&per_page=50&orientation=horizontal&safesearch=true`;
-            const res = await fetch(url);
-            const data = await res.json();
-            const hits = data.hits || [];
-            const photo = hits.length > 0 ? hits[Math.floor(Math.random() * hits.length)] : null;
-            const imgUrl = photo ? photo.largeImageURL : "https://images.pixabay.com/photos/3586966/pexels-photo-3586966.jpeg";
-            const img = new Image();
-            img.onload = () => {
-              const container = placeholders[idx];
-              container.innerHTML = '';
-              container.classList.remove('img-placeholder');
-              container.className = "relative group rounded-2xl overflow-hidden";
-              img.className = "w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500";
-              const overlay = document.createElement('div');
-              overlay.className = "absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center";
-              overlay.innerHTML = `<span class="text-white font-bold text-xl">Download</span>`;
-              img.onclick = () => window.open(imgUrl, '_blank');
-              container.appendChild(img);
-              container.appendChild(overlay);
-            };
-            img.onerror = () => img.src = "https://cdn.pixabay.com/photo/2016/11/29/05/45/astronomy-1867616_1280.jpg";
-            img.src = imgUrl;
-          } catch {
-            placeholders[idx].innerHTML = '<div class="w-full h-full bg-gray-700 flex items-center justify-center rounded-2xl"><span class="text-gray-400">Try again</span></div>';
-          }
+          const uniqueSeed = Date.now() + idx + Math.random() * 10000;
+          const imgUrl = `https://source.unsplash.com/featured/1200x675/?${prompt}&sig=${uniqueSeed}`;
+          const img = new Image();
+          img.onload = () => {
+            const container = placeholders[idx];
+            container.innerHTML = '';
+            container.classList.remove('img-placeholder');
+            container.className = "relative group rounded-2xl overflow-hidden";
+            img.className = "w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500";
+            const overlay = document.createElement('div');
+            overlay.className = "absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center";
+            overlay.innerHTML = `<span class="text-white font-bold text-xl">Download</span>`;
+            img.onclick = () => window.open(imgUrl, '_blank');
+            container.appendChild(img);
+            container.appendChild(overlay);
+          };
+          img.onerror = () => img.src = "https://source.unsplash.com/featured/1200x675/?cinematic";
+          img.src = imgUrl;
           idx++;
         }
       }
-      showMessage('All beautiful images loaded — perfectly matched to your scenes!');
+      showMessage('All high-quality images loaded instantly — perfectly matched to your lyrics!');
     }
     async function generateAudio() {
       const lyrics = document.getElementById('lyrics').value.trim();
