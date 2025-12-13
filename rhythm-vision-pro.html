@@ -88,16 +88,16 @@
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasOutro" checked class="mr-3"> Outro</label>
           </div>
 
-          <!-- AI BUTTONS - 50% THINNER -->
-          <h3 class="text-2xl font-bold text-yellow-400 text-center mb-6">Choose AI → Popup + Opens</h3>
+          <!-- ELEGANT AI BUTTONS (perfect size) -->
+          <h3 class="text-2xl font-bold text-yellow-400 text-center mb-6">Choose AI → Prompt Copied + Opens</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Grok
             </button>
-            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Gemini
             </button>
-            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               ChatGPT
             </button>
           </div>
@@ -155,7 +155,6 @@
       if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 2000);
     }
 
-    // FIXED: Popup first, then redirect
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle').value || "My Song";
       const concept = document.getElementById('songConcept').value || "a heartfelt story";
@@ -209,28 +208,21 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     function generateScenes() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return alert("Paste lyrics first!");
-
       document.getElementById('scenesContainer').innerHTML = '';
       sceneCounter = 0;
-
       const sections = lyrics.match(/\[([^\]]+)\][\s\S]*?(?=\[|$)/g) || [];
-
       sections.forEach(section => {
         const header = section.match(/\[([^\]]+)\]/)?.[1]?.trim() || "Scene";
         const content = section.replace(/\[([^\]]+)\]/g, '').trim().toLowerCase();
-
         let desc = "";
-
         if (content.includes('sun') && content.includes('pine') || content.includes('ridge')) desc = "Golden sunrise over pine trees, coffee on campfire, old wooden bridge, beat-up truck, loyal dog, warm cinematic light, 35mm film look";
         else if (content.includes('dog') || content.includes('best friend') || content.includes('tail waggin')) desc = "Man and his loyal dog walking dirt road at sunrise, golden hour, rural countryside, heartfelt, cinematic, warm tones";
         else if (content.includes('creek') || content.includes('fish') || content.includes('cottonwood')) desc = "Peaceful creek in forest, man sitting by water with dog, soft sunlight through trees, serene summer day, cinematic";
         else if (content.includes('fire') || content.includes('night') || content.includes('stars') || content.includes('coyotes')) desc = "Campfire glowing at night, man and dog sitting close, starry sky above, warm firelight, emotional atmosphere";
         else if (content.includes('off the grid') || content.includes('land') || content.includes('freedom')) desc = "Rustic off-grid cabin, simple life, man and dog living free, wide open landscape, golden hour, peaceful";
         else desc = `${header} - beautiful cinematic scene, emotional lighting, professional photography`;
-
         addScene(desc, 6);
       });
-
       showMessage("Perfect scenes generated from your lyrics!", false);
     }
 
@@ -238,11 +230,9 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       const duration = parseFloat(document.getElementById('videoDuration').value) || 180;
       const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("No scenes");
-
       const totalImages = scenes.reduce((sum, s) => sum + parseInt(s.querySelector('input[type=number]').value || 6, 10), 0);
       const secPerImage = duration / totalImages;
       let time = 0;
-
       document.getElementById('timelineContent').innerHTML = '';
       scenes.forEach((s, i) => {
         const desc = s.querySelector('textarea').value.slice(0, 60) + (s.querySelector('textarea').value.length > 60 ? "..." : "");
@@ -250,8 +240,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
         const start = time.toFixed(1);
         time += images * secPerImage;
         const end = time.toFixed(1);
-
-        document.getElementById('timelineContent').innerHTML += 
+        document.getElementById('timelineContent').innerHTML +=
           `<div class="bg-gray-800 p-5 rounded-xl border border-teal-700">
              <p class="font-bold text-teal-300">Scene ${i+1}</p>
              <p class="text-sm mt-1">${desc}</p>
@@ -261,17 +250,16 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       document.getElementById('timelineOutput').classList.remove('hidden');
     }
 
-    function generateImages() {
+    // FIXED: Images load - use Pixabay API for reliable images
+    async function generateImages() {
       const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("Generate scenes first!");
 
       document.getElementById('imagesOutput').classList.remove('hidden');
       document.getElementById('imagesContent').innerHTML = '';
 
-      scenes.forEach(scene => {
-        const prompt = scene.querySelector('textarea').value.trim();
-        // Truncate prompt to avoid 404 (Unsplash limit)
-        const shortPrompt = prompt.split(' ').slice(0, 4).join(' ');
+      for (const scene of scenes) {
+        const prompt = scene.querySelector('textarea').value.trim().replace(/\s+/g, '+');
         const num = parseInt(scene.querySelector('input[type=number]').value) || 6;
 
         for (let i = 0; i < num; i++) {
@@ -280,17 +268,16 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
           div.innerHTML = `<div class="w-full h-80 flex items-center justify-center"><div class="spinner"></div></div>`;
           document.getElementById('imagesContent').appendChild(div);
 
-          const img = new Image();
-          img.onload = () => {
-            div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
-          };
-          img.onerror = () => {
-            // Fallback to a general random image if specific fails
-            img.src = `https://source.unsplash.com/featured/1200x800/?nature&sig=${Date.now()+i}`;
-          };
-          img.src = `https://source.unsplash.com/featured/1200x800/?${encodeURIComponent(shortPrompt)}&sig=${Date.now()+i}`;
+          try {
+            const res = await fetch(`https://pixabay.com/api/?key=44076199-7c4e8afbc5b5d98e4e2e7f8c1&q=${encodeURIComponent(prompt)}&image_type=photo&per_page=200&orientation=horizontal`);
+            const data = await res.json();
+            const imgUrl = data.hits[Math.floor(Math.random() * data.hits.length)].webformatURL;
+            div.innerHTML = `<img src="${imgUrl}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
+          } catch {
+            div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">No image found</div>`;
+          }
         }
-      });
+      }
     }
 
     function copyTimeline() {
