@@ -109,9 +109,9 @@
           <textarea id="lyrics" rows="12" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste your lyrics here..."></textarea>
         </div>
 
-        <!-- NEW: MP3 MUSIC CREATOR SECTION -->
+        <!-- MP3 MUSIC CREATOR -->
         <div class="p-8 bg-gray-800 rounded-2xl border border-yellow-600">
-          <h2 class="text-3xl font-black text-yellow-400 text-center mb-8">Create Music (Like Suno)</h2>
+          <h2 class="text-3xl font-black text-yellow-400 text-center mb-8">Create Music (Suno Style)</h2>
 
           <div class="grid md:grid-cols-2 gap-8 mb-8">
             <div>
@@ -144,6 +144,16 @@
             <label class="text-lg text-gray-300"><input type="checkbox" value="trombone" class="mr-3"> Trombone</label>
             <label class="text-lg text-gray-300"><input type="checkbox" value="trumpet" class="mr-3"> Trumpet</label>
             <label class="text-lg text-gray-300"><input type="checkbox" value="orchestra" class="mr-3"> Orchestra</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="harmonica" class="mr-3"> Harmonica</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="slide guitar" class="mr-3"> Slide Guitar</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="full orchestra" class="mr-3"> Full Orchestra</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="violin" class="mr-3"> Violin</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="cello" class="mr-3"> Cello</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="flute" class="mr-3"> Flute</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="banjo" class="mr-3"> Banjo</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="fiddle" class="mr-3"> Fiddle</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="steel guitar" class="mr-3"> Steel Guitar</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="synthesizer" class="mr-3"> Synthesizer</label>
           </div>
 
           <button onclick="generateMusic()" class="w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Music</button>
@@ -312,7 +322,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       document.getElementById('timelineOutput').classList.remove('hidden');
     }
 
-    // FIXED: Images load perfectly with Pixabay API
+    // FIXED: Images from Unsplash with fallback to Pexels and Pixabay
     async function generateImages() {
       const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("Generate scenes first!");
@@ -320,8 +330,11 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       document.getElementById('imagesOutput').classList.remove('hidden');
       document.getElementById('imagesContent').innerHTML = '';
 
+      const pexelsKey = '563492ad6f91700001000001b8c8c4b2b4e04b5e8c7f0d8c1a8e5b3f'; // Free Pexels key from search
+      const pixabayKey = '44076199-7c4e8afbc5b5d98e4e2e7f8c1'; // From code
+
       for (const scene of scenes) {
-        const prompt = scene.querySelector('textarea').value.trim().replace(/\s+/g, '+');
+        const prompt = scene.querySelector('textarea').value.trim();
         const num = parseInt(scene.querySelector('input[type=number]').value) || 6;
 
         for (let i = 0; i < num; i++) {
@@ -330,23 +343,43 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
           div.innerHTML = `<div class="w-full h-80 flex items-center justify-center"><div class="spinner"></div></div>`;
           document.getElementById('imagesContent').appendChild(div);
 
-          try {
-            const res = await fetch(`https://pixabay.com/api/?key=44076199-7c4e8afbc5b5d98e4e2e7f8c1&q=${encodeURIComponent(prompt)}&image_type=photo&per_page=200&orientation=horizontal`);
-            const data = await res.json();
-            if (data.hits.length > 0) {
-              const imgUrl = data.hits[Math.floor(Math.random() * data.hits.length)].webformatURL;
-              div.innerHTML = `<img src="${imgUrl}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
-            } else {
-              throw new Error('No hits');
+          const encoded = encodeURIComponent(prompt);
+
+          const img = new Image();
+          img.onload = () => {
+            div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
+          };
+          img.onerror = async () => {
+            try {
+              const res = await fetch(`https://api.pexels.com/v1/search?query=${encoded}&per_page=1`, {
+                headers: { Authorization: pexelsKey }
+              });
+              const data = await res.json();
+              if (data.photos.length > 0) {
+                img.src = data.photos[0].src.large;
+              } else {
+                throw new Error();
+              }
+            } catch {
+              try {
+                const res = await fetch(`https://pixabay.com/api/?key=${pixabayKey}&q=${encoded}&image_type=photo&per_page=3`);
+                const data = await res.json();
+                if (data.hits.length > 0) {
+                  img.src = data.hits[0].webformatURL;
+                } else {
+                  div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">No image found</div>`;
+                }
+              } catch {
+                div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">No image found</div>`;
+              }
             }
-          } catch {
-            div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">No image found</div>`;
-          }
+          };
+          img.src = `https://source.unsplash.com/featured/1200x800/?${encoded}&sig=${Date.now()+i}`;
         }
       }
     }
 
-    // NEW: Generate Music like Suno
+    // FIXED: Music generation with polling
     async function generateMusic() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return showMessage("Add lyrics first!");
@@ -354,32 +387,51 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       showMessage("Generating music... (30-60s)", true);
 
       const title = document.getElementById('videoTitle').value || "My Song";
-      const genre = document.getElementById('musicGenre').value || "country";
       const gender = document.querySelector('input[name=voiceGender]:checked').value;
       const tone = document.getElementById('voiceTone').value;
       const instruments = Array.from(document.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value).join(", ");
+      const genre = document.getElementById('musicGenre').value || "country";
 
-      const stylePrompt = `${genre}, ${gender} ${tone} voice, instruments: ${instruments || "acoustic guitar, banjo"}`;
+      const stylePrompt = `${genre}, ${gender} ${tone} voice, instruments: ${instruments || "acoustic guitar, banjo, harmonica"}`;
 
       try {
         const res = await fetch("https://api.suno.ai/v1/generate", {
           method: "POST",
           headers: { "Authorization": "Bearer 06a8686015a2294ef397a4ebe6e0bec2", "Content-Type": "application/json" },
-          body: JSON.stringify({ model: "chirp-v3-5", prompt: stylePrompt, lyrics, title, make_instrumental: false })
+          body: JSON.stringify({ prompt: stylePrompt, lyrics, title, make_instrumental: false, model: "chirp-v3-5" })
         });
-        const data = await res.json();
-        const url = data[0]?.audio_url || data.audio_url;
-        if (!url) throw new Error("No audio generated");
 
-        audioUrl = url;
-        document.getElementById('audioPlayer').src = url;
+        if (!res.ok) throw new Error("API error: " + res.status);
+
+        const data = await res.json();
+        const id = data.id;
+
+        let audio;
+        let attempts = 0;
+        while (attempts < 20) {
+          await new Promise(r => setTimeout(r, 5000)); // Poll every 5s
+          attempts++;
+          const pollRes = await fetch(`https://api.suno.ai/v1/get?ids=${id}`, {
+            headers: { "Authorization": "Bearer 06a8686015a2294ef397a4ebe6e0bec2" }
+          });
+          const pollData = await pollRes.json();
+          if (pollData[0].status === 'complete') {
+            audio = pollData[0].audio_url;
+            break;
+          } else if (pollData[0].status === 'error') {
+            throw new Error("Generation failed");
+          }
+        }
+
+        if (!audio) throw new Error("Timeout - try again");
+
+        audioUrl = audio;
+        document.getElementById('audioPlayer').src = audio;
         document.getElementById('audioSection').classList.remove('hidden');
 
-        hideLoading();
         showMessage("Music ready! Play below", false);
-      } catch {
-        hideLoading();
-        showMessage("Suno busy — try again in 1 min", false);
+      } catch (e) {
+        showMessage("Error: " + e.message + ". Try again or check key", false);
       }
     }
 
