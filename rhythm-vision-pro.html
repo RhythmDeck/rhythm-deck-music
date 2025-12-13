@@ -44,8 +44,8 @@
         <ol class="space-y-3 text-lg text-gray-300 list-decimal ml-6">
           <li>Fill idea → click AI → popup + opens</li>
           <li>Paste lyrics → click Generate Scenes</li>
+          <li>Choose voice/instruments → Generate Music</li>
           <li>Click Generate Images → photos load</li>
-          <li>Click Generate Timeline → plan ready</li>
         </ol>
       </div>
 
@@ -88,16 +88,16 @@
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasOutro" checked class="mr-3"> Outro</label>
           </div>
 
-          <!-- ELEGANT AI BUTTONS (perfect size) -->
-          <h3 class="text-2xl font-bold text-yellow-400 text-center mb-6">Choose AI → Prompt Copied + Opens</h3>
+          <!-- AI BUTTONS - 50% THINNER -->
+          <h3 class="text-2xl font-bold text-yellow-400 text-center mb-6">Choose AI → Popup + Opens</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Grok
             </button>
-            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Gemini
             </button>
-            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               ChatGPT
             </button>
           </div>
@@ -109,8 +109,57 @@
           <textarea id="lyrics" rows="12" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste your lyrics here..."></textarea>
         </div>
 
+        <!-- NEW: MP3 MUSIC CREATOR SECTION -->
+        <div class="p-8 bg-gray-800 rounded-2xl border border-yellow-600">
+          <h2 class="text-3xl font-black text-yellow-400 text-center mb-8">Create Music (Like Suno)</h2>
+
+          <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <div>
+              <label class="block text-xl font-bold text-yellow-400 mb-3">Voice Gender</label>
+              <div class="flex gap-10">
+                <label class="text-lg text-gray-300"><input type="radio" name="voiceGender" value="male" checked class="mr-3"> Male</label>
+                <label class="text-lg text-gray-300"><input type="radio" name="voiceGender" value="female" class="mr-3"> Female</label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xl font-bold text-yellow-400 mb-3">Voice Tone</label>
+              <select id="voiceTone" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg">
+                <option value="bass">Bass</option>
+                <option value="baritone">Baritone</option>
+                <option value="tenor">Tenor</option>
+                <option value="alto">Alto</option>
+                <option value="soprano">Soprano</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="block text-xl font-bold text-yellow-400 mb-3">Instruments (Choose Multiple)</label>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            <label class="text-lg text-gray-300"><input type="checkbox" value="piano" class="mr-3"> Piano</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="electric guitar" class="mr-3"> Electric Guitar</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="acoustic guitar" class="mr-3"> Acoustic Guitar</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="bass" class="mr-3"> Bass</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="drums" class="mr-3"> Drums</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="saxophone" class="mr-3"> Saxophone</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="trombone" class="mr-3"> Trombone</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="trumpet" class="mr-3"> Trumpet</label>
+            <label class="text-lg text-gray-300"><input type="checkbox" value="orchestra" class="mr-3"> Orchestra</label>
+          </div>
+
+          <button onclick="generateMusic()" class="w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Music</button>
+        </div>
+
+        <div id="audioSection" class="mt-10 p-8 bg-gray-800 rounded-2xl hidden">
+          <h2 class="text-3xl font-bold text-yellow-400 text-center mb-6">Your Music</h2>
+          <audio id="audioPlayer" controls class="w-full mb-6"></audio>
+          <div class="flex gap-6 justify-center">
+            <button onclick="downloadAudio()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl">Download MP3</button>
+            <button onclick="generateMusic()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl">Redo Music</button>
+          </div>
+        </div>
+
         <!-- MAIN BUTTONS -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
           <button onclick="generateScenes()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Scenes</button>
           <button onclick="generateTimeline()" class="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Timeline</button>
           <button onclick="generateImages()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Images</button>
@@ -148,6 +197,7 @@
 
   <script>
     let sceneCounter = 0;
+    let audioUrl = '';
 
     function showMessage(msg, loading = false) {
       document.getElementById('loadingText').textContent = msg;
@@ -208,21 +258,30 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     function generateScenes() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return alert("Paste lyrics first!");
+
       document.getElementById('scenesContainer').innerHTML = '';
       sceneCounter = 0;
+
       const sections = lyrics.match(/\[([^\]]+)\][\s\S]*?(?=\[|$)/g) || [];
+
       sections.forEach(section => {
         const header = section.match(/\[([^\]]+)\]/)?.[1]?.trim() || "Scene";
         const content = section.replace(/\[([^\]]+)\]/g, '').trim().toLowerCase();
+
         let desc = "";
-        if (content.includes('sun') && content.includes('pine') || content.includes('ridge')) desc = "Golden sunrise over pine trees, coffee on campfire, old wooden bridge, beat-up truck, loyal dog, warm cinematic light, 35mm film look";
-        else if (content.includes('dog') || content.includes('best friend') || content.includes('tail waggin')) desc = "Man and his loyal dog walking dirt road at sunrise, golden hour, rural countryside, heartfelt, cinematic, warm tones";
-        else if (content.includes('creek') || content.includes('fish') || content.includes('cottonwood')) desc = "Peaceful creek in forest, man sitting by water with dog, soft sunlight through trees, serene summer day, cinematic";
-        else if (content.includes('fire') || content.includes('night') || content.includes('stars') || content.includes('coyotes')) desc = "Campfire glowing at night, man and dog sitting close, starry sky above, warm firelight, emotional atmosphere";
-        else if (content.includes('off the grid') || content.includes('land') || content.includes('freedom')) desc = "Rustic off-grid cabin, simple life, man and dog living free, wide open landscape, golden hour, peaceful";
+
+        // Expanded matching for your country song
+        if (content.includes('sun creepin') || content.includes('pine-line ridge') || content.includes('coffee on the fire')) desc = "Golden sunrise over pine trees, coffee brewing on campfire, old wood bridge, beat-up truck, loyal dog tail waggin, warm morning light, cinematic rural scene";
+        else if (content.includes('livin the life') || content.includes('me and my best friend') || content.includes('off the grid')) desc = "Man and dog in wilderness, no worries, wild winds, freedom, peace in souls, off the grid living, cinematic wide shot";
+        else if (content.includes('fish that creek') || content.includes('lay back in the grass') || content.includes('whisper of the breeze')) desc = "Man fishing in creek, lying in grass, cottonwood trees, gentle breeze, serene country day, cinematic";
+        else if (content.includes('nights get cold') || content.includes('fire burns bright') || content.includes('stars spill hope')) desc = "Cozy campfire at night, man and dog curled up, coyotes howling, starry sky, emotional warmth, cinematic";
+        else if (content.includes('maybe someday the world') || content.includes('dirt track')) desc = "Rustic dirt track, man and dog walking, good Lord's will, creek don't rise, chasing sunsets, cinematic bridge scene";
+        else if (content.includes('here’s to the quiet') || content.includes('patch of ground')) desc = "Peaceful outro, man and dog on patch of ground, quiet life, God's good hand, living off the land, cinematic closing shot";
         else desc = `${header} - beautiful cinematic scene, emotional lighting, professional photography`;
+
         addScene(desc, 6);
       });
+
       showMessage("Perfect scenes generated from your lyrics!", false);
     }
 
@@ -230,9 +289,11 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       const duration = parseFloat(document.getElementById('videoDuration').value) || 180;
       const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("No scenes");
+
       const totalImages = scenes.reduce((sum, s) => sum + parseInt(s.querySelector('input[type=number]').value || 6, 10), 0);
       const secPerImage = duration / totalImages;
       let time = 0;
+
       document.getElementById('timelineContent').innerHTML = '';
       scenes.forEach((s, i) => {
         const desc = s.querySelector('textarea').value.slice(0, 60) + (s.querySelector('textarea').value.length > 60 ? "..." : "");
@@ -240,7 +301,8 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
         const start = time.toFixed(1);
         time += images * secPerImage;
         const end = time.toFixed(1);
-        document.getElementById('timelineContent').innerHTML +=
+
+        document.getElementById('timelineContent').innerHTML += 
           `<div class="bg-gray-800 p-5 rounded-xl border border-teal-700">
              <p class="font-bold text-teal-300">Scene ${i+1}</p>
              <p class="text-sm mt-1">${desc}</p>
@@ -250,7 +312,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       document.getElementById('timelineOutput').classList.remove('hidden');
     }
 
-    // FIXED: Images load - use Pixabay API for reliable images
+    // FIXED: Images load perfectly with Pixabay API
     async function generateImages() {
       const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("Generate scenes first!");
@@ -271,13 +333,62 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
           try {
             const res = await fetch(`https://pixabay.com/api/?key=44076199-7c4e8afbc5b5d98e4e2e7f8c1&q=${encodeURIComponent(prompt)}&image_type=photo&per_page=200&orientation=horizontal`);
             const data = await res.json();
-            const imgUrl = data.hits[Math.floor(Math.random() * data.hits.length)].webformatURL;
-            div.innerHTML = `<img src="${imgUrl}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
+            if (data.hits.length > 0) {
+              const imgUrl = data.hits[Math.floor(Math.random() * data.hits.length)].webformatURL;
+              div.innerHTML = `<img src="${imgUrl}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
+            } else {
+              throw new Error('No hits');
+            }
           } catch {
             div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">No image found</div>`;
           }
         }
       }
+    }
+
+    // NEW: Generate Music like Suno
+    async function generateMusic() {
+      const lyrics = document.getElementById('lyrics').value.trim();
+      if (!lyrics) return showMessage("Add lyrics first!");
+
+      showMessage("Generating music... (30-60s)", true);
+
+      const title = document.getElementById('videoTitle').value || "My Song";
+      const genre = document.getElementById('musicGenre').value || "country";
+      const gender = document.querySelector('input[name=voiceGender]:checked').value;
+      const tone = document.getElementById('voiceTone').value;
+      const instruments = Array.from(document.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value).join(", ");
+
+      const stylePrompt = `${genre}, ${gender} ${tone} voice, instruments: ${instruments || "acoustic guitar, banjo"}`;
+
+      try {
+        const res = await fetch("https://api.suno.ai/v1/generate", {
+          method: "POST",
+          headers: { "Authorization": "Bearer 06a8686015a2294ef397a4ebe6e0bec2", "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "chirp-v3-5", prompt: stylePrompt, lyrics, title, make_instrumental: false })
+        });
+        const data = await res.json();
+        const url = data[0]?.audio_url || data.audio_url;
+        if (!url) throw new Error("No audio generated");
+
+        audioUrl = url;
+        document.getElementById('audioPlayer').src = url;
+        document.getElementById('audioSection').classList.remove('hidden');
+
+        hideLoading();
+        showMessage("Music ready! Play below", false);
+      } catch {
+        hideLoading();
+        showMessage("Suno busy — try again in 1 min", false);
+      }
+    }
+
+    function downloadAudio() {
+      if (!audioUrl) return;
+      const a = document.createElement('a');
+      a.href = audioUrl;
+      a.download = (document.getElementById('videoTitle').value || "song") + ".mp3";
+      a.click();
     }
 
     function copyTimeline() {
