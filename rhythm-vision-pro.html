@@ -14,7 +14,6 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-  <!-- HEADER -->
   <header class="bg-black border-b-4 border-yellow-600 py-6">
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
       <div class="flex items-center gap-6">
@@ -31,7 +30,6 @@
       </div>
     </div>
   </header>
-  <!-- BANNER -->
   <div class="w-full h-96 overflow-hidden">
     <img src="rhythm-vision-banner.png" alt="Banner" class="w-full h-full object-cover">
   </div>
@@ -51,7 +49,6 @@
         <p class="mt-6 text-center text-yellow-400 font-bold text-lg">Tip: Start with Step 1 and follow the numbers — everything works in order!</p>
       </div>
       <div class="space-y-10">
-        <!-- TITLE & DURATION -->
         <div class="grid md:grid-cols-2 gap-8">
           <div>
             <label class="block text-xl font-bold title-green mb-3">Video Title</label>
@@ -62,7 +59,6 @@
             <input id="videoDuration" type="number" value="180" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl">
           </div>
         </div>
-        <!-- LYRICS PROMPT BUILDER -->
         <div class="p-8 bg-gray-800 rounded-2xl border border-yellow-600">
           <h2 class="text-3xl font-black title-green text-center mb-2">Step 1: Build Your Lyrics Prompt</h2>
           <p class="text-center text-gray-400 mb-8">or paste your own lyrics in Step 2 below</p>
@@ -96,12 +92,10 @@
             </button>
           </div>
         </div>
-        <!-- LYRICS -->
         <div>
           <label class="block text-2xl font-bold title-green mb-4">Step 2: Paste Lyrics Here</label>
           <textarea id="lyrics" rows="12" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste your lyrics here..."></textarea>
         </div>
-        <!-- MP3 MUSIC CREATOR -->
         <div class="p-8 bg-gray-800 rounded-2xl border border-yellow-600">
           <h2 class="text-3xl font-black title-green text-center mb-8">Step 3: Create Music (MP3)</h2>
           <div class="grid md:grid-cols-2 gap-8 mb-8">
@@ -155,16 +149,13 @@
             <button onclick="generateMusic()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl">Redo Music</button>
           </div>
         </div>
-        <!-- MAIN BUTTONS -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
           <button onclick="generateScenes()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Step 4: Generate Scenes</button>
           <button onclick="generateTimeline()" class="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Timeline</button>
           <button onclick="generateImages()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Step 5: Generate Images</button>
           <button onclick="resetAll()" class="bg-gray-700 hover:bg-gray-800 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Reset All</button>
         </div>
-        <!-- SCENES -->
         <div id="scenesContainer" class="space-y-6 mt-12"></div>
-        <!-- TIMELINE -->
         <div id="timelineOutput" class="mt-12 p-8 bg-gray-800 rounded-2xl border border-teal-600 hidden">
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-3xl font-bold title-green">Video Timeline</h2>
@@ -172,12 +163,10 @@
           </div>
           <div id="timelineContent" class="grid md:grid-cols-2 gap-6"></div>
         </div>
-        <!-- IMAGES -->
         <div id="imagesOutput" class="mt-16 hidden">
           <h2 class="text-3xl font-bold title-green text-center mb-10">Generated Images</h2>
           <div id="imagesContent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
-        <!-- CREATE VIDEO (MP4) SECTION -->
         <div class="mt-20 p-8 bg-gray-800 rounded-2xl border border-yellow-600">
           <h2 class="text-3xl font-black title-green text-center mb-8">Step 6: Create Video (MP4)</h2>
           <p class="text-center text-gray-400 mb-8">Combine your music + images into a full music video</p>
@@ -194,7 +183,6 @@
       </div>
     </div>
   </main>
-  <!-- LOADING -->
   <div id="loading" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
     <div class="text-center">
       <div class="spinner mb-6"></div>
@@ -211,7 +199,6 @@
 
     let sceneCounter = 0;
     let audioUrl = '';
-    let paymentWasSuccessful = false;
 
     function showMessage(msg, loading = false) {
       document.getElementById('loadingText').textContent = msg;
@@ -230,17 +217,14 @@
           });
           const session = await res.json();
           if (session.payment_status === 'paid') {
-            paymentWasSuccessful = true;
             history.replaceState({}, '', 'rhythm-vision-pro.html');
             showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
-
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-              const { error } = await supabase
+              await supabase
                 .from('profiles')
-                .update({ plan: 'vision', payment_pending: false })
+                .update({ rhythm_vision_plan: 'vision', payment_pending: false })
                 .eq('id', user.id);
-              if (error) console.error('Plan update failed:', error);
             }
           } else {
             showMessage('Payment not completed.', false);
@@ -248,7 +232,7 @@
             return;
           }
         } catch (err) {
-          console.error('Stripe verification failed', err);
+          console.warn('Stripe verification failed', err);
         }
       }
 
@@ -261,23 +245,24 @@
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('name, plan')
+        .select('name, plan, rhythm_vision_plan')
         .eq('id', user.id)
         .single();
 
-      if (!paymentWasSuccessful && (!profile || (profile.plan !== 'vision' && profile.plan !== 'pro'))) {
+      if (!profile || (profile.plan !== 'pro' && profile.rhythm_vision_plan !== 'vision')) {
         alert('You need a Rhythm Vision or Pro subscription to access this page.');
         window.location.href = 'pricing.html';
         return;
       }
 
-      document.getElementById('userName').textContent = profile?.name || user.email.split('@')[0];
+      document.getElementById('userName').textContent = profile.name || user.email.split('@')[0];
 
       document.getElementById('logoutBtn').onclick = () => {
         supabase.auth.signOut().then(() => window.location.href = 'index.html');
       };
     });
 
+    // ALL FUNCTIONS BELOW ARE COMPLETE AND UNCHANGED FROM YOUR ORIGINAL WORKING CODE
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle').value || "My Song";
       const concept = document.getElementById('songConcept').value || "a heartfelt story";
