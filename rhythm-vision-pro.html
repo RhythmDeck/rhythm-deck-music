@@ -10,7 +10,6 @@
     body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
     .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    /* Beautiful, pleasing lime-green for all titles */
     .title-green { color: #a3e635; font-weight: 900; }
   </style>
 </head>
@@ -26,9 +25,10 @@
           <p class="text-xl text-gray-300">AI Music Video Creator</p>
         </div>
       </div>
-      <a href="profile-admin-pro.html" class="bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-black px-10 py-4 rounded-xl shadow-2xl hover:scale-105 transition text-lg">
-        Back to Dashboard
-      </a>
+      <div class="flex items-center gap-6">
+        <p class="text-lg">Welcome, <span id="userName" class="font-bold">Guest</span></p>
+        <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl">Logout</button>
+      </div>
     </div>
   </header>
   <!-- BANNER -->
@@ -209,62 +209,65 @@
     let sceneCounter = 0;
     let audioUrl = '';
 
-    // AUTH + STRIPE REDIRECT HANDLING ON LOAD
+    function showMessage(msg, loading = false) {
+      document.getElementById('loadingText').textContent = msg;
+      document.getElementById('loading').classList.toggle('hidden', !loading);
+      if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 3000);
+    }
+
+    // FULL AUTH + STRIPE REDIRECT + ACCESS CONTROL
     window.addEventListener('load', async () => {
-      // Handle Stripe redirect after payment
+      // Handle Stripe redirect with session_id
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
 
       if (sessionId) {
         try {
           const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
-            headers: { Authorization: 'pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW' }  // <-- REPLACE WITH YOUR STRIPE PUBLISHABLE KEY
+            headers: { Authorization: 'Bearer pk_test_51YOUR_PUBLISHABLE_KEY' }  // REPLACE WITH YOUR STRIPE TEST PUBLISHABLE KEY
           });
           const session = await res.json();
           if (session.payment_status === 'paid') {
-            // Clean URL and show success
             history.replaceState({}, '', 'rhythm-vision-pro.html');
             showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
           } else {
             showMessage('Payment not completed.', false);
-            window.location.href = 'pricing.html';
+            setTimeout(() => window.location.href = 'pricing.html', 2000);
             return;
           }
         } catch (err) {
-          console.warn('Stripe session verification failed', err);
-          // Continue to normal auth check
+          console.warn('Stripe verification failed', err);
         }
       }
 
-      // Normal login / access check
+      // Check if user is logged in and has correct plan
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        alert('Please log in to access Rhythm Vision.');
+        alert('Please log in to access Rhythm Vision Pro.');
         window.location.href = 'login.html';
         return;
       }
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('plan')
+        .select('name, plan')
         .eq('id', user.id)
         .single();
 
-      if (profile?.plan !== 'vision' && profile?.plan !== 'pro') {
+      if (!profile || (profile.plan !== 'vision' && profile.plan !== 'pro')) {
         alert('You need a Rhythm Vision or Pro subscription to access this page.');
         window.location.href = 'pricing.html';
         return;
       }
 
-      // User has access — initialize app
-      // (Your existing onload code can go here if needed)
-    });
+      // User has access — show name and enable app
+      document.getElementById('userName').textContent = profile.name || user.email.split('@')[0];
 
-    function showMessage(msg, loading = false) {
-      document.getElementById('loadingText').textContent = msg;
-      document.getElementById('loading').classList.toggle('hidden', !loading);
-      if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 3000);
-    }
+      // Logout button
+      document.getElementById('logoutBtn').onclick = () => {
+        supabase.auth.signOut().then(() => window.location.href = 'index.html');
+      };
+    });
 
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle').value || "My Song";
@@ -462,18 +465,6 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       const text = document.getElementById('timelineContent').innerText;
       navigator.clipboard.writeText(text);
       showMessage("Timeline copied!");
-    }
-
-    function downloadScenes() {
-      let text = "RHYTHM VISION SCENES\n\n";
-      document.querySelectorAll('#scenesContainer > div').forEach((s, i) => {
-        text += `Scene ${i+1}\n${s.querySelector('textarea').value}\nImages: ${s.querySelector('input[type=number]').value}\n\n`;
-      });
-      const blob = new Blob([text], {type: 'text/plain'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = "rhythm-vision-scenes.txt";
-      a.click();
     }
 
     function resetAll() {
