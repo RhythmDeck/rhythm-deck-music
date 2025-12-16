@@ -6,6 +6,7 @@
   <title>Sign Up | Rhythm Deck Music</title>
   <base href="/">
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase script with defer so DOM is fully loaded before our script runs -->
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     .input-focus:focus { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4); }
@@ -13,7 +14,8 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
   <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
-  <!-- Header & Hero -->
+
+  <!-- Header -->
   <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3">
       <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -32,6 +34,8 @@
       <a href="signup.html" class="bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-400 transition shadow-md">Sign Up</a>
     </nav>
   </header>
+
+  <!-- Hero -->
   <section class="relative h-[350px] md:h-[450px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
            style="background-image: url('banner-cropped.jpg');">
     <div class="bg-black bg-opacity-60 p-8 md:p-10 rounded-xl text-center shadow-2xl">
@@ -44,6 +48,8 @@
       </a>
     </div>
   </section>
+
+  <!-- Main Form -->
   <main class="flex-grow flex items-center justify-center py-12 md:py-16 px-4">
     <div class="container mx-auto">
       <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
@@ -86,8 +92,9 @@
                 <option value="pro">Pro Plan (Full Platform)</option>
               </select>
             </div>
-            <!-- Vision Options -->
-            <div id="visionOptions" class="hidden space-y-4">
+
+            <!-- Vision Options - visible only when Vision selected -->
+            <div id="visionOptions" class="space-y-4">
               <div>
                 <label class="block text-gray-700 font-semibold mb-1">Rhythm Vision Duration</label>
                 <select id="visionDuration" class="w-full border border-gray-300 rounded-lg p-3">
@@ -101,8 +108,9 @@
                 <p class="text-sm text-gray-600 mt-2">Secure checkout with Stripe · Instant access</p>
               </div>
             </div>
-            <!-- Pro Options -->
-            <div id="proOptions" class="hidden space-y-4">
+
+            <!-- Pro Options - visible only when Pro selected -->
+            <div id="proOptions" class="space-y-4">
               <div>
                 <label class="block text-gray-700 font-semibold mb-1">Pro Plan Duration</label>
                 <select id="planDuration" class="w-full border border-gray-300 rounded-lg p-3">
@@ -118,6 +126,7 @@
                 <p class="text-sm text-gray-600 mt-2">Secure checkout with Stripe · Instant access</p>
               </div>
             </div>
+
             <div class="flex items-center space-x-2">
               <input type="checkbox" id="terms" required class="rounded text-green-500 h-4 w-4">
               <label for="terms" class="text-gray-700 text-sm">I agree to the <a href="terms.html" class="text-green-500 hover:underline">Terms</a> and <a href="privacy.html" class="text-green-500 hover:underline">Privacy Policy</a>.</label>
@@ -130,6 +139,8 @@
       </div>
     </div>
   </main>
+
+  <!-- Footer -->
   <footer class="bg-black text-white mt-10 p-5 text-center text-sm">
     <nav class="mb-2 space-x-4">
       <a href="contact.html" class="hover:text-green-400">Contact Us</a>
@@ -145,7 +156,6 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    // YOUR STRIPE PAYMENT LINKS
     const paymentLinks = {
       vision_monthly: 'https://buy.stripe.com/test_aFa3co3psc9i1Kw4XG4800c',
       vision_1year: 'https://buy.stripe.com/test_cNi3coe465KUah289S4800b',
@@ -167,6 +177,7 @@
       setTimeout(() => document.getElementById(id)?.remove(), 10000);
     }
 
+    // Everything runs after page is fully loaded
     document.addEventListener('DOMContentLoaded', () => {
       const planType = document.getElementById('planType');
       const visionOptions = document.getElementById('visionOptions');
@@ -181,31 +192,29 @@
       const subdomainStatus = document.getElementById('subdomainStatus');
       const submitButton = document.getElementById('submitButton');
 
-      // Password Show/Hide Toggle - Now 100% reliable
+      // Password Show/Hide - guaranteed to work
       const togglePassword = document.getElementById('togglePassword');
       const passwordField = document.getElementById('password');
-      if (togglePassword && passwordField) {
-        togglePassword.addEventListener('click', () => {
-          if (passwordField.type === 'password') {
-            passwordField.type = 'text';
-            togglePassword.textContent = 'Hide';
-          } else {
-            passwordField.type = 'password';
-            togglePassword.textContent = 'Show';
-          }
-        });
-      }
+      togglePassword.addEventListener('click', () => {
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+          togglePassword.textContent = 'Hide';
+        } else {
+          passwordField.type = 'password';
+          togglePassword.textContent = 'Show';
+        }
+      });
 
-      // Show correct duration dropdown when plan is selected
+      // Show/hide duration sections and price box
       planType.addEventListener('change', () => {
         const val = planType.value;
         visionOptions.classList.toggle('hidden', val !== 'vision');
         proOptions.classList.toggle('hidden', val !== 'pro');
+        // Hide price displays when changing plan
         visionPriceDisplay.classList.add('hidden');
         priceDisplay.classList.add('hidden');
       });
 
-      // Show price when duration selected
       visionDuration.addEventListener('change', () => {
         const price = visionDuration.selectedOptions[0]?.dataset.price || '0.00';
         visionFinalPrice.textContent = '$' + price;
@@ -218,7 +227,7 @@
         priceDisplay.classList.remove('hidden');
       });
 
-      // Subdomain check
+      // Subdomain availability check
       subdomainInput.addEventListener('input', () => {
         clearTimeout(window.subdomainTimeout);
         window.subdomainTimeout = setTimeout(async () => {
@@ -236,7 +245,7 @@
         }, 600);
       });
 
-      // Form submit
+      // Form submission
       document.getElementById('signupForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         submitButton.disabled = true;
@@ -256,7 +265,7 @@
           if (plan === 'free') {
             const { data: { user }, error } = await supabase.auth.signUp({
               email, password,
-              options: { data: { full_name: name, subdomain: rawSubdomain }}
+              options: { data: { full_name: name, subdomain: rawSubdomain } }
             });
             if (error) throw error;
             await supabase.from('profiles').upsert({
@@ -271,7 +280,7 @@
             if (!visionDuration.value) throw new Error("Select a duration");
             const { data: { user }, error: authError } = await supabase.auth.signUp({
               email, password,
-              options: { data: { full_name: name, subdomain: rawSubdomain }}
+              options: { data: { full_name: name, subdomain: rawSubdomain } }
             });
             if (authError) throw authError;
             await supabase.from('profiles').upsert({
@@ -288,7 +297,7 @@
             if (!planDuration.value) throw new Error("Please select a duration");
             const { data: { user }, error: authError } = await supabase.auth.signUp({
               email, password,
-              options: { data: { full_name: name, subdomain: rawSubdomain }}
+              options: { data: { full_name: name, subdomain: rawSubdomain } }
             });
             if (authError) throw authError;
             await supabase.from('profiles').upsert({
