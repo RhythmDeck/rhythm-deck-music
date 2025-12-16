@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rhythm Deck - Rhythm Vision</title>
+  <title>Rhythm Deck - Rhythm Vision Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
     .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    /* Exact green from your site buttons */
     .title-green { color: #10b981; font-weight: 900; }
   </style>
 </head>
@@ -212,6 +211,7 @@
 
     let sceneCounter = 0;
     let audioUrl = '';
+    let paymentWasSuccessful = false;
 
     function showMessage(msg, loading = false) {
       document.getElementById('loadingText').textContent = msg;
@@ -219,7 +219,6 @@
       if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 3000);
     }
 
-    // AUTH + STRIPE + PLAN UPDATE (PERMANENT)
     window.addEventListener('load', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
@@ -231,14 +230,17 @@
           });
           const session = await res.json();
           if (session.payment_status === 'paid') {
+            paymentWasSuccessful = true;
             history.replaceState({}, '', 'rhythm-vision-pro.html');
             showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
+
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-              await supabase
+              const { error } = await supabase
                 .from('profiles')
                 .update({ plan: 'vision', payment_pending: false })
                 .eq('id', user.id);
+              if (error) console.error('Plan update failed:', error);
             }
           } else {
             showMessage('Payment not completed.', false);
@@ -246,7 +248,7 @@
             return;
           }
         } catch (err) {
-          console.warn('Stripe verification failed', err);
+          console.error('Stripe verification failed', err);
         }
       }
 
@@ -263,13 +265,13 @@
         .eq('id', user.id)
         .single();
 
-      if (!profile || (profile.plan !== 'vision' && profile.plan !== 'pro')) {
+      if (!paymentWasSuccessful && (!profile || (profile.plan !== 'vision' && profile.plan !== 'pro'))) {
         alert('You need a Rhythm Vision or Pro subscription to access this page.');
         window.location.href = 'pricing.html';
         return;
       }
 
-      document.getElementById('userName').textContent = profile.name || user.email.split('@')[0];
+      document.getElementById('userName').textContent = profile?.name || user.email.split('@')[0];
 
       document.getElementById('logoutBtn').onclick = () => {
         supabase.auth.signOut().then(() => window.location.href = 'index.html');
@@ -356,12 +358,12 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
         const start = time.toFixed(1);
         time += images * secPerImage;
         const end = time.toFixed(1);
-        document.getElementById('timelineContent').innerHTML +=
-          `<div class="bg-gray-800 p-5 rounded-xl border border-teal-700">
-             <p class="font-bold title-green">Scene ${i+1}</p>
-             <p class="text-sm mt-1">${desc}</p>
-             <p class="text-xs text-gray-400 mt-2">${start}s → ${end}s (${images} images)</p>
-           </div>`;
+        document.getElementById('timelineContent').innerHTML += `
+          <div class="bg-gray-800 p-5 rounded-xl border border-teal-700">
+            <p class="font-bold title-green">Scene ${i+1}</p>
+            <p class="text-sm mt-1">${desc}</p>
+            <p class="text-xs text-gray-400 mt-2">${start}s → ${end}s (${images} images)</p>
+          </div>`;
       });
       document.getElementById('timelineOutput').classList.remove('hidden');
     }
