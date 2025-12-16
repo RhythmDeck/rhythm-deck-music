@@ -10,12 +10,12 @@
     body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
     .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    /* Consistent green from your site (#10b981 - emerald-500) */
+    /* Exact green from your site buttons */
     .title-green { color: #10b981; font-weight: 900; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-  <!-- HEADER + LOGO + DASHBOARD -->
+  <!-- HEADER -->
   <header class="bg-black border-b-4 border-yellow-600 py-6">
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
       <div class="flex items-center gap-6">
@@ -84,7 +84,6 @@
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasBridge" checked class="mr-3"> Bridge</label>
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasOutro" checked class="mr-3"> Outro</label>
           </div>
-          <!-- AI BUTTONS -->
           <h3 class="text-2xl font-bold title-green text-center mb-6">Choose AI (opens in new tab + copies prompt)</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
@@ -220,7 +219,7 @@
       if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 3000);
     }
 
-    // PERMANENT AUTH + STRIPE + PLAN UPDATE
+    // AUTH + STRIPE + PLAN UPDATE (PERMANENT)
     window.addEventListener('load', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
@@ -234,14 +233,12 @@
           if (session.payment_status === 'paid') {
             history.replaceState({}, '', 'rhythm-vision-pro.html');
             showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
-            // FORCE PLAN TO 'vision' PERMANENTLY
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-              const { error } = await supabase
+              await supabase
                 .from('profiles')
                 .update({ plan: 'vision', payment_pending: false })
                 .eq('id', user.id);
-              if (error) console.error('Plan update error:', error);
             }
           } else {
             showMessage('Payment not completed.', false);
@@ -278,9 +275,6 @@
         supabase.auth.signOut().then(() => window.location.href = 'index.html');
       };
     });
-
-    // All functions unchanged (openAIAndCopy, addScene, etc.)
-    // ... (same as previous full code)
 
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle').value || "My Song";
