@@ -65,7 +65,6 @@
       <a href="signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-400">Sign Up</a>
     </nav>
   </header>
-
   <!-- LOGIN CARD -->
   <div class="flex-1 flex items-center justify-center p-6">
     <div class="card">
@@ -76,7 +75,6 @@
         </h1>
         <p class="text-gray-400 mt-2">Log in to your artist dashboard</p>
       </div>
-
       <form id="loginForm">
         <div class="input-group">
           <input type="email" id="loginEmail" placeholder="Email address" required
@@ -85,27 +83,24 @@
         <div class="input-group">
           <input type="password" id="loginPassword" placeholder="Password" required
             class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/30 text-lg pr-12">
-          <span class="eye" onclick="togglePass()">Show</span>
+          <span class="eye" onClick="togglePass()">Show</span>
         </div>
         <button type="submit"
           class="w-full py-5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-xl rounded-xl shadow-lg transform hover:scale-105 transition mt-6">
           LOGIN
         </button>
       </form>
-
       <p class="text-center text-gray-400 mt-8">
         Don't have an account?
         <a href="signup.html" class="text-emerald-400 font-bold hover:underline">Sign Up Free or Upgrade to Pro</a>
       </p>
     </div>
   </div>
-
   <script>
     const supabase = window.supabase.createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
-
     function togglePass() {
       const pass = document.getElementById('loginPassword');
       const eye = document.querySelector('.eye');
@@ -117,42 +112,33 @@
         eye.textContent = 'Show';
       }
     }
-
-    // FIXED LOGIN — NOW RESPECTS FREE vs PRO PLAN
+    // LOGIN WITH PLAN-BASED REDIRECT
     document.getElementById('loginForm').onsubmit = async (e) => {
       e.preventDefault();
-
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
-
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
       if (error) {
         alert('Login failed: ' + error.message);
         return;
       }
-
-      // Fetch BOTH plan and subdomain in one query
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
-        .select('plan, subdomain')
+        .select('plan')
         .eq('id', data.user.id)
         .single();
 
-      if (profileError) {
-        console.error(profileError);
-        alert('Error loading profile');
+      if (!profile) {
+        alert('Profile not found');
         return;
       }
 
-      const subdomain = profile.subdomain || 'dashboard';
-      const isPro = profile.plan === 'pro';
-
-      // REDIRECT TO CORRECT DASHBOARD
-      if (isPro) {
-        window.location.href = `profile-admin-pro.html?id=${subdomain}`;
+      if (profile.plan === 'pro') {
+        window.location.href = 'profile-admin-pro.html';
+      } else if (profile.plan === 'vision') {
+        window.location.href = 'rhythm-vision-pro.html';
       } else {
-        window.location.href = `profile-admin.html?id=${subdomain}`;
+        window.location.href = 'profile-admin.html';
       }
     };
   </script>
