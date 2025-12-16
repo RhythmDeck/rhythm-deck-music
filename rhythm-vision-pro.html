@@ -15,7 +15,6 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-
   <!-- HEADER + LOGO + DASHBOARD -->
   <header class="bg-black border-b-4 border-yellow-600 py-6">
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -32,15 +31,12 @@
       </a>
     </div>
   </header>
-
   <!-- BANNER -->
   <div class="w-full h-96 overflow-hidden">
     <img src="rhythm-vision-banner.png" alt="Banner" class="w-full h-full object-cover">
   </div>
-
   <main class="flex-1 container max-w-4xl mx-auto p-8">
     <div class="bg-gray-900/95 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
-
       <div class="mb-10 p-8 bg-gray-800 rounded-2xl">
         <h3 class="text-2xl font-bold mb-4 title-green">How to Use:</h3>
         <ol class="space-y-3 text-lg text-gray-300 list-decimal ml-6">
@@ -50,9 +46,7 @@
           <li>Click Generate Images → photos load</li>
         </ol>
       </div>
-
       <div class="space-y-10">
-
         <!-- TITLE & DURATION -->
         <div class="grid md:grid-cols-2 gap-8">
           <div>
@@ -64,15 +58,12 @@
             <input id="videoDuration" type="number" value="180" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl">
           </div>
         </div>
-
         <!-- LYRICS PROMPT BUILDER -->
         <div class="p-8 bg-gray-800 rounded-2xl border border-yellow-600">
           <h2 class="text-3xl font-black title-green text-center mb-2">Build Your Lyrics Prompt</h2>
           <p class="text-center text-gray-400 mb-8">or paste your own lyrics below</p>
-
           <label class="block text-xl font-bold title-green mb-3">Lyrics Prompt</label>
           <textarea id="songConcept" rows="4" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg" placeholder="A country song about a man and his dog living off the land..."></textarea>
-
           <div class="grid md:grid-cols-2 gap-6 mt-6">
             <div>
               <label class="block text-xl font-bold title-green mb-3">Genre</label>
@@ -83,13 +74,11 @@
               <input id="numVerses" type="number" value="3" min="1" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg">
             </div>
           </div>
-
           <div class="flex gap-10 justify-center my-8">
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasChorus" checked class="mr-3"> Chorus</label>
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasBridge" checked class="mr-3"> Bridge</label>
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasOutro" checked class="mr-3"> Outro</label>
           </div>
-
           <!-- AI BUTTONS -->
           <h3 class="text-2xl font-bold title-green text-center mb-6">Choose AI → Popup + Opens</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -104,17 +93,14 @@
             </button>
           </div>
         </div>
-
         <!-- LYRICS -->
         <div>
           <label class="block text-2xl font-bold title-green mb-4">Lyrics</label>
           <textarea id="lyrics" rows="12" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste your lyrics here..."></textarea>
         </div>
-
         <!-- MP3 MUSIC CREATOR -->
         <div class="p-8 bg-gray-800 rounded-2xl border border-yellow-600">
           <h2 class="text-3xl font-black title-green text-center mb-8">Create Music (MP3)</h2>
-
           <div class="grid md:grid-cols-2 gap-8 mb-8">
             <div>
               <label class="block text-xl font-bold title-green mb-3">Voice Gender</label>
@@ -134,7 +120,6 @@
               </select>
             </div>
           </div>
-
           <label class="block text-xl font-bold title-green mb-3">Instruments (Choose Multiple)</label>
           <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
             <label class="text-lg text-gray-300"><input type="checkbox" value="piano" class="mr-3"> Piano</label>
@@ -157,10 +142,8 @@
             <label class="text-lg text-gray-300"><input type="checkbox" value="steel guitar" class="mr-3"> Steel Guitar</label>
             <label class="text-lg text-gray-300"><input type="checkbox" value="synthesizer" class="mr-3"> Synthesizer</label>
           </div>
-
           <button onclick="generateMusic()" class="w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Music (MP3)</button>
         </div>
-
         <div id="audioSection" class="mt-10 p-8 bg-gray-800 rounded-2xl hidden">
           <h2 class="text-3xl font-bold title-green text-center mb-6">Your Music</h2>
           <audio id="audioPlayer" controls class="w-full mb-6"></audio>
@@ -169,7 +152,6 @@
             <button onclick="generateMusic()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl">Redo Music</button>
           </div>
         </div>
-
         <!-- MAIN BUTTONS -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
           <button onclick="generateScenes()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Scenes</button>
@@ -177,10 +159,8 @@
           <button onclick="generateImages()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Images</button>
           <button onclick="resetAll()" class="bg-gray-700 hover:bg-gray-800 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Reset All</button>
         </div>
-
         <!-- SCENES -->
         <div id="scenesContainer" class="space-y-6 mt-12"></div>
-
         <!-- TIMELINE -->
         <div id="timelineOutput" class="mt-12 p-8 bg-gray-800 rounded-2xl border border-teal-600 hidden">
           <div class="flex justify-between items-center mb-6">
@@ -189,13 +169,11 @@
           </div>
           <div id="timelineContent" class="grid md:grid-cols-2 gap-6"></div>
         </div>
-
         <!-- IMAGES -->
         <div id="imagesOutput" class="mt-16 hidden">
           <h2 class="text-3xl font-bold title-green text-center mb-10">Generated Images</h2>
           <div id="imagesContent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
-
         <!-- CREATE VIDEO (MP4) SECTION -->
         <div class="mt-20 p-8 bg-gray-800 rounded-2xl border border-yellow-600">
           <h2 class="text-3xl font-black title-green text-center mb-8">Create Video (MP4)</h2>
@@ -210,11 +188,9 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </main>
-
   <!-- LOADING -->
   <div id="loading" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
     <div class="text-center">
@@ -223,14 +199,71 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    const supabase = window.supabase.createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
+
     let sceneCounter = 0;
     let audioUrl = '';
+
+    // AUTH + STRIPE REDIRECT HANDLING ON LOAD
+    window.addEventListener('load', async () => {
+      // Handle Stripe redirect after payment
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session_id');
+
+      if (sessionId) {
+        try {
+          const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
+            headers: { Authorization: 'pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW' }  // <-- REPLACE WITH YOUR STRIPE PUBLISHABLE KEY
+          });
+          const session = await res.json();
+          if (session.payment_status === 'paid') {
+            // Clean URL and show success
+            history.replaceState({}, '', 'rhythm-vision-pro.html');
+            showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
+          } else {
+            showMessage('Payment not completed.', false);
+            window.location.href = 'pricing.html';
+            return;
+          }
+        } catch (err) {
+          console.warn('Stripe session verification failed', err);
+          // Continue to normal auth check
+        }
+      }
+
+      // Normal login / access check
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('Please log in to access Rhythm Vision.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.plan !== 'vision' && profile?.plan !== 'pro') {
+        alert('You need a Rhythm Vision or Pro subscription to access this page.');
+        window.location.href = 'pricing.html';
+        return;
+      }
+
+      // User has access — initialize app
+      // (Your existing onload code can go here if needed)
+    });
 
     function showMessage(msg, loading = false) {
       document.getElementById('loadingText').textContent = msg;
       document.getElementById('loading').classList.toggle('hidden', !loading);
-      if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 2000);
+      if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 3000);
     }
 
     function openAIAndCopy(ai) {
@@ -242,12 +275,10 @@
       if (document.getElementById('hasChorus').checked) structure += ", catchy chorus";
       if (document.getElementById('hasBridge').checked) structure += ", bridge";
       if (document.getElementById('hasOutro').checked) structure += ", outro";
-
       const prompt = `Write professional ${genre} lyrics titled "${title}".
 Concept: ${concept}
 Structure: ${structure}
 Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
-
       navigator.clipboard.writeText(prompt);
       alert(`Prompt copied to clipboard!\nOpening ${ai.toUpperCase()} in a new tab...`);
       if (ai === 'grok') window.open('https://grok.x.ai', '_blank');
@@ -282,18 +313,13 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     function generateScenes() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return alert("Paste lyrics first!");
-
       document.getElementById('scenesContainer').innerHTML = '';
       sceneCounter = 0;
-
       const sections = lyrics.match(/\[([^\]]+)\][\s\S]*?(?=\[|$)/g) || [];
-
       sections.forEach(section => {
         const header = section.match(/\[([^\]]+)\]/)?.[1]?.trim() || "Scene";
         const content = section.replace(/\[([^\]]+)\]/g, '').trim().toLowerCase();
-
         let desc = "";
-
         if (content.includes('sun creepin') || content.includes('pine-line ridge') || content.includes('coffee on the fire')) desc = "Golden sunrise over pine trees, coffee brewing on campfire, old wood bridge, beat-up truck, loyal dog tail waggin, warm morning light, cinematic rural scene";
         else if (content.includes('livin the life') || content.includes('me and my best friend') || content.includes('off the grid')) desc = "Man and dog in wilderness, no worries, wild winds, freedom, peace in souls, off the grid living, cinematic wide shot";
         else if (content.includes('fish that creek') || content.includes('lay back in the grass') || content.includes('whisper of the breeze')) desc = "Man fishing in creek, lying in grass, cottonwood trees, gentle breeze, serene country day, cinematic";
@@ -301,10 +327,8 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
         else if (content.includes('maybe someday the world') || content.includes('dirt track')) desc = "Rustic dirt track, man and dog walking, good Lord's will, creek don't rise, chasing sunsets, cinematic bridge scene";
         else if (content.includes('here’s to the quiet') || content.includes('patch of ground')) desc = "Peaceful outro, man and dog on patch of ground, quiet life, God's good hand, living off the land, cinematic closing shot";
         else desc = `${header} - beautiful cinematic scene, emotional lighting, professional photography`;
-
         addScene(desc, 6);
       });
-
       showMessage("Perfect scenes generated from your lyrics!", false);
     }
 
@@ -312,11 +336,9 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       const duration = parseFloat(document.getElementById('videoDuration').value) || 180;
       const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("No scenes");
-
       const totalImages = scenes.reduce((sum, s) => sum + parseInt(s.querySelector('input[type=number]').value || 6, 10), 0);
       const secPerImage = duration / totalImages;
       let time = 0;
-
       document.getElementById('timelineContent').innerHTML = '';
       scenes.forEach((s, i) => {
         const desc = s.querySelector('textarea').value.slice(0, 60) + (s.querySelector('textarea').value.length > 60 ? "..." : "");
@@ -324,8 +346,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
         const start = time.toFixed(1);
         time += images * secPerImage;
         const end = time.toFixed(1);
-
-        document.getElementById('timelineContent').innerHTML += 
+        document.getElementById('timelineContent').innerHTML +=
           `<div class="bg-gray-800 p-5 rounded-xl border border-teal-700">
              <p class="font-bold title-green">Scene ${i+1}</p>
              <p class="text-sm mt-1">${desc}</p>
@@ -335,24 +356,19 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       document.getElementById('timelineOutput').classList.remove('hidden');
     }
 
-    // Images with multiple fallbacks
     async function generateImages() {
       const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("Generate scenes first!");
-
       document.getElementById('imagesOutput').classList.remove('hidden');
       document.getElementById('imagesContent').innerHTML = '';
-
       for (const scene of scenes) {
         const prompt = scene.querySelector('textarea').value.trim();
         const num = parseInt(scene.querySelector('input[type=number]').value) || 6;
-
         for (let i = 0; i < num; i++) {
           const div = document.createElement('div');
           div.className = "bg-gray-800 rounded-xl overflow-hidden shadow-2xl";
           div.innerHTML = `<div class="w-full h-80 flex items-center justify-center"><div class="spinner"></div></div>`;
           document.getElementById('imagesContent').appendChild(div);
-
           const encoded = encodeURIComponent(prompt);
           const img = new Image();
           img.onload = () => div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
@@ -372,33 +388,25 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       }
     }
 
-    // Music generation with your Suno key
     async function generateMusic() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return showMessage("Add lyrics first!");
-
       showMessage("Generating music... (30-60s)", true);
-
       const title = document.getElementById('videoTitle').value || "My Song";
       const gender = document.querySelector('input[name=voiceGender]:checked').value;
       const tone = document.getElementById('voiceTone').value;
       const instruments = Array.from(document.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value).join(", ");
       const genre = document.getElementById('musicGenre').value || "country";
-
       const stylePrompt = `${genre}, ${gender} ${tone} voice, instruments: ${instruments || "acoustic guitar, banjo, harmonica"}`;
-
       try {
         const res = await fetch("https://api.suno.ai/v1/generate", {
           method: "POST",
           headers: { "Authorization": "Bearer 06a8686015a2294ef397a4ebe6e0bec2", "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: stylePrompt, lyrics, title, make_instrumental: false, model: "chirp-v3-5" })
         });
-
         if (!res.ok) throw new Error("API error");
-
         const data = await res.json();
         const id = data.id;
-
         let audio;
         let attempts = 0;
         while (attempts < 30) {
@@ -413,9 +421,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
             break;
           }
         }
-
         if (!audio) throw new Error("Timeout");
-
         audioUrl = audio;
         document.getElementById('audioPlayer').src = audio;
         document.getElementById('audioSection').classList.remove('hidden');
@@ -436,9 +442,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
     function createVideo() {
       if (!audioUrl) return showMessage("Generate music first!");
       if (document.querySelectorAll('#imagesContent img').length === 0) return showMessage("Generate images first!");
-
       showMessage("Creating video demo...", true);
-
       setTimeout(() => {
         const video = document.getElementById('finalVideo');
         video.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
