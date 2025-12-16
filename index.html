@@ -14,7 +14,6 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900"><br><br>
-
   <!-- HEADER -->
   <header class="bg-black text-white p-4 flex justify-between items-center">
     <div class="flex items-center space-x-3">
@@ -34,7 +33,6 @@
       <a href="signup.html" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
     </nav>
   </header>
-
   <!-- HERO -->
   <section class="relative h-[500px] bg-cover bg-center flex items-center justify-center"
            style="background-image: url('banner-cropped.jpg');">
@@ -46,7 +44,6 @@
       </p>
     </div>
   </section>
-
   <!-- ABOUT + MAIN STAGE FEATURE -->
   <section class="max-w-6xl mx-auto py-16 px-6 grid md:grid-cols-2 gap-8 items-start">
     <div>
@@ -81,7 +78,6 @@
       </div>
     </div>
   </section>
-
   <!-- FEATURED CREATORS -->
   <section class="bg-gray-200 py-12">
     <div class="max-w-6xl mx-auto px-6 text-center">
@@ -130,6 +126,46 @@
     </div>
   </section>
 
+  <!-- NEW SECTION: MESSAGING, COLLABORATION & RHYTHM VISION -->
+  <section class="max-w-6xl mx-auto py-16 px-6">
+    <h3 class="text-3xl font-bold mb-8 text-center">Our Core Features</h3>
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Messaging -->
+      <div class="bg-white rounded-xl shadow-lg p-8 text-center border-2 border-green-500">
+        <h4 class="text-2xl font-bold mb-4 text-green-600">Messaging</h4>
+        <p class="text-gray-700 leading-relaxed">
+          Direct, private messaging between artists and fans. Stay connected, discuss ideas, and build relationships — all within the platform.
+        </p>
+        <p class="mt-6 text-sm font-semibold text-gray-600">
+          Available exclusively with the <strong>Pro Plan</strong>
+        </p>
+      </div>
+
+      <!-- Collaboration -->
+      <div class="bg-white rounded-xl shadow-lg p-8 text-center border-2 border-green-500">
+        <h4 class="text-2xl font-bold mb-4 text-green-600">Collaboration</h4>
+        <p class="text-gray-700 leading-relaxed">
+          Work together with other creators. Share files, exchange feedback, and co-create music seamlessly in a dedicated collaboration space.
+        </p>
+        <p class="mt-6 text-sm font-semibold text-gray-600">
+          Available exclusively with the <strong>Pro Plan</strong>
+        </p>
+      </div>
+
+      <!-- Rhythm Vision -->
+      <div class="bg-white rounded-xl shadow-lg p-8 text-center border-2 border-yellow-500">
+        <h4 class="text-2xl font-bold mb-4 text-yellow-600">Rhythm Vision</h4>
+        <p class="text-gray-700 leading-relaxed">
+          Our powerful AI music video creator. Turn your lyrics and music into stunning visual videos with scenes, images, and timelines — all generated automatically.
+        </p>
+        <p class="mt-6 text-sm font-semibold text-gray-600">
+          Included in the <strong>Pro Plan</strong><br>
+          or available as a <strong>stand-alone app</strong>
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- FREE vs PRO PLAN SECTION -->
   <section class="max-w-6xl mx-auto py-16 px-6">
     <h3 class="text-3xl font-bold mb-8 text-center">Plans & Features</h3>
@@ -165,7 +201,6 @@
       </div>
     </div>
   </section><br>
-
   <!-- Q&A SECTION -->
   <section class="bg-neutral-950 py-16 px-6">
     <div class="max-w-6xl mx-auto">
@@ -220,7 +255,6 @@
       </div>
     </div>
   </section>
-
   <!-- VIDEO MODAL -->
   <div id="videoModal" class="fixed inset-0 bg-black bg-opacity-80 items-center justify-center z-50">
     <div class="relative w-full max-w-3xl">
@@ -231,7 +265,6 @@
       <button id="closeVideoBtn" class="absolute top-2 right-2 bg-white text-black px-3 py-1 rounded-full font-bold">X</button>
     </div>
   </div>
-
   <!-- FOOTER -->
   <footer class="bg-black text-white mt-10 p-4 text-center text-sm">
     <nav class="mb-2 space-x-4">
@@ -241,7 +274,6 @@
     </nav>
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
-
   <!-- VIDEO SCRIPT -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -249,21 +281,18 @@
       const videoPlayer = document.getElementById("videoPlayer");
       const videoSourceMp4 = document.getElementById("videoSourceMp4");
       const closeBtn = document.getElementById("closeVideoBtn");
-
       function openVideo(mp4Path) {
         videoSourceMp4.src = mp4Path;
         videoPlayer.load();
         modal.classList.add("active");
         videoPlayer.play().catch(err => console.warn("Play interrupted:", err));
       }
-
       function closeVideo() {
         videoPlayer.pause();
         videoPlayer.currentTime = 0;
         videoSourceMp4.src = "";
         modal.classList.remove("active");
       }
-
       modal.addEventListener("click", e => { if (e.target === modal) closeVideo(); });
       closeBtn.addEventListener("click", closeVideo);
       document.querySelectorAll("[data-video]").forEach(el => {
