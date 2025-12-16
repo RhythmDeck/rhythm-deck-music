@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rhythm Deck - Rhythm Vision Pro</title>
+  <title>Rhythm Deck - Rhythm Vision</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
     .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* Neon Green for all titles */
+    .neon-green { color: #39ff14; text-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -40,7 +42,7 @@
     <div class="bg-gray-900/95 backdrop-blur rounded-3xl shadow-2xl p-10 border border-yellow-600">
 
       <div class="mb-10 p-8 bg-gray-800 rounded-2xl">
-        <h3 class="text-2xl font-bold mb-4 text-teal-300">How to Use:</h3>
+        <h3 class="text-2xl font-bold mb-4 neon-green">How to Use:</h3>
         <ol class="space-y-3 text-lg text-gray-300 list-decimal ml-6">
           <li>Fill idea → click AI → popup + opens</li>
           <li>Paste lyrics → click Generate Scenes</li>
@@ -54,30 +56,30 @@
         <!-- TITLE & DURATION -->
         <div class="grid md:grid-cols-2 gap-8">
           <div>
-            <label class="block text-xl font-bold text-yellow-400 mb-3">Video Title</label>
+            <label class="block text-xl font-bold neon-green mb-3">Video Title</label>
             <input id="videoTitle" type="text" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl" placeholder="My Song">
           </div>
           <div>
-            <label class="block text-xl font-bold text-yellow-400 mb-3">Duration (seconds)</label>
+            <label class="block text-xl font-bold neon-green mb-3">Duration (seconds)</label>
             <input id="videoDuration" type="number" value="180" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-5 text-xl">
           </div>
         </div>
 
         <!-- LYRICS PROMPT BUILDER -->
         <div class="p-8 bg-gray-800 rounded-2xl border border-yellow-600">
-          <h2 class="text-3xl font-black text-yellow-400 text-center mb-2">Build Your Lyrics Prompt</h2>
+          <h2 class="text-3xl font-black neon-green text-center mb-2">Build Your Lyrics Prompt</h2>
           <p class="text-center text-gray-400 mb-8">or paste your own lyrics below</p>
 
-          <label class="block text-xl font-bold text-yellow-400 mb-3">Lyrics Prompt</label>
+          <label class="block text-xl font-bold neon-green mb-3">Lyrics Prompt</label>
           <textarea id="songConcept" rows="4" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg" placeholder="A country song about a man and his dog living off the land..."></textarea>
 
           <div class="grid md:grid-cols-2 gap-6 mt-6">
             <div>
-              <label class="block text-xl font-bold text-yellow-400 mb-3">Genre</label>
+              <label class="block text-xl font-bold neon-green mb-3">Genre</label>
               <input id="musicGenre" type="text" value="country" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg">
             </div>
             <div>
-              <label class="block text-xl font-bold text-yellow-400 mb-3">Number of Verses</label>
+              <label class="block text-xl font-bold neon-green mb-3">Number of Verses</label>
               <input id="numVerses" type="number" value="3" min="1" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg">
             </div>
           </div>
@@ -88,16 +90,16 @@
             <label class="text-lg text-gray-300"><input type="checkbox" id="hasOutro" checked class="mr-3"> Outro</label>
           </div>
 
-          <!-- AI BUTTONS - 50% THINNER -->
-          <h3 class="text-2xl font-bold text-yellow-400 text-center mb-6">Choose AI → Popup + Opens</h3>
+          <!-- AI BUTTONS -->
+          <h3 class="text-2xl font-bold neon-green text-center mb-6">Choose AI → Popup + Opens</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onClick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('grok')" class="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Grok
             </button>
-            <button onClick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('gemini')" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               Gemini
             </button>
-            <button onClick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
+            <button onclick="openAIAndCopy('chatgpt')" class="bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white font-bold py-2 rounded-xl shadow-lg hover:shadow-2xl transition text-xl">
               ChatGPT
             </button>
           </div>
@@ -105,24 +107,24 @@
 
         <!-- LYRICS -->
         <div>
-          <label class="block text-2xl font-bold text-yellow-400 mb-4">Lyrics</label>
+          <label class="block text-2xl font-bold neon-green mb-4">Lyrics</label>
           <textarea id="lyrics" rows="12" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-6 text-lg font-mono" placeholder="Paste your lyrics here..."></textarea>
         </div>
 
         <!-- MP3 MUSIC CREATOR -->
         <div class="p-8 bg-gray-800 rounded-2xl border border-yellow-600">
-          <h2 class="text-3xl font-black text-yellow-400 text-center mb-8">Create Music (MP3)</h2>
+          <h2 class="text-3xl font-black neon-green text-center mb-8">Create Music (MP3)</h2>
 
           <div class="grid md:grid-cols-2 gap-8 mb-8">
             <div>
-              <label class="block text-xl font-bold text-yellow-400 mb-3">Voice Gender</label>
+              <label class="block text-xl font-bold neon-green mb-3">Voice Gender</label>
               <div class="flex gap-10">
                 <label class="text-lg text-gray-300"><input type="radio" name="voiceGender" value="male" checked class="mr-3"> Male</label>
                 <label class="text-lg text-gray-300"><input type="radio" name="voiceGender" value="female" class="mr-3"> Female</label>
               </div>
             </div>
             <div>
-              <label class="block text-xl font-bold text-yellow-400 mb-3">Voice Tone</label>
+              <label class="block text-xl font-bold neon-green mb-3">Voice Tone</label>
               <select id="voiceTone" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-5 text-lg">
                 <option value="bass">Bass</option>
                 <option value="baritone">Baritone</option>
@@ -133,7 +135,7 @@
             </div>
           </div>
 
-          <label class="block text-xl font-bold text-yellow-400 mb-3">Instruments (Choose Multiple)</label>
+          <label class="block text-xl font-bold neon-green mb-3">Instruments (Choose Multiple)</label>
           <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
             <label class="text-lg text-gray-300"><input type="checkbox" value="piano" class="mr-3"> Piano</label>
             <label class="text-lg text-gray-300"><input type="checkbox" value="electric guitar" class="mr-3"> Electric Guitar</label>
@@ -156,24 +158,24 @@
             <label class="text-lg text-gray-300"><input type="checkbox" value="synthesizer" class="mr-3"> Synthesizer</label>
           </div>
 
-          <button onClick="generateMusic()" class="w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Music (MP3)</button>
+          <button onclick="generateMusic()" class="w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Music (MP3)</button>
         </div>
 
         <div id="audioSection" class="mt-10 p-8 bg-gray-800 rounded-2xl hidden">
-          <h2 class="text-3xl font-bold text-yellow-400 text-center mb-6">Your Music</h2>
+          <h2 class="text-3xl font-bold neon-green text-center mb-6">Your Music</h2>
           <audio id="audioPlayer" controls class="w-full mb-6"></audio>
           <div class="flex gap-6 justify-center">
-            <button onClick="downloadAudio()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl">Download MP3</button>
-            <button onClick="generateMusic()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl">Redo Music</button>
+            <button onclick="downloadAudio()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl">Download MP3</button>
+            <button onclick="generateMusic()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl">Redo Music</button>
           </div>
         </div>
 
         <!-- MAIN BUTTONS -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
-          <button onClick="generateScenes()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Scenes</button>
-          <button onClick="generateTimeline()" class="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Timeline</button>
-          <button onClick="generateImages()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Images</button>
-          <button onClick="resetAll()" class="bg-gray-700 hover:bg-gray-800 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Reset All</button>
+          <button onclick="generateScenes()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Scenes</button>
+          <button onclick="generateTimeline()" class="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Timeline</button>
+          <button onclick="generateImages()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-black font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Generate Images</button>
+          <button onclick="resetAll()" class="bg-gray-700 hover:bg-gray-800 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">Reset All</button>
         </div>
 
         <!-- SCENES -->
@@ -182,17 +184,33 @@
         <!-- TIMELINE -->
         <div id="timelineOutput" class="mt-12 p-8 bg-gray-800 rounded-2xl border border-teal-600 hidden">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-3xl font-bold text-teal-300">Video Timeline</h2>
-            <button onClick="copyTimeline()" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg">Copy</button>
+            <h2 class="text-3xl font-bold neon-green">Video Timeline</h2>
+            <button onclick="copyTimeline()" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg">Copy</button>
           </div>
           <div id="timelineContent" class="grid md:grid-cols-2 gap-6"></div>
         </div>
 
         <!-- IMAGES -->
         <div id="imagesOutput" class="mt-16 hidden">
-          <h2 class="text-3xl font-bold text-yellow-400 text-center mb-10">Generated Images</h2>
+          <h2 class="text-3xl font-bold neon-green text-center mb-10">Generated Images</h2>
           <div id="imagesContent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
+
+        <!-- CREATE VIDEO (MP4) SECTION - at the bottom -->
+        <div class="mt-20 p-8 bg-gray-800 rounded-2xl border border-yellow-600">
+          <h2 class="text-3xl font-black neon-green text-center mb-8">Create Video (MP4)</h2>
+          <p class="text-center text-gray-400 mb-8">Combine your music + images into a full music video</p>
+          <button onclick="createVideo()" class="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-bold text-xl py-6 rounded-xl shadow-xl hover:scale-105 transition">
+            Generate Full Music Video (MP4)
+          </button>
+          <div id="videoSection" class="mt-10 hidden">
+            <video id="finalVideo" controls class="w-full rounded-xl shadow-2xl"></video>
+            <div class="flex justify-center mt-6">
+              <button onclick="downloadVideo()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-12 rounded-xl">Download MP4</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
@@ -231,11 +249,7 @@ Structure: ${structure}
 Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
       navigator.clipboard.writeText(prompt);
-
-      // Popup first
       alert(`Prompt copied to clipboard!\nOpening ${ai.toUpperCase()} in a new tab...`);
-
-      // Then redirect
       if (ai === 'grok') window.open('https://grok.x.ai', '_blank');
       if (ai === 'gemini') window.open('https://gemini.google.com', '_blank');
       if (ai === 'chatgpt') window.open('https://chatgpt.com', '_blank');
@@ -247,7 +261,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       div.className = 'p-6 bg-gray-800 rounded-xl border border-gray-700';
       div.innerHTML = `
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-2xl font-bold text-teal-300">Scene ${sceneCounter}</h3>
+          <h3 class="text-2xl font-bold neon-green">Scene ${sceneCounter}</h3>
           <button onclick="this.closest('div').remove(); sceneCounter--; renumber()" class="text-red-400 hover:text-red-300 text-3xl">×</button>
         </div>
         <textarea class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-white text-lg resize-y min-h-32">${description}</textarea>
@@ -280,7 +294,6 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
         let desc = "";
 
-        // Expanded matching for your country song
         if (content.includes('sun creepin') || content.includes('pine-line ridge') || content.includes('coffee on the fire')) desc = "Golden sunrise over pine trees, coffee brewing on campfire, old wood bridge, beat-up truck, loyal dog tail waggin, warm morning light, cinematic rural scene";
         else if (content.includes('livin the life') || content.includes('me and my best friend') || content.includes('off the grid')) desc = "Man and dog in wilderness, no worries, wild winds, freedom, peace in souls, off the grid living, cinematic wide shot";
         else if (content.includes('fish that creek') || content.includes('lay back in the grass') || content.includes('whisper of the breeze')) desc = "Man fishing in creek, lying in grass, cottonwood trees, gentle breeze, serene country day, cinematic";
@@ -314,7 +327,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
         document.getElementById('timelineContent').innerHTML += 
           `<div class="bg-gray-800 p-5 rounded-xl border border-teal-700">
-             <p class="font-bold text-teal-300">Scene ${i+1}</p>
+             <p class="font-bold neon-green">Scene ${i+1}</p>
              <p class="text-sm mt-1">${desc}</p>
              <p class="text-xs text-gray-400 mt-2">${start}s → ${end}s (${images} images)</p>
            </div>`;
@@ -322,16 +335,13 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       document.getElementById('timelineOutput').classList.remove('hidden');
     }
 
-    // FIXED: Images from Unsplash with fallback to Pexels and Pixabay
+    // Images load with multiple fallbacks
     async function generateImages() {
       const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
       if (scenes.length === 0) return showMessage("Generate scenes first!");
 
       document.getElementById('imagesOutput').classList.remove('hidden');
       document.getElementById('imagesContent').innerHTML = '';
-
-      const pexelsKey = '563492ad6f91700001000001b8c8c4b2b4e04b5e8c7f0d8c1a8e5b3f'; // Free Pexels key from search
-      const pixabayKey = '44076199-7c4e8afbc5b5d98e4e2e7f8c1'; // From code
 
       for (const scene of scenes) {
         const prompt = scene.querySelector('textarea').value.trim();
@@ -344,42 +354,25 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
           document.getElementById('imagesContent').appendChild(div);
 
           const encoded = encodeURIComponent(prompt);
-
           const img = new Image();
-          img.onload = () => {
-            div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
-          };
-          img.onerror = async () => {
-            try {
-              const res = await fetch(`https://api.pexels.com/v1/search?query=${encoded}&per_page=1`, {
-                headers: { Authorization: pexelsKey }
-              });
-              const data = await res.json();
-              if (data.photos.length > 0) {
-                img.src = data.photos[0].src.large;
-              } else {
-                throw new Error();
-              }
-            } catch {
-              try {
-                const res = await fetch(`https://pixabay.com/api/?key=${pixabayKey}&q=${encoded}&image_type=photo&per_page=3`);
-                const data = await res.json();
-                if (data.hits.length > 0) {
-                  img.src = data.hits[0].webformatURL;
-                } else {
-                  div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">No image found</div>`;
-                }
-              } catch {
-                div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">No image found</div>`;
-              }
-            }
+          img.onload = () => div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-110 transition duration-500">`;
+          img.onerror = () => {
+            fetch(`https://api.pexels.com/v1/search?query=${encoded}&per_page=1`, {
+              headers: { Authorization: '563492ad6f91700001000001b8c8c4b2b4e04b5e8c7f0d8c1a8e5b3f' }
+            }).then(r => r.json()).then(d => {
+              if (d.photos?.length) img.src = d.photos[0].src.large;
+            }).catch(() => {
+              fetch(`https://pixabay.com/api/?key=44076199-7c4e8afbc5b5d98e4e2e7f8c1&q=${encoded}&image_type=photo`).then(r => r.json()).then(d => {
+                if (d.hits?.length) img.src = d.hits[0].webformatURL;
+              }).catch(() => div.innerHTML = `<div class="w-full h-80 bg-gray-700 flex items-center justify-center text-gray-500">No image</div>`);
+            });
           };
           img.src = `https://source.unsplash.com/featured/1200x800/?${encoded}&sig=${Date.now()+i}`;
         }
       }
     }
 
-    // FIXED: Music generation with polling
+    // Music generation (Suno)
     async function generateMusic() {
       const lyrics = document.getElementById('lyrics').value.trim();
       if (!lyrics) return showMessage("Add lyrics first!");
@@ -401,37 +394,34 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
           body: JSON.stringify({ prompt: stylePrompt, lyrics, title, make_instrumental: false, model: "chirp-v3-5" })
         });
 
-        if (!res.ok) throw new Error("API error: " + res.status);
+        if (!res.ok) throw new Error("API error");
 
         const data = await res.json();
         const id = data.id;
 
         let audio;
         let attempts = 0;
-        while (attempts < 20) {
-          await new Promise(r => setTimeout(r, 5000)); // Poll every 5s
+        while (attempts < 30) {
+          await new Promise(r => setTimeout(r, 4000));
           attempts++;
-          const pollRes = await fetch(`https://api.suno.ai/v1/get?ids=${id}`, {
+          const poll = await fetch(`https://api.suno.ai/v1/get?ids=${id}`, {
             headers: { "Authorization": "Bearer 06a8686015a2294ef397a4ebe6e0bec2" }
           });
-          const pollData = await pollRes.json();
-          if (pollData[0].status === 'complete') {
+          const pollData = await poll.json();
+          if (pollData[0]?.status === 'complete') {
             audio = pollData[0].audio_url;
             break;
-          } else if (pollData[0].status === 'error') {
-            throw new Error("Generation failed");
           }
         }
 
-        if (!audio) throw new Error("Timeout - try again");
+        if (!audio) throw new Error("Timeout");
 
         audioUrl = audio;
         document.getElementById('audioPlayer').src = audio;
         document.getElementById('audioSection').classList.remove('hidden');
-
-        showMessage("Music ready! Play below", false);
+        showMessage("Music ready!", false);
       } catch (e) {
-        showMessage("Error: " + e.message + ". Try again or check key", false);
+        showMessage("Music generation failed. Try again.", false);
       }
     }
 
@@ -440,6 +430,28 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       const a = document.createElement('a');
       a.href = audioUrl;
       a.download = (document.getElementById('videoTitle').value || "song") + ".mp3";
+      a.click();
+    }
+
+    // Create Video (MP4) - client-side demo
+    function createVideo() {
+      if (!audioUrl) return showMessage("Generate music first!");
+      if (document.querySelectorAll('#imagesContent img').length === 0) return showMessage("Generate images first!");
+
+      showMessage("Creating video... (this is a demo)", true);
+
+      setTimeout(() => {
+        const video = document.getElementById('finalVideo');
+        video.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"; // Demo video
+        document.getElementById('videoSection').classList.remove('hidden');
+        showMessage("Video ready! (Demo using sample video)", false);
+      }, 3000);
+    }
+
+    function downloadVideo() {
+      const a = document.createElement('a');
+      a.href = document.getElementById('finalVideo').src;
+      a.download = (document.getElementById('videoTitle').value || "video") + ".mp4";
       a.click();
     }
 
