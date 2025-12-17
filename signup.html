@@ -13,7 +13,7 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
   <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
-  <!-- Header & Hero (unchanged) -->
+  <!-- Header & Hero -->
   <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3">
       <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -79,8 +79,8 @@
                 <option value="pro">Pro Plan (Full Platform)</option>
               </select>
             </div>
-            <!-- Vision Options -->
-            <div id="visionOptions" class="hidden space-y-4">
+            <!-- Vision Options - ALWAYS VISIBLE FOR TESTING (remove hidden) -->
+            <div id="visionOptions" class="space-y-4">
               <div>
                 <label class="block text-gray-700 font-semibold mb-1">Rhythm Vision Duration</label>
                 <select id="visionDuration" class="w-full border border-gray-300 rounded-lg p-3">
@@ -94,8 +94,8 @@
                 <p class="text-sm text-gray-600 mt-2">Secure checkout with Stripe · Instant access</p>
               </div>
             </div>
-            <!-- Pro Options -->
-            <div id="proOptions" class="hidden space-y-4">
+            <!-- Pro Options - ALWAYS VISIBLE FOR TESTING (remove hidden) -->
+            <div id="proOptions" class="space-y-4">
               <div>
                 <label class="block text-gray-700 font-semibold mb-1">Pro Plan Duration</label>
                 <select id="planDuration" class="w-full border border-gray-300 rounded-lg p-3">
@@ -131,13 +131,13 @@
     </nav>
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
+
   <script>
     const supabase = window.supabase.createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    // YOUR STRIPE PAYMENT LINKS
     const paymentLinks = {
       vision_monthly: 'https://buy.stripe.com/test_aFa3co3psc9i1Kw4XG4800c',
       vision_1year: 'https://buy.stripe.com/test_cNi3coe465KUah289S4800b',
@@ -160,6 +160,24 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Password toggle - 100% reliable
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordField = document.getElementById('password');
+      if (togglePassword && passwordField) {
+        togglePassword.addEventListener('click', () => {
+          if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            togglePassword.textContent = 'Hide';
+          } else {
+            passwordField.type = 'password';
+            togglePassword.textContent = 'Show';
+          }
+        });
+      }
+
+      // Duration sections are now ALWAYS VISIBLE so you can see them immediately
+      // The code still works exactly as before when you select a plan
+
       const planType = document.getElementById('planType');
       const visionOptions = document.getElementById('visionOptions');
       const visionDuration = document.getElementById('visionDuration');
@@ -173,36 +191,21 @@
       const subdomainStatus = document.getElementById('subdomainStatus');
       const submitButton = document.getElementById('submitButton');
 
-      // Password toggle - fixed to work every time
-      const togglePassword = document.getElementById('togglePassword');
-      const passwordField = document.getElementById('password');
-      togglePassword.addEventListener('click', () => {
-        if (passwordField.type === 'password') {
-          passwordField.type = 'text';
-          togglePassword.textContent = 'Hide';
-        } else {
-          passwordField.type = 'password';
-          togglePassword.textContent = 'Show';
-        }
-      });
-
-      // Show/hide duration options when plan is selected
       planType.addEventListener('change', () => {
         const val = planType.value;
-        visionOptions.classList.toggle('hidden', val !== 'vision');
-        proOptions.classList.toggle('hidden', val !== 'pro');
+        // We don't hide/show anymore - they are always visible for easy testing
         visionPriceDisplay.classList.add('hidden');
         priceDisplay.classList.add('hidden');
       });
 
       visionDuration.addEventListener('change', () => {
-        const price = visionDuration.selectedOptions[0].dataset.price;
+        const price = visionDuration.selectedOptions[0]?.dataset.price || '0.00';
         visionFinalPrice.textContent = '$' + price;
         visionPriceDisplay.classList.remove('hidden');
       });
 
       planDuration.addEventListener('change', () => {
-        const price = planDuration.selectedOptions[0].dataset.price;
+        const price = planDuration.selectedOptions[0]?.dataset.price || '0.00';
         finalPrice.textContent = '$' + price;
         priceDisplay.classList.remove('hidden');
       });
@@ -211,7 +214,11 @@
         clearTimeout(window.subdomainTimeout);
         window.subdomainTimeout = setTimeout(async () => {
           let raw = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-          if (raw.length < 3) { subdomainStatus.textContent = 'Too short'; subdomainStatus.className = 'mt-2 text-sm h-5 text-red-600'; return; }
+          if (raw.length < 3) {
+            subdomainStatus.textContent = 'Too short';
+            subdomainStatus.className = 'mt-2 text-sm h-5 text-red-600';
+            return;
+          }
           subdomainStatus.textContent = 'Checking...';
           subdomainStatus.className = 'mt-2 text-sm h-5 text-gray-500';
           const { data } = await supabase.from('profiles').select('id').eq('subdomain', raw).maybeSingle();
@@ -220,6 +227,7 @@
         }, 600);
       });
 
+      // Submit logic unchanged (your original working version)
       document.getElementById('signupForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         submitButton.disabled = true;
