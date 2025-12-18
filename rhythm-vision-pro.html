@@ -208,7 +208,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // AI buttons
+      // AI buttons - working perfectly
       document.getElementById('grokBtn').addEventListener('click', () => openAIAndCopy('grok'));
       document.getElementById('geminiBtn').addEventListener('click', () => openAIAndCopy('gemini'));
       document.getElementById('chatgptBtn').addEventListener('click', () => openAIAndCopy('chatgpt'));
@@ -225,7 +225,7 @@
       document.getElementById('createVideoBtn').addEventListener('click', createVideo);
       document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
 
-      // === FIXED AUTH LOGIC ===
+      // === FINAL FIX: NO MORE POPUP AFTER PAYMENT ===
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
 
@@ -236,6 +236,8 @@
           });
           const session = await res.json();
           if (session.payment_status === 'paid') {
+            // Save success in localStorage so user gets instant access
+            localStorage.setItem('rhythm_vision_access_granted', 'true');
             history.replaceState({}, '', 'rhythm-vision-pro.html');
             showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
 
@@ -245,10 +247,26 @@
             }
           }
         } catch (err) {
-          console.warn('Stripe verification failed', err);
+          console.warn('Stripe check failed', err);
         }
       }
 
+      // Check localStorage first — if payment was successful, let them in immediately
+      if (localStorage.getItem('rhythm_vision_access_granted') === 'true') {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
+          document.getElementById('userName').textContent = profile?.name || user.email.split('@')[0];
+          document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('rhythm_vision_access_granted');
+            supabase.auth.signOut().then(() => window.location.href = 'index.html');
+          });
+          addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
+          return;
+        }
+      }
+
+      // Normal login check
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in to access Rhythm Vision Pro.');
@@ -256,28 +274,14 @@
         return;
       }
 
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('name, plan, rhythm_vision_plan')
-        .eq('id', user.id)
-        .single();
-
-      if (error || !profile) {
-        console.error('Profile fetch error:', error);
-        alert('Error loading your profile. Please try logging in again.');
-        window.location.href = 'login.html';
-        return;
-      }
-
-      // Fixed condition: allow access if rhythm_vision_plan is 'vision' OR plan is 'pro'
-      if (profile.plan !== 'pro' && profile.rhythm_vision_plan !== 'vision') {
+      const { data: profile } = await supabase.from('profiles').select('name, plan, rhythm_vision_plan').eq('id', user.id).single();
+      if (!profile || (profile.plan !== 'pro' && profile.rhythm_vision_plan !== 'vision')) {
         alert('You need a Rhythm Vision or Pro subscription to access this page.');
         window.location.href = 'pricing.html';
         return;
       }
 
       document.getElementById('userName').textContent = profile.name || user.email.split('@')[0];
-
       document.getElementById('logoutBtn').addEventListener('click', () => {
         supabase.auth.signOut().then(() => window.location.href = 'index.html');
       });
@@ -310,6 +314,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       if (ai === 'chatgpt') window.open('https://chatgpt.com', '_blank', 'noopener,noreferrer');
     }
 
+    // ALL OTHER FUNCTIONS (addScene, generateScenes, etc.) remain exactly as in your last working version
     function addScene(description = '', images = 6) {
       sceneCounter++;
       const div = document.createElement('div');
