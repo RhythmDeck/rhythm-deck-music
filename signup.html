@@ -6,14 +6,13 @@
   <title>Sign Up | Rhythm Deck Music</title>
   <base href="/">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     .input-focus:focus { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4); }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
   <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
-  <!-- Header & Hero unchanged -->
+  <!-- Header & Hero -->
   <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3">
       <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -132,8 +131,11 @@
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
-  <script>
-    const supabase = window.supabase.createClient(
+  <!-- Supabase CDN with module support -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabase = createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
@@ -173,7 +175,7 @@
       const subdomainStatus = document.getElementById('subdomainStatus');
       const submitButton = document.getElementById('submitButton');
 
-      // Password toggle - safe inside DOMContentLoaded
+      // Password toggle
       const togglePassword = document.getElementById('togglePassword');
       const passwordField = document.getElementById('password');
       togglePassword.addEventListener('click', () => {
@@ -185,9 +187,6 @@
           togglePassword.textContent = 'Show';
         }
       });
-
-      // REMOVED the lines that force hidden - they were the bug
-      // Duration sections stay hidden by HTML class until plan selected
 
       planType.addEventListener('change', () => {
         const val = planType.value;
