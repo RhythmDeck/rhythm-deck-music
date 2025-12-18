@@ -207,7 +207,7 @@
       if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 3000);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       // AI buttons
       document.getElementById('grokBtn').addEventListener('click', () => openAIAndCopy('grok'));
       document.getElementById('geminiBtn').addEventListener('click', () => openAIAndCopy('gemini'));
@@ -225,65 +225,75 @@
       document.getElementById('createVideoBtn').addEventListener('click', createVideo);
       document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
 
-      // Auth logic
-      (async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session_id');
-        if (sessionId) {
-          try {
-            const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
-              headers: { Authorization: 'Bearer pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW' }
-            });
-            const session = await res.json();
-            if (session.payment_status === 'paid') {
-              history.replaceState({}, '', 'rhythm-vision-pro.html');
-              showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
-              const { data: { user } } = await supabase.auth.getUser();
-              if (user) {
-                await supabase.from('profiles').update({ rhythm_vision_plan: 'vision', payment_pending: false }).eq('id', user.id);
-              }
-            } else {
-              showMessage('Payment not completed.', false);
-              setTimeout(() => window.location.href = 'pricing.html', 2000);
+      // === FIXED AUTH LOGIC ===
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session_id');
+
+      if (sessionId) {
+        try {
+          const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
+            headers: { Authorization: 'Bearer pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW' }
+          });
+          const session = await res.json();
+          if (session.payment_status === 'paid') {
+            history.replaceState({}, '', 'rhythm-vision-pro.html');
+            showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              await supabase.from('profiles').update({ rhythm_vision_plan: 'vision', payment_pending: false }).eq('id', user.id);
             }
-          } catch (err) {
-            console.warn('Stripe verification failed', err);
           }
+        } catch (err) {
+          console.warn('Stripe verification failed', err);
         }
+      }
 
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          alert('Please log in to access Rhythm Vision Pro.');
-          window.location.href = 'login.html';
-          return;
-        }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('Please log in to access Rhythm Vision Pro.');
+        window.location.href = 'login.html';
+        return;
+      }
 
-        const { data: profile } = await supabase.from('profiles').select('name, plan, rhythm_vision_plan').eq('id', user.id).single();
-        if (!profile || (profile.plan !== 'pro' && profile.rhythm_vision_plan !== 'vision')) {
-          alert('You need a Rhythm Vision or Pro subscription to access this page.');
-          window.location.href = 'pricing.html';
-          return;
-        }
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('name, plan, rhythm_vision_plan')
+        .eq('id', user.id)
+        .single();
 
-        document.getElementById('userName').textContent = profile.name || user.email.split('@')[0];
+      if (error || !profile) {
+        console.error('Profile fetch error:', error);
+        alert('Error loading your profile. Please try logging in again.');
+        window.location.href = 'login.html';
+        return;
+      }
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-          supabase.auth.signOut().then(() => window.location.href = 'index.html');
-        });
-      })();
+      // Fixed condition: allow access if rhythm_vision_plan is 'vision' OR plan is 'pro'
+      if (profile.plan !== 'pro' && profile.rhythm_vision_plan !== 'vision') {
+        alert('You need a Rhythm Vision or Pro subscription to access this page.');
+        window.location.href = 'pricing.html';
+        return;
+      }
+
+      document.getElementById('userName').textContent = profile.name || user.email.split('@')[0];
+
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        supabase.auth.signOut().then(() => window.location.href = 'index.html');
+      });
 
       addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
     });
 
     function openAIAndCopy(ai) {
-      const title = document.getElementById('videoTitle').value || "My Song";
-      const concept = document.getElementById('songConcept').value || "a heartfelt story";
-      const genre = document.getElementById('musicGenre').value || "country";
-      const verses = document.getElementById('numVerses').value;
+      const title = document.getElementById('videoTitle')?.value || "My Song";
+      const concept = document.getElementById('songConcept')?.value || "a heartfelt story";
+      const genre = document.getElementById('musicGenre')?.value || "country";
+      const verses = document.getElementById('numVerses')?.value || "3";
       let structure = `${verses} verses`;
-      if (document.getElementById('hasChorus').checked) structure += ", catchy chorus";
-      if (document.getElementById('hasBridge').checked) structure += ", bridge";
-      if (document.getElementById('hasOutro').checked) structure += ", outro";
+      if (document.getElementById('hasChorus')?.checked) structure += ", catchy chorus";
+      if (document.getElementById('hasBridge')?.checked) structure += ", bridge";
+      if (document.getElementById('hasOutro')?.checked) structure += ", outro";
       const prompt = `Write professional ${genre} lyrics titled "${title}".
 Concept: ${concept}
 Structure: ${structure}
