@@ -79,8 +79,8 @@
                 <option value="pro">Pro Plan (Full Platform)</option>
               </select>
             </div>
-            <!-- Vision Options -->
-            <div id="visionOptions" class="space-y-4">
+            <!-- Vision Options - hidden by default -->
+            <div id="visionOptions" class="hidden space-y-4">
               <div>
                 <label class="block text-gray-700 font-semibold mb-1">Rhythm Vision Duration</label>
                 <select id="visionDuration" class="w-full border border-gray-300 rounded-lg p-3">
@@ -94,8 +94,8 @@
                 <p class="text-sm text-gray-600 mt-2">Secure checkout with Stripe · Instant access</p>
               </div>
             </div>
-            <!-- Pro Options -->
-            <div id="proOptions" class="space-y-4">
+            <!-- Pro Options - hidden by default -->
+            <div id="proOptions" class="hidden space-y-4">
               <div>
                 <label class="block text-gray-700 font-semibold mb-1">Pro Plan Duration</label>
                 <select id="planDuration" class="w-full border border-gray-300 rounded-lg p-3">
@@ -173,43 +173,39 @@
       const subdomainStatus = document.getElementById('subdomainStatus');
       const submitButton = document.getElementById('submitButton');
 
-      // Password toggle - safe and reliable
-      const togglePassword = document.getElementById('togglePassword');
-      const passwordField = document.getElementById('password');
-      if (togglePassword && passwordField) {
-        togglePassword.addEventListener('click', () => {
-          if (passwordField.type === 'password') {
-            passwordField.type = 'text';
-            togglePassword.textContent = 'Hide';
-          } else {
-            passwordField.type = 'password';
-            togglePassword.textContent = 'Show';
-          }
-        });
-      }
+      // Password toggle - back to direct method that worked before
+      document.getElementById('togglePassword').addEventListener('click', () => {
+        const pw = document.getElementById('password');
+        const toggle = document.getElementById('togglePassword');
+        pw.type = pw.type === 'password' ? 'text' : 'password';
+        toggle.textContent = pw.type === 'password' ? 'Show' : 'Hide';
+      });
 
-      // Duration sections start hidden, show when plan is selected
-      visionOptions.classList.add('hidden');
-      proOptions.classList.add('hidden');
-
+      // Fix duration show/hide - correct toggle logic
       planType.addEventListener('change', () => {
         const val = planType.value;
-        visionOptions.classList.toggle('hidden', val !== 'vision');
-        proOptions.classList.toggle('hidden', val !== 'pro');
+        if (val === 'vision') {
+          visionOptions.classList.remove('hidden');
+          proOptions.classList.add('hidden');
+        } else if (val === 'pro') {
+          proOptions.classList.remove('hidden');
+          visionOptions.classList.add('hidden');
+        } else {
+          visionOptions.classList.add('hidden');
+          proOptions.classList.add('hidden');
+        }
         visionPriceDisplay.classList.add('hidden');
         priceDisplay.classList.add('hidden');
       });
 
       visionDuration.addEventListener('change', () => {
-        const selected = visionDuration.options[visionDuration.selectedIndex];
-        const price = selected.dataset.price || '0.00';
+        const price = visionDuration.selectedOptions[0].dataset.price || '0.00';
         visionFinalPrice.textContent = '$' + price;
         visionPriceDisplay.classList.remove('hidden');
       });
 
       planDuration.addEventListener('change', () => {
-        const selected = planDuration.options[planDuration.selectedIndex];
-        const price = selected.dataset.price || '0.00';
+        const price = planDuration.selectedOptions[0].dataset.price || '0.00';
         finalPrice.textContent = '$' + price;
         priceDisplay.classList.remove('hidden');
       });
@@ -315,7 +311,7 @@
           }
         } catch (err) {
           console.error(err);
-          showMessage('Error', err.message || 'Something went wrong', 'bg-red-600');
+          showMessage('Error', err.message || 'Something went wrong. Check console for details.', 'bg-red-600');
           submitButton.disabled = false;
           submitButton.innerHTML = 'Create Account';
         }
