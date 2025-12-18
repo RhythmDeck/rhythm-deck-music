@@ -209,7 +209,6 @@
     window.addEventListener('load', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
-
       if (sessionId) {
         try {
           const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
@@ -235,34 +234,28 @@
           console.warn('Stripe verification failed', err);
         }
       }
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in to access Rhythm Vision Pro.');
         window.location.href = 'login.html';
         return;
       }
-
       const { data: profile } = await supabase
         .from('profiles')
         .select('name, plan, rhythm_vision_plan')
         .eq('id', user.id)
         .single();
-
       if (!profile || (profile.plan !== 'pro' && profile.rhythm_vision_plan !== 'vision')) {
         alert('You need a Rhythm Vision or Pro subscription to access this page.');
         window.location.href = 'pricing.html';
         return;
       }
-
       document.getElementById('userName').textContent = profile.name || user.email.split('@')[0];
-
       document.getElementById('logoutBtn').onclick = () => {
         supabase.auth.signOut().then(() => window.location.href = 'index.html');
       };
     });
 
-    // ALL FUNCTIONS BELOW ARE COMPLETE AND UNCHANGED FROM YOUR ORIGINAL WORKING CODE
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle').value || "My Song";
       const concept = document.getElementById('songConcept').value || "a heartfelt story";
@@ -276,11 +269,16 @@
 Concept: ${concept}
 Structure: ${structure}
 Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
-      navigator.clipboard.writeText(prompt);
-      alert(`Prompt copied to clipboard!\nOpening ${ai.toUpperCase()} in a new tab...`);
-      if (ai === 'grok') window.open('https://grok.x.ai', '_blank');
-      if (ai === 'gemini') window.open('https://gemini.google.com', '_blank');
-      if (ai === 'chatgpt') window.open('https://chatgpt.com', '_blank');
+
+      navigator.clipboard.writeText(prompt).then(() => {
+        alert(`Prompt copied to clipboard!\nOpening ${ai.toUpperCase()} in a new tab...`);
+      }).catch(() => {
+        alert('Prompt ready (copy manually if needed):\n\n' + prompt + '\n\nOpening ' + ai.toUpperCase() + ' in a new tab...');
+      });
+
+      if (ai === 'grok') window.open('https://grok.x.ai', '_blank', 'noopener,noreferrer');
+      if (ai === 'gemini') window.open('https://gemini.google.com', '_blank', 'noopener,noreferrer');
+      if (ai === 'chatgpt') window.open('https://chatgpt.com', '_blank', 'noopener,noreferrer');
     }
 
     function addScene(description = '', images = 6) {
