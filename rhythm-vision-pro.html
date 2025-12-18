@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: linear_gradient(to bottom, #0f172a, #1e1b4b); color: #e2e8f0; min-height: 100vh; }
     .spinner { border: 4px solid #334155; border-top: 4px solid #5eead4; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .title-green { color: #10b981; font-weight: 900; }
@@ -208,7 +208,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // AI buttons - working perfectly
+      // AI buttons
       document.getElementById('grokBtn').addEventListener('click', () => openAIAndCopy('grok'));
       document.getElementById('geminiBtn').addEventListener('click', () => openAIAndCopy('gemini'));
       document.getElementById('chatgptBtn').addEventListener('click', () => openAIAndCopy('chatgpt'));
@@ -225,7 +225,7 @@
       document.getElementById('createVideoBtn').addEventListener('click', createVideo);
       document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
 
-      // === FINAL FIX: NO MORE POPUP AFTER PAYMENT ===
+      // FIXED: Handle Stripe return and grant access
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
 
@@ -235,15 +235,17 @@
             headers: { Authorization: 'Bearer pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW' }
           });
           const session = await res.json();
-          if (session.payment_status === 'paid') {
-            // Save success in localStorage so user gets instant access
+          if (session.payment_status === 'paid' && session.mode === 'subscription' || session.mode === 'payment') {
             localStorage.setItem('rhythm_vision_access_granted', 'true');
             history.replaceState({}, '', 'rhythm-vision-pro.html');
             showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
 
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-              await supabase.from('profiles').update({ rhythm_vision_plan: 'vision', payment_pending: false }).eq('id', user.id);
+              const updateData = { rhythm_vision_plan: 'vision' };
+              // If you have a 'paid' or other field, add it here
+              // updateData.paid = true;
+              await supabase.from('profiles').update(updateData).eq('id', user.id);
             }
           }
         } catch (err) {
@@ -251,12 +253,12 @@
         }
       }
 
-      // Check localStorage first — if payment was successful, let them in immediately
+      // Instant access if payment was successful
       if (localStorage.getItem('rhythm_vision_access_granted') === 'true') {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
-          document.getElementById('userName').textContent = profile?.name || user.email.split('@')[0];
+          document.getElementById('userName').textContent = profile?.name || user.email.split('@')[0] || 'User';
           document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('rhythm_vision_access_granted');
             supabase.auth.signOut().then(() => window.location.href = 'index.html');
@@ -266,7 +268,7 @@
         }
       }
 
-      // Normal login check
+      // Normal check
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in to access Rhythm Vision Pro.');
@@ -281,7 +283,7 @@
         return;
       }
 
-      document.getElementById('userName').textContent = profile.name || user.email.split('@')[0];
+      document.getElementById('userName').textContent = profile.name || user.email.split('@')[0] || 'User';
       document.getElementById('logoutBtn').addEventListener('click', () => {
         supabase.auth.signOut().then(() => window.location.href = 'index.html');
       });
@@ -314,7 +316,6 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
       if (ai === 'chatgpt') window.open('https://chatgpt.com', '_blank', 'noopener,noreferrer');
     }
 
-    // ALL OTHER FUNCTIONS (addScene, generateScenes, etc.) remain exactly as in your last working version
     function addScene(description = '', images = 6) {
       sceneCounter++;
       const div = document.createElement('div');
