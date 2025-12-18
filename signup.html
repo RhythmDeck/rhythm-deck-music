@@ -51,7 +51,7 @@
         </div>
         <div class="w-full md:w-1/2 p-6 md:p-10">
           <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Create Your Rhythm Deck Account</h2>
-          
+         
           <form id="signupForm" class="space-y-4">
             <div><label class="block text-gray-700 font-semibold mb-1">Name /Band Name</label><input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
             <div><label class="block text-gray-700 font-semibold mb-1">Email</label><input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
@@ -131,15 +131,12 @@
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
-  <!-- Supabase CDN with module support -->
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
     const supabase = createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
-
     const paymentLinks = {
       vision_monthly: 'https://buy.stripe.com/test_aFa3co3psc9i1Kw4XG4800c',
       vision_1year: 'https://buy.stripe.com/test_cNi3coe465KUah289S4800b',
@@ -148,7 +145,6 @@
       '2year': 'https://buy.stripe.com/test_5kQeV6bVYa1a4WIcq848003',
       '3year': 'https://buy.stripe.com/test_14AcMY5xA2yI0Gs9dW48004'
     };
-
     function showMessage(title, message, color = 'bg-green-600') {
       const id = 'toast-' + Date.now();
       document.getElementById('toastContainer').insertAdjacentHTML('beforeend',
@@ -160,7 +156,6 @@
       setTimeout(() => document.getElementById(id)?.classList.add('opacity-100', 'scale-100'), 50);
       setTimeout(() => document.getElementById(id)?.remove(), 10000);
     }
-
     document.addEventListener('DOMContentLoaded', () => {
       const planType = document.getElementById('planType');
       const visionOptions = document.getElementById('visionOptions');
@@ -174,7 +169,6 @@
       const subdomainInput = document.getElementById('subdomain');
       const subdomainStatus = document.getElementById('subdomainStatus');
       const submitButton = document.getElementById('submitButton');
-
       // Password toggle
       const togglePassword = document.getElementById('togglePassword');
       const passwordField = document.getElementById('password');
@@ -187,7 +181,6 @@
           togglePassword.textContent = 'Show';
         }
       });
-
       planType.addEventListener('change', () => {
         const val = planType.value;
         if (val === 'vision') {
@@ -203,19 +196,16 @@
         visionPriceDisplay.classList.add('hidden');
         priceDisplay.classList.add('hidden');
       });
-
       visionDuration.addEventListener('change', () => {
         const price = visionDuration.selectedOptions[0]?.dataset.price || '0.00';
         visionFinalPrice.textContent = '$' + price;
         visionPriceDisplay.classList.remove('hidden');
       });
-
       planDuration.addEventListener('change', () => {
         const price = planDuration.selectedOptions[0]?.dataset.price || '0.00';
         finalPrice.textContent = '$' + price;
         priceDisplay.classList.remove('hidden');
       });
-
       subdomainInput.addEventListener('input', () => {
         clearTimeout(window.subdomainTimeout);
         window.subdomainTimeout = setTimeout(async () => {
@@ -232,7 +222,6 @@
           subdomainStatus.className = data ? 'mt-2 text-sm h-5 text-red-600' : 'mt-2 text-sm h-5 text-green-600';
         }, 600);
       });
-
       document.getElementById('signupForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         submitButton.disabled = true;
@@ -246,7 +235,6 @@
           if (rawSubdomain.length < 3) throw new Error("Subdomain too short");
           const { data: taken } = await supabase.from('profiles').select('id').eq('subdomain', rawSubdomain).maybeSingle();
           if (taken) throw new Error(`Subdomain "${rawSubdomain}" is taken`);
-
           if (plan === 'free') {
             const { data: { user }, error } = await supabase.auth.signUp({
               email,
@@ -267,7 +255,6 @@
             setTimeout(() => location.href = 'https://rhythm-deck-music.onrender.com/profile-admin.html', 1500);
             return;
           }
-
           if (plan === 'vision') {
             if (!visionDuration.value) throw new Error("Select a duration");
             const { data: { user }, error: authError } = await supabase.auth.signUp({
@@ -281,7 +268,7 @@
               name,
               email,
               subdomain: rawSubdomain,
-              plan: 'vision',
+              rhythm_vision_plan: 'vision',  // ← CORRECT COLUMN
               payment_pending: true,
               bio: '',
               created_at: new Date().toISOString()
@@ -292,7 +279,6 @@
             setTimeout(() => location.href = checkoutUrl, 1000);
             return;
           }
-
           if (plan === 'pro') {
             if (!planDuration.value) throw new Error("Please select a duration");
             const { data: { user }, error: authError } = await supabase.auth.signUp({
@@ -306,7 +292,7 @@
               name,
               email,
               subdomain: rawSubdomain,
-              plan: 'pro',
+              plan: 'pro',  // Pro uses the 'plan' column
               payment_pending: true,
               bio: '',
               created_at: new Date().toISOString()
