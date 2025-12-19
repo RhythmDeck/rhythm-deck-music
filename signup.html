@@ -147,12 +147,13 @@
     };
     function showMessage(title, message, color = 'bg-green-600') {
       const id = 'toast-' + Date.now();
-      document.getElementById('toastContainer').insertAdjacentHTML('beforeend',
-        `<div id="${id}" class="fixed top-4 left-1/2 -translate-x-1/2 ${color} text-white px-8 py-5 rounded-xl shadow-2xl max-w-md w-full z-50 transition-all duration-300 scale-95 opacity-0">
+      document.getElementById('toastContainer').insertAdjacentHTML('beforeend', `
+        <div id="${id}" class="fixed top-4 left-1/2 -translate-x-1/2 ${color} text-white px-8 py-5 rounded-xl shadow-2xl max-w-md w-full z-50 transition-all duration-300 scale-95 opacity-0">
           <div class="font-black text-2xl">${title}</div>
           <p class="text-lg mt-2 break-words">${message}</p>
           <button onclick="document.getElementById('${id}').remove()" class="absolute top-3 right-4 text-3xl">×</button>
-        </div>`);
+        </div>
+      `);
       setTimeout(() => document.getElementById(id)?.classList.add('opacity-100', 'scale-100'), 50);
       setTimeout(() => document.getElementById(id)?.remove(), 10000);
     }
@@ -169,7 +170,6 @@
       const subdomainInput = document.getElementById('subdomain');
       const subdomainStatus = document.getElementById('subdomainStatus');
       const submitButton = document.getElementById('submitButton');
-      // Password toggle
       const togglePassword = document.getElementById('togglePassword');
       const passwordField = document.getElementById('password');
       togglePassword.addEventListener('click', () => {
@@ -236,39 +236,23 @@
           const { data: taken } = await supabase.from('profiles').select('id').eq('subdomain', rawSubdomain).maybeSingle();
           if (taken) throw new Error(`Subdomain "${rawSubdomain}" is taken`);
           if (plan === 'free') {
-            const { data: { user }, error } = await supabase.auth.signUp({
-              email,
-              password,
-              options: { data: { full_name: name, subdomain: rawSubdomain }}
-            });
+            const { data: { user }, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, subdomain: rawSubdomain } } });
             if (error) throw error;
-            await supabase.from('profiles').upsert({
-              id: user.id,
-              name,
-              email,
-              subdomain: rawSubdomain,
-              plan: 'free',
-              bio: '',
-              created_at: new Date().toISOString()
-            });
+            await supabase.from('profiles').upsert({ id: user.id, name, email, subdomain: rawSubdomain, plan: 'free', bio: '', created_at: new Date().toISOString() });
             showMessage('Welcome!', 'Free account created – welcome to Rhythm Deck!');
             setTimeout(() => location.href = 'https://rhythm-deck-music.onrender.com/profile-admin.html', 1500);
             return;
           }
           if (plan === 'vision') {
             if (!visionDuration.value) throw new Error("Select a duration");
-            const { data: { user }, error: authError } = await supabase.auth.signUp({
-              email,
-              password,
-              options: { data: { full_name: name, subdomain: rawSubdomain }}
-            });
+            const { data: { user }, error: authError } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, subdomain: rawSubdomain } } });
             if (authError) throw authError;
             await supabase.from('profiles').upsert({
               id: user.id,
               name,
               email,
               subdomain: rawSubdomain,
-              rhythm_vision_plan: 'vision',  // ← THIS IS THE FIX
+              rhythm_vision_plan: 'vision', // ← This is the correct column
               payment_pending: true,
               bio: '',
               created_at: new Date().toISOString()
@@ -280,12 +264,9 @@
             return;
           }
           if (plan === 'pro') {
+
             if (!planDuration.value) throw new Error("Please select a duration");
-            const { data: { user }, error: authError } = await supabase.auth.signUp({
-              email,
-              password,
-              options: { data: { full_name: name, subdomain: rawSubdomain }}
-            });
+            const { data: { user }, error: authError } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, subdomain: rawSubdomain } } });
             if (authError) throw authError;
             await supabase.from('profiles').upsert({
               id: user.id,
