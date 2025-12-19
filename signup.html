@@ -252,7 +252,7 @@
               name,
               email,
               subdomain: rawSubdomain,
-              rhythm_vision_plan: 'vision', // ← This is the correct column
+              rhythm_vision_plan: 'vision',  // Correct column for Vision access
               payment_pending: true,
               bio: '',
               created_at: new Date().toISOString()
@@ -264,7 +264,6 @@
             return;
           }
           if (plan === 'pro') {
-
             if (!planDuration.value) throw new Error("Please select a duration");
             const { data: { user }, error: authError } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, subdomain: rawSubdomain } } });
             if (authError) throw authError;
