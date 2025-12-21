@@ -83,7 +83,7 @@
         <div class="input-group">
           <input type="password" id="loginPassword" placeholder="Password" required
             class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/30 text-lg pr-12">
-          <span id="eyeToggle" class="eye">Show</span>
+          <span class="eye" onclick="togglePass()">Show</span>
         </div>
         <button type="submit"
           class="w-full py-5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-xl rounded-xl shadow-lg transform hover:scale-105 transition mt-6">
@@ -96,17 +96,14 @@
       </p>
     </div>
   </div>
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const supabase = createClient(
+  <script>
+    const supabase = window.supabase.createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
-
-    // Fixed password toggle - now uses proper event listener and correct ID
-    document.getElementById('eyeToggle').addEventListener('click', () => {
+    function togglePass() {
       const pass = document.getElementById('loginPassword');
-      const eye = document.getElementById('eyeToggle');
+      const eye = document.querySelector('.eye');
       if (pass.type === 'password') {
         pass.type = 'text';
         eye.textContent = 'Hide';
@@ -114,37 +111,34 @@
         pass.type = 'password';
         eye.textContent = 'Show';
       }
-    });
-
+    }
     // LOGIN WITH PLAN-BASED REDIRECT
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    document.getElementById('loginForm').onsubmit = async (e) => {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         alert('Login failed: ' + error.message);
         return;
       }
-      // Fetch profile to determine plan
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
         .select('plan, rhythm_vision_plan')
         .eq('id', data.user.id)
         .single();
-      if (profileError || !profile) {
-        alert('Profile not found or error loading profile');
+      if (!profile) {
+        alert('Profile not found');
         return;
       }
-      let redirectPage = 'profile-admin.html'; // default for free
       if (profile.plan === 'pro') {
-        redirectPage = 'profile-admin-pro.html';
-      } else if (profile.rhythm_vision_plan === 'vision' || profile.plan === 'vision') { // support both
-        redirectPage = 'rhythm-vision-pro.html';
+        window.location.href = 'profile-admin-pro.html';
+      } else if (profile.rhythm_vision_plan === 'vision') {
+        window.location.href = 'rhythm-vision-pro.html';
+      } else {
+        window.location.href = 'profile-admin.html';
       }
-      // Redirect
-      window.location.href = redirectPage;
-    });
+    };
   </script>
 </body>
 </html>
