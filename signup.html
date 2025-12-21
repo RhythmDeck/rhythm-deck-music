@@ -43,7 +43,7 @@
       </a>
     </div>
   </section>
-  <main class="flex-grow flex items-center justify 
+  <main class="flex-grow flex items-center justify-center py-12 md:py-16 px-4">
     <div class="container mx-auto">
       <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
         <div class="w-1/2 hidden md:block">
@@ -51,7 +51,7 @@
         </div>
         <div class="w-full md:w-1/2 p-6 md:p-10">
           <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Create Your Rhythm Deck Account</h2>
-          
+         
           <form id="signupForm" class="space-y-4">
             <div><label class="block text-gray-700 font-semibold mb-1">Name /Band Name</label><input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
             <div><label class="block text-gray-700 font-semibold mb-1">Email</label><input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
@@ -161,12 +161,8 @@
       const planType = document.getElementById('planType');
       const visionOptions = document.getElementById('visionOptions');
       const visionDuration = document.getElementById('visionDuration');
-      const visionPriceDisplay = document.getElementById('visionPriceDisplay');
-      const visionFinalPrice = document.getElementById('visionFinalPrice');
       const proOptions = document.getElementById('proOptions');
       const planDuration = document.getElementById('planDuration');
-      const priceDisplay = document.getElementById('priceDisplay');
-      const finalPrice = document.getElementById('finalPrice');
       const subdomainInput = document.getElementById('subdomain');
       const subdomainStatus = document.getElementById('subdomainStatus');
       const submitButton = document.getElementById('submitButton');
@@ -193,18 +189,6 @@
           visionOptions.classList.add('hidden');
           proOptions.classList.add('hidden');
         }
-        visionPriceDisplay.classList.add('hidden');
-        priceDisplay.classList.add('hidden');
-      });
-      visionDuration.addEventListener('change', () => {
-        const price = visionDuration.selectedOptions[0]?.dataset.price || '0.00';
-        visionFinalPrice.textContent = '$' + price;
-        visionPriceDisplay.classList.remove('hidden');
-      });
-      planDuration.addEventListener('change', () => {
-        const price = planDuration.selectedOptions[0]?.dataset.price || '0.00';
-        finalPrice.textContent = '$' + price;
-        priceDisplay.classList.remove('hidden');
       });
       subdomainInput.addEventListener('input', () => {
         clearTimeout(window.subdomainTimeout);
@@ -230,68 +214,52 @@
         const email = document.getElementById('email').value.trim().toLowerCase();
         const password = document.getElementById('password').value;
         const rawSubdomain = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-        let plan = planType.value.trim();  // Trim any whitespace
-
-        // DEBUG: This will show in browser console what plan is detected
-        console.log('DETECTED PLAN VALUE:', `'${plan}'`);
-
+        let plan = planType.value.trim();
+        const isVisionSelected = !visionOptions.classList.contains('hidden') && visionDuration.value; // Fallback check if Vision options were shown and duration selected
         try {
           if (rawSubdomain.length < 3) throw new Error("Subdomain too short");
           const { data: taken } = await supabase.from('profiles').select('id').eq('subdomain', rawSubdomain).maybeSingle();
           if (taken) throw new Error(`Subdomain "${rawSubdomain}" is taken`);
+          const { data: { user }, error: authError } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, subdomain: rawSubdomain } } });
+          if (authError) throw authError;
+          let updateData = {
+            id: user.id,
+            name,
+            email,
+            subdomain: rawSubdomain,
+            bio: '',
+            created_at: new Date().toISOString()
+          };
           if (plan === 'free') {
-            const { data: { user }, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, subdomain: rawSubdomain } } });
-            if (error) throw error;
-            await supabase.from('profiles').upsert({ id: user.id, name, email, subdomain: rawSubdomain, plan: 'free', bio: '', created_at: new Date().toISOString() });
-            showMessage('Welcome!', 'Free account created – welcome to Rhythm Deck!');
-            setTimeout(() => location.href = 'https://rhythm-deck-music.onrender.com/profile-admin.html', 1500);
-            return;
-          }
-          // SAFETY FALLBACK: if plan contains "vision" (case-insensitive), treat as Vision
-          if (plan.toLowerCase().includes('vision') || plan === 'vision') {
-            console.log('FORCING VISION PLAN BRANCH');
-            plan = 'vision';  // Force it
-          }
-          if (plan === 'vision') {
-            if (!visionDuration.value) throw new Error("Select a duration");
-            const { data: { user }, error: authError } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, subdomain: rawSubdomain } } });
-            if (authError) throw authError;
-            await supabase.from('profiles').upsert({
-              id: user.id,
-              name,
-              email,
-              subdomain: rawSubdomain,
-              rhythm_vision_plan: 'vision',
-              payment_pending: true,
-              bio: '',
-              created_at: new Date().toISOString()
-            });
-            const key = 'vision_' + visionDuration.value;
-            const checkoutUrl = `${paymentLinks[key]}?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${user.id}`;
-            showMessage('Redirecting...', 'Taking you to secure checkout...');
-            setTimeout(() => location.href = checkoutUrl, 1000);
-            return;
-          }
-          if (plan === 'pro') {
+            updateData.plan = 'free';
+          } else if (plan === 'pro' || !proOptions.classList.contains('hidden')) {
             if (!planDuration.value) throw new Error("Please select a duration");
-            const { data: { user }, error: authError } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, subdomain: rawSubdomain } } });
-            if (authError) throw authError;
-            await supabase.from('profiles').upsert({
-              id: user.id,
-              name,
-              email,
-              subdomain: rawSubdomain,
-              plan: 'pro',
-              payment_pending: true,
-              bio: '',
-              created_at: new Date().toISOString()
-            });
+            updateData.plan = 'pro';
+            updateData.payment_pending = true;
+          } else {
+            // Default to Vision if not free or pro (fallback for Rhythm Vision)
+            updateData.rhythm_vision_plan = 'vision';
+            updateData.payment_pending = true;
+            if (isVisionSelected) {
+              const key = 'vision_' + visionDuration.value;
+              const checkoutUrl = `${paymentLinks[key]}?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${user.id}`;
+              showMessage('Redirecting...', 'Taking you to secure checkout...');
+              setTimeout(() => location.href = checkoutUrl, 1000);
+              await supabase.from('profiles').upsert(updateData);
+              return;
+            }
+          }
+          await supabase.from('profiles').upsert(updateData);
+          if (updateData.plan === 'pro') {
             const checkoutUrl = `${paymentLinks[planDuration.value]}?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${user.id}`;
             showMessage('Redirecting...', 'Taking you to secure checkout...');
             setTimeout(() => location.href = checkoutUrl, 1000);
+          } else {
+            showMessage('Welcome!', 'Account created!');
+            setTimeout(() => location.href = 'https://rhythm-deck-music.onrender.com/profile-admin.html', 1500);
           }
         } catch (err) {
-          console.error('Signup error:', err);
+          console.error(err);
           showMessage('Error', err.message || 'Something went wrong', 'bg-red-600');
           submitButton.disabled = false;
           submitButton.innerHTML = 'Create Account';
