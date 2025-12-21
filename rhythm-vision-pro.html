@@ -189,14 +189,12 @@
       <p class="text-4xl text-teal-400 font-bold" id="loadingText">Working...</p>
     </div>
   </div>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
-
     let sceneCounter = 0;
     let audioUrl = '';
 
@@ -207,12 +205,10 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // AI buttons
+      // Button event listeners (unchanged)
       document.getElementById('grokBtn').addEventListener('click', () => openAIAndCopy('grok'));
       document.getElementById('geminiBtn').addEventListener('click', () => openAIAndCopy('gemini'));
       document.getElementById('chatgptBtn').addEventListener('click', () => openAIAndCopy('chatgpt'));
-
-      // Other buttons
       document.getElementById('generateMusicBtn').addEventListener('click', generateMusic);
       document.getElementById('downloadAudioBtn').addEventListener('click', downloadAudio);
       document.getElementById('redoMusicBtn').addEventListener('click', generateMusic);
@@ -224,7 +220,7 @@
       document.getElementById('createVideoBtn').addEventListener('click', createVideo);
       document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
 
-      // Handle Stripe return and grant access
+      // === FIXED: Handle successful Stripe return ===
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
       if (sessionId) {
@@ -233,39 +229,68 @@
             headers: { Authorization: 'Bearer pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW' }
           });
           const session = await res.json();
+
           if (session.payment_status === 'paid' && (session.mode === 'subscription' || session.mode === 'payment')) {
             localStorage.setItem('rhythm_vision_access_granted', 'true');
             history.replaceState({}, '', 'rhythm-vision-pro.html');
-            showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
+
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
+              // Update DB
               await supabase.from('profiles').update({ rhythm_vision_plan: 'vision' }).eq('id', user.id);
+
+              // Re-fetch fresh profile
+              const { data: freshProfile } = await supabase.from('profiles')
+                .select('name, plan, rhythm_vision_plan')
+                .eq('id', user.id)
+                .single();
+
+              // Set name and grant access
+              let displayName = freshProfile?.name ||
+                               user.user_metadata?.full_name ||
+                               user.email?.split('@')[0] ||
+                               'User';
+              document.getElementById('userName').textContent = displayName;
+
+              document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('rhythm_vision_access_granted');
+                supabase.auth.signOut().then(() => window.location.href = 'index.html');
+              });
+
+              showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
+              addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
+
+              // Stop further execution — access granted
+              return;
             }
           }
         } catch (err) {
-          console.warn('Stripe check failed', err);
+          console.warn('Stripe session check failed', err);
         }
       }
 
-      // Instant access if payment was successful
+      // === Instant access if previously granted (e.g. page refresh) ===
       if (localStorage.getItem('rhythm_vision_access_granted') === 'true') {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          let displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
           const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
-          if (profile?.name) displayName = profile.name;
+          let displayName = profile?.name ||
+                           user.user_metadata?.full_name ||
+                           user.email?.split('@')[0] ||
+                           'User';
           document.getElementById('userName').textContent = displayName;
 
           document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('rhythm_vision_access_granted');
             supabase.auth.signOut().then(() => window.location.href = 'index.html');
           });
+
           addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
           return;
         }
       }
 
-      // Normal check
+      // === Normal access check (only runs if not already granted above) ===
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in to access Rhythm Vision Pro.');
@@ -273,17 +298,21 @@
         return;
       }
 
-      const { data: profile } = await supabase.from('profiles').select('name, plan, rhythm_vision_plan').eq('id', user.id).single();
+      const { data: profile } = await supabase.from('profiles')
+        .select('name, plan, rhythm_vision_plan')
+        .eq('id', user.id)
+        .single();
+
       if (!profile || (profile.plan !== 'pro' && profile.rhythm_vision_plan !== 'vision')) {
         alert('You need a Rhythm Vision or Pro subscription to access this page.');
         window.location.href = 'pricing.html';
         return;
       }
 
-      // FIXED: Robust name display with multiple fallbacks
-      let displayName = profile.name || 
-                       user.user_metadata?.full_name || 
-                       user.email?.split('@')[0] || 
+      // Normal logged-in user — set name and continue
+      let displayName = profile.name ||
+                       user.user_metadata?.full_name ||
+                       user.email?.split('@')[0] ||
                        'User';
       document.getElementById('userName').textContent = displayName;
 
@@ -294,6 +323,7 @@
       addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
     });
 
+    // All your existing functions below (unchanged)
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle')?.value || "My Song";
       const concept = document.getElementById('songConcept')?.value || "a heartfelt story";
