@@ -220,7 +220,7 @@
       document.getElementById('createVideoBtn').addEventListener('click', createVideo);
       document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
 
-      // STRIPE RETURN HANDLING - FIXED TO PREVENT POPUP
+      // STRIPE RETURN HANDLING - FIXED
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
       if (sessionId) {
@@ -237,7 +237,6 @@
             if (user) {
               await supabase.from('profiles').update({ rhythm_vision_plan: 'vision' }).eq('id', user.id);
 
-              // Refetch to get fresh data
               const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
 
               let displayName = profile?.name || user.email?.split('@')[0] || 'User';
@@ -251,7 +250,7 @@
               showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
               addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
 
-              // CRITICAL: STOP EXECUTION HERE TO PREVENT POPUP
+              // STOP - do not run normal check
               return;
             }
           }
@@ -260,7 +259,25 @@
         }
       }
 
-      // NORMAL ACCESS CHECK (runs on page load or refresh)
+      // Instant access if previously granted (refresh)
+      if (localStorage.getItem('rhythm_vision_access_granted') === 'true') {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
+          let displayName = profile?.name || user.email?.split('@')[0] || 'User';
+          document.getElementById('userName').textContent = displayName;
+
+          document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('rhythm_vision_access_granted');
+            supabase.auth.signOut().then(() => window.location.href = 'index.html');
+          });
+
+          addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
+          return;
+        }
+      }
+
+      // Normal access check
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in to access Rhythm Vision Pro.');
@@ -338,7 +355,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
 
     function generateScenes() {
       const lyrics = document.getElementById('lyrics').value.trim();
-      if (!lyrics) return alert("Paste lyrics first!");
+      if (!lyrics) return showMessage('Paste lyrics first');
       document.getElementById('scenesContainer').innerHTML = '';
       sceneCounter = 0;
       const sections = lyrics.match(/\[([^\]]+)\][\s\S]*?(?=\[|$)/g) || [];
@@ -355,7 +372,7 @@ Make it emotional and radio-ready. Use [Verse 1], [Chorus], etc.`;
         else desc = `${header} - beautiful cinematic scene, emotional lighting, professional photography`;
         addScene(desc, 6);
       });
-      showMessage("Perfect scenes generated from your lyrics!", false);
+      showMessage('Perfect scenes generated from your lyrics!', false);
     }
 
     function generateTimeline() {
