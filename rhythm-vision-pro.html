@@ -220,7 +220,7 @@
       document.getElementById('createVideoBtn').addEventListener('click', createVideo);
       document.getElementById('downloadVideoBtn').addEventListener('click', downloadVideo);
 
-      // STRIPE RETURN HANDLING - FIXED
+      // STRIPE RETURN HANDLING - FIXED TO ELIMINATE POPUP
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
       if (sessionId) {
@@ -250,7 +250,7 @@
               showMessage('Payment successful! Welcome to Rhythm Vision Pro.', false);
               addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
 
-              // STOP - do not run normal check
+              // STOP EXECUTION - SKIP NORMAL CHECK TO PREVENT POPUP
               return;
             }
           }
@@ -259,7 +259,7 @@
         }
       }
 
-      // Instant access if previously granted (refresh)
+      // INSTANT ACCESS ON REFRESH IF PAID BEFORE
       if (localStorage.getItem('rhythm_vision_access_granted') === 'true') {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -277,7 +277,7 @@
         }
       }
 
-      // Normal access check
+      // NORMAL ACCESS CHECK
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in to access Rhythm Vision Pro.');
@@ -306,6 +306,7 @@
       addScene("Golden sunrise over pine trees, coffee on campfire, loyal dog, rural peace", 6);
     });
 
+    // ALL YOUR OTHER FUNCTIONS (unchanged)
     function openAIAndCopy(ai) {
       const title = document.getElementById('videoTitle')?.value || "My Song";
       const concept = document.getElementById('songConcept')?.value || "a heartfelt story";
