@@ -6,7 +6,7 @@
   <title>Sign Up | Rhythm Deck Music</title>
   <base href="/">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://js.stripe.com/v3/"></script> <!-- Add Stripe JS -->
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     .input-focus:focus { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4); }
   </style>
@@ -85,13 +85,9 @@
                 <label class="block text-gray-700 font-semibold mb-1">Rhythm Vision Duration</label>
                 <select id="visionDuration" class="w-full border border-gray-300 rounded-lg p-3">
                   <option value="" disabled selected>Select duration</option>
-                  <option value="monthly" data-price="8.95">Monthly – $8.95 / month</option>
-                  <option value="1year" data-price="89.95">1 Year – $89.95 (Save ~17%)</option>
+                  <option value="monthly">Monthly – $8.95 / month</option>
+                  <option value="1year">1 Year – $89.95 (Save ~17%)</option>
                 </select>
-              </div>
-              <div id="visionPriceDisplay" class="hidden bg-gradient-to-r from-purple-50 to-indigo-50 p-5 rounded-xl border-2 border-purple-300 text-center">
-                <p class="text-3xl font-black text-purple-700">Total: <span id="visionFinalPrice">$0.00</span></p>
-                <p class="text-sm text-gray-600 mt-2">Secure checkout with Stripe · Instant access</p>
               </div>
             </div>
             <!-- Pro Options -->
@@ -100,15 +96,11 @@
                 <label class="block text-gray-700 font-semibold mb-1">Pro Plan Duration</label>
                 <select id="planDuration" class="w-full border border-gray-300 rounded-lg p-3">
                   <option value="" disabled selected>Select duration</option>
-                  <option value="monthly" data-price="12.95">Monthly Pro Plan – $12.95 / month</option>
-                  <option value="1year" data-price="126.10">1 Year (10% off) — $126.10</option>
-                  <option value="2year" data-price="238.19">2 Years (15% off) — $238.19</option>
-                  <option value="3year" data-price="336.26">3 Years (20% off) — $336.26</option>
+                  <option value="monthly">Monthly Pro Plan – $12.95 / month</option>
+                  <option value="1year">1 Year (10% off) — $126.10</option>
+                  <option value="2year">2 Years (15% off) — $238.19</option>
+                  <option value="3year">3 Years (20% off) — $336.26</option>
                 </select>
-              </div>
-              <div id="priceDisplay" class="hidden bg-gradient-to-r from-emerald-50 to-green-50 p-5 rounded-xl border-2 border-emerald-300 text-center">
-                <p class="text-3xl font-black text-emerald-700">Total: <span id="finalPrice">$0.00</span></p>
-                <p class="text-sm text-gray-600 mt-2">Secure checkout with Stripe · Instant access</p>
               </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -246,7 +238,6 @@
             showMessage('Welcome!', 'Account created successfully!');
             setTimeout(() => location.href = 'https://rhythm-deck-music.onrender.com/profile-admin.html', 1500);
           } else {
-            // For paid plans, set pending and redirect to Checkout
             updateData.payment_pending = true;
             if (plan === 'pro') {
               updateData.plan = 'pro';
@@ -255,7 +246,6 @@
             }
             await supabase.from('profiles').upsert(updateData);
 
-            // Call the Edge Function to create Checkout session
             const duration = plan === 'pro' ? planDuration.value : visionDuration.value;
             if (!duration) throw new Error("Please select a duration");
 
@@ -265,12 +255,15 @@
               body: JSON.stringify({ planType: plan, duration, userId: user.id, email })
             });
 
-            if (!response.ok) throw new Error('Failed to create checkout session');
+            if (!response.ok) {
+              const errText = await response.text();
+              throw new Error(`Failed to create checkout session: ${errText}`);
+            }
 
             const { sessionId } = await response.json();
 
-            const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
-            if (stripeError) throw stripeError;
+            const { error } = await stripe.redirectToCheckout({ sessionId });
+            if (error) throw error;
           }
         } catch (err) {
           console.error(err);
