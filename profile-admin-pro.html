@@ -160,7 +160,54 @@
   );
   let currentUser = null;
 
-  // GLOBAL FUNCTIONS - MOVED OUTSIDE DOMContentLoaded
+  // MAKE SAVE FUNCTIONS GLOBALLY AVAILABLE FOR onClick
+  window.saveArtistName = async function() {
+    const name = document.getElementById('artistNameInput').value.trim();
+    if (!name) return alert("Enter a name");
+    const { error } = await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
+    if (error) {
+      alert("Save failed: " + error.message);
+    } else {
+      alert("Name saved!");
+    }
+  };
+
+  window.saveBio = async function() {
+    const bio = document.getElementById('bioInput').value.trim();
+    const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
+    if (error) {
+      alert("Save failed: " + error.message);
+    } else {
+      alert("Bio saved!");
+    }
+  };
+
+  window.saveCollaborationOptIn = async function() {
+    const checked = document.getElementById('collaborationOptIn').checked;
+    const { error } = await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
+    if (error) {
+      alert("Save failed: " + error.message);
+    } else {
+      alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
+    }
+  };
+
+  window.logout = async function() {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+  };
+
+  window.closeModal = function() {
+    document.getElementById('videoModal').classList.remove('show');
+    document.getElementById('modalVideo').src = '';
+  };
+
+  window.openVideoPopup = function(url) {
+    document.getElementById('modalVideo').src = url;
+    document.getElementById('videoModal').classList.add('show');
+  };
+
+  // Other functions (load, upload, etc.) remain the same
   async function displayProBadge() {
     if (!currentUser) return;
     const { count } = await supabase
@@ -177,38 +224,6 @@
     }
   }
 
-  async function saveArtistName() {
-    const name = document.getElementById('artistNameInput').value.trim();
-    if (!name) return alert("Enter a name");
-    const { error } = await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
-    if (error) {
-      alert("Save failed: " + error.message);
-    } else {
-      alert("Name saved!");
-    }
-  }
-
-  async function saveBio() {
-    const bio = document.getElementById('bioInput').value.trim();
-    const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
-    if (error) {
-      alert("Save failed: " + error.message);
-    } else {
-      alert("Bio saved!");
-    }
-  }
-
-  async function saveCollaborationOptIn() {
-    const checked = document.getElementById('collaborationOptIn').checked;
-    const { error } = await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
-    if (error) {
-      alert("Save failed: " + error.message);
-    } else {
-      alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
-    }
-  }
-
-  // OTHER FUNCTIONS (upload, load, etc.) remain the same
   async function loadProfileData() {
     const { data: profile, error } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
     if (error) return console.error(error);
@@ -340,21 +355,6 @@
     await supabase.storage.from('media').upload(path, file, { upsert: true });
     await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
     loadProfileData();
-  }
-
-  function openVideoPopup(url) {
-    document.getElementById('modalVideo').src = url;
-    document.getElementById('videoModal').classList.add('show');
-  }
-
-  function closeModal() {
-    document.getElementById('videoModal').classList.remove('show');
-    document.getElementById('modalVideo').src = '';
-  }
-
-  async function logout() {
-    await supabase.auth.signOut();
-    window.location.href = 'login.html';
   }
 
   async function deleteAccount() {
