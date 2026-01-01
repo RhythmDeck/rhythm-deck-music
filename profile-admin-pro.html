@@ -85,34 +85,6 @@
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
-    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
-      <h3 class="text-3xl font-black text-purple-800 mb-4">Go Live with Your Fans</h3>
-      <div class="grid lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2">
-          <div id="liveStreamContainer" class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
-            <div id="offlineMessage" class="text-center">When you are ready - Click the Go Live Now button</div>
-            <video id="previewVideo" class="hidden w-full h-full object-cover" autoplay playsinline muted></video>
-            <div id="livepeer-player" class="hidden w-full h-full"></div>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-xl p-6 flex flex-col h-full">
-          <h4 class="font-black text-xl text-purple-700 mb-4">Live Chat</h4>
-          <div id="messages" class="flex-1 overflow-y-auto space-y-3 mb-4 bg-gray-50 p-4 rounded-lg min-h-0 max-h-96"></div>
-          <div class="flex gap-2">
-            <input type="text" id="chatInput" placeholder="Say something to your fans..." class="flex-1 border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600">
-            <button id="sendMessage" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded-lg">Send</button>
-          </div>
-        </div>
-      </div>
-      <div class="text-center mt-8 flex justify-center gap-8">
-        <button id="startStream" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-3xl px-16 py-3 rounded-2xl shadow-2xl transform hover:scale-105 transition-all">
-          Go Live Now
-        </button>
-        <button id="endStream" class="hidden bg-red-600 hover:bg-red-700 text-white font-black text-3xl px-16 py-3 rounded-2xl shadow-2xl">End Live Stream</button>
-      </div>
-    </div>
-  </section>
-  <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
       <div class="md:col-span-1 space-y-6">
         <div class="bg-gray-50 p-5 rounded-xl shadow">
@@ -208,15 +180,21 @@
     const name = document.getElementById('artistNameInput').value.trim();
     if (!name) return alert("Enter a name");
     const { error } = await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
-    if (error) alert("Failed: " + error.message);
-    else alert("Name saved!");
+    if (error) {
+      alert("Save failed: " + error.message);
+    } else {
+      alert("Name saved!");
+    }
   }
 
   async function saveBio() {
     const bio = document.getElementById('bioInput').value.trim();
     const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
-    if (error) alert("Failed: " + error.message);
-    else alert("Bio saved!");
+    if (error) {
+      alert("Save failed: " + error.message);
+    } else {
+      alert("Bio saved!");
+    }
   }
 
   async function loadProfileData() {
