@@ -67,18 +67,31 @@
 
     if (!rawParam) {
       document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
-      throw '';
+      throw new Error('No ID parameter');
     }
 
     let artistId = null;
 
     async function init() {
       let profile = null;
-      const { data: exact } = await supabase.from('profiles').select('id, name, bio, banner_url, logo_url, plan').eq('subdomain', rawParam).maybeSingle();
+
+      // Try by subdomain
+      const { data: exact, error: exactError } = await supabase
+        .from('profiles')
+        .select('id, name, bio, banner_url, logo_url, plan')
+        .eq('subdomain', rawParam)
+        .maybeSingle();
+
       if (exact) profile = exact;
 
+      // If not found, try by UUID (user id)
       if (!profile) {
-        const { data: byId } = await supabase.from('profiles').select('id, name, bio, banner_url, logo_url, plan').eq('id', rawParam).maybeSingle();
+        const { data: byId, error: idError } = await supabase
+          .from('profiles')
+          .select('id, name, bio, banner_url, logo_url, plan')
+          .eq('id', rawParam)
+          .maybeSingle();
+
         if (byId) profile = byId;
       }
 
@@ -89,41 +102,58 @@
 
       artistId = profile.id;
 
-      document.title = `${profile.name} • Rhythm Deck`;
+      document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
 
+      // Banner
       if (profile.banner_url) {
-        const banner = document.getElementById('banner');
-        banner.src = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
-        banner.onload = () => {
-          banner.classList.remove('hidden');
+        const bannerImg = document.getElementById('banner');
+        const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
+        bannerImg.src = bannerUrl;
+        bannerImg.onload = () => {
+          bannerImg.classList.remove('hidden');
           document.getElementById('bannerPlaceholder').classList.add('hidden');
+        };
+        bannerImg.onerror = () => {
+          console.error('Banner failed to load:', bannerUrl);
         };
       }
 
+      // Logo
       if (profile.logo_url) {
-        document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
+        const logoImg = document.getElementById('logo');
+        logoImg.src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
 
+      // Pro badge
       const badge = document.getElementById('badge-container');
       badge.innerHTML = '';
       if (profile.plan === 'pro') {
         badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`;
       }
 
+      // Load videos
       loadVideos();
     }
 
     async function loadVideos() {
       if (!artistId) return;
-      const { data: videos } = await supabase
+
+      const { data: videos, error } = await supabase
         .from('user_videos')
         .select('id, video_url, thumbnail_url, title')
         .eq('user_id', artistId)
         .order('created_at', { ascending: false });
 
       const list = document.getElementById('videoList');
+
+      if (error) {
+        console.error('Error loading videos:', error);
+        list.innerHTML = '<p class="col-span-full text-center text-red-600">Error loading videos</p>';
+        return;
+      }
+
       if (!videos || videos.length === 0) {
         list.innerHTML = '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>';
         return;
@@ -132,12 +162,19 @@
       list.innerHTML = '';
       for (const v of videos) {
         const videoUrl = getMediaUrl(v.video_url);
-        const thumbUrl = v.thumbnail_url ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now() : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
+        const thumbUrl = v.thumbnail_url 
+          ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now() 
+          : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
+
         list.innerHTML += `
           <div class="video-card">
             <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
               <img src="${thumbUrl}" alt="thumb" onerror="this.src='https://placehold.co/600x338/emerald/white?text=No+Thumb'">
-              <div class="play-overlay"><div class="play-button"><svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg></div></div>
+              <div class="play-overlay">
+                <div class="play-button">
+                  <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg>
+                </div>
+              </div>
             </div>
             <div class="p-6">
               <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled'}</h3>
@@ -148,16 +185,17 @@
 
     function openVideo(url) {
       document.getElementById('modalVideo').src = url;
-      document.getElementById('videoModal').classList.remove('invisible','opacity-0');
+      document.getElementById('videoModal').classList.remove('invisible', 'opacity-0');
       document.getElementById('videoModal').classList.add('opacity-100');
     }
 
     function closeVideo() {
-      document.getElementById('videoModal').classList.add('invisible','opacity-0');
+      document.getElementById('videoModal').classList.add('invisible', 'opacity-0');
       document.getElementById('videoModal').classList.remove('opacity-100');
       document.getElementById('modalVideo').src = '';
     }
 
+    // Start loading
     init();
   </script>
 </body>
