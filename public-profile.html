@@ -248,7 +248,7 @@
           </div>`;
       }
 
-      // Like button handlers — refresh videos after like to update all counts
+      // Attach handlers AFTER elements are added to DOM
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
@@ -267,11 +267,10 @@
             await supabase.from('video_likes').insert({ video_id: videoId, user_id: userId });
           }
 
-          loadVideos(); // Refresh to update heart count and state
+          loadVideos(); // Refresh to update counts and heart state
         };
       });
 
-      // Comment post handlers
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
@@ -282,7 +281,7 @@
           await supabase.from('video_comments').insert({ video_id: id, name, comment });
           document.getElementById(`comment-${id}`).value = '';
           document.getElementById(`name-${id}`).value = '';
-          loadVideos(); // Refresh to show new comment
+          loadVideos();
         };
       });
     }
@@ -349,7 +348,7 @@
 
     function openVideo(url) {
       const modalVideo = document.getElementById('modalVideo');
-      modalVideo.src = url + '?autoplay=1&muted=1';
+      modalVideo.src = url; // No query params — rely on attributes
       const modal = document.getElementById('videoModal');
       modal.classList.remove('invisible', 'opacity-0');
       modal.classList.add('opacity-100');
