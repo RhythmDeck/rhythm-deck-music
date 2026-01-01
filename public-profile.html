@@ -7,19 +7,23 @@
   <link rel="icon" href="data:,">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .video-card{border-radius:1.5rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.15);transition:.4s;background:white;position:relative}
-    .video-card::before{content:'';position:absolute;inset:-8px;border-radius:1.75rem;background:linear-gradient(45deg,#10b981,#34d399,#6ee7b7);z-index:-1;filter:blur(12px);opacity:.8}
-    .video-card:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,.3)}
+    .video-card{background:#111;border-radius:1rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.3);transition:.4s;position:relative}
+    .video-card:hover{transform:translateY(-10px);box-shadow:0 30px 60px rgba(0,0,0,.5)}
     .thumbnail-container{position:relative;padding-top:56.25%;background:#000;cursor:pointer;overflow:hidden}
     .thumbnail-container img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:.4s}
+    .play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:.4s}
     .video-card:hover .play-overlay{opacity:1}
-    .play-button{width:90px;height:90px;background:rgba(255,255,255,.95);border-radius:50%;display:flex;align-items:center;justify-content:center}
-    .play-button svg{width:38px;height:38px;margin-left:6px;fill:#10b981}
+    .play-button{width:90px;height:90px;background:rgba(16,185,129,.9);border-radius:50%;display:flex;align-items:center;justify-content:center}
+    .play-button svg{width:38px;height:38px;margin-left:6px;fill:white}
     #artistName{color:#fff;text-shadow:0 4px 20px #000;-webkit-text-stroke:2px #000;paint-order:stroke fill}
     .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
     @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
-    .offline-placeholder{background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:white;text-align:center;padding:3rem}
+    .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
+    .comment-name{font-weight:700;color:#10b981}
+    .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
+    .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;opacity:0.8}
+    .like-display svg{width:28px;height:28px;stroke:#ef4444;fill:none}
+    .liked svg{fill:#ef4444;stroke:none}
     #badge-container{position:absolute;top:20px;right:20px;z-index:30}
     #badge-container img{width:110px;height:110px;filter:drop-shadow(0 0 25px rgba(255,215,0,0.8));transition:all .4s}
     #badge-container img:hover{transform:scale(1.2) rotate(12deg)}
@@ -70,13 +74,16 @@
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
+
     <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center">Videos</h2>
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
+
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
     <button onClick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
+
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -91,6 +98,15 @@
       return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
 
+    function getAnonId() {
+      let id = localStorage.getItem('rhythmdeck_anon_id');
+      if (!id) {
+        id = 'anon_' + Math.random().toString(36).substr(2, 12);
+        localStorage.setItem('rhythmdeck_anon_id', id);
+      }
+      return id;
+    }
+
     const urlParams = new URLSearchParams(location.search);
     const rawParam = urlParams.get('id')?.trim().toLowerCase();
 
@@ -100,7 +116,7 @@
     }
 
     let artistId = null;
-    let isPro = false;
+    let videoCount = 0;
 
     async function init() {
       let profile = null;
@@ -133,7 +149,6 @@
       }
 
       artistId = profile.id;
-      isPro = profile.plan === 'pro';
 
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
@@ -150,43 +165,142 @@
       }
 
       if (profile.logo_url) {
-        const logoUrl = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
-        document.getElementById('logo').src = logoUrl;
+        document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
 
-      const badge = document.getElementById('badge-container');
-      badge.innerHTML = '';
-      if (isPro) {
-        badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`;
-      }
-
-      // Show live stream section only for Pro users
-      if (isPro) {
+      // Show live stream only for Pro
+      if (profile.plan === 'pro') {
         document.getElementById('liveStreamSection').classList.remove('hidden');
         checkLiveStatus();
-        setInterval(checkLiveStatus, 8000); // Check every 8 seconds
+        setInterval(checkLiveStatus, 8000);
       }
 
       loadVideos();
     }
 
-    async function checkLiveStatus() {
-      if (!artistId || !isPro) return;
+    async function loadVideos() {
+      if (!artistId) return;
 
+      const { data: videos } = await supabase
+        .from('user_videos')
+        .select('id, video_url, thumbnail_url, title')
+        .eq('user_id', artistId)
+        .order('created_at', { ascending: false });
+
+      const list = document.getElementById('videoList');
+      videoCount = videos?.length || 0;
+
+      // Update Pro badge: only if 3+ videos
+      const badge = document.getElementById('badge-container');
+      badge.innerHTML = '';
+      if (videoCount >= 3) {
+        badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`;
+      }
+
+      if (!videos || videos.length === 0) {
+        list.innerHTML = '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>';
+        return;
+      }
+
+      list.innerHTML = '';
+      const anonId = getAnonId();
+
+      for (const v of videos) {
+        const videoUrl = getMediaUrl(v.video_url);
+        const thumbUrl = v.thumbnail_url 
+          ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now() 
+          : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
+
+        const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
+        const { data: userLike } = await supabase.from('video_likes').select('id').eq('video_id', v.id).eq('user_id', anonId).maybeSingle();
+        const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false });
+
+        list.innerHTML += `
+          <div class="video-card">
+            <div class="relative">
+              <img src="${thumbUrl}" class="w-full h-48 object-cover">
+              <div class="play-overlay" onclick="openVideo('${videoUrl}')">
+                <div class="play-button">
+                  <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="white"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-6 bg-gray-800 text-white">
+              <h3 class="font-black text-2xl text-emerald-400 text-center mb-4">${v.title || 'Untitled'}</h3>
+              <div class="flex justify-between items-center mb-4">
+                <button class="like-btn flex items-center gap-2 font-bold text-lg ${userLike ? 'liked text-red-500' : 'text-gray-400'} hover:text-red-500 transition" data-id="${v.id}">
+                  Heart
+                  <svg class="w-7 h-7 ${userLike ? 'fill-red-500' : 'fill-none'} stroke-current" viewBox="0 0 24 24">
+                    <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
+                  <span class="like-count">${likes}</span>
+                </button>
+                <button onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')" class="text-emerald-400 font-bold hover:text-emerald-300">Share</button>
+              </div>
+              <div class="border-t border-gray-700 pt-4 space-y-2 text-sm max-h-48 overflow-y-auto">
+                ${comments.length === 0 ? '<p class="text-gray-500 italic text-center py-4">Be the first to comment!</p>' : ''}
+                ${comments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name || 'Fan'}:</span> <span class="comment-text">${c.comment}</span></div>`).join('')}
+              </div>
+              <div class="mt-6">
+                <input type="text" placeholder="Your name (optional)" class="border-2 border-emerald-500 rounded-lg p-2 w-full mb-2" id="name-${v.id}">
+                <div class="flex gap-2">
+                  <input type="text" placeholder="Write a comment..." class="border-2 border-emerald-500 rounded-lg p-2 flex-1" id="comment-${v.id}">
+                  <button data-id="${v.id}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg post-comment">Post</button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // Attach like handlers
+      document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.onclick = async () => {
+          const videoId = btn.dataset.id;
+          const userId = getAnonId();
+          const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id', videoId).eq('user_id', userId).maybeSingle();
+          if (existing) {
+            await supabase.from('video_likes').delete().eq('id', existing.id);
+            btn.classList.remove('liked', 'text-red-500');
+            btn.querySelector('svg').classList.remove('fill-red-500');
+            btn.querySelector('.like-count').textContent = Number(btn.querySelector('.like-count').textContent) - 1;
+          } else {
+            await supabase.from('video_likes').insert({ video_id: videoId, user_id: userId });
+            btn.classList.add('liked', 'text-red-500');
+            btn.querySelector('svg').classList.add('fill-red-500');
+            btn.querySelector('.like-count').textContent = Number(btn.querySelector('.like-count').textContent) + 1;
+          }
+        };
+      });
+
+      // Attach comment handlers
+      document.querySelectorAll('.post-comment').forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.dataset.id;
+          const name = document.getElementById(`name-${id}`).value.trim() || 'Fan';
+          const comment = document.getElementById(`comment-${id}`).value.trim();
+          if (!comment) return;
+          await supabase.from('video_comments').insert({ video_id: id, name, comment });
+          document.getElementById(`comment-${id}`).value = '';
+          document.getElementById(`name-${id}`).value = '';
+          loadVideos(); // Reload to show new comment
+        };
+      });
+    }
+
+    async function checkLiveStatus() {
+      if (!artistId || profile?.plan !== 'pro') return;
       const { data: session } = await supabase
         .from('live_sessions')
-        .select('playback_id, is_active')
+        .select('playback_id')
         .eq('user_id', artistId)
         .eq('is_active', true)
-        .single()
-        .throwOnError()
-        .catch(() => ({ data: null }));
+        .maybeSingle();
 
       const playerDiv = document.getElementById('livepeer-player');
       const indicator = document.getElementById('liveIndicator');
       const offlineMsg = document.getElementById('offlineMessage');
 
-      if (session && session.playback_id) {
+      if (session?.playback_id) {
         indicator.classList.remove('hidden');
         offlineMsg.classList.add('hidden');
         playerDiv.classList.remove('hidden');
@@ -202,8 +316,7 @@
     }
 
     async function loadLiveChat() {
-      if (!artistId || !isPro) return;
-
+      if (!artistId) return;
       const { data: messages } = await supabase
         .from('live_chat')
         .select('name, message')
@@ -216,7 +329,6 @@
         chatContainer.innerHTML = '<p class="text-gray-500 text-center italic">Chat appears when the artist is live</p>';
         return;
       }
-
       chatContainer.innerHTML = '';
       messages.forEach(msg => {
         const name = msg.name?.trim() || 'Fan';
@@ -227,59 +339,12 @@
     }
 
     async function sendLiveMessage() {
-      const nameInput = document.getElementById('chatNameInput');
-      const msgInput = document.getElementById('chatMessageInput');
-      const name = nameInput.value.trim() || 'Fan';
-      const message = msgInput.value.trim();
+      const name = document.getElementById('chatNameInput').value.trim() || 'Fan';
+      const message = document.getElementById('chatMessageInput').value.trim();
       if (!message || !artistId) return;
-
-      await supabase.from('live_chat').insert({
-        user_id: artistId,
-        name: name,
-        message: message
-      });
-
-      msgInput.value = '';
+      await supabase.from('live_chat').insert({ user_id: artistId, name, message });
+      document.getElementById('chatMessageInput').value = '';
       loadLiveChat();
-    }
-
-    async function loadVideos() {
-      if (!artistId) return;
-
-      const { data: videos } = await supabase
-        .from('user_videos')
-        .select('id, video_url, thumbnail_url, title')
-        .eq('user_id', artistId)
-        .order('created_at', { ascending: false });
-
-      const list = document.getElementById('videoList');
-      if (!videos || videos.length === 0) {
-        list.innerHTML = '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>';
-        return;
-      }
-
-      list.innerHTML = '';
-      for (const v of videos) {
-        const videoUrl = getMediaUrl(v.video_url);
-        const thumbUrl = v.thumbnail_url 
-          ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now() 
-          : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
-
-        list.innerHTML += `
-          <div class="video-card">
-            <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
-              <img src="${thumbUrl}" alt="thumb" onerror="this.src='https://placehold.co/600x338/emerald/white?text=No+Thumb'">
-              <div class="play-overlay">
-                <div class="play-button">
-                  <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="#10b981"/></svg>
-                </div>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3 class="font-black text-2xl text-emerald-900 text-center mb-4">${v.title || 'Untitled'}</h3>
-            </div>
-          </div>`;
-      }
     }
 
     function openVideo(url) {
