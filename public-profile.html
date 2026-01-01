@@ -78,8 +78,8 @@
   </div>
 
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
-    <button onClick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
-    <video id="modalVideo" controls autoplay playsinline class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
+    <button onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
+    <video id="modalVideo" controls autoplay muted playsinline class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
 
   <script type="module">
@@ -248,7 +248,7 @@
           </div>`;
       }
 
-      // Like button handlers
+      // Like button handlers — refresh videos after like to update all counts
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
@@ -263,17 +263,11 @@
 
           if (existing) {
             await supabase.from('video_likes').delete().eq('id', existing.id);
-            btn.classList.remove('liked', 'text-red-500');
-            btn.querySelector('svg').classList.remove('fill-red-500');
-            const countSpan = btn.querySelector('.like-count');
-            countSpan.textContent = Number(countSpan.textContent) - 1;
           } else {
             await supabase.from('video_likes').insert({ video_id: videoId, user_id: userId });
-            btn.classList.add('liked', 'text-red-500');
-            btn.querySelector('svg').classList.add('fill-red-500');
-            const countSpan = btn.querySelector('.like-count');
-            countSpan.textContent = Number(countSpan.textContent) + 1;
           }
+
+          loadVideos(); // Refresh to update heart count and state
         };
       });
 
@@ -288,7 +282,7 @@
           await supabase.from('video_comments').insert({ video_id: id, name, comment });
           document.getElementById(`comment-${id}`).value = '';
           document.getElementById(`name-${id}`).value = '';
-          loadVideos(); // Refresh to show new comment and updated hearts
+          loadVideos(); // Refresh to show new comment
         };
       });
     }
@@ -355,7 +349,7 @@
 
     function openVideo(url) {
       const modalVideo = document.getElementById('modalVideo');
-      modalVideo.src = url;
+      modalVideo.src = url + '?autoplay=1&muted=1';
       const modal = document.getElementById('videoModal');
       modal.classList.remove('invisible', 'opacity-0');
       modal.classList.add('opacity-100');
