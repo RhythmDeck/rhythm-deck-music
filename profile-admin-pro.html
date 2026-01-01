@@ -285,8 +285,12 @@
 
   async function saveCollaborationOptIn() {
     const checked = document.getElementById('collaborationOptIn').checked;
-    await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
-    alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
+    const { error } = await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
+    if (error) {
+      alert("Save failed: " + error.message);
+    } else {
+      alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
+    }
   }
 
   async function uploadAndPublish() {
