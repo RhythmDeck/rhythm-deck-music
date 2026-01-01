@@ -248,7 +248,7 @@
           </div>`;
       }
 
-      // Attach handlers AFTER elements are added to DOM
+      // Attach like and comment handlers after DOM update
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
@@ -281,7 +281,7 @@
           await supabase.from('video_comments').insert({ video_id: id, name, comment });
           document.getElementById(`comment-${id}`).value = '';
           document.getElementById(`name-${id}`).value = '';
-          loadVideos();
+          loadVideos(); // Refresh to show new comment
         };
       });
     }
@@ -348,7 +348,7 @@
 
     function openVideo(url) {
       const modalVideo = document.getElementById('modalVideo');
-      modalVideo.src = url; // No query params — rely on attributes
+      modalVideo.src = url;
       const modal = document.getElementById('videoModal');
       modal.classList.remove('invisible', 'opacity-0');
       modal.classList.add('opacity-100');
