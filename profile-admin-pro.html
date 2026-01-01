@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pro Profile | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.livepeer.studio/player"></script>
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
@@ -84,34 +85,6 @@
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
-    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
-      <h3 class="text-3xl font-black text-purple-800 mb-4">Go Live with Your Fans</h3>
-      <div class="grid lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2">
-          <div id="liveStreamContainer" class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
-            <div id="offlineMessage" class="text-center">When you are ready - Click the Go Live Now button</div>
-            <video id="previewVideo" class="hidden w-full h-full object-cover" autoplay playsinline muted></video>
-            <div id="livepeer-player" class="hidden w-full h-full"></div>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-xl p-6 flex flex-col h-full">
-          <h4 class="font-black text-xl text-purple-700 mb-4">Live Chat</h4>
-          <div id="messages" class="flex-1 overflow-y-auto space-y-3 mb-4 bg-gray-50 p-4 rounded-lg min-h-0 max-h-96"></div>
-          <div class="flex gap-2">
-            <input type="text" id="chatInput" placeholder="Say something to your fans..." class="flex-1 border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600">
-            <button id="sendMessage" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded-lg">Send</button>
-          </div>
-        </div>
-      </div>
-      <div class="text-center mt-8 flex justify-center gap-8">
-        <button id="startStream" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-3xl px-16 py-3 rounded-2xl shadow-2xl transform hover:scale-105 transition-all">
-          Go Live Now
-        </button>
-        <button id="endStream" class="hidden bg-red-600 hover:bg-red-700 text-white font-black text-3xl px-16 py-3 rounded-2xl shadow-2xl">End Live Stream</button>
-      </div>
-    </div>
-  </section>
-  <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
       <div class="md:col-span-1 space-y-6">
         <div class="bg-gray-50 p-5 rounded-xl shadow">
@@ -187,6 +160,7 @@
   );
   let currentUser = null;
 
+  // GLOBAL FUNCTIONS - MOVED OUTSIDE DOMContentLoaded
   async function displayProBadge() {
     if (!currentUser) return;
     const { count } = await supabase
@@ -209,7 +183,6 @@
     const { error } = await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
     if (error) {
       alert("Save failed: " + error.message);
-      console.error('Save Name error', error);
     } else {
       alert("Name saved!");
     }
@@ -220,18 +193,25 @@
     const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
     if (error) {
       alert("Save failed: " + error.message);
-      console.error('Save Bio error', error);
     } else {
       alert("Bio saved!");
     }
   }
 
+  async function saveCollaborationOptIn() {
+    const checked = document.getElementById('collaborationOptIn').checked;
+    const { error } = await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
+    if (error) {
+      alert("Save failed: " + error.message);
+    } else {
+      alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
+    }
+  }
+
+  // OTHER FUNCTIONS (upload, load, etc.) remain the same
   async function loadProfileData() {
     const { data: profile, error } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
-    if (error) {
-      console.error('Load profile error', error);
-      return;
-    }
+    if (error) return console.error(error);
     document.getElementById('artistNameInput').value = profile.name || '';
     document.getElementById('bioInput').value = profile.bio || '';
     if (profile.banner_url) {
@@ -315,17 +295,6 @@
     document.getElementById('collaborationOptIn').checked = !!data?.collaboration_opt_in;
   }
 
-  async function saveCollaborationOptIn() {
-    const checked = document.getElementById('collaborationOptIn').checked;
-    const { error } = await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
-    if (error) {
-      alert("Save failed: " + error.message);
-      console.error('Save Collaboration error', error);
-    } else {
-      alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
-    }
-  }
-
   async function uploadAndPublish() {
     const videoFile = document.getElementById('videoInput').files[0];
     const thumbFile = document.getElementById('thumbnailInput').files[0];
@@ -396,7 +365,7 @@
     }
   }
 
-  // MAIN INIT — RUN UPGRADE FIRST, THEN LOAD DATA
+  // MAIN INIT
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('Login required'); window.location.href = 'login.html'; return; }
@@ -413,7 +382,7 @@
       window.history.replaceState({}, '', 'profile-admin-pro.html');
     }
 
-    // Now load everything with fresh data
+    // Load data
     await Promise.all([
       loadProfileData(),
       loadVideos(),
@@ -425,8 +394,6 @@
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
-    document.getElementById('startStream').addEventListener('click', () => alert('Live stream coming soon!'));
-    document.getElementById('sendMessage').addEventListener('click', () => alert('Chat coming soon!'));
     document.getElementById('deleteConfirmInput').addEventListener('input', e => {
       const val = e.target.value.trim();
       const btn = document.getElementById('deleteAccountBtn');
