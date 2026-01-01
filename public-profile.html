@@ -50,9 +50,10 @@
     <button onClick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script>
-    const supabase = window.supabase.createClient(
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
@@ -64,7 +65,7 @@
     };
 
     const urlParams = new URLSearchParams(location.search);
-    const rawParam = urlParams.get('id')?.trim();
+    const rawParam = urlParams.get('id')?.trim().toLowerCase();
 
     if (!rawParam) {
       document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
@@ -76,11 +77,11 @@
     async function init() {
       let profile = null;
 
-      // Try subdomain (exact match, no case sensitivity needed if stored lowercase)
+      // First: try by subdomain (case-insensitive)
       const { data: subdomainData, error: subdomainError } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, plan')
-        .eq('subdomain', rawParam)
+        .ilike('subdomain', rawParam)
         .limit(1);
 
       if (subdomainData && subdomainData.length > 0) {
@@ -102,7 +103,7 @@
 
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
-        console.error('Profile not found for param:', rawParam);
+        console.error('No profile found for param:', rawParam);
         return;
       }
 
@@ -116,23 +117,24 @@
 
       // Banner
       if (profile.banner_url) {
-        const bannerImg = document.getElementById('banner');
         const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
         console.log('Loading banner:', bannerUrl);
+        const bannerImg = document.getElementById('banner');
         bannerImg.src = bannerUrl;
         bannerImg.onload = () => {
           bannerImg.classList.remove('hidden');
           document.getElementById('bannerPlaceholder').classList.add('hidden');
         };
-        bannerImg.onerror = () => console.error('Banner load failed');
+        bannerImg.onerror = () => console.error('Banner load failed:', bannerUrl);
       }
 
       // Logo
       if (profile.logo_url) {
-        const logoImg = document.getElementById('logo');
         const logoUrl = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
         console.log('Loading logo:', logoUrl);
+        const logoImg = document.getElementById('logo');
         logoImg.src = logoUrl;
+        logoImg.onerror = () => console.error('Logo load failed:', logoUrl);
       }
 
       // Pro badge
@@ -155,9 +157,8 @@
         .order('created_at', { ascending: false });
 
       const list = document.getElementById('videoList');
-
       if (error) {
-        console.error('Videos error:', error);
+        console.error('Videos load error:', error);
         list.innerHTML = '<p class="col-span-full text-center text-red-600">Error loading videos</p>';
         return;
       }
@@ -173,6 +174,8 @@
         const thumbUrl = v.thumbnail_url 
           ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now() 
           : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
+
+        console.log('Loading video thumb:', thumbUrl);
 
         list.innerHTML += `
           <div class="video-card">
