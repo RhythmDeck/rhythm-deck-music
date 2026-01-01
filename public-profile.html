@@ -67,11 +67,10 @@
       return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
 
-    // Generate real UUID for anon user — matches your uuid column
     function getAnonId() {
       let id = localStorage.getItem('rhythmdeck_anon_id');
       if (!id) {
-        id = crypto.randomUUID();
+        id = crypto.randomUUID(); // Real UUID for uuid column
         localStorage.setItem('rhythmdeck_anon_id', id);
       }
       return id;
@@ -245,7 +244,7 @@
               video_id: videoId,
               user_id: userId,
               fan_name: 'Fan'
-            });
+            }, { returning: 'minimal' });
           }
 
           loadVideos();
