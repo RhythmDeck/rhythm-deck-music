@@ -67,6 +67,7 @@
       return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
 
+    // Generate real UUID for anon user — matches your uuid column
     function getAnonId() {
       let id = localStorage.getItem('rhythmdeck_anon_id');
       if (!id) {
@@ -244,11 +245,10 @@
               video_id: videoId,
               user_id: userId,
               fan_name: 'Fan'
-            }, { returning: 'minimal' }); // <-- FIX: Skip post-insert SELECT
+            });
           }
 
-          loadVideos(); // Refresh UI
-
+          loadVideos();
         };
       });
 
