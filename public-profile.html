@@ -67,10 +67,11 @@
       return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
 
+    // Generate a real UUID for anon user (matches your uuid column type)
     function getAnonId() {
       let id = localStorage.getItem('rhythmdeck_anon_id');
       if (!id) {
-        id = 'anon_' + Math.random().toString(36).substr(2, 12);
+        id = crypto.randomUUID();
         localStorage.setItem('rhythmdeck_anon_id', id);
       }
       return id;
@@ -137,9 +138,6 @@
         document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
 
-      const badge = document.getElementById('badge-container');
-      badge.innerHTML = '';
-      // Badge only after counting videos
       loadVideos();
     }
 
@@ -216,7 +214,7 @@
           </div>`;
       }
 
-      // Expose to global for inline onclick
+      // Make functions global for inline onclick
       window.openVideo = function(url) {
         const modalVideo = document.getElementById('modalVideo');
         modalVideo.src = url;
@@ -232,7 +230,7 @@
         document.getElementById('modalVideo').src = '';
       };
 
-      // Attach like handlers
+      // Like handlers
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
@@ -248,14 +246,18 @@
           if (existing) {
             await supabase.from('video_likes').delete().eq('id', existing.id);
           } else {
-            await supabase.from('video_likes').insert({ video_id: videoId, user_id: userId });
+            await supabase.from('video_likes').insert({
+              video_id: videoId,
+              user_id: userId,
+              fan_name: 'Fan'  // optional
+            });
           }
 
-          loadVideos(); // Refresh to update
+          loadVideos(); // Refresh to update UI
         };
       });
 
-      // Attach comment handlers
+      // Comment handlers
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
