@@ -71,7 +71,6 @@
     }
 
     let artistId = null;
-    let isPro = false;
 
     async function init() {
       let profile = null;
@@ -89,7 +88,6 @@
       }
 
       artistId = profile.id;
-      isPro = profile.plan === 'pro';
 
       document.title = `${profile.name} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
@@ -97,7 +95,7 @@
 
       if (profile.banner_url) {
         const banner = document.getElementById('banner');
-        banner.src = getMediaUrl(profile.banner_url);
+        banner.src = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
         banner.onload = () => {
           banner.classList.remove('hidden');
           document.getElementById('bannerPlaceholder').classList.add('hidden');
@@ -105,12 +103,12 @@
       }
 
       if (profile.logo_url) {
-        document.getElementById('logo').src = getMediaUrl(profile.logo_url);
+        document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
 
       const badge = document.getElementById('badge-container');
       badge.innerHTML = '';
-      if (isPro) {
+      if (profile.plan === 'pro') {
         badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`;
       }
 
@@ -134,7 +132,7 @@
       list.innerHTML = '';
       for (const v of videos) {
         const videoUrl = getMediaUrl(v.video_url);
-        const thumbUrl = v.thumbnail_url ? getMediaUrl(v.thumbnail_url) : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
+        const thumbUrl = v.thumbnail_url ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now() : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
         list.innerHTML += `
           <div class="video-card">
             <div class="thumbnail-container" onclick="openVideo('${videoUrl}')">
