@@ -16,8 +16,6 @@
     .play-button{width:90px;height:90px;background:rgba(16,185,129,.9);border-radius:50%;display:flex;align-items:center;justify-content:center}
     .play-button svg{width:38px;height:38px;margin-left:6px;fill:white}
     #artistName{color:#fff;text-shadow:0 4px 20px #000;-webkit-text-stroke:2px #000;paint-order:stroke fill}
-    .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
-    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
     .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
     .comment-name{font-weight:700;color:#10b981}
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
@@ -39,33 +37,6 @@
     <div class="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
       <img id="logo" src="https://placehold.co/400x400/emerald/white?text=Artist&font=roboto" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
-    </div>
-
-    <!-- LIVE STREAM SECTION - ONLY FOR PRO USERS -->
-    <div id="liveStreamSection" class="mb-20 hidden">
-      <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
-        <h3 class="text-3xl font-black text-purple-800 mb-4">Go Live with Your Fans</h3>
-        <div class="grid lg:grid-cols-3 gap-8">
-          <div class="lg:col-span-2">
-            <div id="liveStreamContainer" class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
-              <div id="offlineMessage" class="text-center">The artist is not live right now</div>
-              <div id="livepeer-player" class="hidden w-full h-full"></div>
-              <div id="liveIndicator" class="live-badge hidden">LIVE NOW</div>
-            </div>
-          </div>
-          <div class="bg-white rounded-xl shadow-xl p-6 flex flex-col h-full">
-            <h4 class="font-black text-xl text-purple-700 mb-4">Live Chat</h4>
-            <div id="liveChatMessages" class="flex-1 overflow-y-auto bg-gray-50 p-4 rounded-lg min-h-0 max-h-96 space-y-3">
-              <p class="text-gray-500 text-center italic">Chat appears when the artist is live</p>
-            </div>
-            <div class="flex gap-2 mt-4">
-              <input type="text" id="chatNameInput" placeholder="Your name (optional)" class="flex-1 border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600">
-              <input type="text" id="chatMessageInput" placeholder="Send a message..." class="flex-1 border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600" onkeydown="if(event.key==='Enter') sendLiveMessage()">
-              <button onclick="sendLiveMessage()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded-lg">Send</button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
@@ -166,12 +137,9 @@
         document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
 
-      if (profile.plan === 'pro') {
-        document.getElementById('liveStreamSection').classList.remove('hidden');
-        checkLiveStatus();
-        setInterval(checkLiveStatus, 8000);
-      }
-
+      const badge = document.getElementById('badge-container');
+      badge.innerHTML = '';
+      // Badge only after counting videos
       loadVideos();
     }
 
@@ -248,7 +216,23 @@
           </div>`;
       }
 
-      // Attach like and comment handlers after DOM update
+      // Expose to global for inline onclick
+      window.openVideo = function(url) {
+        const modalVideo = document.getElementById('modalVideo');
+        modalVideo.src = url;
+        const modal = document.getElementById('videoModal');
+        modal.classList.remove('invisible', 'opacity-0');
+        modal.classList.add('opacity-100');
+      };
+
+      window.closeVideo = function() {
+        const modal = document.getElementById('videoModal');
+        modal.classList.add('invisible', 'opacity-0');
+        modal.classList.remove('opacity-100');
+        document.getElementById('modalVideo').src = '';
+      };
+
+      // Attach like handlers
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
@@ -267,10 +251,11 @@
             await supabase.from('video_likes').insert({ video_id: videoId, user_id: userId });
           }
 
-          loadVideos(); // Refresh to update counts and heart state
+          loadVideos(); // Refresh to update
         };
       });
 
+      // Attach comment handlers
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
@@ -281,84 +266,9 @@
           await supabase.from('video_comments').insert({ video_id: id, name, comment });
           document.getElementById(`comment-${id}`).value = '';
           document.getElementById(`name-${id}`).value = '';
-          loadVideos(); // Refresh to show new comment
+          loadVideos();
         };
       });
-    }
-
-    async function checkLiveStatus() {
-      if (!artistId) return;
-      const { data: session } = await supabase
-        .from('live_sessions')
-        .select('playback_id')
-        .eq('user_id', artistId)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      const playerDiv = document.getElementById('livepeer-player');
-      const indicator = document.getElementById('liveIndicator');
-      const offlineMsg = document.getElementById('offlineMessage');
-
-      if (session?.playback_id) {
-        indicator.classList.remove('hidden');
-        offlineMsg.classList.add('hidden');
-        playerDiv.classList.remove('hidden');
-        playerDiv.innerHTML = `<iframe src="https://lvpr.tv?v=${session.playback_id}&autoplay=1" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" class="w-full h-full"></iframe>`;
-      } else {
-        indicator.classList.add('hidden');
-        offlineMsg.classList.remove('hidden');
-        playerDiv.classList.add('hidden');
-        playerDiv.innerHTML = '';
-      }
-
-      loadLiveChat();
-    }
-
-    async function loadLiveChat() {
-      if (!artistId) return;
-      const { data: messages } = await supabase
-        .from('live_chat')
-        .select('name, message')
-        .eq('user_id', artistId)
-        .order('created_at', { ascending: true })
-        .limit(100);
-
-      const chatContainer = document.getElementById('liveChatMessages');
-      if (!messages || messages.length === 0) {
-        chatContainer.innerHTML = '<p class="text-gray-500 text-center italic">Chat appears when the artist is live</p>';
-        return;
-      }
-      chatContainer.innerHTML = '';
-      messages.forEach(msg => {
-        const name = msg.name?.trim() || 'Fan';
-        const message = msg.message || '';
-        chatContainer.innerHTML += `<div class="bg-purple-900/60 text-white p-3 rounded-lg max-w-xs"><strong class="text-purple-300">${name}:</strong> ${message}</div>`;
-      });
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    async function sendLiveMessage() {
-      const name = document.getElementById('chatNameInput').value.trim() || 'Fan';
-      const message = document.getElementById('chatMessageInput').value.trim();
-      if (!message || !artistId) return;
-      await supabase.from('live_chat').insert({ user_id: artistId, name, message });
-      document.getElementById('chatMessageInput').value = '';
-      loadLiveChat();
-    }
-
-    function openVideo(url) {
-      const modalVideo = document.getElementById('modalVideo');
-      modalVideo.src = url;
-      const modal = document.getElementById('videoModal');
-      modal.classList.remove('invisible', 'opacity-0');
-      modal.classList.add('opacity-100');
-    }
-
-    function closeVideo() {
-      const modal = document.getElementById('videoModal');
-      modal.classList.add('invisible', 'opacity-0');
-      modal.classList.remove('opacity-100');
-      document.getElementById('modalVideo').src = '';
     }
 
     init();
