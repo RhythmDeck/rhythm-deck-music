@@ -59,13 +59,12 @@
 
     const getMediaUrl = (path) => {
       if (!path) return '';
-      // Remove leading slashes
       const cleanPath = path.replace(/^\/+/, '');
       return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
 
     const urlParams = new URLSearchParams(location.search);
-    const rawParam = urlParams.get('id')?.trim().toLowerCase();
+    const rawParam = urlParams.get('id')?.trim();
 
     if (!rawParam) {
       document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
@@ -77,36 +76,40 @@
     async function init() {
       let profile = null;
 
-      // First: try exact subdomain match (case-insensitive)
-      const { data: subdomainMatch } = await supabase
+      // Try subdomain (exact match, no case sensitivity needed if stored lowercase)
+      const { data: subdomainData, error: subdomainError } = await supabase
         .from('profiles')
-        .select('id, name, bio, banner_url, logo_url, plan, subdomain')
-        .ilike('subdomain', rawParam) // case-insensitive like
-        .single();
+        .select('id, name, bio, banner_url, logo_url, plan')
+        .eq('subdomain', rawParam)
+        .limit(1);
 
-      if (subdomainMatch && subdomainMatch.subdomain) {
-        profile = subdomainMatch;
+      if (subdomainData && subdomainData.length > 0) {
+        profile = subdomainData[0];
       }
 
-      // Second: if no subdomain match, try by user ID (UUID)
+      // Fallback to UUID
       if (!profile) {
-        const { data: idMatch } = await supabase
+        const { data: idData, error: idError } = await supabase
           .from('profiles')
-          .select('id, name, bio, banner_url, logo_url, plan, subdomain')
+          .select('id, name, bio, banner_url, logo_url, plan')
           .eq('id', rawParam)
-          .single();
+          .limit(1);
 
-        if (idMatch) profile = idMatch;
+        if (idData && idData.length > 0) {
+          profile = idData[0];
+        }
       }
 
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
+        console.error('Profile not found for param:', rawParam);
         return;
       }
 
+      console.log('Profile loaded:', profile);
+
       artistId = profile.id;
 
-      // Update page content
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
@@ -115,17 +118,21 @@
       if (profile.banner_url) {
         const bannerImg = document.getElementById('banner');
         const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
+        console.log('Loading banner:', bannerUrl);
         bannerImg.src = bannerUrl;
         bannerImg.onload = () => {
           bannerImg.classList.remove('hidden');
           document.getElementById('bannerPlaceholder').classList.add('hidden');
         };
+        bannerImg.onerror = () => console.error('Banner load failed');
       }
 
       // Logo
       if (profile.logo_url) {
         const logoImg = document.getElementById('logo');
-        logoImg.src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
+        const logoUrl = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
+        console.log('Loading logo:', logoUrl);
+        logoImg.src = logoUrl;
       }
 
       // Pro badge
@@ -150,7 +157,7 @@
       const list = document.getElementById('videoList');
 
       if (error) {
-        console.error('Video load error:', error);
+        console.error('Videos error:', error);
         list.innerHTML = '<p class="col-span-full text-center text-red-600">Error loading videos</p>';
         return;
       }
