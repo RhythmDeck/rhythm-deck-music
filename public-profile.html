@@ -67,7 +67,6 @@
       return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
 
-    // Generate a real UUID for anon user (matches your uuid column type)
     function getAnonId() {
       let id = localStorage.getItem('rhythmdeck_anon_id');
       if (!id) {
@@ -214,23 +213,18 @@
           </div>`;
       }
 
-      // Make functions global for inline onclick
       window.openVideo = function(url) {
-        const modalVideo = document.getElementById('modalVideo');
-        modalVideo.src = url;
-        const modal = document.getElementById('videoModal');
-        modal.classList.remove('invisible', 'opacity-0');
-        modal.classList.add('opacity-100');
+        document.getElementById('modalVideo').src = url;
+        document.getElementById('videoModal').classList.remove('invisible', 'opacity-0');
+        document.getElementById('videoModal').classList.add('opacity-100');
       };
 
       window.closeVideo = function() {
-        const modal = document.getElementById('videoModal');
-        modal.classList.add('invisible', 'opacity-0');
-        modal.classList.remove('opacity-100');
+        document.getElementById('videoModal').classList.add('invisible', 'opacity-0');
+        document.getElementById('videoModal').classList.remove('opacity-100');
         document.getElementById('modalVideo').src = '';
       };
 
-      // Like handlers
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
@@ -249,15 +243,15 @@
             await supabase.from('video_likes').insert({
               video_id: videoId,
               user_id: userId,
-              fan_name: 'Fan'  // optional
-            });
+              fan_name: 'Fan'
+            }, { returning: 'minimal' }); // <-- FIX: Skip post-insert SELECT
           }
 
-          loadVideos(); // Refresh to update UI
+          loadVideos(); // Refresh UI
+
         };
       });
 
-      // Comment handlers
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
