@@ -36,6 +36,8 @@
     #badge-container img:hover {
       transform: scale(1.2) rotate(10deg);
     }
+    .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -84,6 +86,38 @@
     <input type="file" id="logoInput" accept="image/*" class="hidden">
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
+
+  <!-- LIVE STREAM & CHAT SECTION RESTORED -->
+  <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
+    <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
+    <div class="grid lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
+          <div id="offlineMessage" class="text-center">You are not live right now</div>
+          <div id="livepeer-player" class="hidden w-full h-full"></div>
+          <div id="liveIndicator" class="live-badge hidden">LIVE NOW</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-xl p-6 flex flex-col h-full">
+        <h4 class="font-black text-xl text-purple-700 mb-4">Live Chat</h4>
+        <div id="liveChatMessages" class="flex-1 overflow-y-auto bg-gray-50 p-4 rounded-lg min-h-0 max-h-96 space-y-3">
+          <p class="text-gray-500 text-center italic">Chat appears when you go live</p>
+        </div>
+        <div class="mt-4">
+          <p class="text-sm text-gray-600 mb-2">Start a live stream to enable chat</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-8 text-center">
+      <button id="goLiveBtn" class="bg-red-600 hover:bg-red-700 text-white font-black text-xl px-10 py-5 rounded-xl shadow-lg transform hover:scale-105 transition">
+        Go Live Now
+      </button>
+      <button id="endLiveBtn" class="ml-4 bg-gray-600 hover:bg-gray-700 text-white font-black text-xl px-10 py-5 rounded-xl shadow-lg hidden">
+        End Stream
+      </button>
+    </div>
+  </section>
+
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
       <div class="md:col-span-1 space-y-6">
@@ -159,7 +193,6 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
   let currentUser = null;
-
   // MAKE SAVE FUNCTIONS GLOBALLY AVAILABLE FOR onClick
   window.saveArtistName = async function() {
     const name = document.getElementById('artistNameInput').value.trim();
@@ -171,7 +204,6 @@
       alert("Name saved!");
     }
   };
-
   window.saveBio = async function() {
     const bio = document.getElementById('bioInput').value.trim();
     const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
@@ -181,7 +213,6 @@
       alert("Bio saved!");
     }
   };
-
   window.saveCollaborationOptIn = async function() {
     const checked = document.getElementById('collaborationOptIn').checked;
     const { error } = await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
@@ -191,23 +222,18 @@
       alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
     }
   };
-
   window.logout = async function() {
     await supabase.auth.signOut();
     window.location.href = 'login.html';
   };
-
   window.closeModal = function() {
     document.getElementById('videoModal').classList.remove('show');
     document.getElementById('modalVideo').src = '';
   };
-
   window.openVideoPopup = function(url) {
     document.getElementById('modalVideo').src = url;
     document.getElementById('videoModal').classList.add('show');
   };
-
-  // Other functions (load, upload, etc.) remain the same
   async function displayProBadge() {
     if (!currentUser) return;
     const { count } = await supabase
@@ -223,7 +249,6 @@
       `;
     }
   }
-
   async function loadProfileData() {
     const { data: profile, error } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
     if (error) return console.error(error);
@@ -243,7 +268,6 @@
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
   }
-
   async function loadVideos() {
     const { data: videos } = await supabase
       .from('user_videos')
@@ -296,7 +320,6 @@
         </div>`;
     }
   }
-
   async function deleteVideo(id, videoPath, thumbPath) {
     await supabase.from('user_videos').delete().eq('id', id);
     await supabase.storage.from('media').remove([videoPath]);
@@ -304,12 +327,10 @@
     loadVideos();
     displayProBadge();
   }
-
   async function loadCollaborationStatus() {
     const { data } = await supabase.from('profiles').select('collaboration_opt_in').eq('id', currentUser.id).single();
     document.getElementById('collaborationOptIn').checked = !!data?.collaboration_opt_in;
   }
-
   async function uploadAndPublish() {
     const videoFile = document.getElementById('videoInput').files[0];
     const thumbFile = document.getElementById('thumbnailInput').files[0];
@@ -338,7 +359,6 @@
       spinner.classList.add('hidden');
     }
   }
-
   async function uploadBanner(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -347,7 +367,6 @@
     await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
     loadProfileData();
   }
-
   async function uploadLogo(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -356,7 +375,6 @@
     await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
     loadProfileData();
   }
-
   async function deleteAccount() {
     if (confirm('Delete EVERYTHING forever?')) {
       await supabase.from('profiles').delete().eq('id', currentUser.id);
@@ -364,13 +382,11 @@
       window.location.href = 'index.html';
     }
   }
-
   // MAIN INIT
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('Login required'); window.location.href = 'login.html'; return; }
     currentUser = user;
-
     // AUTO UPGRADE TO PRO ON STRIPE RETURN
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('session_id') && !sessionStorage.getItem('pro_upgraded')) {
@@ -381,7 +397,6 @@
       sessionStorage.setItem('pro_upgraded', 'true');
       window.history.replaceState({}, '', 'profile-admin-pro.html');
     }
-
     // Load data
     await Promise.all([
       loadProfileData(),
@@ -389,7 +404,6 @@
       loadCollaborationStatus(),
       displayProBadge()
     ]);
-
     // Event listeners
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
