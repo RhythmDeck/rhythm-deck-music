@@ -58,10 +58,11 @@
             <div id="liveChatMessages" class="flex-1 overflow-y-auto bg-gray-50 p-4 rounded-lg min-h-0 max-h-96 space-y-3">
               <p class="text-gray-500 text-center italic">Chat appears when the artist is live</p>
             </div>
-            <div class="flex gap-2 mt-4">
-              <input type="text" id="chatNameInput" placeholder="Your name (optional)" class="flex-1 border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600">
-              <input type="text" id="chatMessageInput" placeholder="Send a message..." class="flex-1 border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600" onkeydown="if(event.key==='Enter') sendLiveMessage()">
-              <button onclick="sendLiveMessage()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded-lg">Send</button>
+            <!-- VERTICAL CHAT INPUT STACK -->
+            <div class="mt-4 space-y-3">
+              <input type="text" id="chatNameInput" placeholder="Your name (optional)" class="w-full border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600">
+              <input type="text" id="chatMessageInput" placeholder="Send a message..." class="w-full border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600" onkeydown="if(event.key==='Enter') sendLiveMessage()">
+              <button onclick="sendLiveMessage()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg">Send</button>
             </div>
           </div>
         </div>
@@ -148,7 +149,6 @@
       if (profile.logo_url) {
         document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
-      // Show Live Stream section only for Pro
       if (isPro) {
         document.getElementById('liveStreamSection').classList.remove('hidden');
         checkLiveStatus();
