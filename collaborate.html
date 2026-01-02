@@ -7,15 +7,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .artist-card:hover {transform: translateY(-8px);transition:all .3s;box-shadow:0 20px 40px rgba(0,0,0,.9);}
-    .song-item {padding: 10px 12px; border-radius: 8px; margin: 3px 0; background: rgba(139,92,246,0.1); transition: all .2s; cursor: pointer; font-weight: 500; border: 1px solid #a855f7;}
-    .song-item:hover {background: #a855f7; color: white; transform: translateX(4px);}
+    .video-item {padding: 10px 12px; border-radius: 8px; margin: 3px 0; background: rgba(139,92,246,0.1); transition: all .2s; cursor: pointer; font-weight: 500; border: 1px solid #a855f7;}
+    .video-item:hover {background: #a855f7; color: white; transform: translateX(4px);}
     .modal {display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 99999; justify-content: center; align-items: center;}
     .modal.active {display: flex;}
     video { outline: none; }
+    .stat-badge {background: rgba(16,185,129,0.2); border: 1px solid #10b981; padding: 6px 12px; border-radius: 999px; font-size: 0.9rem;}
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-
 <header class="bg-black/90 backdrop-blur-lg border-b border-purple-600 p-6 shadow-2xl">
   <div class="max-w-7xl mx-auto flex justify-between items-center">
     <div class="flex items-center space-x-4">
@@ -24,6 +24,7 @@
     </div>
     <nav class="space-x-8 flex items-center">
       <a href="profile-admin-pro.html" class="hover:text-purple-400 transition">Dashboard</a>
+      <a href="message-dashboard.html" class="hover:text-emerald-400 transition">Messages</a>
       <button onClick="logout()" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold">Logout</button>
     </nav>
   </div>
@@ -33,19 +34,19 @@
   <h2 class="text-6xl font-black mb-6 bg-gradient-to-r from-green-400 to-purple-500 bg-clip-text text-transparent">
     Collaboration Network
   </h2>
-  <p class="text-xl max-w-3xl mx-auto opacity-90">Connect • Listen • Collab</p>
+  <p class="text-xl max-w-3xl mx-auto opacity-90">Discover Pro artists open to collaboration</p>
 </section>
 
 <section class="max-w-7xl mx-auto px-6 pb-20">
   <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
-  <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists available yet. Be the first!</p>
+  <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists available for collaboration yet.</p>
 </section>
 
 <!-- VIDEO MODAL -->
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
     <button onClick="closeModal()" class="absolute top-4 right-6 text-white text-7xl z-10 hover:text-red-500 transition">×</button>
-    <video id="modalVideo" controls class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
+    <video id="modalVideo" controls autoplay class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
   </div>
 </div>
 
@@ -61,36 +62,35 @@
       </h2>
       <div class="space-y-5">
         <div>
-          <label class="block text-base font-bold mb-1">Artist / Band Name *</label>
+          <label class="block text-base font-bold mb-1">Your Name / Band *</label>
           <input type="text" id="collabName" placeholder="Your name or band" required class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 focus:outline-none focus:border-emerald-400">
         </div>
         <div>
-          <label class="block text-base font-bold mb-1">Email Address *</label>
+          <label class="block text-base font-bold mb-1">Your Email *</label>
           <input type="email" id="collabEmail" placeholder="you@example.com" required class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 focus:outline-none focus:border-emerald-400">
         </div>
         <div>
           <label class="block text-base font-bold mb-1">Message *</label>
-          <textarea id="collabMessage" rows="5" placeholder="Hey! Love your sound..." required class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
+          <textarea id="collabMessage" rows="5" placeholder="Hey! I'd love to collab..." required class="w-full p-3 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
         </div>
       </div>
       <button onClick="sendCollabMessage()" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition transform hover:scale-105 shadow-xl">
         Send Message
       </button>
-      <p class="text-center text-gray-400 mt-4 text-sm">The artist will get your message instantly</p>
+      <p class="text-center text-gray-400 mt-4 text-sm">They'll get your message in their dashboard</p>
     </div>
   </div>
 </div>
 
-<!-- SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-<script>
-  const getMediaUrl = (path) => `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${path.replace(/^\/+/g, '')}`
-
-  const supabase = window.supabase.createClient(
+  const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
+
+  const getMediaUrl = (path) => `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${path?.replace(/^\/+/g, '') || ''}`;
 
   let currentUser = null;
   let targetArtistId = null;
@@ -113,15 +113,14 @@
   };
 
   window.sendCollabMessage = async function() {
-    if (!targetArtistId) return;
+    if (!targetArtistId) return alert('Error: No artist selected');
 
     const name = document.getElementById('collabName').value.trim();
     const email = document.getElementById('collabEmail').value.trim();
     const message = document.getElementById('collabMessage').value.trim();
 
     if (!name || !email || !message) {
-      alert('All fields are required!');
-      return;
+      return alert('Please fill all fields');
     }
 
     const { error } = await supabase
@@ -129,7 +128,7 @@
       .insert({
         artist_id: targetArtistId,
         sender_name: name,
-        sender_email: email,   // This now matches the new column
+        sender_email: email,
         message: message,
         status: 'pending'
       });
@@ -142,73 +141,6 @@
       closeCollabModal();
     }
   };
-
-  // Everything else stays exactly the same — cards load, modal works, red X works
-  (async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return location.href = 'login.html';
-    currentUser = user;
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('collaboration_opt_in')
-      .eq('id', currentUser.id)
-      .single();
-
-    if (!profile?.collaboration_opt_in) {
-      alert("Turn on 'Open to Collaboration' in your profile first!");
-      location.href = 'profile-admin-pro.html';
-      return;
-    }
-
-    await loadArtists();
-  })();
-
-  async function loadArtists() {
-    const { data: artists } = await supabase
-      .from('profiles')
-      .select('id, name, logo_url, banner_url, email, subdomain')
-      .or('collaboration_opt_in.eq.true,open_to_collab.eq.true')
-      .neq('id', currentUser.id);
-
-    const grid = document.getElementById('artistsGrid');
-    grid.innerHTML = '';
-    if (!artists || artists.length === 0) {
-      document.getElementById('noArtists').classList.remove('hidden');
-      return;
-    }
-
-    for (const a of artists) {
-      const logo = a.logo_url ? getMediaUrl(a.logo_url) : 'logo-placeholder.png';
-      const banner = a.banner_url ? getMediaUrl(a.banner_url) : 'https://via.placeholder.com/800x300/4c1d95/ffffff?text=Artist+Banner';
-      const { data: videos } = await supabase.from('user_videos').select('title, video_url').eq('user_id', a.id).limit(10);
-      const tracks = videos?.length > 0
-        ? videos.map(v => `<div class="song-item" onclick="playVideo('${getMediaUrl(v.video_url)}')">${v.title || 'Untitled'}</div>`).join('')
-        : '<p class="text-gray-500 text-xs">No tracks yet</p>';
-      const profileId = a.subdomain?.trim() ? a.subdomain.trim() : a.id;
-      const publicLink = `${location.origin}/public-profile.html?id=${profileId}`;
-
-      grid.innerHTML += `
-        <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
-          <div class="h-40 bg-cover bg-center" style="background-image:url('${banner}')"></div>
-          <div class="p-6 -mt-20 relative z-10 text-center">
-            <img src="${logo}" class="w-32 h-32 rounded-full mx-auto border-8 border-black shadow-2xl object-cover" onerror="this.src='logo-placeholder.png'">
-            <h3 class="text-2xl font-black mt-4">${a.name || 'Unknown Artist'}</h3>
-            <p class="text-sm text-gray-400 mt-2">${videos?.length || 0} Track${(videos?.length || 0) !== 1 ? 's' : ''}</p>
-            <div class="mt-5 text-left bg-black/60 rounded-xl p-4 max-h-64 overflow-y-auto text-sm">${tracks}</div>
-            <a href="${publicLink}" target="_blank" class="block mt-5">
-              <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition transform hover:scale-105 shadow-lg">
-                View Public Profile
-              </button>
-            </a>
-            <button onclick="openCollabModal('${a.id}', '${(a.name || 'Artist').replace(/'/g, "\\'")}')"
-              class="w-full mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-lg py-5 rounded-xl shadow-xl transition transform hover:scale-105">
-              Message for Collab
-            </button>
-          </div>
-        </div>`;
-    }
-  }
 
   window.playVideo = function(url) {
     document.getElementById('modalVideo').src = url;
@@ -230,6 +162,92 @@
     await supabase.auth.signOut();
     location.href = 'login.html';
   };
+
+  async function loadArtists() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return location.href = 'login.html';
+    currentUser = user;
+
+    const { data: artists } = await supabase
+      .from('profiles')
+      .select('id, name, logo_url, subdomain')
+      .eq('collaboration_opt_in', true)
+      .neq('id', currentUser.id);
+
+    const grid = document.getElementById('artistsGrid');
+    grid.innerHTML = '';
+
+    if (!artists || artists.length === 0) {
+      document.getElementById('noArtists').classList.remove('hidden');
+      return;
+    }
+
+    for (const artist of artists) {
+      const logo = artist.logo_url ? getMediaUrl(artist.logo_url) : 'https://placehold.co/200x200/emerald/white?text=Artist';
+
+      // Get videos
+      const { data: videos } = await supabase
+        .from('user_videos')
+        .select('id, title, video_url')
+        .eq('user_id', artist.id);
+
+      // Get total hearts and comments
+      let totalHearts = 0;
+      let totalComments = 0;
+      if (videos) {
+        for (const v of videos) {
+          const { count: hearts } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
+          const { count: comments } = await supabase.from('video_comments').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
+          totalHearts += hearts || 0;
+          totalComments += comments || 0;
+        }
+      }
+
+      const videoList = videos?.length > 0
+        ? videos.map(v => `<div class="video-item" onclick="playVideo('${getMediaUrl(v.video_url)}')">${v.title || 'Untitled Video'}</div>`).join('')
+        : '<p class="text-gray-500 text-sm">No videos yet</p>';
+
+      const profileId = artist.subdomain?.trim() || artist.id;
+      const publicLink = `public-profile.html?id=${profileId}`;
+
+      grid.innerHTML += `
+        <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
+          <div class="p-6 text-center">
+            <div class="flex items-center justify-center gap-4 mb-4">
+              <img src="${logo}" class="w-20 h-20 rounded-full border-4 border-emerald-500 shadow-xl object-cover" onerror="this.src='https://placehold.co/80x80/emerald/white?text=A'">
+              <h3 class="text-2xl font-black">${artist.name || 'Unknown Artist'}</h3>
+            </div>
+
+            <div class="flex justify-center gap-6 mb-6">
+              <div class="stat-badge">
+                ❤️ ${totalHearts} Hearts
+              </div>
+              <div class="stat-badge">
+                💬 ${totalComments} Comments
+              </div>
+            </div>
+
+            <div class="mb-6 bg-black/60 rounded-xl p-4 max-h-48 overflow-y-auto text-sm">
+              ${videoList}
+            </div>
+
+            <div class="space-y-3">
+              <a href="${publicLink}" target="_blank" class="block">
+                <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition shadow-lg">
+                  View Public Profile
+                </button>
+              </a>
+              <button onclick="openCollabModal('${artist.id}', '${(artist.name || 'Artist').replace(/'/g, "\\'")}')"
+                class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-4 rounded-xl shadow-xl transition transform hover:scale-105">
+                Message for Collab
+              </button>
+            </div>
+          </div>
+        </div>`;
+    }
+  }
+
+  loadArtists();
 </script>
 </body>
 </html>
