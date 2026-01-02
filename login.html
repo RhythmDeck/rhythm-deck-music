@@ -6,7 +6,6 @@
   <title>Login | Rhythm Deck</title>
   <base href="/">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
@@ -98,13 +97,16 @@
       </p>
     </div>
   </div>
-  <script>
-    const supabase = window.supabase.createClient(
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabase = createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    // Fixed Show/Hide password
+    // Password Show/Hide toggle
     const passwordInput = document.getElementById('loginPassword');
     const toggleEye = document.getElementById('toggleEye');
 
@@ -118,7 +120,7 @@
       }
     });
 
-    // LOGIN WITH PLAN-BASED REDIRECT + better error messages
+    // Login form handler
     document.getElementById('loginForm').onsubmit = async (e) => {
       e.preventDefault();
 
@@ -129,11 +131,11 @@
 
       if (error) {
         console.error('Login error:', error);
-        alert('Login failed: ' + error.message);
+        alert('Login failed: ' + error.message + '\nCheck console for details.');
         return;
       }
 
-      // Successful login
+      // Fetch profile to determine plan
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('plan, rhythm_vision_plan')
@@ -141,8 +143,8 @@
         .single();
 
       if (profileError || !profile) {
-        console.error('Profile fetch error:', profileError);
-        alert('Profile not found or error loading profile');
+        console.error('Profile error:', profileError);
+        alert('Could not load profile. Try again.');
         return;
       }
 
