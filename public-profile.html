@@ -16,6 +16,8 @@
     .play-button{width:90px;height:90px;background:rgba(16,185,129,.9);border-radius:50%;display:flex;align-items:center;justify-content:center}
     .play-button svg{width:38px;height:38px;margin-left:6px;fill:white}
     #artistName{color:#fff;text-shadow:0 4px 20px #000;-webkit-text-stroke:2px #000;paint-order:stroke fill}
+    .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
     .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
     .comment-name{font-weight:700;color:#10b981}
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
@@ -39,90 +41,101 @@
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
+    <!-- LIVE STREAM & CHAT SECTION - ONLY FOR PRO -->
+    <div id="liveStreamSection" class="mb-20 hidden">
+      <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
+        <h3 class="text-3xl font-black text-purple-800 mb-4">Go Live with Your Fans</h3>
+        <div class="grid lg:grid-cols-3 gap-8">
+          <div class="lg:col-span-2">
+            <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
+              <div id="offlineMessage" class="text-center">The artist is not live right now</div>
+              <div id="livepeer-player" class="hidden w-full h-full"></div>
+              <div id="liveIndicator" class="live-badge hidden">LIVE NOW</div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl shadow-xl p-6 flex flex-col h-full">
+            <h4 class="font-black text-xl text-purple-700 mb-4">Live Chat</h4>
+            <div id="liveChatMessages" class="flex-1 overflow-y-auto bg-gray-50 p-4 rounded-lg min-h-0 max-h-96 space-y-3">
+              <p class="text-gray-500 text-center italic">Chat appears when the artist is live</p>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <input type="text" id="chatNameInput" placeholder="Your name (optional)" class="flex-1 border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600">
+              <input type="text" id="chatMessageInput" placeholder="Send a message..." class="flex-1 border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600" onkeydown="if(event.key==='Enter') sendLiveMessage()">
+              <button onclick="sendLiveMessage()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2 rounded-lg">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
-
     <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center">Videos</h2>
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
-
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
     <button onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay muted playsinline class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
     const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
-
     const getMediaUrl = (path) => {
       if (!path) return '';
       const cleanPath = path.replace(/^\/+/, '');
       return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
-
     function getAnonId() {
       let id = localStorage.getItem('rhythmdeck_anon_id');
       if (!id) {
-        id = crypto.randomUUID(); // Real UUID for uuid column
+        id = crypto.randomUUID();
         localStorage.setItem('rhythmdeck_anon_id', id);
       }
       return id;
     }
-
     const urlParams = new URLSearchParams(location.search);
     const rawParam = urlParams.get('id')?.trim().toLowerCase();
-
     if (!rawParam) {
       document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
       throw new Error('No ID parameter');
     }
-
     let artistId = null;
     let videoCount = 0;
-
+    let isPro = false;
     async function init() {
       let profile = null;
-
       const { data: subdomainData } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, plan')
         .ilike('subdomain', rawParam)
         .limit(1);
-
       if (subdomainData && subdomainData.length > 0) {
         profile = subdomainData[0];
       }
-
       if (!profile) {
         const { data: idData } = await supabase
           .from('profiles')
           .select('id, name, bio, banner_url, logo_url, plan')
           .eq('id', rawParam)
           .limit(1);
-
         if (idData && idData.length > 0) {
           profile = idData[0];
         }
       }
-
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
         return;
       }
-
       artistId = profile.id;
-
+      isPro = profile.plan === 'pro';
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
-
       if (profile.banner_url) {
         const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
         const bannerImg = document.getElementById('banner');
@@ -132,50 +145,99 @@
           document.getElementById('bannerPlaceholder').classList.add('hidden');
         };
       }
-
       if (profile.logo_url) {
         document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
-
+      // Show Live Stream section only for Pro
+      if (isPro) {
+        document.getElementById('liveStreamSection').classList.remove('hidden');
+        checkLiveStatus();
+        setInterval(checkLiveStatus, 10000);
+      }
       loadVideos();
     }
-
+    async function checkLiveStatus() {
+      if (!artistId || !isPro) return;
+      const { data: session } = await supabase
+        .from('live_sessions')
+        .select('playback_id')
+        .eq('user_id', artistId)
+        .eq('is_active', true)
+        .maybeSingle();
+      const playerDiv = document.getElementById('livepeer-player');
+      const indicator = document.getElementById('liveIndicator');
+      const offlineMsg = document.getElementById('offlineMessage');
+      if (session && session.playback_id) {
+        indicator.classList.remove('hidden');
+        offlineMsg.classList.add('hidden');
+        playerDiv.classList.remove('hidden');
+        playerDiv.innerHTML = `<iframe src="https://lvpr.tv?v=${session.playback_id}&autoplay=1" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" class="w-full h-full"></iframe>`;
+        loadLiveChat();
+      } else {
+        indicator.classList.add('hidden');
+        offlineMsg.classList.remove('hidden');
+        playerDiv.classList.add('hidden');
+        playerDiv.innerHTML = '';
+      }
+    }
+    async function loadLiveChat() {
+      if (!artistId) return;
+      const { data: messages } = await supabase
+        .from('live_chat')
+        .select('name, message')
+        .eq('user_id', artistId)
+        .order('created_at', { ascending: true })
+        .limit(50);
+      const chatContainer = document.getElementById('liveChatMessages');
+      if (!messages || messages.length === 0) {
+        chatContainer.innerHTML = '<p class="text-gray-500 text-center italic">Chat appears when the artist is live</p>';
+        return;
+      }
+      chatContainer.innerHTML = '';
+      messages.forEach(msg => {
+        const name = msg.name?.trim() || 'Fan';
+        chatContainer.innerHTML += `<div class="bg-purple-100 p-3 rounded-lg"><strong class="text-purple-700">${name}:</strong> <span class="text-gray-800">${msg.message}</span></div>`;
+      });
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    async function sendLiveMessage() {
+      const nameInput = document.getElementById('chatNameInput');
+      const msgInput = document.getElementById('chatMessageInput');
+      const name = nameInput.value.trim() || 'Fan';
+      const message = msgInput.value.trim();
+      if (!message || !artistId) return;
+      await supabase.from('live_chat').insert({ user_id: artistId, name, message });
+      msgInput.value = '';
+      loadLiveChat();
+    }
     async function loadVideos() {
       if (!artistId) return;
-
       const { data: videos } = await supabase
         .from('user_videos')
         .select('id, video_url, thumbnail_url, title')
         .eq('user_id', artistId)
         .order('created_at', { ascending: false });
-
       const list = document.getElementById('videoList');
       videoCount = videos?.length || 0;
-
       const badge = document.getElementById('badge-container');
       badge.innerHTML = '';
       if (videoCount >= 3) {
         badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`;
       }
-
       if (!videos || videos.length === 0) {
         list.innerHTML = '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>';
         return;
       }
-
       list.innerHTML = '';
       const anonId = getAnonId();
-
       for (const v of videos) {
         const videoUrl = getMediaUrl(v.video_url);
-        const thumbUrl = v.thumbnail_url 
-          ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now() 
+        const thumbUrl = v.thumbnail_url
+          ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now()
           : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
-
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
         const { data: userLike } = await supabase.from('video_likes').select('id').eq('video_id', v.id).eq('user_id', anonId).maybeSingle();
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false });
-
         list.innerHTML += `
           <div class="video-card">
             <div class="relative">
@@ -212,31 +274,26 @@
             </div>
           </div>`;
       }
-
       window.openVideo = function(url) {
         document.getElementById('modalVideo').src = url;
         document.getElementById('videoModal').classList.remove('invisible', 'opacity-0');
         document.getElementById('videoModal').classList.add('opacity-100');
       };
-
       window.closeVideo = function() {
         document.getElementById('videoModal').classList.add('invisible', 'opacity-0');
         document.getElementById('videoModal').classList.remove('opacity-100');
         document.getElementById('modalVideo').src = '';
       };
-
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
           const userId = getAnonId();
-
           const { data: existing } = await supabase
             .from('video_likes')
             .select('id')
             .eq('video_id', videoId)
             .eq('user_id', userId)
             .maybeSingle();
-
           if (existing) {
             await supabase.from('video_likes').delete().eq('id', existing.id);
           } else {
@@ -246,18 +303,15 @@
               fan_name: 'Fan'
             }, { returning: 'minimal' });
           }
-
           loadVideos();
         };
       });
-
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
           const name = document.getElementById(`name-${id}`).value.trim() || 'Fan';
           const comment = document.getElementById(`comment-${id}`).value.trim();
           if (!comment) return;
-
           await supabase.from('video_comments').insert({ video_id: id, name, comment });
           document.getElementById(`comment-${id}`).value = '';
           document.getElementById(`name-${id}`).value = '';
@@ -265,7 +319,6 @@
         };
       });
     }
-
     init();
   </script>
 </body>
