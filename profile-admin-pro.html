@@ -19,7 +19,7 @@
     .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
     .comment-name{font-weight:700;color:#10b981}
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
-    .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;opacity:0.8}
+    .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;}
     .like-display svg{width:28px;height:28px;stroke:#ef4444;fill:none}
     #badge-container {
       position: absolute;
@@ -286,6 +286,7 @@
       const thumbUrl = video.thumbnail_url
         ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now()
         : 'https://via.placeholder.com/400x225/10b981/ffffff?text=Video';
+      // FIXED: Get current like count
       const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', video.id);
       const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', video.id).order('created_at', { ascending: false });
       container.innerHTML += `
