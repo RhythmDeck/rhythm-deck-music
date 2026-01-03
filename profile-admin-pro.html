@@ -21,23 +21,15 @@
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
     .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;}
     .like-display svg{width:28px;height:28px;stroke:#ef4444;fill:none}
-    #badge-container {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      z-index: 30;
-    }
-    #badge-container img {
-      width: 96px;
-      height: 96px;
-      filter: drop-shadow(0 0 20px rgba(255,215,0,0.7));
-      transition: all 0.4s ease;
-    }
-    #badge-container img:hover {
-      transform: scale(1.2) rotate(10deg);
-    }
+    #badge-container {position: absolute;top: 16px;right: 16px;z-index: 30;}
+    #badge-container img {width: 96px;height: 96px;filter: drop-shadow(0 0 20px rgba(255,215,0,0.7));transition: all 0.4s ease;}
+    #badge-container img:hover {transform: scale(1.2) rotate(10deg);}
     .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
     @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+    .social-btn {transition:all .3s;transform:scale(1);}
+    .social-btn:hover {transform:scale(1.05);}
+    #socialModal {position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .3s;}
+    #socialModal.show {opacity:1;visibility:visible;}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -85,6 +77,39 @@
     <button onClick="document.getElementById('bannerInput').click()" class="absolute bottom-4 right-4 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg">Upload Banner</button>
     <input type="file" id="logoInput" accept="image/*" class="hidden">
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
+  </section>
+
+  <!-- SOCIAL MEDIA SHARING PANEL -->
+  <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-br from-purple-800 to-pink-800 rounded-xl shadow-2xl text-white">
+    <h3 class="text-4xl font-black mb-6 text-center">Share Your Content to Social Media</h3>
+    <p class="text-center mb-8 opacity-90 text-lg">Connect your accounts and post videos, updates, and music with one click</p>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+      <button class="social-btn bg-gradient-to-br from-pink-500 to-purple-500 p-6 rounded-xl shadow-lg flex flex-col items-center gap-3">
+        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.694.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg>
+        <span class="font-bold text-xl">Instagram</span>
+        <span class="text-sm opacity-80">Connect Account</span>
+      </button>
+      <button class="social-btn bg-black p-6 rounded-xl shadow-lg flex flex-col items-center gap-3">
+        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.691 17.682c-1.518.902-3.238 1.375-4.691 1.375-2.427 0-4.5-1.008-5.691-2.682.361-.06 1.053-.12 1.53-.12 1.8 0 3.6.6 5.091 1.8.903-.301 1.652-1.052 2.043-1.953-.3.06-.902.18-1.502.18-.602 0-1.202-.18-1.652-.48 1.05-.6 1.652-1.652 1.652-2.853 0-.3-.06-.6-.12-.902.902-.6 1.652-1.652 2.043-2.553-.842.48-1.803.842-2.943.963.963-.6 1.652-1.652 1.652-2.853 0-.902-.301-1.652-.902-2.253 1.652 2.043 4.137 3.336 6.943 3.576-.06-.301-.12-.602-.12-.902 0-2.193 1.803-3.996 3.996-3.996 1.201 0 2.282.48 3.042 1.351 1.652-.301 3.336-.902 4.5-1.652-.541 1.652-1.652 3.036-3.336 3.936 1.502-.18 2.943-.6 4.137-1.201-.963 1.502-2.282 2.703-3.996 3.696z"/></svg>
+        <span class="font-bold text-xl">TikTok</span>
+        <span class="text-sm opacity-80">Connect Account</span>
+      </button>
+      <button class="social-btn bg-red-600 p-6 rounded-xl shadow-lg flex flex-col items-center gap-3">
+        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        <span class="font-bold text-xl">YouTube</span>
+        <span class="text-sm opacity-80">Connect Account</span>
+      </button>
+      <button class="social-btn bg-blue-600 p-6 rounded-xl shadow-lg flex flex-col items-center gap-3">
+        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+        <span class="font-bold text-xl">Facebook</span>
+        <span class="text-sm opacity-80">Connect Account</span>
+      </button>
+      <button class="social-btn bg-black p-6 rounded-xl shadow-lg flex flex-col items-center gap-3">
+        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span class="font-bold text-xl">X (Twitter)</span>
+        <span class="text-sm opacity-80">Connect Account</span>
+      </button>
+    </div>
   </section>
 
   <!-- LIVE STREAM & CHAT SECTION RESTORED -->
@@ -150,8 +175,8 @@
       </div>
       <div class="md:col-span-3 space-y-8">
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
-          <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Video</h3><br>
-          <p>(Refresh page to view new likes and comments)</p><br>
+          <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Video</h3>
+          <p class="mb-4 text-sm text-gray-600">(Refresh page to view new likes and comments)</p>
           <div class="grid md:grid-cols-2 gap-6">
             <div><label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label><input type="file" accept="image/*" id="thumbnailInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white"></div>
             <div><label class="block font-bold mb-3 text-gray-700">Video File (.mp4)</label><input type="file" accept="video/mp4" id="videoInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white"></div>
@@ -184,22 +209,57 @@
     </div>
   </section>
 </main>
+
+<!-- SOCIAL SHARE MODAL -->
+<div id="socialModal">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-4 p-8 relative">
+    <button onclick="document.getElementById('socialModal').classList.remove('show')" class="absolute top-4 right-4 text-4xl text-gray-600 hover:text-red-600">&times;</button>
+    <h2 class="text-4xl font-black text-center mb-8 text-purple-800">Share This Video</h2>
+    <div class="mb-8">
+      <label class="block text-xl font-bold mb-3">Caption</label>
+      <textarea id="socialCaption" class="w-full p-4 border-2 border-purple-300 rounded-xl h-32 resize-none focus:border-purple-600 focus:outline-none" placeholder="Write something awesome...">Check out my latest video on Rhythm Deck! 🎵</textarea>
+    </div>
+    <div class="mb-8">
+      <p class="text-xl font-bold mb-4">Post to:</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <label class="flex items-center gap-4 cursor-pointer">
+          <input type="checkbox" id="shareInstagram" class="w-6 h-6 accent-pink-500">
+          <span class="text-lg font-bold">Instagram</span>
+        </label>
+        <label class="flex items-center gap-4 cursor-pointer">
+          <input type="checkbox" id="shareTikTok" class="w-6 h-6 accent-black">
+          <span class="text-lg font-bold">TikTok</span>
+        </label>
+        <label class="flex items-center gap-4 cursor-pointer">
+          <input type="checkbox" id="shareYouTube" class="w-6 h-6 accent-red-600">
+          <span class="text-lg font-bold">YouTube</span>
+        </label>
+        <label class="flex items-center gap-4 cursor-pointer">
+          <input type="checkbox" id="shareFacebook" class="w-6 h-6 accent-blue-600">
+          <span class="text-lg font-bold">Facebook</span>
+        </label>
+        <label class="flex items-center gap-4 cursor-pointer">
+          <input type="checkbox" id="shareX" class="w-6 h-6 accent-black">
+          <span class="text-lg font-bold">X (Twitter)</span>
+        </label>
+      </div>
+    </div>
+    <button onclick="alert('Posted to selected platforms! (API integration coming soon)'); document.getElementById('socialModal').classList.remove('show')" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black text-2xl py-6 rounded-xl shadow-2xl transform hover:scale-105 transition">
+      Post to Selected Platforms
+    </button>
+  </div>
+</div>
+
 <div id="videoModal"><div id="closeModal" onClick="closeModal()">X</div><video id="modalVideo" controls autoplay class="shadow-2xl"></video></div>
 <footer class="bg-black text-white mt-auto p-6 text-center"><p class="text-sm">© 2025 Rhythm Deck Music. All rights reserved.</p></footer>
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-  // Public anon client for like counts (same as public page)
-  const publicSupabase = createClient(
-    'https://bxoqhmfnseskwqkywppg.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-  );
-  // Authenticated client for everything else
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
   let currentUser = null;
-  // MAKE SAVE FUNCTIONS GLOBALLY AVAILABLE FOR onClick
+
   window.saveArtistName = async function() {
     const name = document.getElementById('artistNameInput').value.trim();
     if (!name) return alert("Enter a name");
@@ -239,6 +299,11 @@
   window.openVideoPopup = function(url) {
     document.getElementById('modalVideo').src = url;
     document.getElementById('videoModal').classList.add('show');
+  };
+  window.openSocialModal = function(videoUrl) {
+    document.getElementById('socialCaption').value = "Check out my latest video on Rhythm Deck! 🎵";
+    document.getElementById('socialModal').classList.add('show');
+    window.currentVideoUrl = videoUrl;
   };
   async function displayProBadge() {
     if (!currentUser) return;
@@ -292,8 +357,7 @@
       const thumbUrl = video.thumbnail_url
         ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now()
         : 'https://via.placeholder.com/400x225/10b981/ffffff?text=Video';
-      // Use public client for like count
-      const { count: likes = 0 } = await publicSupabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', video.id);
+      const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', video.id);
       const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', video.id).order('created_at', { ascending: false });
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
@@ -320,6 +384,9 @@
               </div>
             </div>
           </div>
+          <button onclick="openSocialModal('${videoUrl}')" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black py-4 rounded-b-xl">
+            Share to Social Media
+          </button>
           <button onclick="if(confirm('Delete this video forever?')) deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')"
                   class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
             Delete Video
@@ -389,12 +456,10 @@
       window.location.href = 'index.html';
     }
   }
-  // MAIN INIT
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('Login required'); window.location.href = 'login.html'; return; }
     currentUser = user;
-    // AUTO UPGRADE TO PRO ON STRIPE RETURN
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('session_id') && !sessionStorage.getItem('pro_upgraded')) {
       await supabase
@@ -404,14 +469,12 @@
       sessionStorage.setItem('pro_upgraded', 'true');
       window.history.replaceState({}, '', 'profile-admin-pro.html');
     }
-    // Load data
     await Promise.all([
       loadProfileData(),
       loadVideos(),
       loadCollaborationStatus(),
       displayProBadge()
     ]);
-    // Event listeners
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
