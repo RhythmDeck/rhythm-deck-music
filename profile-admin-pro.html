@@ -286,7 +286,7 @@
       const thumbUrl = video.thumbnail_url
         ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now()
         : 'https://via.placeholder.com/400x225/10b981/ffffff?text=Video';
-      // FIXED: Get current like count
+      // Get current like count
       const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', video.id);
       const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', video.id).order('created_at', { ascending: false });
       container.innerHTML += `
