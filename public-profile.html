@@ -240,7 +240,6 @@
           const { data } = await supabase.from('video_likes').select('id').eq('video_id', v.id).eq('user_id', anonId).maybeSingle();
           userLike = data;
         } catch (err) {
-          // If SELECT fails due to RLS, assume not liked
           userLike = null;
         }
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false });
@@ -290,8 +289,10 @@
         document.getElementById('videoModal').classList.remove('opacity-100');
         document.getElementById('modalVideo').src = '';
       };
+      // FIXED LIKE BUTTON — NO FULL REFRESH
       document.querySelectorAll('.like-btn').forEach(btn => {
-        btn.onclick = async () => {
+        btn.onclick = async (e) => {
+          e.preventDefault();
           const videoId = btn.dataset.id;
           const userId = getAnonId();
           let existing = null;
@@ -304,21 +305,32 @@
               .maybeSingle();
             existing = data;
           } catch (err) {
-            // SELECT failed — assume not liked
             existing = null;
           }
           if (existing) {
             await supabase.from('video_likes').delete().eq('id', existing.id);
+            // Update UI instantly
+            btn.classList.remove('liked', 'text-red-500');
+            btn.querySelector('svg').classList.remove('fill-red-500');
+            btn.querySelector('svg').classList.add('fill-none');
+            const countSpan = btn.querySelector('.like-count');
+            countSpan.textContent = parseInt(countSpan.textContent) - 1;
           } else {
             await supabase.from('video_likes').insert({
               video_id: videoId,
               user_id: userId,
               fan_name: 'Fan'
             }, { returning: 'minimal' });
+            // Update UI instantly
+            btn.classList.add('liked', 'text-red-500');
+            btn.querySelector('svg').classList.add('fill-red-500');
+            btn.querySelector('svg').classList.remove('fill-none');
+            const countSpan = btn.querySelector('.like-count');
+            countSpan.textContent = parseInt(countSpan.textContent) + 1;
           }
-          loadVideos();
         };
       });
+      // Comment post — also no full refresh
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
@@ -328,7 +340,11 @@
           await supabase.from('video_comments').insert({ video_id: id, name, comment });
           document.getElementById(`comment-${id}`).value = '';
           document.getElementById(`name-${id}`).value = '';
-          loadVideos();
+          // Just reload that video's comments
+          const { data: newComments } = await supabase.from('video_comments').select('name, comment').eq('video_id', id).order('created_at', { ascending: false });
+          const card = btn.closest('.video-card');
+          const commentsDiv = card.querySelector('.border-t');
+          commentsDiv.innerHTML = newComments.length === 0 ? '<p class="text-gray-500 italic text-center py-4">Be the first to comment!</p>' : newComments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name || 'Fan'}:</span> <span class="comment-text">${c.comment}</span></div>`).join('');
         };
       });
     }
