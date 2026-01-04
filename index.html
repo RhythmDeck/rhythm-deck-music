@@ -43,8 +43,10 @@
 
 <body class="bg-gray-100 text-gray-900"><br><br>
 
-<!-- AUDIO (ADDED ONLY) -->
-<audio id="logoSound" src="logo-intro-musical.mp3" preload="auto"></audio>
+<!-- AUDIO (UPDATED WITH GENERATED MP3 DATA) -->
+<audio id="logoSound" preload="auto">
+  <source id="audioSource" type="audio/mpeg">
+</audio>
 
 <!-- HEADER -->
 <header class="bg-black text-white p-4 flex justify-between items-center">
@@ -346,18 +348,89 @@
       });
     });
   </script><br>
-<br>
+
 <script>
-  window.addEventListener("load", () => {
-    const logo = document.getElementById("logo");
-    const sound = document.getElementById("logoSound");
+  // AUDIO GENERATION AND PLAYBACK
+  const apiKey = "";
+  
+  async function fetchIntroAudio() {
+    const prompt = "A 6-second cinematic musical brand intro. Start with a swelling orchestral string section that leads into a sophisticated, crystalline piano melody. The mood should be professional, creative, and inspiring, ending with a soft, resonant reverb tail.";
+    
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: "Puck" } // Puck/Charon are good for melodic textures
+              }
+            }
+          },
+          model: "gemini-2.5-flash-preview-tts"
+        })
+      });
 
-    logo.classList.add("logo-intro");
+      const result = await response.json();
+      const pcmData = result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      
+      if (pcmData) {
+        // Convert PCM16 to WAV for browser playback
+        const wavBlob = pcmToWav(pcmData, 24000); // Standard TTS sample rate
+        const audioUrl = URL.createObjectURL(wavBlob);
+        const audioSource = document.getElementById("audioSource");
+        const sound = document.getElementById("logoSound");
+        
+        audioSource.src = audioUrl;
+        sound.load();
+        
+        // Trigger sound with animation
+        const logo = document.getElementById("logo");
+        logo.classList.add("logo-intro");
+        sound.play().catch(() => {
+          console.log("Autoplay prevented. Interaction required for sound.");
+        });
+      }
+    } catch (error) {
+      console.error("Audio generation failed:", error);
+      // Still trigger animation even if audio fails
+      document.getElementById("logo").classList.add("logo-intro");
+    }
+  }
 
-    sound.play().catch(() => {
-      // autoplay blocked — animation still runs silently
-    });
-  });
+  // PCM to WAV Helper
+  function pcmToWav(base64Pcm, sampleRate) {
+    const pcmBuffer = Uint8Array.from(atob(base64Pcm), c => c.charCodeAt(0)).buffer;
+    const wavHeader = new ArrayBuffer(44);
+    const view = new DataView(wavHeader);
+    
+    const writeString = (offset, string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + pcmBuffer.byteLength, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, 'data');
+    view.setUint32(40, pcmBuffer.byteLength, true);
+
+    return new Blob([wavHeader, pcmBuffer], { type: 'audio/wav' });
+  }
+
+  window.addEventListener("load", fetchIntroAudio);
 </script>
 </body>
 </html>
