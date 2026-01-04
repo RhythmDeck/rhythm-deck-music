@@ -79,7 +79,7 @@
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
 
-  <!-- EXPANDED SOCIAL MEDIA SHARING PANEL - 12 PLATFORMS -->
+  <!-- SOCIAL MEDIA SHARING PANEL -->
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-br from-purple-800 to-pink-800 rounded-xl shadow-2xl text-white">
     <h3 class="text-4xl font-black mb-6 text-center">Share Your Content to Social Media</h3>
     <p class="text-center mb-8 opacity-90 text-lg">Connect your accounts and post videos, updates, and music with one click</p>
@@ -164,7 +164,6 @@
         End Stream
       </button>
 
-      <!-- COMPACT TIP BUCKET -->
       <div class="w-full sm:w-auto">
         <div class="bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-xl shadow-xl border-4 border-emerald-400 text-center">
           <h4 class="text-2xl font-black text-emerald-800 mb-3">Enable Fan Tips</h4>
@@ -443,7 +442,7 @@
           <button onclick="openSocialModal('${videoUrl}')" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black py-4 rounded-b-xl">
             Share to Social Media
           </button>
-          <button onclick="deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
+          <button onclick="deleteVideo(${video.id}, '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
             Delete Video
           </button>
         </div>`;
@@ -451,26 +450,44 @@
   }
 
   async function deleteVideo(id, videoPath, thumbPath) {
-    if (!confirm('Delete this video forever? This cannot be undone.')) return;
-    try {
-      // Delete from database first
-      const { error: dbError } = await supabase.from('user_videos').delete().eq('id', id);
-      if (dbError) throw dbError;
+    if (!confirm('Are you sure you want to permanently delete this video? This cannot be undone.')) {
+      return;
+    }
 
-      // Then delete files from storage
-      const filesToDelete = [videoPath];
-      if (thumbPath && thumbPath.trim() !== '') filesToDelete.push(thumbPath);
-      if (filesToDelete.length > 1 || filesToDelete[0].trim() !== '') {
-        const { error: storageError } = await supabase.storage.from('media').remove(filesToDelete);
-        if (storageError) throw storageError;
+    try {
+      // First, delete the row from the database
+      const { error: dbError } = await supabase
+        .from('user_videos')
+        .delete()
+        .eq('id', id);
+
+      if (dbError) {
+        console.error('Database delete error:', dbError);
+        throw dbError;
       }
 
-      alert('Video deleted successfully from database and storage.');
+      // Then delete files from storage
+      const filesToDelete = [];
+      if (videoPath && videoPath.trim() !== '') filesToDelete.push(videoPath);
+      if (thumbPath && thumbPath.trim() !== '') filesToDelete.push(thumbPath);
+
+      if (filesToDelete.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from('media')
+          .remove(filesToDelete);
+
+        if (storageError) {
+          console.error('Storage delete error:', storageError);
+          throw storageError;
+        }
+      }
+
+      alert('Video successfully deleted from both database and storage.');
       loadVideos();
       displayProBadge();
     } catch (err) {
-      console.error('Delete error:', err);
-      alert('Delete failed: ' + err.message);
+      console.error('Delete failed:', err);
+      alert('Failed to delete video: ' + (err.message || 'Unknown error'));
     }
   }
 
@@ -479,34 +496,59 @@
     const thumbFile = document.getElementById('thumbnailInput').files[0];
     const price = parseFloat(document.getElementById('videoPrice').value) || 0;
 
-    if (!videoFile) return alert('Please select a video file');
+    if (!videoFile) {
+      return alert('Please select a video file');
+    }
 
     const spinner = document.getElementById('uploadSpinner');
     spinner.classList.remove('hidden');
 
     try {
-      const videoPath = `videos/${currentUser.id}/${Date.now()}.mp4`;
-      const thumbPath = thumbFile ? `thumbs/${currentUser.id}/${Date.now()}.jpg` : null;
+      const timestamp = Date.now();
+      const videoPath = `videos/${currentUser.id}/${timestamp}.mp4`;
+      const thumbPath = thumbFile ? `thumbs/${currentUser.id}/${timestamp}.jpg` : null;
 
-      await supabase.storage.from('media').upload(videoPath, videoFile, { upsert: true });
-      if (thumbFile) await supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true });
+      // Upload video
+      const { error: videoError } = await supabase.storage
+        .from('media')
+        .upload(videoPath, videoFile, { upsert: true });
 
-      await supabase.from('user_videos').insert({
-        user_id: currentUser.id,
-        video_url: videoPath,
-        thumbnail_url: thumbPath,
-        title: videoFile.name.replace(/\.mp4$/i, ''),
-        price: price
-      });
+      if (videoError) throw videoError;
+
+      // Upload thumbnail if provided
+      if (thumbFile) {
+        const { error: thumbError } = await supabase.storage
+          .from('media')
+          .upload(thumbPath, thumbFile, { upsert: true });
+
+        if (thumbError) throw thumbError;
+      }
+
+      // Insert into database
+      const { error: insertError } = await supabase
+        .from('user_videos')
+        .insert({
+          user_id: currentUser.id,
+          video_url: videoPath,
+          thumbnail_url: thumbPath,
+          title: videoFile.name.replace(/\.mp4$/i, ''),
+          price: price
+        });
+
+      if (insertError) throw insertError;
 
       alert(`Video uploaded successfully! Price set to $${price.toFixed(2)}`);
+
+      // Reset form
       document.getElementById('videoInput').value = '';
       document.getElementById('thumbnailInput').value = '';
       document.getElementById('videoPrice').value = '0.00';
+
       loadVideos();
       displayProBadge();
     } catch (err) {
-      alert('Upload failed: ' + err.message);
+      console.error('Upload error:', err);
+      alert('Upload failed: ' + (err.message || 'Unknown error'));
     } finally {
       spinner.classList.add('hidden');
     }
@@ -516,70 +558,87 @@
     const file = e.target.files[0];
     if (!file) return;
     const path = `banners/${currentUser.id}`;
-    await supabase.storage.from('media').upload(path, file, { upsert: true });
-    await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
-    loadProfileData();
+    const { error } = await supabase.storage.from('media').upload(path, file, { upsert: true });
+    if (error) {
+      alert('Banner upload failed: ' + error.message);
+    } else {
+      await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
+      loadProfileData();
+    }
   }
+
   async function uploadLogo(e) {
     const file = e.target.files[0];
     if (!file) return;
     const path = `logos/${currentUser.id}`;
-    await supabase.storage.from('media').upload(path, file, { upsert: true });
-    await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
-    loadProfileData();
+    const { error } = await supabase.storage.from('media').upload(path, file, { upsert: true });
+    if (error) {
+      alert('Logo upload failed: ' + error.message);
+    } else {
+      await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
+      loadProfileData();
+    }
   }
+
   async function deleteAccount() {
-    if (confirm('Delete EVERYTHING forever?')) {
-      await supabase.from('profiles').delete().eq('id', currentUser.id);
-      await supabase.auth.signOut();
-      window.location.href = 'index.html';
+    if (confirm('This will permanently delete your entire account and all content. Are you absolutely sure?')) {
+      const { error } = await supabase.from('profiles').delete().eq('id', currentUser.id);
+      if (error) {
+        alert('Account deletion failed: ' + error.message);
+      } else {
+        await supabase.auth.signOut();
+        window.location.href = 'index.html';
+      }
     }
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { alert('Login required'); window.location.href = 'login.html'; return; }
+    if (!user) {
+      alert('You must be logged in');
+      window.location.href = 'login.html';
+      return;
+    }
     currentUser = user;
+
+    // Upgrade to pro if coming from Stripe
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('session_id') && !sessionStorage.getItem('pro_upgraded')) {
-      await supabase
-        .from('profiles')
-        .update({ plan: 'pro', paid: true })
-        .eq('id', user.id);
+      await supabase.from('profiles').update({ plan: 'pro', paid: true }).eq('id', user.id);
       sessionStorage.setItem('pro_upgraded', 'true');
       window.history.replaceState({}, '', 'profile-admin-pro.html');
     }
+
     await Promise.all([
       loadProfileData(),
       loadVideos(),
       displayProBadge()
     ]);
+
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
 
-    // Stripe connection status
-    async function checkStripeConnection() {
-      const { data: profile } = await supabase.from('profiles').select('stripe_account_id').eq('id', currentUser.id).single();
-      const statusDiv = document.getElementById('stripeStatus');
-      const btn = document.getElementById('connectStripeBtn');
-      if (profile?.stripe_account_id) {
-        statusDiv.textContent = 'Tip Bucket Active!';
-        statusDiv.className = 'text-green-700';
-        btn.textContent = 'Manage Stripe Account';
-        btn.classList.replace('bg-emerald-600', 'bg-gray-600');
-      } else {
-        statusDiv.textContent = 'Not connected';
-        statusDiv.className = 'text-red-600';
-        btn.textContent = 'Enable Tip Bucket – Connect Stripe';
-      }
+    // Stripe tip bucket status
+    const { data: profile } = await supabase.from('profiles').select('stripe_account_id').eq('id', currentUser.id).single();
+    const statusDiv = document.getElementById('stripeStatus');
+    const btn = document.getElementById('connectStripeBtn');
+    if (profile?.stripe_account_id) {
+      statusDiv.textContent = 'Tip Bucket Active!';
+      statusDiv.className = 'text-green-700 font-bold';
+      btn.textContent = 'Manage Stripe Account';
+      btn.classList.replace('bg-emerald-600', 'bg-gray-600');
+    } else {
+      statusDiv.textContent = 'Not connected';
+      statusDiv.className = 'text-red-600 font-bold';
+      btn.textContent = 'Enable Tip Bucket – Connect Stripe';
     }
-    await checkStripeConnection();
     document.getElementById('connectStripeBtn').addEventListener('click', () => {
-      alert('Test Mode: This will soon connect to Stripe for real tipping!');
+      alert('Stripe connection coming soon!');
     });
 
-    document.getElementById('deleteConfirmInput').addEventListener('input', e => {
+    // Danger zone confirmation
+    document.getElementById('deleteConfirmInput').addEventListener('input', (e) => {
       const val = e.target.value.trim();
       const btn = document.getElementById('deleteAccountBtn');
       if (val === 'Delete My Account') {
