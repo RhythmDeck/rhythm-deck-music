@@ -5,34 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     a:hover { color: #0000FF; }
     #videoModal { display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 50; align-items: center; justify-content: center; }
     #videoModal.active { display: flex; }
     .cursor-pointer { cursor: pointer; }
-    .style1 {color: #FFFFFF}
+    .style1 { color: #FFFFFF }
+
+    /* ===== LOGO INTRO ANIMATION (ADDED ONLY) ===== */
+    @keyframes logoIntro {
+      0% {
+        transform: translate(140px, 60px) scale(4) rotate(0deg);
+        opacity: 0;
+        box-shadow: 0 0 0 rgba(0,255,120,0);
+      }
+      15% {
+        opacity: 1;
+      }
+      60% {
+        transform: translate(40px, 20px) scale(1.8) rotate(720deg);
+        box-shadow: 0 0 30px rgba(0,255,120,0.35);
+      }
+      100% {
+        transform: translate(0, 0) scale(1) rotate(1080deg);
+        box-shadow: none;
+      }
+    }
+
+    .logo-intro {
+      animation: logoIntro 5.5s ease-out forwards;
+      transform-origin: center;
+      will-change: transform;
+    }
   </style>
 </head>
+
 <body class="bg-gray-100 text-gray-900"><br><br>
-  <!-- HEADER -->
-  <header class="bg-black text-white p-4 flex justify-between items-center">
-    <div class="flex items-center space-x-3">
-      <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
-      <div>
-        <h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
-        <p class="text-sm text-gray-300">Unleash Your Beat</p>
-      </div>
+
+<!-- AUDIO (ADDED ONLY) -->
+<audio id="logoSound" src="logo-intro-musical.mp3" preload="auto"></audio>
+
+<!-- HEADER -->
+<header class="bg-black text-white p-4 flex justify-between items-center">
+  <div class="flex items-center space-x-3">
+    <img
+      id="logo"
+      src="logo-1-sm.jpg"
+      alt="Rhythm Deck Logo"
+      class="w-10 h-10 rounded-full"
+    >
+    <div>
+      <h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+      <p class="text-sm text-gray-300">Unleash Your Beat</p>
     </div>
-    <nav class="space-x-4">
-      <a href="index.html" class="hover:underline text-green-400">Home</a>
-      <a href="about.html" class="hover:underline">About</a>
-      <a href="benefits.html" class="hover:underline">Benefits</a>
-      <a href="pricing.html" class="hover:underline">Pricing</a>
-      <a href="contact.html" class="hover:underline">Contact</a>
-      <a href="login.html" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300">Login</a>
-      <a href="signup.html" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
-    </nav>
-  </header>
+  </div>
+  <nav class="space-x-4">
+    <a href="index.html" class="hover:underline text-green-400">Home</a>
+    <a href="about.html" class="hover:underline">About</a>
+    <a href="benefits.html" class="hover:underline">Benefits</a>
+    <a href="pricing.html" class="hover:underline">Pricing</a>
+    <a href="contact.html" class="hover:underline">Contact</a>
+    <a href="login.html" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300">Login</a>
+    <a href="signup.html" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
+  </nav>
+</header>
   <!-- HERO -->
   <section class="relative h-[500px] bg-cover bg-center flex items-center justify-center"
            style="background-image: url('banner-cropped.jpg');">
@@ -308,6 +345,19 @@
         el.addEventListener("click", () => openVideo(el.dataset.video));
       });
     });
-  </script>
+  </script><br>
+<br>
+<script>
+  window.addEventListener("load", () => {
+    const logo = document.getElementById("logo");
+    const sound = document.getElementById("logoSound");
+
+    logo.classList.add("logo-intro");
+
+    sound.play().catch(() => {
+      // autoplay blocked — animation still runs silently
+    });
+  });
+</script>
 </body>
 </html>
