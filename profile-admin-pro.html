@@ -78,6 +78,7 @@
     <input type="file" id="logoInput" accept="image/*" class="hidden">
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
+
   <!-- EXPANDED SOCIAL MEDIA SHARING PANEL - 12 PLATFORMS -->
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-br from-purple-800 to-pink-800 rounded-xl shadow-2xl text-white">
     <h3 class="text-4xl font-black mb-6 text-center">Share Your Content to Social Media</h3>
@@ -134,10 +135,10 @@
     </div>
   </section>
 
-  <!-- LIVE STREAM & CHAT SECTION – NOW WITH VISIBLE TIP BUCKET BUTTON -->
+  <!-- LIVE STREAM & CHAT SECTION – NOW INCLUDES COMPACT TIP BUCKET -->
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
     <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
-    <div class="grid lg:grid-cols-3 gap-8">
+    <div class="grid lg:grid-cols-3 gap-8 mb-8">
       <div class="lg:col-span-2">
         <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
           <div id="offlineMessage" class="text-center">You are not live right now</div>
@@ -159,14 +160,14 @@
       <button id="goLiveBtn" class="bg-red-600 hover:bg-red-700 text-white font-black text-xl px-10 py-5 rounded-xl shadow-lg transform hover:scale-105 transition">
         Go Live Now
       </button>
-      <button id="endLiveBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-black text-xl px-10 py-5 rounded-xl shadow-lg hidden">
+      <button id="endLiveBtn" class="ml-4 bg-gray-600 hover:bg-gray-700 text-white font-black text-xl px-10 py-5 rounded-xl shadow-lg hidden">
         End Stream
       </button>
 
-      <!-- HIGHLY VISIBLE TIP BUCKET BUTTON -->
+      <!-- COMPACT TIP BUCKET – INTEGRATED INTO LIVE SECTION -->
       <div class="w-full sm:w-auto">
-        <div class="bg-gradient-to-br from-emerald-50 to-green-50 p-6 rounded-xl shadow-2xl border-4 border-emerald-300 text-center">
-          <h4 class="text-2xl font-bold text-emerald-800 mb-3">Enable Fan Tips</h4>
+        <div class="bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-xl shadow-xl border-4 border-emerald-400 text-center">
+          <h4 class="text-2xl font-black text-emerald-800 mb-3">Enable Fan Tips</h4>
           <p class="text-sm text-gray-700 mb-4">Let fans support you directly during streams and on your profile</p>
           <div id="stripeStatus" class="mb-4 text-lg font-bold"></div>
           <button id="connectStripeBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-lg shadow-lg text-xl transition transform hover:scale-105">
@@ -244,7 +245,8 @@
     </div>
   </section>
 </main>
-<!-- SOCIAL SHARE MODAL - NOW WITH ALL 12 PLATFORMS -->
+
+<!-- SOCIAL SHARE MODAL -->
 <div id="socialModal">
   <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-4 p-8 relative">
     <button onclick="document.getElementById('socialModal').classList.remove('show')" class="absolute top-4 right-4 text-4xl text-gray-600 hover:text-red-600">&times;</button>
@@ -311,8 +313,10 @@
     </button>
   </div>
 </div>
+
 <div id="videoModal"><div id="closeModal" onClick="closeModal()">X</div><video id="modalVideo" controls autoplay class="shadow-2xl"></video></div>
 <footer class="bg-black text-white mt-auto p-6 text-center"><p class="text-sm">© 2026 Rhythm Deck Music. All rights reserved.</p></footer>
+
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
   const supabase = createClient(
@@ -555,7 +559,7 @@
     });
     document.getElementById('deleteAccountBtn').addEventListener('click', deleteAccount);
 
-    // NEW: Check Stripe connection status
+    // Stripe connection status
     async function checkStripeConnection() {
       const { data: profile } = await supabase
         .from('profiles')
@@ -567,7 +571,7 @@
       const btn = document.getElementById('connectStripeBtn');
 
       if (profile?.stripe_account_id) {
-        statusDiv.textContent = '✅ Tip Bucket Active!';
+        statusDiv.textContent = 'Tip Bucket Active!';
         statusDiv.className = 'text-green-700';
         btn.textContent = 'Manage Stripe Account';
         btn.classList.replace('bg-emerald-600', 'bg-gray-600');
@@ -580,7 +584,6 @@
 
     await checkStripeConnection();
 
-    // Button click (placeholder for now)
     document.getElementById('connectStripeBtn').addEventListener('click', () => {
       alert('Test Mode: This will soon connect to Stripe for real tipping!');
     });
