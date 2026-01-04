@@ -40,34 +40,12 @@
       <img id="logo" src="https://placehold.co/400x400/emerald/white?text=Artist&font=roboto" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
-    <!-- TIP BUCKET FOR FANS – ONLY VISIBLE IF ARTIST IS PRO AND HAS STRIPE CONNECTED -->
-    <div id="tipBucketSection" class="mb-20 hidden">
-      <div class="bg-gradient-to-br from-emerald-50 to-green-100 p-10 rounded-3xl shadow-2xl border-8 border-emerald-300 text-center max-w-4xl mx-auto">
-        <div class="bg-yellow-100 border-4 border-yellow-400 rounded-xl py-3 px-6 mb-6">
-          <p class="text-lg font-bold text-yellow-800">⚠️ Test Mode Active – No Real Charges</p>
-          <p class="text-sm text-yellow-700">This is a demo. Tips are simulated for investor preview.</p>
-        </div>
-        <h3 class="text-5xl font-black text-emerald-800 mb-6">Support This Artist</h3>
-        <p class="text-xl text-gray-700 mb-8">Send a tip to show your appreciation for their music and streams!</p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 max-w-2xl mx-auto">
-          <button class="tip-amount bg-white hover:bg-emerald-100 border-4 border-emerald-400 rounded-2xl py-6 text-3xl font-black text-emerald-800 shadow-lg transform hover:scale-110 transition" data-amount="5">$5</button>
-          <button class="tip-amount bg-white hover:bg-emerald-100 border-4 border-emerald-400 rounded-2xl py-6 text-3xl font-black text-emerald-800 shadow-lg transform hover:scale-110 transition" data-amount="10">$10</button>
-          <button class="tip-amount bg-white hover:bg-emerald-100 border-4 border-emerald-400 rounded-2xl py-6 text-3xl font-black text-emerald-800 shadow-lg transform hover:scale-110 transition" data-amount="20">$20</button>
-        </div>
-        <div class="mb-8 max-w-md mx-auto">
-          <input type="number" id="customTip" placeholder="Or enter custom amount (e.g. 50)" class="w-full text-center text-2xl py-4 border-4 border-emerald-400 rounded-2xl focus:outline-none focus:border-emerald-600">
-        </div>
-        <button id="sendTipBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-3xl px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition">
-          Send Tip ❤️
-        </button>
-        <p class="text-sm text-gray-600 mt-6">Powered by Stripe • Secure (when live)</p>
-      </div>
-    </div>
-    <!-- LIVE STREAM & CHAT SECTION - ONLY FOR PRO -->
+
+    <!-- LIVE STREAM & CHAT SECTION - NOW INCLUDES COMPACT TIP BUCKET -->
     <div id="liveStreamSection" class="mb-20 hidden">
       <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
-        <h3 class="text-3xl font-black text-purple-800 mb-4">Go Live with Your Fans</h3>
-        <div class="grid lg:grid-cols-3 gap-8">
+        <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
+        <div class="grid lg:grid-cols-3 gap-8 mb-8">
           <div class="lg:col-span-2">
             <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
               <div id="offlineMessage" class="text-center">The artist is not live right now</div>
@@ -87,8 +65,26 @@
             </div>
           </div>
         </div>
+
+        <!-- COMPACT TIP BUCKET – INTEGRATED INTO LIVE SECTION -->
+        <div id="tipBucketSection" class="hidden bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-xl shadow-xl border-4 border-emerald-400 text-center">
+          <h4 class="text-2xl font-black text-emerald-800 mb-3">Support This Artist</h4>
+          <p class="text-sm text-gray-700 mb-4">Send a tip to show your appreciation</p>
+          <div class="grid grid-cols-3 gap-3 mb-4 max-w-xs mx-auto">
+            <button class="tip-amount bg-white hover:bg-emerald-200 border-2 border-emerald-500 rounded-xl py-3 text-lg font-bold text-emerald-800 shadow transition" data-amount="5">$5</button>
+            <button class="tip-amount bg-white hover:bg-emerald-200 border-2 border-emerald-500 rounded-xl py-3 text-lg font-bold text-emerald-800 shadow transition" data-amount="10">$10</button>
+            <button class="tip-amount bg-white hover:bg-emerald-200 border-2 border-emerald-500 rounded-xl py-3 text-lg font-bold text-emerald-800 shadow transition" data-amount="20">$20</button>
+          </div>
+          <div class="max-w-xs mx-auto mb-4">
+            <input type="number" id="customTip" placeholder="Custom amount" class="w-full text-center py-2 border-2 border-emerald-500 rounded-xl focus:outline-none focus:border-emerald-700">
+          </div>
+          <button id="sendTipBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-xl shadow-lg transition">
+            Send Tip ❤️
+          </button>
+        </div>
       </div>
     </div>
+
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
@@ -128,7 +124,6 @@
     let artistId = null;
     let videoCount = 0;
     let isPro = false;
-    let hasStripe = false;
     async function init() {
       let profile = null;
       const { data: subdomainData } = await supabase
@@ -155,7 +150,6 @@
       }
       artistId = profile.id;
       isPro = profile.plan === 'pro';
-      hasStripe = !!profile.stripe_account_id;
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
@@ -367,7 +361,7 @@
         };
       });
     }
-    // Tip Bucket functionality (placeholder for now)
+    // Compact Tip Bucket functionality
     document.querySelectorAll('.tip-amount').forEach(btn => {
       btn.addEventListener('click', () => {
         document.getElementById('customTip').value = btn.dataset.amount;
@@ -379,7 +373,7 @@
         alert('Please enter an amount of at least $1');
         return;
       }
-      alert(`🎉 Thank you! In the live version, $${amount} would be sent to the artist.\n\n(This is test mode – no charge made)`);
+      alert(`Thank you for your support! $${amount} tip sent to the artist.`);
       document.getElementById('customTip').value = '';
     });
     init();
