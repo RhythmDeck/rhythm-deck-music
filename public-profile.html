@@ -41,26 +41,6 @@
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
-    <!-- TIP BUCKET FOR FANS – ONLY VISIBLE IF ARTIST IS PRO AND HAS STRIPE CONNECTED -->
-    <div id="tipBucketSection" class="mb-20 hidden">
-      <div class="bg-gradient-to-br from-emerald-50 to-green-100 p-10 rounded-3xl shadow-2xl border-8 border-emerald-300 text-center max-w-4xl mx-auto">
-        <h3 class="text-5xl font-black text-emerald-800 mb-6">Support This Artist</h3>
-        <p class="text-xl text-gray-700 mb-8">Send a tip to show your appreciation for their music and streams!</p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 max-w-2xl mx-auto">
-          <button class="tip-amount bg-white hover:bg-emerald-100 border-4 border-emerald-400 rounded-2xl py-6 text-3xl font-black text-emerald-800 shadow-lg transform hover:scale-110 transition" data-amount="5">$5</button>
-          <button class="tip-amount bg-white hover:bg-emerald-100 border-4 border-emerald-400 rounded-2xl py-6 text-3xl font-black text-emerald-800 shadow-lg transform hover:scale-110 transition" data-amount="10">$10</button>
-          <button class="tip-amount bg-white hover:bg-emerald-100 border-4 border-emerald-400 rounded-2xl py-6 text-3xl font-black text-emerald-800 shadow-lg transform hover:scale-110 transition" data-amount="20">$20</button>
-        </div>
-        <div class="mb-8 max-w-md mx-auto">
-          <input type="number" id="customTip" placeholder="Or enter custom amount" class="w-full text-center text-2xl py-4 border-4 border-emerald-400 rounded-2xl focus:outline-none focus:border-emerald-600">
-        </div>
-        <button id="sendTipBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-3xl px-12 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition">
-          Send Tip ❤️
-        </button>
-        <p class="text-sm text-gray-600 mt-6">Powered by Stripe • Secure payment</p>
-      </div>
-    </div>
-
     <!-- LIVE STREAM & CHAT SECTION - ONLY FOR PRO -->
     <div id="liveStreamSection" class="mb-20 hidden">
       <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
@@ -87,6 +67,7 @@
         </div>
       </div>
     </div>
+
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
@@ -126,12 +107,11 @@
     let artistId = null;
     let videoCount = 0;
     let isPro = false;
-    let hasStripe = false;
     async function init() {
       let profile = null;
       const { data: subdomainData } = await supabase
         .from('profiles')
-        .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+        .select('id, name, bio, banner_url, logo_url, plan')
         .ilike('subdomain', rawParam)
         .limit(1);
       if (subdomainData && subdomainData.length > 0) {
@@ -140,7 +120,7 @@
       if (!profile) {
         const { data: idData } = await supabase
           .from('profiles')
-          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+          .select('id, name, bio, banner_url, logo_url, plan')
           .eq('id', rawParam)
           .limit(1);
         if (idData && idData.length > 0) {
@@ -153,7 +133,6 @@
       }
       artistId = profile.id;
       isPro = profile.plan === 'pro';
-      hasStripe = !!profile.stripe_account_id;
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
@@ -173,9 +152,6 @@
         document.getElementById('liveStreamSection').classList.remove('hidden');
         checkLiveStatus();
         setInterval(checkLiveStatus, 10000);
-      }
-      if (isPro && hasStripe) {
-        document.getElementById('tipBucketSection').classList.remove('hidden');
       }
       loadVideos();
     }
@@ -313,6 +289,7 @@
         document.getElementById('videoModal').classList.remove('opacity-100');
         document.getElementById('modalVideo').src = '';
       };
+      // FIXED LIKE BUTTON — NO FULL REFRESH
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async (e) => {
           e.preventDefault();
@@ -332,6 +309,7 @@
           }
           if (existing) {
             await supabase.from('video_likes').delete().eq('id', existing.id);
+            // Update UI instantly
             btn.classList.remove('liked', 'text-red-500');
             btn.querySelector('svg').classList.remove('fill-red-500');
             btn.querySelector('svg').classList.add('fill-none');
@@ -343,6 +321,7 @@
               user_id: userId,
               fan_name: 'Fan'
             }, { returning: 'minimal' });
+            // Update UI instantly
             btn.classList.add('liked', 'text-red-500');
             btn.querySelector('svg').classList.add('fill-red-500');
             btn.querySelector('svg').classList.remove('fill-none');
@@ -351,6 +330,7 @@
           }
         };
       });
+      // Comment post — also no full refresh
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
@@ -360,6 +340,7 @@
           await supabase.from('video_comments').insert({ video_id: id, name, comment });
           document.getElementById(`comment-${id}`).value = '';
           document.getElementById(`name-${id}`).value = '';
+          // Just reload that video's comments
           const { data: newComments } = await supabase.from('video_comments').select('name, comment').eq('video_id', id).order('created_at', { ascending: false });
           const card = btn.closest('.video-card');
           const commentsDiv = card.querySelector('.border-t');
@@ -367,21 +348,6 @@
         };
       });
     }
-    // Tip Bucket functionality (placeholder for now)
-    document.querySelectorAll('.tip-amount').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.getElementById('customTip').value = btn.dataset.amount;
-      });
-    });
-    document.getElementById('sendTipBtn')?.addEventListener('click', () => {
-      const amount = document.getElementById('customTip').value || 5;
-      if (amount < 1) {
-        alert('Please enter an amount of at least $1');
-        return;
-      }
-      alert(`Thank you! In full version, $${amount} would be sent to the artist via Stripe.\n\n(Test mode – no real charge)`);
-      document.getElementById('customTip').value = '';
-    });
     init();
   </script>
 </body>
