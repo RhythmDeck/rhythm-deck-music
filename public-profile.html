@@ -6,6 +6,8 @@
   <title>Artist | Rhythm Deck</title>
   <link rel="icon" href="data:,">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     .video-card{background:#111;border-radius:1rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.3);transition:.4s;position:relative}
     .video-card:hover{transform:translateY(-10px);box-shadow:0 30px 60px rgba(0,0,0,.5)}
@@ -41,10 +43,10 @@
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
-    <!-- LIVE STREAM & CHAT SECTION - NOW INCLUDES COMPACT TIP BUCKET -->
+    <!-- LIVE STREAM & CHAT SECTION WITH REAL TIP BUCKET -->
     <div id="liveStreamSection" class="mb-20 hidden">
       <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
-        <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
+        <h3 class="text-3xl font-black text-purple-800 mb-6">Artist is Live</h3>
         <div class="grid lg:grid-cols-3 gap-8 mb-8">
           <div class="lg:col-span-2">
             <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
@@ -66,21 +68,22 @@
           </div>
         </div>
 
-        <!-- COMPACT TIP BUCKET – INTEGRATED INTO LIVE SECTION -->
-        <div id="tipBucketSection" class="hidden bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-xl shadow-xl border-4 border-emerald-400 text-center">
-          <h4 class="text-2xl font-black text-emerald-800 mb-3">Support This Artist</h4>
-          <p class="text-sm text-gray-700 mb-4">Send a tip to show your appreciation</p>
-          <div class="grid grid-cols-3 gap-3 mb-4 max-w-xs mx-auto">
-            <button class="tip-amount bg-white hover:bg-emerald-200 border-2 border-emerald-500 rounded-xl py-3 text-lg font-bold text-emerald-800 shadow transition" data-amount="5">$5</button>
-            <button class="tip-amount bg-white hover:bg-emerald-200 border-2 border-emerald-500 rounded-xl py-3 text-lg font-bold text-emerald-800 shadow transition" data-amount="10">$10</button>
-            <button class="tip-amount bg-white hover:bg-emerald-200 border-2 border-emerald-500 rounded-xl py-3 text-lg font-bold text-emerald-800 shadow transition" data-amount="20">$20</button>
+        <!-- REAL TIP BUCKET -->
+        <div id="tipBucketSection" class="hidden bg-gradient-to-br from-emerald-100 to-green-100 p-8 rounded-xl shadow-xl border-4 border-emerald-400 text-center max-w-2xl mx-auto">
+          <h4 class="text-3xl font-black text-emerald-800 mb-4">Support This Artist</h4>
+          <p class="text-lg text-gray-700 mb-6">Send a tip to show your love ❤️</p>
+          <div class="grid grid-cols-3 gap-4 mb-6 max-w-md mx-auto">
+            <button class="tip-amount bg-white hover:bg-emerald-200 border-4 border-emerald-500 rounded-2xl py-4 text-2xl font-black text-emerald-800 shadow-lg transition transform hover:scale-105" data-amount="500">$5</button>
+            <button class="tip-amount bg-white hover:bg-emerald-200 border-4 border-emerald-500 rounded-2xl py-4 text-2xl font-black text-emerald-800 shadow-lg transition transform hover:scale-105" data-amount="1000">$10</button>
+            <button class="tip-amount bg-white hover:bg-emerald-200 border-4 border-emerald-500 rounded-2xl py-4 text-2xl font-black text-emerald-800 shadow-lg transition transform hover:scale-105" data-amount="2000">$20</button>
           </div>
-          <div class="max-w-xs mx-auto mb-4">
-            <input type="number" id="customTip" placeholder="Custom amount" class="w-full text-center py-2 border-2 border-emerald-500 rounded-xl focus:outline-none focus:border-emerald-700">
+          <div class="max-w-sm mx-auto mb-6">
+            <input type="number" id="customTip" placeholder="Or enter custom amount (USD)" min="1" step="0.01" class="w-full text-center text-2xl py-4 border-4 border-emerald-500 rounded-2xl focus:outline-none focus:border-emerald-700">
           </div>
-          <button id="sendTipBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-xl shadow-lg transition">
+          <button id="sendTipBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-2xl py-5 px-12 rounded-2xl shadow-2xl transition transform hover:scale-105">
             Send Tip ❤️
           </button>
+          <p class="text-sm text-gray-600 mt-4">Powered by Stripe • Test mode</p>
         </div>
       </div>
     </div>
@@ -89,24 +92,32 @@
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
+
     <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center">Videos</h2>
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
+
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
     <button onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay muted playsinline class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
+
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
+
+    // REPLACE WITH YOUR STRIPE TEST PUBLISHABLE KEY
+    const stripe = Stripe('pk_test_51YourTestPublishableKeyHereReplaceThis');
+
     const getMediaUrl = (path) => {
       if (!path) return '';
       const cleanPath = path.replace(/^\/+/, '');
       return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
+
     function getAnonId() {
       let id = localStorage.getItem('rhythmdeck_anon_id');
       if (!id) {
@@ -115,44 +126,53 @@
       }
       return id;
     }
+
     const urlParams = new URLSearchParams(location.search);
     const rawParam = urlParams.get('id')?.trim().toLowerCase();
     if (!rawParam) {
       document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
       throw new Error('No ID parameter');
     }
+
     let artistId = null;
-    let videoCount = 0;
+    let stripeAccountId = null;
     let isPro = false;
+
     async function init() {
       let profile = null;
+
+      // Try subdomain first
       const { data: subdomainData } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
         .ilike('subdomain', rawParam)
-        .limit(1);
-      if (subdomainData && subdomainData.length > 0) {
-        profile = subdomainData[0];
-      }
+        .single();
+
+      if (subdomainData) profile = subdomainData;
+
+      // Fallback to ID
       if (!profile) {
         const { data: idData } = await supabase
           .from('profiles')
           .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
           .eq('id', rawParam)
-          .limit(1);
-        if (idData && idData.length > 0) {
-          profile = idData[0];
-        }
+          .single();
+        if (idData) profile = idData;
       }
+
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
         return;
       }
+
       artistId = profile.id;
+      stripeAccountId = profile.stripe_account_id;
       isPro = profile.plan === 'pro';
+
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
+
       if (profile.banner_url) {
         const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
         const bannerImg = document.getElementById('banner');
@@ -162,28 +182,36 @@
           document.getElementById('bannerPlaceholder').classList.add('hidden');
         };
       }
+
       if (profile.logo_url) {
         document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
+
       if (isPro) {
         document.getElementById('liveStreamSection').classList.remove('hidden');
-        document.getElementById('tipBucketSection').classList.remove('hidden');
+        if (stripeAccountId) {
+          document.getElementById('tipBucketSection').classList.remove('hidden');
+        }
         checkLiveStatus();
         setInterval(checkLiveStatus, 10000);
       }
+
       loadVideos();
     }
+
     async function checkLiveStatus() {
-      if (!artistId || !isPro) return;
+      if (!artistId) return;
       const { data: session } = await supabase
         .from('live_sessions')
         .select('playback_id')
         .eq('user_id', artistId)
         .eq('is_active', true)
         .maybeSingle();
+
       const playerDiv = document.getElementById('livepeer-player');
       const indicator = document.getElementById('liveIndicator');
       const offlineMsg = document.getElementById('offlineMessage');
+
       if (session && session.playback_id) {
         indicator.classList.remove('hidden');
         offlineMsg.classList.add('hidden');
@@ -197,6 +225,7 @@
         playerDiv.innerHTML = '';
       }
     }
+
     async function loadLiveChat() {
       if (!artistId) return;
       const { data: messages } = await supabase
@@ -205,28 +234,27 @@
         .eq('user_id', artistId)
         .order('created_at', { ascending: true })
         .limit(50);
+
       const chatContainer = document.getElementById('liveChatMessages');
-      if (!messages || messages.length === 0) {
-        chatContainer.innerHTML = '<p class="text-gray-500 text-center italic">Chat appears when the artist is live</p>';
-        return;
-      }
-      chatContainer.innerHTML = '';
-      messages.forEach(msg => {
+      chatContainer.innerHTML = messages?.length ? '' : '<p class="text-gray-500 text-center italic">No messages yet</p>';
+
+      messages?.forEach(msg => {
         const name = msg.name?.trim() || 'Fan';
         chatContainer.innerHTML += `<div class="bg-purple-100 p-3 rounded-lg"><strong class="text-purple-700">${name}:</strong> <span class="text-gray-800">${msg.message}</span></div>`;
       });
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
+
     async function sendLiveMessage() {
-      const nameInput = document.getElementById('chatNameInput');
-      const msgInput = document.getElementById('chatMessageInput');
-      const name = nameInput.value.trim() || 'Fan';
-      const message = msgInput.value.trim();
+      const name = document.getElementById('chatNameInput').value.trim() || 'Fan';
+      const message = document.getElementById('chatMessageInput').value.trim();
       if (!message || !artistId) return;
+
       await supabase.from('live_chat').insert({ user_id: artistId, name, message });
-      msgInput.value = '';
+      document.getElementById('chatMessageInput').value = '';
       loadLiveChat();
     }
+
     async function loadVideos() {
       if (!artistId) return;
       const { data: videos } = await supabase
@@ -234,33 +262,27 @@
         .select('id, video_url, thumbnail_url, title')
         .eq('user_id', artistId)
         .order('created_at', { ascending: false });
+
       const list = document.getElementById('videoList');
-      videoCount = videos?.length || 0;
       const badge = document.getElementById('badge-container');
-      badge.innerHTML = '';
-      if (videoCount >= 3) {
-        badge.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`;
-      }
+      badge.innerHTML = (videos?.length >= 3) ? `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">` : '';
+
       if (!videos || videos.length === 0) {
         list.innerHTML = '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>';
         return;
       }
+
       list.innerHTML = '';
       const anonId = getAnonId();
+
       for (const v of videos) {
         const videoUrl = getMediaUrl(v.video_url);
-        const thumbUrl = v.thumbnail_url
-          ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now()
-          : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
+        const thumbUrl = v.thumbnail_url ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now() : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
+
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
-        let userLike = null;
-        try {
-          const { data } = await supabase.from('video_likes').select('id').eq('video_id', v.id).eq('user_id', anonId).maybeSingle();
-          userLike = data;
-        } catch (err) {
-          userLike = null;
-        }
+        const { data: userLike } = await supabase.from('video_likes').select('id').eq('video_id', v.id).eq('user_id', anonId).maybeSingle();
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false });
+
         list.innerHTML += `
           <div class="video-card">
             <div class="relative">
@@ -297,54 +319,27 @@
             </div>
           </div>`;
       }
-      window.openVideo = function(url) {
-        document.getElementById('modalVideo').src = url;
-        document.getElementById('videoModal').classList.remove('invisible', 'opacity-0');
-        document.getElementById('videoModal').classList.add('opacity-100');
-      };
-      window.closeVideo = function() {
-        document.getElementById('videoModal').classList.add('invisible', 'opacity-0');
-        document.getElementById('videoModal').classList.remove('opacity-100');
-        document.getElementById('modalVideo').src = '';
-      };
+
+      // Likes and comments handlers (same as before)
       document.querySelectorAll('.like-btn').forEach(btn => {
-        btn.onclick = async (e) => {
-          e.preventDefault();
+        btn.onclick = async () => {
           const videoId = btn.dataset.id;
           const userId = getAnonId();
-          let existing = null;
-          try {
-            const { data } = await supabase
-              .from('video_likes')
-              .select('id')
-              .eq('video_id', videoId)
-              .eq('user_id', userId)
-              .maybeSingle();
-            existing = data;
-          } catch (err) {
-            existing = null;
-          }
+          const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id', videoId).eq('user_id', userId).maybeSingle();
           if (existing) {
             await supabase.from('video_likes').delete().eq('id', existing.id);
             btn.classList.remove('liked', 'text-red-500');
             btn.querySelector('svg').classList.remove('fill-red-500');
-            btn.querySelector('svg').classList.add('fill-none');
-            const countSpan = btn.querySelector('.like-count');
-            countSpan.textContent = parseInt(countSpan.textContent) - 1;
+            btn.querySelector('.like-count').textContent = parseInt(btn.querySelector('.like-count').textContent) - 1;
           } else {
-            await supabase.from('video_likes').insert({
-              video_id: videoId,
-              user_id: userId,
-              fan_name: 'Fan'
-            }, { returning: 'minimal' });
+            await supabase.from('video_likes').insert({ video_id: videoId, user_id: userId });
             btn.classList.add('liked', 'text-red-500');
             btn.querySelector('svg').classList.add('fill-red-500');
-            btn.querySelector('svg').classList.remove('fill-none');
-            const countSpan = btn.querySelector('.like-count');
-            countSpan.textContent = parseInt(countSpan.textContent) + 1;
+            btn.querySelector('.like-count').textContent = parseInt(btn.querySelector('.like-count').textContent) + 1;
           }
         };
       });
+
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
@@ -354,28 +349,62 @@
           await supabase.from('video_comments').insert({ video_id: id, name, comment });
           document.getElementById(`comment-${id}`).value = '';
           document.getElementById(`name-${id}`).value = '';
-          const { data: newComments } = await supabase.from('video_comments').select('name, comment').eq('video_id', id).order('created_at', { ascending: false });
-          const card = btn.closest('.video-card');
-          const commentsDiv = card.querySelector('.border-t');
-          commentsDiv.innerHTML = newComments.length === 0 ? '<p class="text-gray-500 italic text-center py-4">Be the first to comment!</p>' : newComments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name || 'Fan'}:</span> <span class="comment-text">${c.comment}</span></div>`).join('');
+          loadVideos(); // Refresh comments
         };
       });
     }
-    // Compact Tip Bucket functionality
+
+    // REAL TIP FUNCTIONALITY
     document.querySelectorAll('.tip-amount').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.getElementById('customTip').value = btn.dataset.amount;
+        document.getElementById('customTip').value = (btn.dataset.amount / 100).toFixed(2);
       });
     });
-    document.getElementById('sendTipBtn')?.addEventListener('click', () => {
-      const amount = document.getElementById('customTip').value || 5;
-      if (amount < 1) {
-        alert('Please enter an amount of at least $1');
+
+    document.getElementById('sendTipBtn')?.addEventListener('click', async () => {
+      if (!stripeAccountId) {
+        alert('This artist has not enabled tips yet.');
         return;
       }
-      alert(`Thank you for your support! $${amount} tip sent to the artist.`);
-      document.getElementById('customTip').value = '';
+
+      let amount = parseFloat(document.getElementById('customTip').value || '5');
+      if (isNaN(amount) || amount < 1) {
+        alert('Please enter a tip amount of at least $1');
+        return;
+      }
+
+      // Call your future Edge Function to create Checkout session
+      // For now, direct Stripe Checkout in test mode (will charge test card)
+      const response = await fetch('https://bxoqhmfnseskwqkywppg.supabase.co/functions/v1/create-tip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: Math.round(amount * 100),
+          artistAccountId: stripeAccountId
+        })
+      });
+
+      const { sessionId } = await response.json();
+      if (!sessionId) {
+        alert('Error creating tip. Try again.');
+        return;
+      }
+
+      stripe.redirectToCheckout({ sessionId });
     });
+
+    window.openVideo = (url) => {
+      document.getElementById('modalVideo').src = url;
+      document.getElementById('videoModal').classList.remove('invisible', 'opacity-0');
+      document.getElementById('videoModal').classList.add('opacity-100');
+    };
+
+    window.closeVideo = () => {
+      document.getElementById('videoModal').classList.add('invisible', 'opacity-0');
+      document.getElementById('videoModal').classList.remove('opacity-100');
+      document.getElementById('modalVideo').src = '';
+    };
+
     init();
   </script>
 </body>
