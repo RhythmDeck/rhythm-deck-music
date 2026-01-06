@@ -103,7 +103,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
     // REPLACE WITH YOUR STRIPE TEST PUBLISHABLE KEY
-    const stripe = Stripe('pk_test_51YOUR_TEST_PUBLISHABLE_KEY_REPLACE_THIS');
+    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
 
     const getMediaUrl = (path) => {
       if (!path) return '';
@@ -281,7 +281,7 @@
           <div class="video-card">
             <div class="relative">
               <img src="${thumbUrl}" class="w-full h-48 object-cover">
-              <div class="play-overlay" onclick="${isPaid ? `buyVideo('${v.id}', ${price})` : `openVideo('${videoUrl}')`}">
+              <div class="play-overlay" onclick="playPreview('${videoUrl}')">
                 <div class="play-button">
                   <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="white"/></svg>
                 </div>
@@ -314,11 +314,17 @@
                   <button data-id="${v.id}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg post-comment">Post</button>
                 </div>
               </div>
+              ${isPaid ? `
+              <div class="mt-6 text-center">
+                <button onclick="buyVideo('${v.id}', ${price}, '${videoUrl}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-xl shadow-lg text-lg transition">
+                  Buy & Download – $${price.toFixed(2)}
+                </button>
+              </div>` : ''}
             </div>
           </div>`;
       }
 
-      // Likes handler
+      // Likes and comments handlers
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
@@ -338,7 +344,6 @@
         };
       });
 
-      // Comments handler
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
@@ -353,39 +358,26 @@
       });
     }
 
-    // TIP BUCKET – COMPACT
-    document.querySelectorAll('.tip-amount').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.getElementById('customTip').value = (btn.dataset.amount / 100).toFixed(2);
-      });
-    });
+    // PLAY PREVIEW – ALL VIDEOS PLAY FULLY IN MODAL (FREE OR PAID)
+    window.playPreview = (url) => {
+      openVideo(url);
+    };
 
-    document.getElementById('sendTipBtn')?.addEventListener('click', async () => {
+    // BUY VIDEO – TEST MODE (REAL IMPLEMENTATION COMING WHEN STRIPE CONNECT IS READY)
+    window.buyVideo = (videoId, priceUSD, videoUrl) => {
       if (!stripeAccountId) {
-        alert('This artist has not enabled tips yet.');
-
+        alert('Artist has not connected payments yet.');
         return;
       }
-      let amount = parseFloat(document.getElementById('customTip').value || '5');
-      if (isNaN(amount) || amount < 1) {
-        alert('Please enter a tip amount of at least $1');
-        return;
+      // Test mode – simulate purchase
+      if (confirm(`Pay $${priceUSD.toFixed(2)} to download this video? (Test mode)`)) {
+        // Simulate successful payment
+        const a = document.createElement('a');
+        a.href = videoUrl;
+        a.download = 'video.mp4';
+        a.click();
+        alert('Download started! Thank you for supporting the artist ❤️');
       }
-      // Replace with real function when ready
-      alert(`Thank you! $${amount.toFixed(2)} tip sent to the artist (test mode)`);
-      document.getElementById('customTip').value = '';
-    });
-
-    // BUY VIDEO FUNCTION (uses Stripe Checkout)
-    window.buyVideo = async (videoId, priceUSD) => {
-      if (!stripeAccountId) {
-        alert('Artist has not connected payment yet.');
-        return;
-      }
-      const amount = Math.round(priceUSD * 100);
-      // Replace with real Edge Function call when ready
-      alert(`Redirecting to pay $${priceUSD.toFixed(2)} for this video (test mode)`);
-      // In production: call create-video-purchase-session function and redirectToCheckout
     };
 
     window.openVideo = (url) => {
@@ -399,6 +391,27 @@
       document.getElementById('videoModal').classList.remove('opacity-100');
       document.getElementById('modalVideo').src = '';
     };
+
+    // TIP BUCKET – TEST MODE
+    document.querySelectorAll('.tip-amount').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('customTip').value = (btn.dataset.amount / 100).toFixed(2);
+      });
+    });
+
+    document.getElementById('sendTipBtn')?.addEventListener('click', () => {
+      if (!stripeAccountId) {
+        alert('This artist has not enabled tips yet.');
+        return;
+      }
+      let amount = parseFloat(document.getElementById('customTip').value || '5');
+      if (isNaN(amount) || amount < 1) {
+        alert('Please enter a tip amount of at least $1');
+        return;
+      }
+      alert(`Thank you! $${amount.toFixed(2)} tip sent to the artist (test mode)`);
+      document.getElementById('customTip').value = '';
+    });
 
     init();
   </script>
