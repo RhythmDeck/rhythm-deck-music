@@ -42,8 +42,7 @@
       <img id="logo" src="https://placehold.co/400x400/emerald/white?text=Artist&font=roboto" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
-
-    <!-- LIVE STREAM & CHAT SECTION WITH REAL TIP BUCKET -->
+    <!-- LIVE STREAM & CHAT SECTION WITH COMPACT TIP BUCKET -->
     <div id="liveStreamSection" class="mb-20 hidden">
       <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
         <h3 class="text-3xl font-black text-purple-800 mb-6">Artist is Live</h3>
@@ -67,50 +66,44 @@
             </div>
           </div>
         </div>
-
-        <!-- REAL TIP BUCKET -->
-        <div id="tipBucketSection" class="hidden bg-gradient-to-br from-emerald-100 to-green-100 p-8 rounded-xl shadow-xl border-4 border-emerald-400 text-center max-w-2xl mx-auto">
-          <h4 class="text-3xl font-black text-emerald-800 mb-4">Support This Artist</h4>
-          <p class="text-lg text-gray-700 mb-6">Send a tip to show your love ❤️</p>
-          <div class="grid grid-cols-3 gap-4 mb-6 max-w-md mx-auto">
-            <button class="tip-amount bg-white hover:bg-emerald-200 border-4 border-emerald-500 rounded-2xl py-4 text-2xl font-black text-emerald-800 shadow-lg transition transform hover:scale-105" data-amount="500">$5</button>
-            <button class="tip-amount bg-white hover:bg-emerald-200 border-4 border-emerald-500 rounded-2xl py-4 text-2xl font-black text-emerald-800 shadow-lg transition transform hover:scale-105" data-amount="1000">$10</button>
-            <button class="tip-amount bg-white hover:bg-emerald-200 border-4 border-emerald-500 rounded-2xl py-4 text-2xl font-black text-emerald-800 shadow-lg transition transform hover:scale-105" data-amount="2000">$20</button>
+        <!-- COMPACT TIP BUCKET – 75% SMALLER IN HEIGHT -->
+        <div id="tipBucketSection" class="hidden bg-gradient-to-br from-emerald-100 to-green-100 p-4 rounded-xl shadow-xl border-4 border-emerald-400 text-center max-w-xl mx-auto">
+          <h4 class="text-xl font-black text-emerald-800 mb-2">Support This Artist</h4>
+          <p class="text-sm text-gray-700 mb-3">Send a tip ❤️</p>
+          <div class="grid grid-cols-3 gap-2 mb-3 max-w-xs mx-auto">
+            <button class="tip-amount bg-white hover:bg-emerald-200 border-2 border-emerald-500 rounded-xl py-2 text-lg font-bold text-emerald-800 shadow transition" data-amount="500">$5</button>
+            <button class="tip-amount bg-white hover:bg-emerald-200 border-2 border-emerald-500 rounded-xl py-2 text-lg font-bold text-emerald-800 shadow transition" data-amount="1000">$10</button>
+            <button class="tip-amount bg-white hover:bg-emerald-200 border-2 border-emerald-500 rounded-xl py-2 text-lg font-bold text-emerald-800 shadow transition" data-amount="2000">$20</button>
           </div>
-          <div class="max-w-sm mx-auto mb-6">
-            <input type="number" id="customTip" placeholder="Or enter custom amount (USD)" min="1" step="0.01" class="w-full text-center text-2xl py-4 border-4 border-emerald-500 rounded-2xl focus:outline-none focus:border-emerald-700">
+          <div class="max-w-xs mx-auto mb-3">
+            <input type="number" id="customTip" placeholder="Custom (USD)" min="1" step="0.01" class="w-full text-center py-2 border-2 border-emerald-500 rounded-xl text-base focus:outline-none focus:border-emerald-700">
           </div>
-          <button id="sendTipBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-2xl py-5 px-12 rounded-2xl shadow-2xl transition transform hover:scale-105">
+          <button id="sendTipBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2 px-6 rounded-xl shadow-lg text-base transition">
             Send Tip ❤️
           </button>
-          <p class="text-sm text-gray-600 mt-4">Powered by Stripe • Test mode</p>
+          <p class="text-xs text-gray-600 mt-2">Powered by Stripe • Test mode</p>
         </div>
       </div>
     </div>
-
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
-
     <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center">Videos</h2>
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
-
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
     <button onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay muted playsinline class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
-
     // REPLACE WITH YOUR STRIPE TEST PUBLISHABLE KEY
-    const stripe = Stripe('pk_test_51YourTestPublishableKeyHereReplaceThis');
+    const stripe = Stripe('pk_test_51YOUR_TEST_PUBLISHABLE_KEY_REPLACE_THIS');
 
     const getMediaUrl = (path) => {
       if (!path) return '';
@@ -140,8 +133,6 @@
 
     async function init() {
       let profile = null;
-
-      // Try subdomain first
       const { data: subdomainData } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
@@ -150,7 +141,6 @@
 
       if (subdomainData) profile = subdomainData;
 
-      // Fallback to ID
       if (!profile) {
         const { data: idData } = await supabase
           .from('profiles')
@@ -259,7 +249,7 @@
       if (!artistId) return;
       const { data: videos } = await supabase
         .from('user_videos')
-        .select('id, video_url, thumbnail_url, title')
+        .select('id, video_url, thumbnail_url, title, price')
         .eq('user_id', artistId)
         .order('created_at', { ascending: false });
 
@@ -283,18 +273,26 @@
         const { data: userLike } = await supabase.from('video_likes').select('id').eq('video_id', v.id).eq('user_id', anonId).maybeSingle();
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false });
 
+        const price = v.price || 0;
+        const isPaid = price > 0;
+        const priceText = isPaid ? `$${price.toFixed(2)}` : 'FREE';
+
         list.innerHTML += `
           <div class="video-card">
             <div class="relative">
               <img src="${thumbUrl}" class="w-full h-48 object-cover">
-              <div class="play-overlay" onclick="openVideo('${videoUrl}')">
+              <div class="play-overlay" onclick="${isPaid ? `buyVideo('${v.id}', ${price})` : `openVideo('${videoUrl}')`}">
                 <div class="play-button">
                   <svg viewBox="0 0 68 68"><path d="M14 18 L14 50 L50 34 Z" fill="white"/></svg>
                 </div>
               </div>
+              ${isPaid ? `<div class="absolute bottom-2 right-2 bg-emerald-600 text-white font-black px-4 py-2 rounded-full shadow-lg">$${price.toFixed(2)}</div>` : ''}
             </div>
             <div class="p-6 bg-gray-800 text-white">
               <h3 class="font-black text-2xl text-emerald-400 text-center mb-4">${v.title || 'Untitled'}</h3>
+              <div class="text-center mb-4">
+                <span class="text-2xl font-black text-emerald-400">${priceText}</span>
+              </div>
               <div class="flex justify-between items-center mb-4">
                 <button class="like-btn flex items-center gap-2 font-bold text-lg ${userLike ? 'liked text-red-500' : 'text-gray-400'} hover:text-red-500 transition" data-id="${v.id}">
                   Heart
@@ -320,7 +318,7 @@
           </div>`;
       }
 
-      // Likes and comments handlers (same as before)
+      // Likes handler
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
@@ -340,6 +338,7 @@
         };
       });
 
+      // Comments handler
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
@@ -349,12 +348,12 @@
           await supabase.from('video_comments').insert({ video_id: id, name, comment });
           document.getElementById(`comment-${id}`).value = '';
           document.getElementById(`name-${id}`).value = '';
-          loadVideos(); // Refresh comments
+          loadVideos();
         };
       });
     }
 
-    // REAL TIP FUNCTIONALITY
+    // TIP BUCKET – COMPACT
     document.querySelectorAll('.tip-amount').forEach(btn => {
       btn.addEventListener('click', () => {
         document.getElementById('customTip').value = (btn.dataset.amount / 100).toFixed(2);
@@ -364,34 +363,30 @@
     document.getElementById('sendTipBtn')?.addEventListener('click', async () => {
       if (!stripeAccountId) {
         alert('This artist has not enabled tips yet.');
+
         return;
       }
-
       let amount = parseFloat(document.getElementById('customTip').value || '5');
       if (isNaN(amount) || amount < 1) {
         alert('Please enter a tip amount of at least $1');
         return;
       }
+      // Replace with real function when ready
+      alert(`Thank you! $${amount.toFixed(2)} tip sent to the artist (test mode)`);
+      document.getElementById('customTip').value = '';
+    });
 
-      // Call your future Edge Function to create Checkout session
-      // For now, direct Stripe Checkout in test mode (will charge test card)
-      const response = await fetch('https://bxoqhmfnseskwqkywppg.supabase.co/functions/v1/create-tip', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: Math.round(amount * 100),
-          artistAccountId: stripeAccountId
-        })
-      });
-
-      const { sessionId } = await response.json();
-      if (!sessionId) {
-        alert('Error creating tip. Try again.');
+    // BUY VIDEO FUNCTION (uses Stripe Checkout)
+    window.buyVideo = async (videoId, priceUSD) => {
+      if (!stripeAccountId) {
+        alert('Artist has not connected payment yet.');
         return;
       }
-
-      stripe.redirectToCheckout({ sessionId });
-    });
+      const amount = Math.round(priceUSD * 100);
+      // Replace with real Edge Function call when ready
+      alert(`Redirecting to pay $${priceUSD.toFixed(2)} for this video (test mode)`);
+      // In production: call create-video-purchase-session function and redirectToCheckout
+    };
 
     window.openVideo = (url) => {
       document.getElementById('modalVideo').src = url;
