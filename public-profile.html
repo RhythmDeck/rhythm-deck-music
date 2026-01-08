@@ -25,8 +25,16 @@
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
     .liked svg{fill:#ef4444;stroke:none}
     #badge-container{position:absolute;top:20px;right:20px;z-index:30}
-    #badge-container img{width:110px;height:110px;filter:drop-shadow(0 0 25px rgba(255,215,0,0.8));transition:all .4s}
-    #badge-container img:hover{transform:scale(1.2) rotate(12deg)}
+    /* Platinum badge — 50% larger (165px) */
+    #badge-container img {
+      width: 165px;
+      height: 165px;
+      filter: drop-shadow(0 0 35px rgba(255,215,0,0.9));
+      transition: all .4s ease;
+    }
+    #badge-container img:hover {
+      transform: scale(1.2) rotate(12deg);
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
@@ -42,7 +50,8 @@
       <img id="logo" src="https://placehold.co/400x400/emerald/white?text=Artist&font=roboto" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
-    <!-- LIVE STREAM & CHAT SECTION WITH COMPACT TIP BUCKET -->
+
+    <!-- LIVESTREAM, CHAT & TIP BUCKET SECTION – NOW VISIBLE FOR PRO & PLATINUM -->
     <div id="liveStreamSection" class="mb-20 hidden">
       <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
         <h3 class="text-3xl font-black text-purple-800 mb-6">Artist is Live</h3>
@@ -61,12 +70,12 @@
             </div>
             <div class="mt-4 space-y-3">
               <input type="text" id="chatNameInput" placeholder="Your name (optional)" class="w-full border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600">
-              <input type="text" id="chatMessageInput" placeholder="Send a message..." class="w-full border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600" onkeydown="if(event.key==='Enter') sendLiveMessage()">
-              <button onclick="sendLiveMessage()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg">Send</button>
+              <input type="text" id="chatMessageInput" placeholder="Send a message..." class="w-full border border-purple-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-600" onKeyDown="if(event.key==='Enter') sendLiveMessage()">
+              <button onClick="sendLiveMessage()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg">Send</button>
             </div>
           </div>
         </div>
-        <!-- COMPACT TIP BUCKET – 75% SMALLER IN HEIGHT -->
+        <!-- COMPACT TIP BUCKET -->
         <div id="tipBucketSection" class="hidden bg-gradient-to-br from-emerald-100 to-green-100 p-4 rounded-xl shadow-xl border-4 border-emerald-400 text-center max-w-xl mx-auto">
           <h4 class="text-xl font-black text-emerald-800 mb-2">Support This Artist</h4>
           <p class="text-sm text-gray-700 mb-3">Send a tip ❤️</p>
@@ -85,6 +94,7 @@
         </div>
       </div>
     </div>
+
     <div class="bg-white rounded-3xl shadow-2xl p-10 mb-16 border-2 border-emerald-100">
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
@@ -93,7 +103,7 @@
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
-    <button onclick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
+    <button onClick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay muted playsinline class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
   <script type="module">
@@ -102,15 +112,12 @@
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
-    // REPLACE WITH YOUR STRIPE TEST PUBLISHABLE KEY
     const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
-
     const getMediaUrl = (path) => {
       if (!path) return '';
       const cleanPath = path.replace(/^\/+/, '');
       return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
-
     function getAnonId() {
       let id = localStorage.getItem('rhythmdeck_anon_id');
       if (!id) {
@@ -119,18 +126,15 @@
       }
       return id;
     }
-
     const urlParams = new URLSearchParams(location.search);
     const rawParam = urlParams.get('id')?.trim().toLowerCase();
     if (!rawParam) {
       document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
       throw new Error('No ID parameter');
     }
-
     let artistId = null;
     let stripeAccountId = null;
-    let isPro = false;
-
+    let isPremium = false; // Pro or Platinum
     async function init() {
       let profile = null;
       const { data: subdomainData } = await supabase
@@ -138,9 +142,7 @@
         .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
         .ilike('subdomain', rawParam)
         .single();
-
       if (subdomainData) profile = subdomainData;
-
       if (!profile) {
         const { data: idData } = await supabase
           .from('profiles')
@@ -149,20 +151,16 @@
           .single();
         if (idData) profile = idData;
       }
-
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
         return;
       }
-
       artistId = profile.id;
       stripeAccountId = profile.stripe_account_id;
-      isPro = profile.plan === 'pro';
-
+      isPremium = profile.plan === 'pro' || profile.plan === 'platinum';
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
-
       if (profile.banner_url) {
         const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
         const bannerImg = document.getElementById('banner');
@@ -172,12 +170,18 @@
           document.getElementById('bannerPlaceholder').classList.add('hidden');
         };
       }
-
       if (profile.logo_url) {
         document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
-
-      if (isPro) {
+      // Show Platinum badge only for Platinum plan
+      const badge = document.getElementById('badge-container');
+      if (profile.plan === 'platinum') {
+        badge.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
+      } else {
+        badge.innerHTML = ''; // No badge for Free or regular Pro
+      }
+      // Show live stream section for Pro and Platinum
+      if (isPremium) {
         document.getElementById('liveStreamSection').classList.remove('hidden');
         if (stripeAccountId) {
           document.getElementById('tipBucketSection').classList.remove('hidden');
@@ -185,10 +189,8 @@
         checkLiveStatus();
         setInterval(checkLiveStatus, 10000);
       }
-
       loadVideos();
     }
-
     async function checkLiveStatus() {
       if (!artistId) return;
       const { data: session } = await supabase
@@ -197,11 +199,9 @@
         .eq('user_id', artistId)
         .eq('is_active', true)
         .maybeSingle();
-
       const playerDiv = document.getElementById('livepeer-player');
       const indicator = document.getElementById('liveIndicator');
       const offlineMsg = document.getElementById('offlineMessage');
-
       if (session && session.playback_id) {
         indicator.classList.remove('hidden');
         offlineMsg.classList.add('hidden');
@@ -215,7 +215,6 @@
         playerDiv.innerHTML = '';
       }
     }
-
     async function loadLiveChat() {
       if (!artistId) return;
       const { data: messages } = await supabase
@@ -224,27 +223,22 @@
         .eq('user_id', artistId)
         .order('created_at', { ascending: true })
         .limit(50);
-
       const chatContainer = document.getElementById('liveChatMessages');
       chatContainer.innerHTML = messages?.length ? '' : '<p class="text-gray-500 text-center italic">No messages yet</p>';
-
       messages?.forEach(msg => {
         const name = msg.name?.trim() || 'Fan';
         chatContainer.innerHTML += `<div class="bg-purple-100 p-3 rounded-lg"><strong class="text-purple-700">${name}:</strong> <span class="text-gray-800">${msg.message}</span></div>`;
       });
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-
     async function sendLiveMessage() {
       const name = document.getElementById('chatNameInput').value.trim() || 'Fan';
       const message = document.getElementById('chatMessageInput').value.trim();
       if (!message || !artistId) return;
-
       await supabase.from('live_chat').insert({ user_id: artistId, name, message });
       document.getElementById('chatMessageInput').value = '';
       loadLiveChat();
     }
-
     async function loadVideos() {
       if (!artistId) return;
       const { data: videos } = await supabase
@@ -252,31 +246,22 @@
         .select('id, video_url, thumbnail_url, title, price')
         .eq('user_id', artistId)
         .order('created_at', { ascending: false });
-
       const list = document.getElementById('videoList');
-      const badge = document.getElementById('badge-container');
-      badge.innerHTML = (videos?.length >= 3) ? `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">` : '';
-
       if (!videos || videos.length === 0) {
         list.innerHTML = '<p class="col-span-full text-center text-5xl text-gray-500 py-20">No videos yet</p>';
         return;
       }
-
       list.innerHTML = '';
       const anonId = getAnonId();
-
       for (const v of videos) {
         const videoUrl = getMediaUrl(v.video_url);
         const thumbUrl = v.thumbnail_url ? getMediaUrl(v.thumbnail_url) + '?t=' + Date.now() : 'https://placehold.co/600x338/emerald/white?text=No+Thumb';
-
         const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
         const { data: userLike } = await supabase.from('video_likes').select('id').eq('video_id', v.id).eq('user_id', anonId).maybeSingle();
         const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', v.id).order('created_at', { ascending: false });
-
         const price = v.price || 0;
         const isPaid = price > 0;
         const priceText = isPaid ? `$${price.toFixed(2)}` : 'FREE';
-
         list.innerHTML += `
           <div class="video-card">
             <div class="relative">
@@ -323,8 +308,6 @@
             </div>
           </div>`;
       }
-
-      // Likes and comments handlers
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.onclick = async () => {
           const videoId = btn.dataset.id;
@@ -343,7 +326,6 @@
           }
         };
       });
-
       document.querySelectorAll('.post-comment').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.id;
@@ -357,21 +339,15 @@
         };
       });
     }
-
-    // PLAY PREVIEW – ALL VIDEOS PLAY FULLY IN MODAL (FREE OR PAID)
     window.playPreview = (url) => {
       openVideo(url);
     };
-
-    // BUY VIDEO – TEST MODE (REAL IMPLEMENTATION COMING WHEN STRIPE CONNECT IS READY)
     window.buyVideo = (videoId, priceUSD, videoUrl) => {
       if (!stripeAccountId) {
         alert('Artist has not connected payments yet.');
         return;
       }
-      // Test mode – simulate purchase
       if (confirm(`Pay $${priceUSD.toFixed(2)} to download this video? (Test mode)`)) {
-        // Simulate successful payment
         const a = document.createElement('a');
         a.href = videoUrl;
         a.download = 'video.mp4';
@@ -379,26 +355,21 @@
         alert('Download started! Thank you for supporting the artist ❤️');
       }
     };
-
     window.openVideo = (url) => {
       document.getElementById('modalVideo').src = url;
       document.getElementById('videoModal').classList.remove('invisible', 'opacity-0');
       document.getElementById('videoModal').classList.add('opacity-100');
     };
-
     window.closeVideo = () => {
       document.getElementById('videoModal').classList.add('invisible', 'opacity-0');
       document.getElementById('videoModal').classList.remove('opacity-100');
       document.getElementById('modalVideo').src = '';
     };
-
-    // TIP BUCKET – TEST MODE
     document.querySelectorAll('.tip-amount').forEach(btn => {
       btn.addEventListener('click', () => {
         document.getElementById('customTip').value = (btn.dataset.amount / 100).toFixed(2);
       });
     });
-
     document.getElementById('sendTipBtn')?.addEventListener('click', () => {
       if (!stripeAccountId) {
         alert('This artist has not enabled tips yet.');
@@ -412,7 +383,6 @@
       alert(`Thank you! $${amount.toFixed(2)} tip sent to the artist (test mode)`);
       document.getElementById('customTip').value = '';
     });
-
     init();
   </script>
 </body>
