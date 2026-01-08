@@ -40,16 +40,37 @@
       left: 0;
       right: 0;
       background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-      padding: 16px;
+      padding: 12px 16px;
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.3s ease;
     }
-    .video-container:hover .video-controls {
+    .video-container:hover .video-controls,
+    .video-controls:focus-within {
       opacity: 1;
+    }
+    .progress-bar {
+      flex-grow: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #10b981;
+      transition: width 0.1s;
+    }
+    .time-text {
+      color: white;
+      font-size: 0.9rem;
+      min-width: 100px;
+      text-align: center;
     }
   </style>
 </head>
@@ -90,36 +111,43 @@
 
 <!-- PROMO VIDEO -->
 <section class="max-w-6xl mx-auto px-6 py-8">
-  <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container">
+  <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
     <video
       id="promoVideo"
       src="Rhythm-Deck-Promo-Video.mp4"
       autoplay
       muted
       playsinline
-      class="w-full"
-      style="aspect-ratio: 16/9;"
+      class="w-full max-h-[70vh] object-contain"
     >
       Your browser does not support the video tag.
     </video>
 
-    <!-- Volume Controls Overlay -->
+    <!-- Video Controls -->
     <div class="video-controls">
-      <!-- Mute/Unmute Button -->
-      <button id="muteBtn" class="text-white hover:text-green-400 transition">
-        <svg id="muteIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <!-- Muted Icon (default) -->
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 5.586a2 2 0 112.828 2.828M9 9l6 6m2 2l-2-2m2 2l-6-6M5 3l3.146 3.146M19 21l-3.146-3.146M3 21l3.146-3.146M21 3l-3.146 3.146" />
-        </svg>
-      </button>
+      <!-- Left: Play Again + Mute/Unmute Button -->
+      <div class="flex items-center gap-4">
+        <button id="playAgainBtn" class="hidden text-white hover:text-green-400 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+        <button id="muteBtn" class="bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition">
+          Mute
+        </button>
+      </div>
 
-      <!-- Volume Slider -->
-      <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5" class="w-32 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider">
+      <!-- Center: Progress Bar + Time -->
+      <div class="flex items-center gap-3 flex-grow max-w-md">
+        <span id="currentTime" class="time-text">0:00</span>
+        <div class="progress-bar" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span id="duration" class="time-text">0:00</span>
+      </div>
 
-      <!-- Play Again Button (hidden until video ends) -->
-      <button id="playAgainBtn" class="hidden bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition">
-        Play Again
-      </button>
+      <!-- Right: Empty for balance -->
+      <div></div>
     </div>
   </div>
 </section>
@@ -395,53 +423,55 @@
     // Promo Video Controls
     const promoVideo = document.getElementById("promoVideo");
     const muteBtn = document.getElementById("muteBtn");
-    const muteIcon = document.getElementById("muteIcon");
-    const volumeSlider = document.getElementById("volumeSlider");
     const playAgainBtn = document.getElementById("playAgainBtn");
+    const progressBar = document.getElementById("progressBar");
+    const progressFill = document.getElementById("progressFill");
+    const currentTimeEl = document.getElementById("currentTime");
+    const durationEl = document.getElementById("duration");
 
-    // Initial state
-    promoVideo.volume = 0.5; // 50% volume when unmuted
+    // Format time helper
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
 
-    // Mute/Unmute Toggle
+    // Update duration when metadata loaded
+    promoVideo.addEventListener("loadedmetadata", () => {
+      durationEl.textContent = formatTime(promoVideo.duration);
+    });
+
+    // Update time and progress as video plays
+    promoVideo.addEventListener("timeupdate", () => {
+      const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
+      progressFill.style.width = `${percent}%`;
+      currentTimeEl.textContent = formatTime(promoVideo.currentTime);
+    });
+
+    // Seek when clicking progress bar
+    progressBar.addEventListener("click", (e) => {
+      const rect = progressBar.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      promoVideo.currentTime = pos * promoVideo.duration;
+    });
+
+    // Mute/Unmute button text toggle
     muteBtn.addEventListener("click", () => {
       if (promoVideo.muted) {
         promoVideo.muted = false;
-        muteIcon.innerHTML = `
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828 2.828a9 9 0 010-12.728M5.586 15.414a2 2 0 112.828-2.828M9 9l6 6m2 2l-2-2m2 2l-6-6"/>
-        `;
+        muteBtn.textContent = "Mute";
       } else {
         promoVideo.muted = true;
-        muteIcon.innerHTML = `
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 5.586a2 2 0 112.828 2.828M9 9l6 6m2 2l-2-2m2 2l-6-6M5 3l3.146 3.146M19 21l-3.146-3.146M3 21l3.146-3.146M21 3l-3.146 3.146"/>
-        `;
+        muteBtn.textContent = "Unmute";
       }
     });
 
-    // Volume Slider
-    volumeSlider.addEventListener("input", (e) => {
-      const volume = e.target.value;
-      promoVideo.volume = volume;
-      if (volume == 0) {
-        promoVideo.muted = true;
-      } else {
-        promoVideo.muted = false;
-      }
-      // Update icon based on volume
-      if (volume == 0) {
-        muteIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 5.586a2 2 0 112.828 2.828M9 9l6 6m2 2l-2-2m2 2l-6-6M5 3l3.146 3.146M19 21l-3.146-3.146M3 21l3.146-3.146M21 3l-3.146 3.146"/>`;
-      } else if (volume < 0.5) {
-        muteIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M5.586 15.414a2 2 0 112.828-2.828M9 9l6 6m2 2l-2-2m2 2l-6-6"/>`;
-      } else {
-        muteIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828 2.828a9 9 0 010-12.728M5.586 15.414a2 2 0 112.828-2.828M9 9l6 6m2 2l-2-2m2 2l-6-6"/>`;
-      }
-    });
-
-    // Show Play Again when video ends
+    // Show Play Again button when video ends
     promoVideo.addEventListener("ended", () => {
       playAgainBtn.classList.remove("hidden");
     });
 
-    // Play Again button
+    // Play Again
     playAgainBtn.addEventListener("click", () => {
       promoVideo.currentTime = 0;
       promoVideo.play();
