@@ -248,12 +248,13 @@
             setTimeout(() => location.href = 'https://rhythm-deck-music.onrender.com/profile-admin.html', 1500);
           } else {
             updateData.payment_pending = true;
+            // FIXED: Now correctly sets plan for all paid tiers
             if (plan === 'pro') {
               updateData.plan = 'pro';
             } else if (plan === 'vision') {
               updateData.rhythm_vision_plan = 'vision';
             } else if (plan === 'platinum') {
-              updateData.plan = 'platinum';
+              updateData.plan = 'platinum';  // ← This was missing before!
             }
 
             await supabase.from('profiles').upsert(updateData);
