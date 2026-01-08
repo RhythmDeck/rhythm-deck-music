@@ -33,16 +33,18 @@
       transform-origin: center;
       will-change: transform;
     }
-    /* Controls overlay */
+    /* Video controls overlay */
     .video-controls {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-      padding: 20px;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      padding: 16px;
       display: flex;
       justify-content: center;
+      align-items: center;
+      gap: 16px;
       opacity: 0;
       transition: opacity 0.3s;
     }
@@ -100,16 +102,22 @@
     >
       Your browser does not support the video tag.
     </video>
-    <!-- Sound Toggle Button -->
-    <button id="soundToggle" class="absolute bottom-4 right-4 bg-black bg-opacity-70 text-white p-3 rounded-full hover:bg-opacity-90 transition z-10">
-      <svg id="soundIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <!-- Muted Icon (default) -->
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 5.586a2 2 0 112.828 2.828M9 9l6 6m2 2l-2-2m2 2l-6-6M5 3l3.146 3.146M19 21l-3.146-3.146M3 21l3.146-3.146M21 3l-3.146 3.146" />
-      </svg>
-    </button>
-    <!-- Play Again Button (hidden until video ends) -->
-    <div id="playAgainOverlay" class="hidden absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-      <button id="playAgainBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-lg text-xl transition">
+
+    <!-- Volume Controls Overlay -->
+    <div class="video-controls">
+      <!-- Mute/Unmute Button -->
+      <button id="muteBtn" class="text-white hover:text-green-400 transition">
+        <svg id="muteIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <!-- Muted Icon (default) -->
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 5.586a2 2 0 112.828 2.828M9 9l6 6m2 2l-2-2m2 2l-6-6M5 3l3.146 3.146M19 21l-3.146-3.146M3 21l3.146-3.146M21 3l-3.146 3.146" />
+        </svg>
+      </button>
+
+      <!-- Volume Slider -->
+      <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5" class="w-32 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider">
+
+      <!-- Play Again Button (hidden until video ends) -->
+      <button id="playAgainBtn" class="hidden bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition">
         Play Again
       </button>
     </div>
@@ -386,41 +394,62 @@
 
     // Promo Video Controls
     const promoVideo = document.getElementById("promoVideo");
-    const soundToggle = document.getElementById("soundToggle");
-    const soundIcon = document.getElementById("soundIcon");
-    const playAgainOverlay = document.getElementById("playAgainOverlay");
+    const muteBtn = document.getElementById("muteBtn");
+    const muteIcon = document.getElementById("muteIcon");
+    const volumeSlider = document.getElementById("volumeSlider");
     const playAgainBtn = document.getElementById("playAgainBtn");
 
-    // Remove loop attribute via JS
-    promoVideo.removeAttribute("loop");
+    // Initial state
+    promoVideo.volume = 0.5; // 50% volume when unmuted
 
-    // Sound toggle
-    soundToggle.addEventListener("click", () => {
+    // Mute/Unmute Toggle
+    muteBtn.addEventListener("click", () => {
       if (promoVideo.muted) {
         promoVideo.muted = false;
-        soundIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828 2.828a9 9 0 010-12.728M5.586 15.414a2 2 0 112.828-2.828M9 9l6 6m2 2l-2-2m2 2l-6-6M5 3l3.146 3.146M19 21l-3.146-3.146M3 21l3.146-3.146M21 3l-3.146 3.146"/>';
+        muteIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828 2.828a9 9 0 010-12.728M5.586 15.414a2 2 0 112.828-2.828M9 9l6 6m2 2l-2-2m2 2l-6-6"/>
+        `;
       } else {
         promoVideo.muted = true;
-        soundIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 5.586a2 2 0 112.828 2.828M9 9l6 6m2 2l-2-2m2 2l-6-6M5 3l3.146 3.146M19 21l-3.146-3.146M3 21l3.146-3.146M21 3l-3.146 3.146"/>';
+        muteIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 5.586a2 2 0 112.828 2.828M9 9l6 6m2 2l-2-2m2 2l-6-6M5 3l3.146 3.146M19 21l-3.146-3.146M3 21l3.146-3.146M21 3l-3.146 3.146"/>
+        `;
       }
     });
 
-    // Show Play Again button when video ends
-    promoVideo.addEventListener("ended", () => {
-      playAgainOverlay.classList.remove("hidden");
+    // Volume Slider
+    volumeSlider.addEventListener("input", (e) => {
+      const volume = e.target.value;
+      promoVideo.volume = volume;
+      if (volume == 0) {
+        promoVideo.muted = true;
+      } else {
+        promoVideo.muted = false;
+      }
+      // Update icon based on volume
+      if (volume == 0) {
+        muteIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 5.586a2 2 0 112.828 2.828M9 9l6 6m2 2l-2-2m2 2l-6-6M5 3l3.146 3.146M19 21l-3.146-3.146M3 21l3.146-3.146M21 3l-3.146 3.146"/>`;
+      } else if (volume < 0.5) {
+        muteIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M5.586 15.414a2 2 0 112.828-2.828M9 9l6 6m2 2l-2-2m2 2l-6-6"/>`;
+      } else {
+        muteIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828 2.828a9 9 0 010-12.728M5.586 15.414a2 2 0 112.828-2.828M9 9l6 6m2 2l-2-2m2 2l-6-6"/>`;
+      }
     });
 
-    // Play again button
+    // Show Play Again when video ends
+    promoVideo.addEventListener("ended", () => {
+      playAgainBtn.classList.remove("hidden");
+    });
+
+    // Play Again button
     playAgainBtn.addEventListener("click", () => {
       promoVideo.currentTime = 0;
       promoVideo.play();
-      playAgainOverlay.classList.add("hidden");
+      playAgainBtn.classList.add("hidden");
     });
 
-    // Initial autoplay (muted for browser policy)
-    promoVideo.play().catch(() => {
-      // If autoplay fails, show play button or handle gracefully
-    });
+    // Initial autoplay (muted)
+    promoVideo.play().catch(() => {});
   });
 
   window.addEventListener("load", () => {
