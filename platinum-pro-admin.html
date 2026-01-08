@@ -23,8 +23,16 @@
     .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;}
     .like-display svg{width:28px;height:28px;stroke:#ef4444;fill:none}
     #badge-container {position: absolute;top: 16px;right: 16px;z-index: 30;}
-    #badge-container img {width: 96px;height: 96px;filter: drop-shadow(0 0 20px rgba(255,215,0,0.7));transition: all 0.4s ease;}
-    #badge-container img:hover {transform: scale(1.2) rotate(10deg);}
+    /* Badge is now 50% larger: 144px instead of 96px */
+    #badge-container img {
+      width: 144px;
+      height: 144px;
+      filter: drop-shadow(0 0 30px rgba(255,215,0,0.8));
+      transition: all 0.4s ease;
+    }
+    #badge-container img:hover {
+      transform: scale(1.2) rotate(10deg);
+    }
     .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
     @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
     .social-btn {transition:all .3s;transform:scale(1);}
