@@ -43,20 +43,30 @@
     <section class="bg-white rounded-2xl shadow-2xl p-10 mb-12">
       <h2 class="text-4xl font-black text-orange-800 mb-6">How to Use the Merch Admin Page</h2>
       <p class="text-xl text-gray-800 leading-relaxed mb-6">
-        Welcome to your Merch Admin! This page allows you to create and manage your custom merchandise store. Follow these steps to get started:
+        Welcome to your Merch Admin! Create and manage your custom merchandise store easily.
       </p>
       <ol class="list-decimal list-inside space-y-4 text-lg text-gray-700">
-        <li><strong>Add a New Product</strong>: Fill in name, description, base price, upload main image.</li>
-        <li><strong>Add Variants</strong>: Click "Add Variant" to create options like different sizes or colors. Each variant can have its own price and stock (optional).</li>
-        <li><strong>Edit/Delete</strong>: Use buttons on product cards to update or remove products.</li>
-        <li><strong>View Public Page</strong>: Use the header button to preview your live merch store.</li>
+        <li><strong>Product Name & Price</strong>: Enter the name and your selling price for this item.</li>
+        <li><strong>Description</strong>: Write a compelling description to attract buyers.</li>
+        <li><strong>Image</strong>: Upload a high-quality main photo.</li>
+        <li><strong>Variants</strong>: Add sizes/colors. Each variant gets its own price (you set it directly).</li>
+        <li><strong>Save</strong>: Click "Add Product" or "Update Product".</li>
       </ol>
     </section>
 
-    <!-- BEST PRACTICES & MARKETING (unchanged) -->
-    <!-- ... [Previous sections remain the same] ... -->
+    <!-- BEST PRACTICES & MARKETING -->
+    <section class="bg-white rounded-2xl shadow-2xl p-10 mb-12">
+      <h2 class="text-4xl font-black text-orange-800 mb-6">Best Practices & Marketing Tips</h2>
+      <ul class="list-disc list-inside space-y-4 text-lg text-gray-700">
+        <li>Use clear, bright photos with multiple angles.</li>
+        <li>Write descriptions that tell a story (e.g., "Limited edition tour shirt").</li>
+        <li>Set competitive prices — factor in print costs + your profit.</li>
+        <li>Promote new items on social media and during live streams.</li>
+        <li>Offer bundles or limited editions to create urgency.</li>
+      </ul>
+    </section>
 
-    <!-- ADD/EDIT PRODUCT FORM WITH VARIANTS -->
+    <!-- ADD/EDIT PRODUCT FORM -->
     <section class="bg-white rounded-2xl shadow-2xl p-10 mb-12">
       <h2 class="text-4xl font-black text-orange-800 mb-6" id="formTitle">Add New Product</h2>
       <form id="addProductForm" class="space-y-6">
@@ -66,28 +76,34 @@
           <input type="text" id="productName" required class="w-full border border-gray-300 rounded-lg p-3 focus:border-orange-500">
         </div>
         <div>
+          <label class="block text-gray-700 font-bold mb-2">Price (USD)</label>
+          <input type="number" id="productPrice" min="0" step="0.01" required class="w-full border border-gray-300 rounded-lg p-3 focus:border-orange-500">
+          <p class="text-sm text-gray-600 mt-1">This is your selling price for this product.</p>
+        </div>
+        <div>
           <label class="block text-gray-700 font-bold mb-2">Description</label>
           <textarea id="productDescription" required class="w-full border border-gray-300 rounded-lg p-3 h-32 focus:border-orange-500"></textarea>
         </div>
         <div>
           <label class="block text-gray-700 font-bold mb-2">Main Product Image</label>
           <input type="file" id="productImage" accept="image/*" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-orange-600 file:text-white">
-          <p class="text-sm text-gray-600 mt-2">This is the primary image shown in listings. Leave empty when editing if you don't want to change it.</p>
+          <p class="text-sm text-gray-600 mt-2">Leave empty when editing if you don't want to change it.</p>
         </div>
 
         <!-- VARIANTS SECTION -->
         <div>
-          <h3 class="text-2xl font-bold text-orange-700 mb-4">Variants (Sizes / Colors)</h3>
+          <h3 class="text-2xl font-bold text-orange-700 mb-4">Sizes / Colors Available</h3>
+          <p class="text-gray-700 mb-4">Add each size/color as a separate variant. You set the price for each one individually.</p>
           <div id="variantsContainer" class="space-y-4">
-            <!-- Variants will be added here dynamically -->
+            <!-- Dynamic variants -->
           </div>
           <button type="button" id="addVariantBtn" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">
-            + Add Variant
+            + Add Size/Color
           </button>
         </div>
 
         <div class="flex gap-4">
-          <button type="submit" id="submitButton" class="flex-1 bg-orange-600 text-white font-black py-4 rounded-lg hover:bg-orange-700 transition flex items-center justify-center">
+          <button type="submit" class="flex-1 bg-orange-600 text-white font-black py-4 rounded-lg hover:bg-orange-700 transition flex items-center justify-center">
             <span id="submitText">Add Product</span>
             <div id="uploadSpinner" class="spinner hidden"></div>
           </button>
@@ -130,25 +146,24 @@
       loadProducts();
     }
 
-    function createVariantHTML(index, variant = { option: '', price_adjustment: 0, stock: null }) {
+    function createVariantHTML(index, variant = { option: '', price: 0, stock: null }) {
       return `
         <div class="variant-item" data-index="${index}">
           <div class="grid md:grid-cols-3 gap-4">
             <div>
-              <label class="block text-gray-700 font-medium mb-1">Variant Option (e.g., Small, Black)</label>
+              <label class="block text-gray-700 font-medium mb-1">Size/Color (e.g., Small, Black)</label>
               <input type="text" class="variant-option w-full border border-gray-300 rounded-lg p-3" value="${variant.option || ''}" required>
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-1">Price Adjustment (USD)</label>
-              <input type="number" step="0.01" class="variant-price w-full border border-gray-300 rounded-lg p-3" value="${variant.price_adjustment || 0}">
-              <p class="text-sm text-gray-600 mt-1">Add (+) or subtract (-) from base price. Leave 0 for same price.</p>
+              <label class="block text-gray-700 font-medium mb-1">Price for this variant (USD)</label>
+              <input type="number" step="0.01" min="0" class="variant-price w-full border border-gray-300 rounded-lg p-3" value="${variant.price || ''}" required>
             </div>
             <div>
               <label class="block text-gray-700 font-medium mb-1">Stock (optional)</label>
               <input type="number" min="0" class="variant-stock w-full border border-gray-300 rounded-lg p-3" value="${variant.stock === null ? '' : variant.stock}">
             </div>
           </div>
-          <button type="button" class="remove-variant mt-3 text-red-600 hover:text-red-800 font-medium">Remove Variant</button>
+          <button type="button" class="remove-variant mt-3 text-red-600 hover:text-red-800 font-medium">Remove</button>
         </div>
       `;
     }
@@ -157,8 +172,6 @@
       const container = document.getElementById('variantsContainer');
       const index = container.children.length;
       container.insertAdjacentHTML('beforeend', createVariantHTML(index, variant));
-      
-      // Add remove functionality
       container.lastElementChild.querySelector('.remove-variant').addEventListener('click', () => {
         container.lastElementChild.remove();
       });
@@ -170,11 +183,11 @@
       const variants = [];
       document.querySelectorAll('.variant-item').forEach(item => {
         const option = item.querySelector('.variant-option').value.trim();
-        const priceAdj = parseFloat(item.querySelector('.variant-price').value) || 0;
+        const price = parseFloat(item.querySelector('.variant-price').value);
         const stockInput = item.querySelector('.variant-stock').value;
         const stock = stockInput === '' ? null : parseInt(stockInput);
-        if (option) {
-          variants.push({ option, price_adjustment: priceAdj, stock });
+        if (option && !isNaN(price)) {
+          variants.push({ option, price, stock });
         }
       });
       return variants;
@@ -183,54 +196,47 @@
     async function loadProducts() {
       const { data: products, error } = await supabase
         .from('merch_products')
-        .select('id, name, description, price, image_url, variants')
+        .select('id, name, description, image_url, variants')
         .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading products:', error);
-        alert('Error loading products: ' + error.message);
+        console.error('Error:', error);
+        alert('Error loading products');
         return;
       }
 
       const container = document.getElementById('productList');
-      container.innerHTML = '';
-      if (!products || products.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-500 italic text-lg py-10">No products added yet.</p>';
-        return;
-      }
+      container.innerHTML = products?.length ? '' : '<p class="text-center text-gray-500 italic text-lg py-10">No products yet.</p>';
 
-      for (const product of products) {
+      products?.forEach(product => {
         const { data } = supabase.storage.from('merch_images').getPublicUrl(product.image_url);
-        const variantCount = product.variants ? product.variants.length : 0;
-        const variantText = variantCount > 0 ? `<p class="text-sm text-gray-600 mt-2">${variantCount} variant${variantCount > 1 ? 's' : ''}</p>` : '';
-        
+        const variantCount = product.variants?.length || 0;
+        const prices = product.variants?.map(v => `$${v.price.toFixed(2)}`)?.join(', ') || '';
         container.innerHTML += `
           <div class="bg-gray-50 rounded-xl shadow-lg p-6">
             <img src="${data.publicUrl}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4">
             <h3 class="font-bold text-xl mb-2">${product.name}</h3>
             <p class="text-gray-600 mb-2">${product.description}</p>
-            <p class="text-orange-600 font-bold text-lg mb-2">Base: $${product.price.toFixed(2)}</p>
-            ${variantText}
-            <div class="flex gap-3 mt-4">
-              <button onclick="editProduct(${product.id}, '${product.name.replace(/'/g, "\\'")}', '${product.description.replace(/'/g, "\\'")}', ${product.price}, '${product.image_url}', ${JSON.stringify(product.variants || [])})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold">Edit</button>
+            <p class="text-orange-600 font-bold text-lg mb-2">Prices: ${prices || 'N/A'}</p>
+            <p class="text-sm text-gray-600 mb-4">${variantCount} size${variantCount === 1 ? '' : 's'}/color${variantCount === 1 ? '' : 's'}</p>
+            <div class="flex gap-3">
+              <button onclick="editProduct('${product.id}', '${product.name.replace(/'/g, "\\'")}', '${product.description.replace(/'/g, "\\'")}', '${product.image_url}', ${JSON.stringify(product.variants || [])})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold">Edit</button>
               <button onclick="deleteProduct('${product.id}', '${product.image_url}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold">Delete</button>
             </div>
           </div>
         `;
-      }
+      });
     }
 
-    window.editProduct = function(id, name, description, price, imageUrl, variants) {
+    window.editProduct = function(id, name, description, imageUrl, variants) {
       editingProductId = id;
       document.getElementById('formTitle').textContent = 'Edit Product';
       document.getElementById('submitText').textContent = 'Update Product';
       document.getElementById('productName').value = name;
       document.getElementById('productDescription').value = description;
-      document.getElementById('productPrice').value = price;
       document.getElementById('editProductId').value = id;
 
-      // Clear and repopulate variants
       const container = document.getElementById('variantsContainer');
       container.innerHTML = '';
       (variants || []).forEach(v => addVariant(v));
@@ -246,16 +252,16 @@
       document.getElementById('addProductForm').reset();
       document.getElementById('editProductId').value = '';
       document.getElementById('variantsContainer').innerHTML = '';
-      addVariant(); // Add one empty variant for new products
+      addVariant();
       document.getElementById('cancelEdit').classList.add('hidden');
     });
 
     async function deleteProduct(id, imagePath) {
-      if (!confirm('Delete this product and all its variants? This cannot be undone.')) return;
+      if (!confirm('Delete this product?')) return;
       try {
         await supabase.from('merch_products').delete().eq('id', id);
         if (imagePath) await supabase.storage.from('merch_images').remove([imagePath]);
-        alert('Product deleted.');
+        alert('Product deleted');
         loadProducts();
       } catch (err) {
         alert('Error: ' + err.message);
@@ -266,12 +272,11 @@
       e.preventDefault();
       const name = document.getElementById('productName').value.trim();
       const description = document.getElementById('productDescription').value.trim();
-      const basePrice = parseFloat(document.getElementById('productPrice').value);
       const file = document.getElementById('productImage').files[0];
       const variants = collectVariants();
-      
-      if (!name || !description || isNaN(basePrice) || variants.length === 0) {
-        alert('Please fill all fields and add at least one variant.');
+
+      if (!name || !description || variants.length === 0) {
+        alert('Please complete name, description, and at least one variant with price.');
         return;
       }
 
@@ -281,19 +286,13 @@
       try {
         let imagePath = null;
         if (file || editingProductId) {
-          // If new image or editing (keep existing if no new file)
           if (editingProductId && !file) {
-            // Keep existing image
             const { data: existing } = await supabase.from('merch_products').select('image_url').eq('id', editingProductId).single();
             imagePath = existing.image_url;
           } else {
-            // Upload new image
             if (editingProductId) {
-              // Delete old image
-              const { data: oldProduct } = await supabase.from('merch_products').select('image_url').eq('id', editingProductId).single();
-              if (oldProduct.image_url) {
-                await supabase.storage.from('merch_images').remove([oldProduct.image_url]);
-              }
+              const { data: old } = await supabase.from('merch_products').select('image_url').eq('id', editingProductId).single();
+              if (old.image_url) await supabase.storage.from('merch_images').remove([old.image_url]);
             }
             imagePath = `merch/${currentUser.id}/${Date.now()}_${file.name}`;
             await supabase.storage.from('merch_images').upload(imagePath, file);
@@ -303,30 +302,27 @@
         const productData = {
           name,
           description,
-          price: basePrice,
           image_url: imagePath,
           variants: variants
         };
 
         if (editingProductId) {
           await supabase.from('merch_products').update(productData).eq('id', editingProductId);
-          alert('Product updated successfully!');
+          alert('Product updated!');
         } else {
           productData.user_id = currentUser.id;
           await supabase.from('merch_products').insert(productData);
-          alert('Product added successfully!');
+          alert('Product added!');
         }
 
-        // Reset form
         document.getElementById('addProductForm').reset();
         document.getElementById('variantsContainer').innerHTML = '';
-        addVariant(); // Ready for next product
+        addVariant();
         document.getElementById('editProductId').value = '';
         document.getElementById('cancelEdit').classList.add('hidden');
         document.getElementById('formTitle').textContent = 'Add New Product';
         document.getElementById('submitText').textContent = 'Add Product';
         editingProductId = null;
-
         loadProducts();
       } catch (err) {
         alert('Error: ' + err.message);
@@ -335,7 +331,6 @@
       }
     });
 
-    // Initialize with one empty variant
     document.addEventListener('DOMContentLoaded', () => {
       loadUser();
       addVariant();
