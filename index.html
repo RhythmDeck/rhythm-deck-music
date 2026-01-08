@@ -64,13 +64,34 @@
       height: 100%;
       width: 0%;
       background: #10b981;
-      transition: width 0.1s;
+      transition: width 0.1s linear;
     }
     .time-text {
       color: white;
       font-size: 0.9rem;
-      min-width: 100px;
+      min-width: 90px;
       text-align: center;
+    }
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .volume-slider {
+      width: 80px;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -137,8 +158,11 @@
         </button>
       </div>
 
-      <!-- Center: Progress Bar + Time -->
-      <div class="flex items-center gap-3 flex-grow max-w-md">
+      <!-- Center: Volume Slider + Progress Bar + Time -->
+      <div class="flex items-center gap-3 flex-grow">
+        <div class="volume-container">
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.5" class="volume-slider">
+        </div>
         <span id="currentTime" class="time-text">0:00</span>
         <div class="progress-bar" id="progressBar">
           <div class="progress-fill" id="progressFill"></div>
@@ -423,32 +447,33 @@
     // Promo Video Controls
     const promoVideo = document.getElementById("promoVideo");
     const muteBtn = document.getElementById("muteBtn");
+    const volumeSlider = document.getElementById("volumeSlider");
     const playAgainBtn = document.getElementById("playAgainBtn");
     const progressBar = document.getElementById("progressBar");
     const progressFill = document.getElementById("progressFill");
     const currentTimeEl = document.getElementById("currentTime");
     const durationEl = document.getElementById("duration");
 
-    // Format time helper
+    // Format time
     function formatTime(seconds) {
       const mins = Math.floor(seconds / 60);
       const secs = Math.floor(seconds % 60);
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
-    // Update duration when metadata loaded
+    // Duration
     promoVideo.addEventListener("loadedmetadata", () => {
       durationEl.textContent = formatTime(promoVideo.duration);
     });
 
-    // Update time and progress as video plays
+    // Time update
     promoVideo.addEventListener("timeupdate", () => {
       const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
       progressFill.style.width = `${percent}%`;
       currentTimeEl.textContent = formatTime(promoVideo.currentTime);
     });
 
-    // Seek when clicking progress bar
+    // Seek on progress bar click
     progressBar.addEventListener("click", (e) => {
       const rect = progressBar.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
@@ -457,16 +482,19 @@
 
     // Mute/Unmute button text toggle
     muteBtn.addEventListener("click", () => {
-      if (promoVideo.muted) {
-        promoVideo.muted = false;
-        muteBtn.textContent = "Mute";
-      } else {
-        promoVideo.muted = true;
-        muteBtn.textContent = "Unmute";
-      }
+      promoVideo.muted = !promoVideo.muted;
+      muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
     });
 
-    // Show Play Again button when video ends
+    // Volume slider
+    volumeSlider.addEventListener("input", (e) => {
+      const vol = e.target.value;
+      promoVideo.volume = vol;
+      promoVideo.muted = vol == 0;
+      muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
+    });
+
+    // Show Play Again when video ends
     promoVideo.addEventListener("ended", () => {
       playAgainBtn.classList.remove("hidden");
     });
