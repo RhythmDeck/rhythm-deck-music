@@ -196,7 +196,7 @@
       container.innerHTML = products.length === 0 ? '<p class="text-center text-gray-500 italic text-lg py-10">No products yet. Add your first one above!</p>' : '';
 
       products.forEach(product => {
-        let imgSrc = 'https://via.placeholder.com/600x400?text=No+Image'; // Reliable placeholder
+        let imgSrc = 'https://placehold.co/600x400?text=No+Image'; // Fixed reliable placeholder
         if (product.image_url) {
           const { data: imgData } = supabase.storage.from('merch_images').getPublicUrl(product.image_url);
           imgSrc = imgData.publicUrl;
