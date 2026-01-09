@@ -259,7 +259,7 @@
       }
     }
 
-    // Form submit (add or update)
+    // Form submit (add or update) - FIXED INSERT
     document.getElementById('addProductForm').onsubmit = async (e) => {
       e.preventDefault();
       const name = document.getElementById('productName').value.trim();
@@ -307,7 +307,8 @@
           alert('Product updated successfully!');
         } else {
           productData.user_id = currentUser.id;
-          await supabase.from('merch_products').insert(productData);
+          // FIXED: Use returning: 'minimal' to avoid SELECT after insert
+          await supabase.from('merch_products').insert(productData, { returning: 'minimal' });
           alert('Product added successfully!');
         }
 
