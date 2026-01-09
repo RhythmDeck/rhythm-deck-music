@@ -196,28 +196,55 @@
       container.innerHTML = products.length === 0 ? '<p class="text-center text-gray-500 italic text-lg py-10">No products yet. Add your first one above!</p>' : '';
 
       products.forEach(product => {
-        const { data: imgData } = supabase.storage.from('merch_images').getPublicUrl(product.image_url || '');
+        // FIXED: Use signed URL for private bucket images
+        let imgSrc = 'placeholder.jpg';
+        if (product.image_url) {
+          const { data: signedData } = supabase.storage.from('merch_images').getPublicUrl(product.image_url);
+          imgSrc = signedData.publicUrl;
+        }
+
         const variantCount = product.variants?.length || 0;
         const prices = product.variants?.map(v => `$${v.price.toFixed(2)}`).join(', ') || 'N/A';
 
         container.innerHTML += `
           <div class="bg-gray-50 rounded-xl shadow-lg p-6">
-            <img src="${imgData.publicUrl || 'placeholder.jpg'}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4">
+            <img src="${imgSrc}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4">
             <h3 class="font-bold text-xl mb-2">${product.name}</h3>
             <p class="text-gray-600 mb-2">${product.description}</p>
             <p class="text-orange-600 font-bold text-lg mb-2">Prices: ${prices}</p>
             <p class="text-sm text-gray-600 mb-4">${variantCount} variant${variantCount !== 1 ? 's' : ''}</p>
             <div class="flex gap-3">
-              <button onclick="editProduct('${product.id}', '${product.name.replace(/'/g, "\\'")}', '${product.description.replace(/'/g, "\\'")}', '${product.image_url || ''}', ${JSON.stringify(product.variants || [])})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold">Edit</button>
-              <button onclick="deleteProduct('${product.id}', '${product.image_url || ''}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold">Delete</button>
+              <button class="edit-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold" data-id="${product.id}" data-name="${product.name.replace(/'/g, "\\'")}" data-description="${product.description.replace(/'/g, "\\'")}" data-image="${product.image_url || ''}" data-variants='${JSON.stringify(product.variants || [])}'>Edit</button>
+              <button class="delete-btn flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold" data-id="${product.id}" data-image="${product.image_url || ''}">Delete</button>
             </div>
           </div>
         `;
       });
+
+      // Re-attach event listeners for Edit/Delete buttons (since HTML was replaced)
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const name = btn.dataset.name;
+          const description = btn.dataset.description;
+          const imageUrl = btn.dataset.image;
+          const variants = JSON.parse(btn.dataset.variants);
+          editProduct(id, name, description, imageUrl, variants);
+
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const imagePath = btn.dataset.image;
+          deleteProduct(id, imagePath);
+        });
+      });
     }
 
     // Edit product
-    window.editProduct = function(id, name, description, imageUrl, variants) {
+    function editProduct(id, name, description, imageUrl, variants) {
       editingProductId = id;
       document.getElementById('formTitle').textContent = 'Edit Product';
       document.getElementById('submitText').textContent = 'Update Product';
@@ -231,7 +258,7 @@
 
       document.getElementById('cancelEdit').classList.remove('hidden');
       window.scrollTo({ top: document.getElementById('addProductForm').offsetTop - 100, behavior: 'smooth' });
-    };
+    }
 
     // Cancel edit
     document.getElementById('cancelEdit').onclick = () => {
@@ -258,7 +285,7 @@
       }
     }
 
-    // Form submit (add or update) - FIXED WITH returning: 'minimal'
+    // Form submit (add or update)
     document.getElementById('addProductForm').onsubmit = async (e) => {
       e.preventDefault();
       const name = document.getElementById('productName').value.trim();
@@ -304,7 +331,6 @@
           alert('Product updated successfully!');
         } else {
           productData.user_id = currentUser.id;
-          // THE FIX: returning: 'minimal' to avoid RLS SELECT issue
           await supabase.from('merch_products').insert(productData, { returning: 'minimal' });
           alert('Product added successfully!');
         }
@@ -317,6 +343,7 @@
         document.getElementById('formTitle').textContent = 'Add New Product';
         document.getElementById('submitText').textContent = 'Add Product';
         editingProductId = null;
+
         loadProducts();
       } catch (err) {
         console.error(err);
@@ -328,7 +355,6 @@
 
     // Load user and initialize
     async function init() {
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in');
