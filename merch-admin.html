@@ -196,11 +196,10 @@
       container.innerHTML = products.length === 0 ? '<p class="text-center text-gray-500 italic text-lg py-10">No products yet. Add your first one above!</p>' : '';
 
       products.forEach(product => {
-        // FIXED: Use signed URL for private bucket images
         let imgSrc = 'placeholder.jpg';
         if (product.image_url) {
-          const { data: signedData } = supabase.storage.from('merch_images').getPublicUrl(product.image_url);
-          imgSrc = signedData.publicUrl;
+          const { data: imgData } = supabase.storage.from('merch_images').getPublicUrl(product.image_url);
+          imgSrc = imgData.publicUrl;
         }
 
         const variantCount = product.variants?.length || 0;
@@ -214,14 +213,21 @@
             <p class="text-orange-600 font-bold text-lg mb-2">Prices: ${prices}</p>
             <p class="text-sm text-gray-600 mb-4">${variantCount} variant${variantCount !== 1 ? 's' : ''}</p>
             <div class="flex gap-3">
-              <button class="edit-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold" data-id="${product.id}" data-name="${product.name.replace(/'/g, "\\'")}" data-description="${product.description.replace(/'/g, "\\'")}" data-image="${product.image_url || ''}" data-variants='${JSON.stringify(product.variants || [])}'>Edit</button>
-              <button class="delete-btn flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold" data-id="${product.id}" data-image="${product.image_url || ''}">Delete</button>
+              <button class="edit-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold" 
+                      data-id="${product.id}" 
+                      data-name="${product.name.replace(/'/g, "\\'")}" 
+                      data-description="${product.description.replace(/'/g, "\\'")}" 
+                      data-image="${product.image_url || ''}" 
+                      data-variants='${JSON.stringify(product.variants || [])}'>Edit</button>
+              <button class="delete-btn flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold" 
+                      data-id="${product.id}" 
+                      data-image="${product.image_url || ''}">Delete</button>
             </div>
           </div>
         `;
       });
 
-      // Re-attach event listeners for Edit/Delete buttons (since HTML was replaced)
+      // Re-attach event listeners after reloading HTML
       document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
@@ -230,7 +236,6 @@
           const imageUrl = btn.dataset.image;
           const variants = JSON.parse(btn.dataset.variants);
           editProduct(id, name, description, imageUrl, variants);
-
         });
       });
 
@@ -306,16 +311,29 @@
 
         if (file || editingProductId) {
           if (editingProductId && !file) {
-            const { data } = await supabase.from('merch_products').select('image_url').eq('id', editingProductId).single();
+            // Keep existing image - fetch current image_url safely
+            const { data, error } = await supabase
+              .from('merch_products')
+              .select('image_url')
+              .eq('id', editingProductId)
+              .single();
+            if (error) throw error;
             imagePath = data.image_url;
           } else {
+            // Upload new image
             if (editingProductId) {
-              const { data: old } = await supabase.from('merch_products').select('image_url').eq('id', editingProductId).single();
+              const { data: old, error: oldError } = await supabase
+                .from('merch_products')
+                .select('image_url')
+                .eq('id', editingProductId)
+                .single();
+              if (oldError) throw oldError;
               if (old.image_url) await supabase.storage.from('merch_images').remove([old.image_url]);
             }
             imagePath = `merch/${currentUser.id}/${Date.now()}_${file.name}`;
             const { error: uploadError } = await supabase.storage.from('merch_images').upload(imagePath, file);
             if (uploadError) throw uploadError;
+
           }
         }
 
