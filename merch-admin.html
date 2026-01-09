@@ -14,7 +14,7 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
-  <!-- HEADER -->
+  <!-- HEADER - Fixed Rhythm Deck logo + Back to Dashboard button -->
   <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg gap-4">
     <div class="flex items-center space-x-3">
       <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -23,17 +23,44 @@
         <p class="text-sm text-gray-300">Platinum Pro Plan</p>
       </div>
     </div>
-    <div>
+    <div class="flex gap-4">
+      <a href="dashboard.html" class="bg-gray-700 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-bold transition shadow-lg">
+        ← Back to Dashboard
+      </a>
       <a href="public-merch.html" class="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white px-8 py-3 rounded-lg font-bold transition shadow-lg">
         View Public Merch Page →
       </a>
     </div>
   </header>
 
-  <!-- BANNER -->
-  <section class="relative h-[300px] bg-gradient-to-br from-yellow-900 to-orange-900 overflow-hidden">
-    <div class="absolute inset-0 flex items-center justify-center">
-      <p class="text-white text-4xl font-bold opacity-70">Your Merch Store Admin</p>
+  <!-- BANNER with upload buttons in corners -->
+  <section class="relative h-[300px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('banner-cropped.jpg');">
+    <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+      <p class="text-white text-4xl md:text-5xl font-black text-center">Your Merch Store Admin</p>
+    </div>
+
+    <!-- Upload Logo Button - Bottom Left -->
+    <div class="absolute bottom-4 left-4">
+      <label class="bg-white bg-opacity-80 hover:bg-opacity-100 text-black font-bold py-3 px-6 rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        Upload Logo
+        <input type="file" id="logoUpload" accept="image/*" class="hidden">
+      </label>
+      <p id="logoStatus" class="text-white font-bold mt-2 hidden">Logo updated!</p>
+    </div>
+
+    <!-- Upload Banner Button - Bottom Right -->
+    <div class="absolute bottom-4 right-4">
+      <label class="bg-white bg-opacity-80 hover:bg-opacity-100 text-black font-bold py-3 px-6 rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        Upload Banner
+        <input type="file" id="bannerUpload" accept="image/*" class="hidden">
+      </label>
+      <p id="bannerStatus" class="text-white font-bold mt-2 hidden">Banner updated!</p>
     </div>
   </section>
 
@@ -90,7 +117,6 @@
           <h3 class="text-2xl font-bold text-orange-700 mb-4">Sizes / Colors Available</h3>
           <p class="text-gray-700 mb-4">Add each size/color as a separate variant. You set the price for each one individually.</p>
           <div id="variantsContainer" class="space-y-4">
-            <!-- First variant added automatically on load -->
           </div>
           <button type="button" id="addVariantBtn" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">
             + Add Size/Color
@@ -130,6 +156,67 @@
 
     let currentUser = null;
     let editingProductId = null;
+
+    // Load user's custom banner (logo not shown in header)
+    async function loadBranding() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('banner_url')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Branding load error:', error);
+        return;
+      }
+
+      if (data && data.banner_url) {
+        document.getElementById('userBannerSection').style.backgroundImage = `url('${data.banner_url}')`;
+      }
+    }
+
+    // Upload logo (saved for public page only)
+    document.getElementById('logoUpload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const filePath = `branding/${currentUser.id}/logo_${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage.from('merch_images').upload(filePath, file, { upsert: true });
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage.from('merch_images').getPublicUrl(filePath);
+
+        await supabase.from('profiles').update({ logo_url: publicUrlData.publicUrl }).eq('id', currentUser.id);
+
+        document.getElementById('logoStatus').classList.remove('hidden');
+        setTimeout(() => document.getElementById('logoStatus').classList.add('hidden'), 3000);
+      } catch (err) {
+        alert('Logo upload error: ' + err.message);
+      }
+    });
+
+    // Upload banner
+    document.getElementById('bannerUpload').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const filePath = `branding/${currentUser.id}/banner_${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage.from('merch_images').upload(filePath, file, { upsert: true });
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage.from('merch_images').getPublicUrl(filePath);
+
+        await supabase.from('profiles').update({ banner_url: publicUrlData.publicUrl }).eq('id', currentUser.id);
+
+        document.getElementById('userBannerSection').style.backgroundImage = `url('${publicUrlData.publicUrl}')`;
+        document.getElementById('bannerStatus').classList.remove('hidden');
+        setTimeout(() => document.getElementById('bannerStatus').classList.add('hidden'), 3000);
+      } catch (err) {
+        alert('Banner upload error: ' + err.message);
+      }
+    });
 
     // Create a variant row
     function createVariantHTML(variant = { option: '', price: '', stock: '' }) {
@@ -378,8 +465,9 @@
         return;
       }
       currentUser = user;
+      loadBranding();
       loadProducts();
-      addVariant(); // Add first empty variant
+      addVariant();
     }
 
     // Add variant button
