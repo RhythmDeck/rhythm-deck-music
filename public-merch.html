@@ -33,7 +33,7 @@
     </div>
   </header>
 
-  <!-- SUCCESS MESSAGE (hidden by default) -->
+  <!-- SUCCESS MESSAGE (appears under banner after successful payment) -->
   <div id="successMessage" class="hidden bg-green-600 text-white text-center py-6 font-bold text-2xl shadow-lg">
     Success! Thank you for your order!
   </div>
@@ -87,28 +87,33 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
 
-    const stripe = Stripe('pk_test_your_publishable_key_here'); // REPLACE WITH YOUR REAL STRIPE PUBLIC KEY
+    const stripe = Stripe('pk_test_your_publishable_key_here'); // ← REPLACE WITH YOUR REAL STRIPE PUBLIC KEY
 
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-    // Check for success redirect (Stripe adds ?payment_intent=...&redirect_status=succeeded)
+    // Check for successful payment redirect and clear cart + show message
     function checkSuccessRedirect() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('redirect_status') === 'succeeded') {
+        // Show success message under banner
         document.getElementById('successMessage').classList.remove('hidden');
-        // Optional: Clear cart after success
-        // cart = [];
-        // localStorage.setItem('cart', JSON.stringify(cart));
-        // updateCartCount();
-        // Clean URL (remove query params)
+
+        // Auto-clear the cart after success
+        cart = [];
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+
+        // Clean the URL (remove query params)
         window.history.replaceState({}, document.title, window.location.pathname);
+
+        // Hide message after 10 seconds
         setTimeout(() => {
           document.getElementById('successMessage').classList.add('hidden');
-        }, 10000); // Hide after 10 seconds
+        }, 10000);
       }
     }
 
-    // Load branding
+    // Load custom logo/banner
     async function loadBranding() {
       const { data, error } = await supabase
         .from('profiles')
@@ -279,23 +284,6 @@
       await loadProducts();
       updateCartCount();
       checkSuccessRedirect();
-    }
-
-    // Check if we came back from successful payment
-    function checkSuccessRedirect() {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('redirect_status') === 'succeeded') {
-        const msg = document.getElementById('successMessage');
-        msg.classList.remove('hidden');
-        // Optional: Clear cart after success
-        // cart = [];
-        // localStorage.setItem('cart', JSON.stringify(cart));
-        // updateCartCount();
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-        // Hide after 10 seconds
-        setTimeout(() => msg.classList.add('hidden'), 10000);
-      }
     }
 
     window.onload = init;
