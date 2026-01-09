@@ -33,20 +33,19 @@
     </div>
   </header>
 
-  <!-- BANNER with upload buttons and logo preview -->
+  <!-- BANNER with logo overlapping bottom left -->
   <section class="relative h-[300px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('banner-cropped.jpg');">
-    <!-- Light overlay for better text visibility without darkening the banner too much -->
     <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
       <p class="text-white text-4xl md:text-5xl font-black text-center drop-shadow-lg">Your Merch Store Admin</p>
     </div>
 
-    <!-- Current Logo Preview (for public page) -->
-    <div class="absolute top-4 left-1/2 -translate-x-1/2">
-      <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Your Store Logo" class="w-32 h-32 rounded-full object-cover border-8 border-white shadow-2xl">
+    <!-- Logo overlapping bottom left of banner -->
+    <div class="absolute -bottom-16 left-8 z-10">
+      <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Your Store Logo" class="w-48 h-48 rounded-full object-cover border-8 border-white shadow-2xl">
     </div>
 
-    <!-- Upload Logo Button - Bottom Left -->
-    <div class="absolute bottom-4 left-4">
+    <!-- Upload Logo Button - Bottom Left (next to logo preview) -->
+    <div class="absolute bottom-4 left-4 z-20">
       <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-3 px-6 rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -58,7 +57,7 @@
     </div>
 
     <!-- Upload Banner Button - Bottom Right -->
-    <div class="absolute bottom-4 right-4">
+    <div class="absolute bottom-4 right-4 z-20">
       <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-3 px-6 rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -123,6 +122,7 @@
           <h3 class="text-2xl font-bold text-orange-700 mb-4">Sizes / Colors Available</h3>
           <p class="text-gray-700 mb-4">Add each size/color as a separate variant. You set the price for each one individually.</p>
           <div id="variantsContainer" class="space-y-4">
+            <!-- First variant added automatically on load -->
           </div>
           <button type="button" id="addVariantBtn" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">
             + Add Size/Color
@@ -230,9 +230,243 @@
       }
     });
 
-    // ... [all the existing merch product code: createVariantHTML, addVariant, collectVariants, loadProducts, editProduct, cancelEdit, deleteProduct, form submit, init, etc.] ...
+    // Create a variant row
+    function createVariantHTML(variant = { option: '', price: '', stock: '' }) {
+      return `
+        <div class="variant-item">
+          <div class="grid md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">Size/Color (e.g., Small, Black)</label>
+              <input type="text" class="variant-option w-full border border-gray-300 rounded-lg p-3" value="${variant.option}" required>
+            </div>
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">Price for this variant (USD)</label>
+              <input type="number" step="0.01" min="0" class="variant-price w-full border border-gray-300 rounded-lg p-3" value="${variant.price}" required>
+            </div>
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">Stock (optional)</label>
+              <input type="number" min="0" class="variant-stock w-full border border-gray-300 rounded-lg p-3" value="${variant.stock}">
+            </div>
+          </div>
+          <button type="button" class="remove-variant mt-3 text-red-600 hover:text-red-800 font-medium">Remove this variant</button>
+        </div>
+      `;
+    }
 
-    // (The rest of the product management code is unchanged from the previous version - variants, add/edit/delete products, etc.)
+    // Add a new variant row
+    function addVariant(variant = null) {
+      const container = document.getElementById('variantsContainer');
+      container.insertAdjacentHTML('beforeend', createVariantHTML(variant || { option: '', price: '', stock: '' }));
+      container.lastElementChild.querySelector('.remove-variant').addEventListener('click', function() {
+        this.closest('.variant-item').remove();
+      });
+    }
+
+    // Collect all variants from the form
+    function collectVariants() {
+      const variants = [];
+      document.querySelectorAll('.variant-item').forEach(item => {
+        const option = item.querySelector('.variant-option').value.trim();
+        const price = parseFloat(item.querySelector('.variant-price').value);
+        const stockInput = item.querySelector('.variant-stock').value;
+        const stock = stockInput === '' ? null : parseInt(stockInput);
+        if (option && !isNaN(price) && price >= 0) {
+          variants.push({ option, price, stock });
+        }
+      });
+      return variants;
+    }
+
+    // Load current user's products
+    async function loadProducts() {
+      const { data: products, error } = await supabase
+        .from('merch_products')
+        .select('id, name, description, image_url, variants')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Load error:', error);
+        alert('Error loading products');
+        return;
+      }
+
+      const container = document.getElementById('productList');
+      container.innerHTML = products.length === 0 ? '<p class="text-center text-gray-500 italic text-lg py-10">No products yet. Add your first one above!</p>' : '';
+
+      products.forEach(product => {
+        let imgSrc = 'https://placehold.co/600x400?text=No+Image';
+        if (product.image_url) {
+          const { data: imgData } = supabase.storage.from('merch_images').getPublicUrl(product.image_url);
+          imgSrc = imgData.publicUrl;
+        }
+
+        const variantList = (product.variants || []).map(v => `${v.option} - $${v.price.toFixed(2)}`).join('<br>') || 'No variants';
+
+        container.innerHTML += `
+          <div class="bg-gray-50 rounded-xl shadow-lg p-6">
+            <img src="${imgSrc}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4">
+            <h3 class="font-bold text-xl mb-2">${product.name}</h3>
+            <p class="text-gray-600 mb-2">${product.description}</p>
+            <div class="text-sm text-gray-700 mb-4">
+              <strong>Variants & Prices:</strong><br>
+              ${variantList}
+            </div>
+            <div class="flex gap-3">
+              <button class="edit-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold" 
+                      data-id="${product.id}" 
+                      data-name="${product.name.replace(/'/g, "\\'")}" 
+                      data-description="${product.description.replace(/'/g, "\\'")}" 
+                      data-image="${product.image_url || ''}" 
+                      data-variants='${JSON.stringify(product.variants || [])}'>Edit</button>
+              <button class="delete-btn flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold" 
+                      data-id="${product.id}" 
+                      data-image="${product.image_url || ''}">Delete</button>
+            </div>
+          </div>
+        `;
+      });
+
+      // Re-attach event listeners
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const name = btn.dataset.name;
+          const description = btn.dataset.description;
+          const imageUrl = btn.dataset.image;
+          const variants = JSON.parse(btn.dataset.variants);
+          editProduct(id, name, description, imageUrl, variants);
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const imagePath = btn.dataset.image;
+          deleteProduct(id, imagePath);
+        });
+      });
+    }
+
+    // Edit product
+    function editProduct(id, name, description, imageUrl, variants) {
+      editingProductId = id;
+      document.getElementById('formTitle').textContent = 'Edit Product';
+      document.getElementById('submitText').textContent = 'Update Product';
+      document.getElementById('productName').value = name;
+      document.getElementById('productDescription').value = description;
+      document.getElementById('editProductId').value = id;
+
+      const container = document.getElementById('variantsContainer');
+      container.innerHTML = '';
+      variants.forEach(v => addVariant(v));
+
+      document.getElementById('cancelEdit').classList.remove('hidden');
+      window.scrollTo({ top: document.getElementById('addProductForm').offsetTop - 100, behavior: 'smooth' });
+    }
+
+    // Cancel edit
+    document.getElementById('cancelEdit').onclick = () => {
+      editingProductId = null;
+      document.getElementById('formTitle').textContent = 'Add New Product';
+      document.getElementById('submitText').textContent = 'Add Product';
+      document.getElementById('addProductForm').reset();
+      document.getElementById('editProductId').value = '';
+      document.getElementById('variantsContainer').innerHTML = '';
+      addVariant();
+      document.getElementById('cancelEdit').classList.add('hidden');
+    };
+
+    // Delete product
+    async function deleteProduct(id, imagePath) {
+      if (!confirm('Delete this product permanently?')) return;
+      try {
+        await supabase.from('merch_products').delete().eq('id', id);
+        if (imagePath) await supabase.storage.from('merch_images').remove([imagePath]);
+        alert('Product deleted');
+        loadProducts();
+      } catch (err) {
+        alert('Delete error: ' + err.message);
+      }
+    }
+
+    // Form submit (add or update)
+    document.getElementById('addProductForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('productName').value.trim();
+      const description = document.getElementById('productDescription').value.trim();
+      const file = document.getElementById('productImage').files[0];
+      const variants = collectVariants();
+
+      if (!name || !description || variants.length === 0) {
+        alert('Please fill product name, description, and add at least one variant with a price.');
+        return;
+      }
+
+      const spinner = document.getElementById('uploadSpinner');
+      spinner.classList.remove('hidden');
+
+      try {
+        let imagePath = null;
+
+        if (file || editingProductId) {
+          if (editingProductId && !file) {
+            const { data, error } = await supabase
+              .from('merch_products')
+              .select('image_url')
+              .eq('id', editingProductId)
+              .single();
+            if (error) throw error;
+            imagePath = data.image_url;
+          } else {
+            if (editingProductId) {
+              const { data: old, error: oldError } = await supabase
+                .from('merch_products')
+                .select('image_url')
+                .eq('id', editingProductId)
+                .single();
+              if (oldError) throw oldError;
+              if (old.image_url) await supabase.storage.from('merch_images').remove([old.image_url]);
+            }
+            imagePath = `merch/${currentUser.id}/${Date.now()}_${file.name}`;
+            const { error: uploadError } = await supabase.storage.from('merch_images').upload(imagePath, file);
+            if (uploadError) throw uploadError;
+          }
+        }
+
+        const productData = {
+          name,
+          description,
+          image_url: imagePath,
+          variants
+        };
+
+        if (editingProductId) {
+          await supabase.from('merch_products').update(productData).eq('id', editingProductId);
+          alert('Product updated successfully!');
+        } else {
+          productData.user_id = currentUser.id;
+          await supabase.from('merch_products').insert(productData, { returning: 'minimal' });
+          alert('Product added successfully!');
+        }
+
+        document.getElementById('addProductForm').reset();
+        document.getElementById('variantsContainer').innerHTML = '';
+        addVariant();
+        document.getElementById('editProductId').value = '';
+        document.getElementById('cancelEdit').classList.add('hidden');
+        document.getElementById('formTitle').textContent = 'Add New Product';
+        document.getElementById('submitText').textContent = 'Add Product';
+        editingProductId = null;
+
+        loadProducts();
+      } catch (err) {
+        console.error(err);
+        alert('Error: ' + err.message);
+      } finally {
+        spinner.classList.add('hidden');
+      }
+    };
 
     // Load user and initialize
     async function init() {
@@ -248,8 +482,10 @@
       addVariant();
     }
 
+    // Add variant button
     document.getElementById('addVariantBtn').onclick = () => addVariant();
 
+    // Start everything when page loads
     window.onload = init;
   </script>
 </body>
