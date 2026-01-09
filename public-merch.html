@@ -33,6 +33,11 @@
     </div>
   </header>
 
+  <!-- SUCCESS MESSAGE (hidden by default) -->
+  <div id="successMessage" class="hidden bg-green-600 text-white text-center py-6 font-bold text-2xl shadow-lg">
+    Success! Thank you for your order!
+  </div>
+
   <!-- BANNER -->
   <section class="relative h-[300px] md:h-[400px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('banner-cropped.jpg');">
     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -82,10 +87,28 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
 
-    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW'); 
+    const stripe = Stripe('pk_test_your_publishable_key_here'); // REPLACE WITH YOUR REAL STRIPE PUBLIC KEY
 
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+    // Check for success redirect (Stripe adds ?payment_intent=...&redirect_status=succeeded)
+    function checkSuccessRedirect() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('redirect_status') === 'succeeded') {
+        document.getElementById('successMessage').classList.remove('hidden');
+        // Optional: Clear cart after success
+        // cart = [];
+        // localStorage.setItem('cart', JSON.stringify(cart));
+        // updateCartCount();
+        // Clean URL (remove query params)
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setTimeout(() => {
+          document.getElementById('successMessage').classList.add('hidden');
+        }, 10000); // Hide after 10 seconds
+      }
+    }
+
+    // Load branding
     async function loadBranding() {
       const { data, error } = await supabase
         .from('profiles')
@@ -98,16 +121,14 @@
       }
     }
 
+    // Load products
     async function loadProducts() {
       const { data: products, error } = await supabase
         .from('merch_products')
         .select('id, name, description, image_url, variants')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Products error:', error);
-        return;
-      }
+      if (error) return console.error('Products error:', error);
 
       const grid = document.getElementById('productsGrid');
       grid.innerHTML = products.length === 0 
@@ -257,6 +278,24 @@
       await loadBranding();
       await loadProducts();
       updateCartCount();
+      checkSuccessRedirect();
+    }
+
+    // Check if we came back from successful payment
+    function checkSuccessRedirect() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('redirect_status') === 'succeeded') {
+        const msg = document.getElementById('successMessage');
+        msg.classList.remove('hidden');
+        // Optional: Clear cart after success
+        // cart = [];
+        // localStorage.setItem('cart', JSON.stringify(cart));
+        // updateCartCount();
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        // Hide after 10 seconds
+        setTimeout(() => msg.classList.add('hidden'), 10000);
+      }
     }
 
     window.onload = init;
