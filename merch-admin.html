@@ -33,39 +33,39 @@
     </div>
   </header>
 
-  <!-- BANNER with logo overlapping bottom left -->
+  <!-- BANNER with logo overlapping bottom left, upload buttons moved -->
   <section class="relative h-[300px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('banner-cropped.jpg');">
     <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
       <p class="text-white text-4xl md:text-5xl font-black text-center drop-shadow-lg">Your Merch Store Admin</p>
     </div>
 
-    <!-- Logo overlapping bottom left of banner -->
+    <!-- Logo overlapping bottom left of banner (half on, half below) -->
     <div class="absolute -bottom-16 left-8 z-10">
       <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Your Store Logo" class="w-48 h-48 rounded-full object-cover border-8 border-white shadow-2xl">
     </div>
 
-    <!-- Upload Logo Button - Bottom Left (next to logo preview) -->
-    <div class="absolute bottom-4 left-4 z-20">
-      <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-3 px-6 rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <!-- Upload Logo Button - To the right of the logo preview -->
+    <div class="absolute -bottom-12 left-64 z-20 flex flex-col items-start">
+      <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-2 px-4 text-sm rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
         </svg>
         Upload Logo
         <input type="file" id="logoUpload" accept="image/*" class="hidden">
       </label>
-      <p id="logoStatus" class="text-white font-bold mt-2 hidden">Logo updated!</p>
+      <p id="logoStatus" class="text-white font-bold mt-1 text-sm hidden">Updated!</p>
     </div>
 
-    <!-- Upload Banner Button - Bottom Right -->
+    <!-- Upload Banner Button - Bottom Right (smaller size) -->
     <div class="absolute bottom-4 right-4 z-20">
-      <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-3 px-6 rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-2 px-4 text-sm rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
         </svg>
         Upload Banner
         <input type="file" id="bannerUpload" accept="image/*" class="hidden">
       </label>
-      <p id="bannerStatus" class="text-white font-bold mt-2 hidden">Banner updated!</p>
+      <p id="bannerStatus" class="text-white font-bold mt-1 text-sm hidden">Updated!</p>
     </div>
   </section>
 
