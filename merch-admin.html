@@ -158,7 +158,6 @@
     function addVariant(variant = null) {
       const container = document.getElementById('variantsContainer');
       container.insertAdjacentHTML('beforeend', createVariantHTML(variant || { option: '', price: '', stock: '' }));
-      // Attach remove listener to the new remove button
       container.lastElementChild.querySelector('.remove-variant').addEventListener('click', function() {
         this.closest('.variant-item').remove();
       });
@@ -259,7 +258,7 @@
       }
     }
 
-    // Form submit (add or update) - FIXED INSERT
+    // Form submit (add or update) - FIXED WITH returning: 'minimal'
     document.getElementById('addProductForm').onsubmit = async (e) => {
       e.preventDefault();
       const name = document.getElementById('productName').value.trim();
@@ -280,11 +279,9 @@
 
         if (file || editingProductId) {
           if (editingProductId && !file) {
-            // Keep existing image
             const { data } = await supabase.from('merch_products').select('image_url').eq('id', editingProductId).single();
             imagePath = data.image_url;
           } else {
-            // Upload new image
             if (editingProductId) {
               const { data: old } = await supabase.from('merch_products').select('image_url').eq('id', editingProductId).single();
               if (old.image_url) await supabase.storage.from('merch_images').remove([old.image_url]);
@@ -307,12 +304,11 @@
           alert('Product updated successfully!');
         } else {
           productData.user_id = currentUser.id;
-          // FIXED: Use returning: 'minimal' to avoid SELECT after insert
+          // THE FIX: returning: 'minimal' to avoid RLS SELECT issue
           await supabase.from('merch_products').insert(productData, { returning: 'minimal' });
           alert('Product added successfully!');
         }
 
-        // Reset form
         document.getElementById('addProductForm').reset();
         document.getElementById('variantsContainer').innerHTML = '';
         addVariant();
@@ -321,7 +317,6 @@
         document.getElementById('formTitle').textContent = 'Add New Product';
         document.getElementById('submitText').textContent = 'Add Product';
         editingProductId = null;
-
         loadProducts();
       } catch (err) {
         console.error(err);
@@ -333,6 +328,7 @@
 
     // Load user and initialize
     async function init() {
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in');
