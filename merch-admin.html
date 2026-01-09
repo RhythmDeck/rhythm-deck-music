@@ -196,22 +196,23 @@
       container.innerHTML = products.length === 0 ? '<p class="text-center text-gray-500 italic text-lg py-10">No products yet. Add your first one above!</p>' : '';
 
       products.forEach(product => {
-        let imgSrc = 'https://placehold.co/600x400?text=No+Image'; // Fixed reliable placeholder
+        let imgSrc = 'https://placehold.co/600x400?text=No+Image';
         if (product.image_url) {
           const { data: imgData } = supabase.storage.from('merch_images').getPublicUrl(product.image_url);
           imgSrc = imgData.publicUrl;
         }
 
-        const variantCount = product.variants?.length || 0;
-        const prices = product.variants?.map(v => `$${v.price.toFixed(2)}`).join(', ') || 'N/A';
+        const variantList = (product.variants || []).map(v => `${v.option} - $${v.price.toFixed(2)}`).join('<br>') || 'No variants';
 
         container.innerHTML += `
           <div class="bg-gray-50 rounded-xl shadow-lg p-6">
             <img src="${imgSrc}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4">
             <h3 class="font-bold text-xl mb-2">${product.name}</h3>
             <p class="text-gray-600 mb-2">${product.description}</p>
-            <p class="text-orange-600 font-bold text-lg mb-2">Prices: ${prices}</p>
-            <p class="text-sm text-gray-600 mb-4">${variantCount} variant${variantCount !== 1 ? 's' : ''}</p>
+            <div class="text-sm text-gray-700 mb-4">
+              <strong>Variants & Prices:</strong><br>
+              ${variantList}
+            </div>
             <div class="flex gap-3">
               <button class="edit-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold" 
                       data-id="${product.id}" 
@@ -227,7 +228,7 @@
         `;
       });
 
-      // Re-attach event listeners after reloading HTML
+      // Re-attach event listeners
       document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
