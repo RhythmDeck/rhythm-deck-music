@@ -196,7 +196,7 @@
       container.innerHTML = products.length === 0 ? '<p class="text-center text-gray-500 italic text-lg py-10">No products yet. Add your first one above!</p>' : '';
 
       products.forEach(product => {
-        let imgSrc = 'placeholder.jpg';
+        let imgSrc = 'https://via.placeholder.com/600x400?text=No+Image'; // Reliable placeholder
         if (product.image_url) {
           const { data: imgData } = supabase.storage.from('merch_images').getPublicUrl(product.image_url);
           imgSrc = imgData.publicUrl;
@@ -311,7 +311,6 @@
 
         if (file || editingProductId) {
           if (editingProductId && !file) {
-            // Keep existing image - fetch current image_url safely
             const { data, error } = await supabase
               .from('merch_products')
               .select('image_url')
@@ -320,7 +319,6 @@
             if (error) throw error;
             imagePath = data.image_url;
           } else {
-            // Upload new image
             if (editingProductId) {
               const { data: old, error: oldError } = await supabase
                 .from('merch_products')
@@ -333,7 +331,6 @@
             imagePath = `merch/${currentUser.id}/${Date.now()}_${file.name}`;
             const { error: uploadError } = await supabase.storage.from('merch_images').upload(imagePath, file);
             if (uploadError) throw uploadError;
-
           }
         }
 
