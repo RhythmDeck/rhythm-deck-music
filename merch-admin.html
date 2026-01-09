@@ -33,19 +33,20 @@
     </div>
   </header>
 
-  <!-- BANNER - No dark overlay, fully bright + logo fully below -->
+  <!-- BANNER - Fully bright, logo 25% smaller and overlapping bottom left -->
   <section class="relative h-[300px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('banner-cropped.jpg');">
-    <div class="absolute inset-0 flex items-center justify-center">
-      <p class="text-white text-4xl md:text-5xl font-black text-center drop-shadow-[0_4px_6px_rgba(0,0,0,0.8)]">Your Merch Store Admin</p>
+    <!-- Text with strong shadow for readability -->
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <p class="text-white text-4xl md:text-5xl font-black text-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">Your Merch Store Admin</p>
     </div>
 
-    <!-- Logo fully visible BELOW the banner (no cutoff) -->
-    <div class="absolute left-8 z-10" style="top: 100%; margin-top: -80px;">
-      <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Your Store Logo" class="w-48 h-48 rounded-full object-cover border-8 border-white shadow-2xl">
+    <!-- Logo: 25% smaller (w-36 h-36), overlapping bottom left of banner -->
+    <div class="absolute bottom-0 left-6 z-10 translate-y-1/2">
+      <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Your Store Logo" class="w-36 h-36 rounded-full object-cover border-8 border-white shadow-2xl">
     </div>
 
-    <!-- Upload Logo Button - To the right of the logo, below banner -->
-    <div class="absolute left-64 z-20 flex flex-col items-start" style="top: 100%; margin-top: -80px;">
+    <!-- Upload Logo Button - Right of logo, aligned at banner bottom -->
+    <div class="absolute bottom-4 left-52 z-20">
       <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-2 px-4 text-sm rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -56,7 +57,7 @@
       <p id="logoStatus" class="text-white font-bold mt-1 text-sm hidden">Updated!</p>
     </div>
 
-    <!-- Upload Banner Button - Bottom Right of banner -->
+    <!-- Upload Banner Button - Bottom Right -->
     <div class="absolute bottom-4 right-4 z-20">
       <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-2 px-4 text-sm rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
