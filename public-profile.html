@@ -153,104 +153,89 @@
 
     const urlParams = new URLSearchParams(location.search);
     const rawParam = urlParams.get('id')?.trim().toLowerCase();
+
     let artistId = null;
     let stripeAccountId = null;
     let plan = null;
 
     async function init() {
-      try {
-        console.log('Starting public profile load...');
-        console.log('URL param (id):', rawParam);
-        console.log('Current hostname:', window.location.hostname);
+      let profile = null;
 
-        let profile = null;
+      // First: Try exact ID lookup (UUID format)
+      if (rawParam && rawParam.includes('-')) { // UUIDs contain dashes
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+          .eq('id', rawParam)
+          .single();
 
-        // Try subdomain first
-        const subdomain = window.location.hostname.split('.')[0];
-        if (subdomain && subdomain !== 'www' && subdomain !== 'rhythm-deck-music') {
-          console.log('Trying subdomain lookup:', subdomain);
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
-            .eq('subdomain', subdomain)
-            .single();
-
-          if (error) console.error('Subdomain query error:', error);
-          if (data) {
-            console.log('Profile found via subdomain:', data);
-            profile = data;
-          }
-        }
-
-        // Fallback to ?id= param
-        if (!profile && rawParam) {
-          console.log('Trying ID lookup:', rawParam);
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
-            .eq('id', rawParam)
-            .single();
-
-          if (error) console.error('ID query error:', error);
-          if (data) {
-            console.log('Profile found via ID:', data);
-            profile = data;
-          }
-        }
-
-        if (!profile) {
-          console.error('No profile found');
-          document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
-          return;
-        }
-
-        artistId = profile.id;
-        stripeAccountId = profile.stripe_account_id;
-        plan = profile.plan || 'free';
-
-        document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
-        document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
-        document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
-
-        if (profile.banner_url) {
-          const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
-          const bannerImg = document.getElementById('banner');
-          bannerImg.src = bannerUrl;
-          bannerImg.onload = () => {
-            bannerImg.classList.remove('hidden');
-            document.getElementById('bannerPlaceholder').classList.add('hidden');
-          };
-        }
-
-        if (profile.logo_url) {
-          document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
-        }
-
-        // Platinum Badge
-        const badgeContainer = document.getElementById('badge-container');
-        if (plan === 'platinum') {
-          badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
-        } else {
-          badgeContainer.innerHTML = '';
-        }
-
-        // Show Live Stream + Tip Bucket for Pro or Platinum
-        if (plan === 'pro' || plan === 'platinum') {
-          document.getElementById('liveStreamSection').classList.remove('hidden');
-          if (stripeAccountId) document.getElementById('tipBucketSection').classList.remove('hidden');
-          checkLiveStatus();
-          setInterval(checkLiveStatus, 10000);
-        }
-
-        loadVideos();
-        setMerchButton(subdomain);
-
-      } catch (err) {
-        console.error('Init error:', err);
-        alert('Error loading profile: ' + err.message);
+        if (!error && data) profile = data;
       }
+
+      // Second: Try subdomain lookup (always try this)
+      const subdomain = window.location.hostname.split('.')[0];
+      if (!profile && subdomain && subdomain !== 'www' && subdomain !== 'rhythm-deck-music') {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+          .eq('subdomain', subdomain)
+          .single();
+
+        if (!error && data) profile = data;
+      }
+
+      // If still not found, show error
+      if (!profile) {
+        document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
+        return;
+      }
+
+      artistId = profile.id;
+      stripeAccountId = profile.stripe_account_id;
+      plan = profile.plan || 'free';
+
+      document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
+      document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
+      document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
+
+      if (profile.banner_url) {
+        const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
+        const bannerImg = document.getElementById('banner');
+        bannerImg.src = bannerUrl;
+        bannerImg.onload = () => {
+          bannerImg.classList.remove('hidden');
+          document.getElementById('bannerPlaceholder').classList.add('hidden');
+        };
+      }
+
+      if (profile.logo_url) {
+        document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
+      }
+
+      // Platinum Badge
+      const badgeContainer = document.getElementById('badge-container');
+      if (plan === 'platinum') {
+        badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
+      } else {
+        badgeContainer.innerHTML = '';
+      }
+
+      // Show Live Stream + Tip Bucket for Pro or Platinum
+      if (plan === 'pro' || plan === 'platinum') {
+        document.getElementById('liveStreamSection').classList.remove('hidden');
+        if (stripeAccountId) document.getElementById('tipBucketSection').classList.remove('hidden');
+        checkLiveStatus();
+        setInterval(checkLiveStatus, 10000);
+      }
+
+      loadVideos();
+
+      // Set Merch button link
+      const merchUrl = `https://${subdomain}.rhythmdeckmusic.com/public-merch.html`;
+      document.getElementById('merchStoreBtn').href = merchUrl;
     }
 
+    // Rest of your original functions (unchanged)
     async function checkLiveStatus() {
       if (!artistId) return;
       const { data: session } = await supabase
@@ -451,6 +436,7 @@
       document.getElementById('customTip').value = '';
     });
 
+    // Start loading
     init();
   </script>
 </body>
