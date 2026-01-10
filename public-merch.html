@@ -87,53 +87,83 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
 
-    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW'); 
+    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
 
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-    // Check for successful payment redirect and clear cart + show message
+    // Check for successful payment redirect
     function checkSuccessRedirect() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('redirect_status') === 'succeeded') {
-        // Show success message under banner
-        document.getElementById('successMessage').classList.remove('hidden');
-
-        // Auto-clear the cart after success
+        const successDiv = document.getElementById('successMessage');
+        successDiv.classList.remove('hidden');
         cart = [];
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartCount();
-
-        // Clean the URL (remove query params)
         window.history.replaceState({}, document.title, window.location.pathname);
-
-        // Hide message after 10 seconds
-        setTimeout(() => {
-          document.getElementById('successMessage').classList.add('hidden');
-        }, 10000);
+        setTimeout(() => successDiv.classList.add('hidden'), 10000);
       }
     }
 
-    // Load custom logo/banner
+    // Load custom logo/banner based on subdomain (no login required)
     async function loadBranding() {
-      const { data, error } = await supabase
+      const subdomain = window.location.hostname.split('.')[0]; // e.g. "artistname" from artistname.rhythmdeckmusic.com
+      if (!subdomain || subdomain === 'www' || subdomain === 'rhythm-deck-music') {
+        console.log('No subdomain detected - using default branding');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('logo_url, banner_url')
+          .eq('subdomain', subdomain)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          if (data.logo_url) {
+            document.getElementById('currentLogoPreview').src = data.logo_url;
+          }
+          if (data.banner_url) {
+            document.getElementById('userBannerSection').style.backgroundImage = `url('${data.banner_url}')`;
+          }
+        }
+      } catch (err) {
+        console.error('Branding load error:', err);
+      }
+    }
+
+    // Load products (for the current subdomain/artist)
+    async function loadProducts() {
+      const subdomain = window.location.hostname.split('.')[0];
+      if (!subdomain || subdomain === 'www' || subdomain === 'rhythm-deck-music') {
+        console.log('No subdomain - loading all products or default');
+        // Optional: load all products or show message
+      }
+
+      const { data: profile } = await supabase
         .from('profiles')
-        .select('logo_url, banner_url')
+        .select('id')
+        .eq('subdomain', subdomain)
         .single();
 
-      if (!error && data) {
-        if (data.logo_url) document.getElementById('currentLogoPreview').src = data.logo_url;
-        if (data.banner_url) document.getElementById('userBannerSection').style.backgroundImage = `url('${data.banner_url}')`;
-      }
-    }
-
-    // Load products
-    async function loadProducts() {
-      const { data: products, error } = await supabase
+      let query = supabase
         .from('merch_products')
         .select('id, name, description, image_url, variants')
         .order('created_at', { ascending: false });
 
-      if (error) return console.error('Products error:', error);
+      if (profile) {
+        query = query.eq('user_id', profile.id); // Load only this artist's products
+      }
+
+      const { data: products, error } = await query;
+
+      if (error) {
+        console.error('Products error:', error);
+        return;
+      }
 
       const grid = document.getElementById('productsGrid');
       grid.innerHTML = products.length === 0 
