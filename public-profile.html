@@ -68,8 +68,8 @@
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
+    <!-- LIVESTREAM, CHAT & TIP BUCKET SECTION -->
     <div id="liveStreamSection" class="mb-20 hidden">
-      <!-- Your live stream and tip bucket section - unchanged -->
       <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
         <h3 class="text-3xl font-black text-purple-800 mb-6">Artist is Live</h3>
         <div class="grid lg:grid-cols-3 gap-8 mb-8">
@@ -152,7 +152,17 @@
     }
 
     const urlParams = new URLSearchParams(location.search);
-    const rawParam = urlParams.get('id')?.trim().toLowerCase();
+    let param = urlParams.get('id')?.trim().toLowerCase();
+
+    // Fallback to subdomain from hostname if no ?id=
+    if (!param) {
+      param = window.location.hostname.split('.')[0];
+    }
+
+    if (!param) {
+      document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
+      throw new Error('No parameter or subdomain');
+    }
 
     let artistId = null;
     let stripeAccountId = null;
@@ -161,41 +171,26 @@
     async function init() {
       let profile = null;
 
-      // 1. Try subdomain lookup first (most common for public URLs)
-      const subdomainFromHost = window.location.hostname.split('.')[0];
-      if (subdomainFromHost && subdomainFromHost !== 'www' && subdomainFromHost !== 'rhythm-deck-music') {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
-          .eq('subdomain', subdomainFromHost)
-          .single();
+      // Try subdomain lookup (param is either ?id=subdomain or hostname subdomain)
+      const { data: subData, error: subError } = await supabase
+        .from('profiles')
+        .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id, subdomain')
+        .eq('subdomain', param)
+        .single();
 
-        if (!error && data) {
-          profile = data;
-        }
+      if (!subError && subData) {
+        profile = subData;
       }
 
-      // 2. Fallback to ?id= param - treat as subdomain if not UUID, or as UUID if it looks like one
-      if (!profile && rawParam) {
-        // If it has many dashes and is long, treat as UUID
-        if (rawParam.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i)) {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
-            .eq('id', rawParam)
-            .single();
+      // Fallback to UUID if param looks like one
+      if (!profile && param.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i)) {
+        const { data: uuidData, error: uuidError } = await supabase
+          .from('profiles')
+          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id, subdomain')
+          .eq('id', param)
+          .single();
 
-          if (!error && data) profile = data;
-        } else {
-          // Treat as subdomain
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
-            .eq('subdomain', rawParam)
-            .single();
-
-          if (!error && data) profile = data;
-        }
+        if (!uuidError && uuidData) profile = uuidData;
       }
 
       if (!profile) {
@@ -225,15 +220,11 @@
         document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
 
-      // Platinum Badge
       const badgeContainer = document.getElementById('badge-container');
       if (plan === 'platinum') {
         badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
-      } else {
-        badgeContainer.innerHTML = '';
       }
 
-      // Show Live Stream + Tip Bucket for Pro or Platinum
       if (plan === 'pro' || plan === 'platinum') {
         document.getElementById('liveStreamSection').classList.remove('hidden');
         if (stripeAccountId) document.getElementById('tipBucketSection').classList.remove('hidden');
@@ -243,17 +234,17 @@
 
       loadVideos();
 
-      // Set Merch button link using subdomain
-      const merchSubdomain = profile.subdomain || subdomainFromHost || rawParam;
+      // Set Merch button using subdomain or param
+      const merchSubdomain = profile.subdomain || param;
       if (merchSubdomain) {
-        const merchUrl = `https://${merchSubdomain}.rhythmdeckmusic.com/public-merch.html`;
+        const merchUrl = `https://rhythm-deck-music.onrender.com/public-merch.html?id=${merchSubdomain}`;
         document.getElementById('merchStoreBtn').href = merchUrl;
       } else {
         document.getElementById('merchStoreBtn').style.display = 'none';
       }
     }
 
-    // Your original functions (unchanged from working version)
+    // Your original functions (unchanged)
     async function checkLiveStatus() {
       if (!artistId) return;
       const { data: session } = await supabase
@@ -454,7 +445,6 @@
       document.getElementById('customTip').value = '';
     });
 
-    // Start loading
     init();
   </script>
 </body>
