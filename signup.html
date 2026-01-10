@@ -225,7 +225,7 @@
         try {
           if (rawSubdomain.length < 3) throw new Error("Subdomain must be at least 3 characters");
 
-          // Check subdomain
+          // Check subdomain availability
           const { data: taken } = await supabase.from('profiles').select('id').eq('subdomain', rawSubdomain).maybeSingle();
           if (taken) throw new Error(`Subdomain "${rawSubdomain}" is already taken`);
 
@@ -253,10 +253,11 @@
             subdomain: rawSubdomain,
             bio: '',
             created_at: new Date().toISOString(),
-            paid: false
+            paid: false,
+            payment_pending: plan !== 'free'
           };
 
-          // Set plan correctly for all tiers
+          // Set correct plan field for all tiers
           if (plan === 'free') {
             updateData.plan = 'free';
           } else if (plan === 'pro') {
@@ -264,7 +265,7 @@
           } else if (plan === 'vision') {
             updateData.rhythm_vision_plan = 'vision';
           } else if (plan === 'platinum') {
-            updateData.plan = 'platinum';  // This now correctly sets to 'platinum'
+            updateData.plan = 'platinum';
           }
 
           console.log('Upserting profile with:', updateData);
@@ -272,11 +273,11 @@
           const { error: upsertError } = await supabase.from('profiles').upsert(updateData);
           if (upsertError) throw new Error(upsertError.message || 'Failed to save profile');
 
+          showMessage('Success', 'Account created!');
+
           if (plan === 'free') {
-            showMessage('Welcome!', 'Account created successfully!');
             setTimeout(() => location.href = 'https://rhythm-deck-music.onrender.com/profile-admin.html', 1500);
           } else {
-            updateData.payment_pending = true;
             let duration;
             if (plan === 'pro') duration = planDuration.value;
             else if (plan === 'vision') duration = visionDuration.value;
@@ -305,7 +306,7 @@
           }
         } catch (err) {
           console.error('Full signup error:', err);
-          showMessage('Error', err.message || 'Something went wrong. Check browser console (F12) for details.', 'bg-red-600');
+          showMessage('Error', err.message || 'Failed to create account. Check browser console (F12) for details.', 'bg-red-600');
           submitButton.disabled = false;
           submitButton.innerHTML = 'Create Account';
         }
