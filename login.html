@@ -66,6 +66,7 @@
       <a href="signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-400">Sign Up</a>
     </nav>
   </header>
+
   <!-- LOGIN CARD -->
   <div class="flex-1 flex items-center justify-center p-6">
     <div class="card">
@@ -109,7 +110,6 @@
     // Password Show/Hide toggle
     const passwordInput = document.getElementById('loginPassword');
     const toggleEye = document.getElementById('toggleEye');
-
     toggleEye.addEventListener('click', () => {
       if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
@@ -127,34 +127,40 @@
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
 
-      if (error) {
-        console.error('Login error:', error);
-        alert('Login failed: ' + error.message + '\nCheck console for details.');
-        return;
-      }
+        // Get the user's profile to check plan
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('plan, rhythm_vision_plan')
+          .eq('id', data.user.id)
+          .single();
 
-      // Fetch profile to determine plan
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('plan, rhythm_vision_plan')
-        .eq('id', data.user.id)
-        .single();
+        if (profileError || !profile) {
+          console.error('Profile fetch error:', profileError);
+          alert('Could not load your profile. Please try again or contact support.');
+          return;
+        }
 
-      if (profileError || !profile) {
-        console.error('Profile error:', profileError);
-        alert('Could not load profile. Try again.');
-        return;
-      }
+        // Redirect based on plan (works for ALL users)
+        let redirectUrl = 'profile-admin.html'; // Default for free or unknown
 
-      // Redirect based on plan
-      if (profile.plan === 'pro') {
-        window.location.href = 'profile-admin-pro.html';
-      } else if (profile.rhythm_vision_plan === 'vision') {
-        window.location.href = 'rhythm-vision-pro.html';
-      } else {
-        window.location.href = 'profile-admin.html';
+        if (profile.plan === 'platinum') {
+          redirectUrl = 'platinum-pro-admin.html'; // Your Platinum Pro admin page
+        } else if (profile.plan === 'pro') {
+          redirectUrl = 'profile-admin-pro.html';
+        } else if (profile.rhythm_vision_plan === 'vision') {
+          redirectUrl = 'rhythm-vision-pro.html';
+        }
+
+        // Optional: Add query param to show success/welcome message
+        window.location.href = redirectUrl + '?welcome=true';
+
+      } catch (err) {
+        console.error('Login error:', err);
+        alert('Login failed: ' + (err.message || 'Invalid email or password'));
       }
     };
   </script>
