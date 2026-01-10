@@ -171,7 +171,7 @@
     async function init() {
       let profile = null;
 
-      // Try subdomain lookup (param is either ?id=subdomain or hostname subdomain)
+      // Step 1: Try as subdomain (this covers both ?id=subdomain and hostname subdomain)
       const { data: subData, error: subError } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id, subdomain')
@@ -182,8 +182,8 @@
         profile = subData;
       }
 
-      // Fallback to UUID if param looks like one
-      if (!profile && param.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i)) {
+      // Step 2: If not found, try as UUID (for legacy links)
+      if (!profile) {
         const { data: uuidData, error: uuidError } = await supabase
           .from('profiles')
           .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id, subdomain')
@@ -206,6 +206,12 @@
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
 
+      // Load custom logo
+      if (profile.logo_url) {
+        document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
+      }
+
+      // Load custom banner
       if (profile.banner_url) {
         const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
         const bannerImg = document.getElementById('banner');
@@ -216,15 +222,15 @@
         };
       }
 
-      if (profile.logo_url) {
-        document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
-      }
-
+      // Platinum Badge
       const badgeContainer = document.getElementById('badge-container');
       if (plan === 'platinum') {
         badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
+      } else {
+        badgeContainer.innerHTML = '';
       }
 
+      // Show Live Stream + Tip Bucket
       if (plan === 'pro' || plan === 'platinum') {
         document.getElementById('liveStreamSection').classList.remove('hidden');
         if (stripeAccountId) document.getElementById('tipBucketSection').classList.remove('hidden');
@@ -234,7 +240,7 @@
 
       loadVideos();
 
-      // Set Merch button using subdomain or param
+      // Set Merch button using the artist's subdomain
       const merchSubdomain = profile.subdomain || param;
       if (merchSubdomain) {
         const merchUrl = `https://rhythm-deck-music.onrender.com/public-merch.html?id=${merchSubdomain}`;
@@ -445,6 +451,7 @@
       document.getElementById('customTip').value = '';
     });
 
+    // Start loading
     init();
   </script>
 </body>
