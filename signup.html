@@ -13,7 +13,6 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
   <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
-
   <!-- Header & Hero -->
   <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3">
@@ -33,7 +32,6 @@
       <a href="signup.html" class="bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-400 transition shadow-md">Sign Up</a>
     </nav>
   </header>
-
   <section class="relative h-[350px] md:h-[450px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
            style="background-image: url('banner-cropped.jpg');">
     <div class="bg-black bg-opacity-60 p-8 md:p-10 rounded-xl text-center shadow-2xl">
@@ -46,7 +44,6 @@
       </a>
     </div>
   </section>
-
   <main class="flex-grow flex items-center justify-center py-12 md:py-16 px-4">
     <div class="container mx-auto">
       <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
@@ -55,7 +52,7 @@
         </div>
         <div class="w-full md:w-1/2 p-6 md:p-10">
           <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Create Your Rhythm Deck Account</h2>
-      
+    
           <form id="signupForm" class="space-y-4">
             <div><label class="block text-gray-700 font-semibold mb-1">Name /Band Name</label><input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
             <div><label class="block text-gray-700 font-semibold mb-1">Email</label><input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus"></div>
@@ -129,7 +126,6 @@
       </div>
     </div>
   </main>
-
   <footer class="bg-black text-white mt-10 p-5 text-center text-sm">
     <nav class="mb-2 space-x-4">
       <a href="contact.html" class="hover:text-green-400">Contact Us</a>
@@ -138,7 +134,6 @@
     </nav>
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient(
@@ -318,6 +313,12 @@
           submitButton.innerHTML = 'Create Account';
         }
       });
+
+      // Fallback: If redirected from Stripe, show success message on admin page
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('redirect_status') === 'succeeded') {
+        showMessage('Payment Success', 'Welcome to your Platinum Pro Admin Dashboard!', 'bg-green-600');
+      }
     });
   </script>
 </body>
