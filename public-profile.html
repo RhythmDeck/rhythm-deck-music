@@ -68,8 +68,8 @@
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
-    <!-- LIVESTREAM, CHAT & TIP BUCKET SECTION -->
     <div id="liveStreamSection" class="mb-20 hidden">
+      <!-- Your live stream and tip bucket section - unchanged -->
       <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
         <h3 class="text-3xl font-black text-purple-800 mb-6">Artist is Live</h3>
         <div class="grid lg:grid-cols-3 gap-8 mb-8">
@@ -161,30 +161,43 @@
     async function init() {
       let profile = null;
 
-      // First: Try exact ID lookup (UUID format)
-      if (rawParam && rawParam.includes('-')) { // UUIDs contain dashes
+      // 1. Try subdomain lookup first (most common for public URLs)
+      const subdomainFromHost = window.location.hostname.split('.')[0];
+      if (subdomainFromHost && subdomainFromHost !== 'www' && subdomainFromHost !== 'rhythm-deck-music') {
         const { data, error } = await supabase
           .from('profiles')
           .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
-          .eq('id', rawParam)
+          .eq('subdomain', subdomainFromHost)
           .single();
 
-        if (!error && data) profile = data;
+        if (!error && data) {
+          profile = data;
+        }
       }
 
-      // Second: Try subdomain lookup (always try this)
-      const subdomain = window.location.hostname.split('.')[0];
-      if (!profile && subdomain && subdomain !== 'www' && subdomain !== 'rhythm-deck-music') {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
-          .eq('subdomain', subdomain)
-          .single();
+      // 2. Fallback to ?id= param - treat as subdomain if not UUID, or as UUID if it looks like one
+      if (!profile && rawParam) {
+        // If it has many dashes and is long, treat as UUID
+        if (rawParam.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i)) {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+            .eq('id', rawParam)
+            .single();
 
-        if (!error && data) profile = data;
+          if (!error && data) profile = data;
+        } else {
+          // Treat as subdomain
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+            .eq('subdomain', rawParam)
+            .single();
+
+          if (!error && data) profile = data;
+        }
       }
 
-      // If still not found, show error
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
         return;
@@ -230,12 +243,17 @@
 
       loadVideos();
 
-      // Set Merch button link
-      const merchUrl = `https://${subdomain}.rhythmdeckmusic.com/public-merch.html`;
-      document.getElementById('merchStoreBtn').href = merchUrl;
+      // Set Merch button link using subdomain
+      const merchSubdomain = profile.subdomain || subdomainFromHost || rawParam;
+      if (merchSubdomain) {
+        const merchUrl = `https://${merchSubdomain}.rhythmdeckmusic.com/public-merch.html`;
+        document.getElementById('merchStoreBtn').href = merchUrl;
+      } else {
+        document.getElementById('merchStoreBtn').style.display = 'none';
+      }
     }
 
-    // Rest of your original functions (unchanged)
+    // Your original functions (unchanged from working version)
     async function checkLiveStatus() {
       if (!artistId) return;
       const { data: session } = await supabase
