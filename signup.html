@@ -205,9 +205,15 @@
           }
           subdomainStatus.textContent = 'Checking...';
           subdomainStatus.className = 'mt-2 text-sm h-5 text-gray-500';
-          const { data } = await supabase.from('profiles').select('id').eq('subdomain', raw).maybeSingle();
-          subdomainStatus.textContent = data ? 'Taken' : 'Available!';
-          subdomainStatus.className = data ? 'mt-2 text-sm h-5 text-red-600' : 'mt-2 text-sm h-5 text-green-600';
+          try {
+            const { data } = await supabase.from('profiles').select('id').eq('subdomain', raw).maybeSingle();
+            subdomainStatus.textContent = data ? 'Taken' : 'Available!';
+            subdomainStatus.className = data ? 'mt-2 text-sm h-5 text-red-600' : 'mt-2 text-sm h-5 text-green-600';
+          } catch (err) {
+            subdomainStatus.textContent = 'Error checking';
+            subdomainStatus.className = 'mt-2 text-sm h-5 text-red-600';
+            console.error('Subdomain check failed:', err);
+          }
         }, 600);
       });
 
@@ -225,11 +231,10 @@
         try {
           if (rawSubdomain.length < 3) throw new Error("Subdomain must be at least 3 characters");
 
-          // Check subdomain availability
           const { data: taken } = await supabase.from('profiles').select('id').eq('subdomain', rawSubdomain).maybeSingle();
           if (taken) throw new Error(`Subdomain "${rawSubdomain}" is already taken`);
 
-          console.log('Starting signup with:', { email, password: '***', name, subdomain: rawSubdomain, plan });
+          console.log('Starting signup with:', { email, name, subdomain: rawSubdomain, plan });
 
           const { data: { user }, error: authError } = await supabase.auth.signUp({
             email,
@@ -257,7 +262,6 @@
             payment_pending: plan !== 'free'
           };
 
-          // Set correct plan field for all tiers
           if (plan === 'free') {
             updateData.plan = 'free';
           } else if (plan === 'pro') {
@@ -293,8 +297,11 @@
               body: JSON.stringify({ planType: plan, duration, userId: user.id, email })
             });
 
+            console.log('Checkout response status:', response.status);
+
             if (!response.ok) {
               const errText = await response.text();
+              console.error('Checkout error response:', errText);
               throw new Error(`Failed to create checkout session: ${errText}`);
             }
 
@@ -306,7 +313,7 @@
           }
         } catch (err) {
           console.error('Full signup error:', err);
-          showMessage('Error', err.message || 'Failed to create account. Check browser console (F12) for details.', 'bg-red-600');
+          showMessage('Error', err.message || 'Failed to create account. Check console (F12) for details.', 'bg-red-600');
           submitButton.disabled = false;
           submitButton.innerHTML = 'Create Account';
         }
