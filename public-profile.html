@@ -25,35 +25,19 @@
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
     .liked svg{fill:#ef4444;stroke:none}
     #badge-container{position:absolute;top:20px;right:20px;z-index:30}
-    #badge-container img{width:165px;height:165px;filter:drop-shadow(0 0 35px rgba(255,215,0,0.9));transition:all .4s ease;}
-    #badge-container img:hover{transform:scale(1.2) rotate(12deg);}
+    /* Platinum badge — large 165px */
+    #badge-container img {
+      width: 165px;
+      height: 165px;
+      filter: drop-shadow(0 0 35px rgba(255,215,0,0.9));
+      transition: all .4s ease;
+    }
+    #badge-container img:hover {
+      transform: scale(1.2) rotate(12deg);
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
-
-  <!-- Rhythm Deck Header with Merch Button -->
-  <header class="bg-black text-white p-5 flex flex-col sm:flex-row justify-between items-center shadow-lg">
-    <div class="flex items-center space-x-4">
-      <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-12 h-12 rounded-full border-2 border-green-500">
-      <div>
-        <h1 class="text-3xl font-black tracking-wider">RHYTHM DECK</h1>
-        <p class="text-sm text-green-400">Unleash Your Beat</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-6 mt-4 sm:mt-0">
-      <a 
-        id="merchStoreBtn" 
-        href="#" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        class="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white px-8 py-3 rounded-lg font-bold transition shadow-lg"
-      >
-        Check out our Merch Store
-      </a>
-    </div>
-  </header>
-
-  <!-- Artist Content -->
   <div class="relative h-64 md:h-96 bg-gray-900 overflow-hidden">
     <img id="banner" src="" alt="Banner" class="w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="flex items-center justify-center h-full text-white text-6xl font-black bg-gradient-to-br from-emerald-900 to-teal-900">
@@ -61,7 +45,6 @@
     </div>
     <div id="badge-container"></div>
   </div>
-
   <div class="max-w-7xl mx-auto p-6 -mt-20 relative z-10">
     <div class="flex flex-col md:flex-row gap-8 items-center md:items-end mb-12">
       <img id="logo" src="https://placehold.co/400x400/emerald/white?text=Artist&font=roboto" alt="Logo" class="w-48 h-48 rounded-full border-8 border-white shadow-2xl object-cover">
@@ -116,33 +99,25 @@
       <h2 class="text-4xl font-black text-emerald-800 mb-6">About</h2>
       <p id="artistBio" class="text-xl text-gray-800 leading-relaxed whitespace-pre-line">Loading bio...</p>
     </div>
-
     <h2 class="text-5xl font-black text-emerald-900 mb-12 text-center">Videos</h2>
     <div id="videoList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10"></div>
   </div>
-
   <div id="videoModal" class="fixed inset-0 bg-black/96 flex items-center justify-center z-[9999] opacity-0 invisible transition-all duration-300">
     <button onClick="closeVideo()" class="fixed top-8 right-8 w-16 h-16 bg-white text-black rounded-full text-4xl font-bold z-50 hover:bg-gray-200">X</button>
     <video id="modalVideo" controls autoplay muted playsinline class="max-w-[95%] max-h-[90vh] rounded-2xl shadow-2xl"></video>
   </div>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
     const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
-
     const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
-
-    // Fixed getMediaUrl: uses correct bucket + relative path only
     const getMediaUrl = (path) => {
       if (!path) return '';
       const cleanPath = path.replace(/^\/+/, '');
-      return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/merch_images/${cleanPath}?t=${Date.now()}`;
+      return `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${cleanPath}`;
     };
-
     function getAnonId() {
       let id = localStorage.getItem('rhythmdeck_anon_id');
       if (!id) {
@@ -151,54 +126,35 @@
       }
       return id;
     }
-
     const urlParams = new URLSearchParams(location.search);
-    let param = urlParams.get('id')?.trim().toLowerCase();
-
-    // Fallback to subdomain from hostname if no ?id=
-    if (!param) {
-      param = window.location.hostname.split('.')[0];
-    }
-
-    if (!param) {
+    const rawParam = urlParams.get('id')?.trim().toLowerCase();
+    if (!rawParam) {
       document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Invalid Link</div>';
-      throw new Error('No parameter or subdomain');
+      throw new Error('No ID parameter');
     }
-
     let artistId = null;
     let stripeAccountId = null;
-    let plan = null;
-
+    let plan = null; // Will be 'free', 'pro', or 'platinum'
     async function init() {
       let profile = null;
-
-      // Try as subdomain first (covers ?id=subdomain and hostname subdomain)
-      const { data: subData, error: subError } = await supabase
+      const { data: subdomainData, error: subErr } = await supabase
         .from('profiles')
-        .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id, subdomain')
-        .eq('subdomain', param)
+        .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+        .ilike('subdomain', rawParam)
         .single();
-
-      if (!subError && subData) {
-        profile = subData;
-      }
-
-      // Fallback to UUID only if param looks like one
-      if (!profile && param.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i)) {
-        const { data: uuidData, error: uuidError } = await supabase
+      if (subdomainData) profile = subdomainData;
+      if (!profile) {
+        const { data: idData } = await supabase
           .from('profiles')
-          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id, subdomain')
-          .eq('id', param)
+          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+          .eq('id', rawParam)
           .single();
-
-        if (!uuidError && uuidData) profile = uuidData;
+        if (idData) profile = idData;
       }
-
       if (!profile) {
         document.body.innerHTML = '<div class="text-center py-40 text-7xl font-black text-red-600">Artist Not Found</div>';
         return;
       }
-
       artistId = profile.id;
       stripeAccountId = profile.stripe_account_id;
       plan = profile.plan || 'free';
@@ -207,21 +163,17 @@
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
 
-      // Load custom logo (relative path from DB)
-      if (profile.logo_url) {
-        document.getElementById('logo').src = getMediaUrl(profile.logo_url);
-      }
-
-      // Load custom banner (relative path from DB)
       if (profile.banner_url) {
-        const bannerUrl = getMediaUrl(profile.banner_url);
+        const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
         const bannerImg = document.getElementById('banner');
         bannerImg.src = bannerUrl;
         bannerImg.onload = () => {
           bannerImg.classList.remove('hidden');
           document.getElementById('bannerPlaceholder').classList.add('hidden');
         };
-        bannerImg.onerror = () => console.error('Banner failed to load:', bannerUrl);
+      }
+      if (profile.logo_url) {
+        document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
 
       // Platinum Badge
@@ -232,27 +184,19 @@
         badgeContainer.innerHTML = '';
       }
 
-      // Show Live Stream + Tip Bucket
+      // Show Live Stream + Tip Bucket for Pro or Platinum
       if (plan === 'pro' || plan === 'platinum') {
         document.getElementById('liveStreamSection').classList.remove('hidden');
-        if (stripeAccountId) document.getElementById('tipBucketSection').classList.remove('hidden');
+        if (stripeAccountId) {
+          document.getElementById('tipBucketSection').classList.remove('hidden');
+        }
         checkLiveStatus();
-        setInterval(checkLiveStatus, 10000);
+        setInterval(checkLiveStatus, 10000); // Check every 10 seconds
       }
 
       loadVideos();
-
-      // Set Merch button using subdomain
-      const merchSubdomain = profile.subdomain || param;
-      if (merchSubdomain) {
-        const merchUrl = `https://rhythm-deck-music.onrender.com/public-merch.html?id=${merchSubdomain}`;
-        document.getElementById('merchStoreBtn').href = merchUrl;
-      } else {
-        document.getElementById('merchStoreBtn').style.display = 'none';
-      }
     }
 
-    // Your original functions (unchanged)
     async function checkLiveStatus() {
       if (!artistId) return;
       const { data: session } = await supabase
@@ -453,7 +397,6 @@
       document.getElementById('customTip').value = '';
     });
 
-    // Start loading
     init();
   </script>
 </body>
