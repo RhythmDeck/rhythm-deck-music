@@ -225,8 +225,7 @@
       </div>
 
       <div class="md:col-span-3 space-y-8">
-
-        <!-- NEW: MP3 AUDIO UPLOAD SECTION -->
+        <!-- AUDIO UPLOAD SECTION -->
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Audio Track (MP3)</h3>
           <p class="mb-4 text-sm text-gray-600">(Refresh page to view new likes and comments)</p>
@@ -251,7 +250,7 @@
           </button>
         </div>
 
-        <!-- UPDATED: VIDEO + ALBUM UPLOAD SECTION -->
+        <!-- VIDEO + ALBUM UPLOAD SECTION -->
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Video or Album</h3>
           <p class="mb-4 text-sm text-gray-600">(Refresh page to view new likes and comments)</p>
@@ -320,7 +319,6 @@
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
@@ -365,9 +363,10 @@
     document.getElementById('videoModal').classList.add('show');
   };
 
+  // Placeholder for social modal - expand if you have full implementation
   window.openSocialModal = function(videoUrl) {
-    // Placeholder - add your full social modal logic here if you have it
-    alert("Social sharing for: " + videoUrl);
+    alert("Social sharing modal would open here for: " + videoUrl);
+    // Add your full social modal logic if available
   };
 
   async function displayProBadge() {
@@ -400,21 +399,32 @@
   }
 
   async function loadVideos() {
-    const { data: videos, error } = await supabase.from('user_videos').select('id, video_url, thumbnail_url, title, price, type').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const { data: videos, error } = await supabase
+      .from('user_videos')
+      .select('id, video_url, thumbnail_url, title, price, type')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
     if (error) {
       console.error('Error loading media:', error);
+      alert('Error loading media: ' + error.message);
       return;
     }
+
     const container = document.getElementById('videoList');
     container.innerHTML = '';
+
     if (!videos || videos.length === 0) {
       container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No media uploaded yet.</p>';
       return;
     }
+
     for (const item of videos) {
-      const { data: mediaData } = supabase.storage.from('media').getPublicUrl(item.video_url);
-      const mediaUrl = mediaData.publicUrl;
-      const thumbUrl = item.thumbnail_url ? supabase.storage.from('media').getPublicUrl(item.thumbnail_url).data.publicUrl + '?t=' + Date.now() : 'https://via.placeholder.com/400x225/10b981/ffffff?text=' + (item.type === 'album' ? 'Album' : item.type === 'audio' ? 'Audio' : 'Video');
+      const mediaUrl = supabase.storage.from('media').getPublicUrl(item.video_url).data.publicUrl;
+      const thumbUrl = item.thumbnail_url 
+        ? supabase.storage.from('media').getPublicUrl(item.thumbnail_url).data.publicUrl + '?t=' + Date.now() 
+        : 'https://via.placeholder.com/400x225/10b981/ffffff?text=' + (item.type || 'Media');
+
       const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', item.id);
       const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', item.id).order('created_at', { ascending: false });
 
@@ -480,37 +490,135 @@
     }
   }
 
-  async function uploadAndPublish() {
-    const videoFile = document.getElementById('videoInput').files[0];
-    const thumbFile = document.getElementById('thumbnailInput').files[0];
-    const price = parseFloat(document.getElementById('videoPrice').value) || 0;
-    if (!videoFile) return alert('Please select a video file');
-    const spinner = document.getElementById('uploadSpinner');
+  // AUDIO UPLOAD FUNCTION
+  async function uploadAudio() {
+    const thumbFile = document.getElementById('audioThumbnailInput').files[0];
+    const audioFile = document.getElementById('audioInput').files[0];
+    const price = parseFloat(document.getElementById('audioPrice').value) || 0;
+
+    if (!audioFile) return alert('Please select an MP3 audio file');
+    if (!thumbFile) return alert('Please select a thumbnail image');
+
+    const spinner = document.getElementById('audioSpinner');
     spinner.classList.remove('hidden');
+
     try {
-      const videoPath = `videos/${currentUser.id}/${Date.now()}.mp4`;
-      const thumbPath = thumbFile ? `thumbs/${currentUser.id}/${Date.now()}.jpg` : null;
-      await supabase.storage.from('media').upload(videoPath, videoFile, { upsert: true });
-      if (thumbFile) await supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true });
+      const timestamp = Date.now();
+      const thumbPath = `thumbs/audio/${currentUser.id}/${timestamp}.jpg`;
+      const audioPath = `audio/${currentUser.id}/${timestamp}.mp3`;
+
+      await supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true });
+      await supabase.storage.from('media').upload(audioPath, audioFile, { upsert: true });
+
       await supabase.from('user_videos').insert({
         user_id: currentUser.id,
-        video_url: videoPath,
+        video_url: audioPath,
         thumbnail_url: thumbPath,
-        title: videoFile.name.replace(/\.mp4$/i, ''),
-        price: price
+        title: audioFile.name.replace(/\.mp3$/i, '') || 'Untitled Audio',
+        price: price,
+        type: 'audio'
       });
-      alert('Video uploaded successfully! Price set to $' + price.toFixed(2));
-      document.getElementById('videoInput').value = '';
-      document.getElementById('thumbnailInput').value = '';
-      document.getElementById('videoPrice').value = '0.00';
+
+      alert('Audio track uploaded successfully! Price set to $' + price.toFixed(2));
+      document.getElementById('audioThumbnailInput').value = '';
+      document.getElementById('audioInput').value = '';
+      document.getElementById('audioPrice').value = '0.00';
       loadVideos();
       displayProBadge();
     } catch (err) {
-      alert('Upload failed: ' + err.message);
+      console.error(err);
+      alert('Audio upload failed: ' + (err.message || 'Unknown error'));
     } finally {
       spinner.classList.add('hidden');
     }
   }
+
+  // VIDEO UPLOAD FUNCTION (updated)
+  async function uploadAndPublish() {
+    const videoFile = document.getElementById('videoInput').files[0];
+    const thumbFile = document.getElementById('thumbnailInput').files[0];
+    const price = parseFloat(document.getElementById('mediaPrice').value) || 0;
+
+    if (!videoFile) return alert('Please select a video file (.mp4)');
+    if (!thumbFile) return alert('Please select a thumbnail image');
+
+    const spinner = document.getElementById('uploadSpinner');
+    spinner.classList.remove('hidden');
+
+    try {
+      const timestamp = Date.now();
+      const videoPath = `videos/${currentUser.id}/${timestamp}.mp4`;
+      const thumbPath = `thumbs/${currentUser.id}/${timestamp}.jpg`;
+
+      await supabase.storage.from('media').upload(videoPath, videoFile, { upsert: true });
+      await supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true });
+
+      await supabase.from('user_videos').insert({
+        user_id: currentUser.id,
+        video_url: videoPath,
+        thumbnail_url: thumbPath,
+        title: videoFile.name.replace(/\.mp4$/i, '') || 'Untitled Video',
+        price: price,
+        type: 'video'
+      });
+
+      alert('Video uploaded successfully! Price set to $' + price.toFixed(2));
+      document.getElementById('videoInput').value = '';
+      document.getElementById('thumbnailInput').value = '';
+      document.getElementById('mediaPrice').value = '0.00';
+      loadVideos();
+      displayProBadge();
+    } catch (err) {
+      console.error(err);
+      alert('Video upload failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      spinner.classList.add('hidden');
+    }
+  }
+
+  // ALBUM UPLOAD FUNCTION (new)
+  async function uploadAlbum() {
+    const thumbFile = document.getElementById('thumbnailInput').files[0];
+    const zipFile = document.getElementById('albumInput').files[0];
+    const price = parseFloat(document.getElementById('mediaPrice').value) || 0;
+
+    if (!zipFile) return alert('Please select a ZIP file for the album');
+    if (!thumbFile) return alert('Please select a thumbnail image');
+
+    const spinner = document.getElementById('albumSpinner') || document.createElement('div'); // fallback
+    spinner.classList.remove('hidden');
+
+    try {
+      const timestamp = Date.now();
+      const thumbPath = `thumbs/album/${currentUser.id}/${timestamp}.jpg`;
+      const albumPath = `albums/${currentUser.id}/${timestamp}.zip`;
+
+      await supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true });
+      await supabase.storage.from('media').upload(albumPath, zipFile, { upsert: true });
+
+      await supabase.from('user_videos').insert({
+        user_id: currentUser.id,
+        video_url: albumPath,
+        thumbnail_url: thumbPath,
+        title: zipFile.name.replace(/\.zip$/i, '') || 'Untitled Album',
+        price: price,
+        type: 'album'
+      });
+
+      alert('Album uploaded successfully! Price set to $' + price.toFixed(2));
+      document.getElementById('albumInput').value = '';
+      document.getElementById('thumbnailInput').value = '';
+      document.getElementById('mediaPrice').value = '0.00';
+      loadVideos();
+      displayProBadge();
+    } catch (err) {
+      console.error(err);
+      alert('Album upload failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      spinner.classList.add('hidden');
+    }
+  }
+
   async function uploadBanner(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -519,6 +627,7 @@
     await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
     loadProfileData();
   }
+
   async function uploadLogo(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -527,6 +636,7 @@
     await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
     loadProfileData();
   }
+
   async function deleteAccount() {
     if (confirm('Delete EVERYTHING forever?')) {
       await supabase.from('profiles').delete().eq('id', currentUser.id);
@@ -534,35 +644,46 @@
       window.location.href = 'index.html';
     }
   }
+
+  // Stripe connection check & handler (your original)
+  async function checkStripeConnection() {
+    const { data: profile } = await supabase.from('profiles').select('stripe_account_id').eq('id', currentUser.id).single();
+    const statusDiv = document.getElementById('stripeStatus');
+    const btn = document.getElementById('connectStripeBtn');
+    if (profile?.stripe_account_id) {
+      statusDiv.textContent = 'Tip Bucket Active!';
+      statusDiv.className = 'text-green-700 font-bold';
+      btn.textContent = 'Manage Stripe Account';
+      btn.classList.replace('bg-emerald-600', 'bg-gray-600');
+    } else {
+      statusDiv.textContent = 'Not connected';
+      statusDiv.className = 'text-red-600 font-bold';
+      btn.textContent = 'Enable Tip Bucket – Connect Stripe';
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { alert('Login required'); window.location.href = 'login.html'; return; }
+    if (!user) { 
+      alert('Login required'); 
+      window.location.href = 'login.html'; 
+      return; 
+    }
     currentUser = user;
+
     await Promise.all([
       loadProfileData(),
       loadVideos(),
-      displayProBadge()
+      displayProBadge(),
+      checkStripeConnection()
     ]);
+
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
+    document.getElementById('uploadAudio').addEventListener('click', uploadAudio);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
-    // Stripe tip bucket
-    async function checkStripeConnection() {
-      const { data: profile } = await supabase.from('profiles').select('stripe_account_id').eq('id', currentUser.id).single();
-      const statusDiv = document.getElementById('stripeStatus');
-      const btn = document.getElementById('connectStripeBtn');
-      if (profile?.stripe_account_id) {
-        statusDiv.textContent = 'Tip Bucket Active!';
-        statusDiv.className = 'text-green-700 font-bold';
-        btn.textContent = 'Manage Stripe Account';
-        btn.classList.replace('bg-emerald-600', 'bg-gray-600');
-      } else {
-        statusDiv.textContent = 'Not connected';
-        statusDiv.className = 'text-red-600 font-bold';
-        btn.textContent = 'Enable Tip Bucket – Connect Stripe';
-      }
-    }
-    await checkStripeConnection();
+    document.getElementById('uploadAlbum').addEventListener('click', uploadAlbum);
+
     document.getElementById('connectStripeBtn').addEventListener('click', async () => {
       try {
         const { data, error } = await supabase.functions.invoke('stripe-onboard', {
@@ -574,6 +695,7 @@
         alert('Error starting onboarding: ' + err.message);
       }
     });
+
     document.getElementById('deleteConfirmInput').addEventListener('input', e => {
       const val = e.target.value.trim();
       const btn = document.getElementById('deleteAccountBtn');
@@ -589,6 +711,7 @@
         btn.textContent = 'Yes, Delete Everything';
       }
     });
+
     document.getElementById('deleteAccountBtn').addEventListener('click', deleteAccount);
   });
 </script>
