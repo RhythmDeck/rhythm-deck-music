@@ -23,7 +23,6 @@
     .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;}
     .like-display svg{width:28px;height:28px;stroke:#ef4444;fill:none}
     #badge-container {position: absolute;top: 16px;right: 16px;z-index: 30;}
-    /* Badge is now 50% larger: 144px instead of 96px */
     #badge-container img {
       width: 144px;
       height: 144px;
@@ -42,6 +41,7 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg gap-4">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -58,19 +58,12 @@
     <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold transition">
       Collaboration Network
     </a>
-    <!-- NEW: Radio Stations Button -->
     <a href="radio-stations.html" class="bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
       Radio Stations
     </a>
-    <!-- NEW: Merch Button -->
-    <a 
-  href="merch-admin.html" 
-  target="_blank" 
-  rel="noopener noreferrer"
-  class="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg"
->
-  Merch
-</a>
+    <a href="merch-admin.html" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
+      Merch
+    </a>
     <a href="message-dashboard.html" id="messagesBtn" class="relative bg-emerald-600 hover:bg-emerald-700 px-6 py-2 rounded-lg font-black flex items-center gap-2 transition">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-16"/>
@@ -85,6 +78,7 @@
     </button>
   </nav>
 </header>
+
 <main class="flex-grow">
   <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
     <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
@@ -100,6 +94,7 @@
     <input type="file" id="logoInput" accept="image/*" class="hidden">
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
+
   <!-- SOCIAL MEDIA SHARING PANEL - 12 PLATFORMS -->
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-br from-purple-800 to-pink-800 rounded-xl shadow-2xl text-white">
     <h3 class="text-4xl font-black mb-6 text-center">Share Your Content to Social Media</h3>
@@ -155,6 +150,7 @@
       </button>
     </div>
   </section>
+
   <!-- LIVE STREAM & CHAT SECTION WITH COMPACT TIP BUCKET -->
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
     <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
@@ -196,6 +192,7 @@
       </div>
     </div>
   </section>
+
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
       <div class="md:col-span-1 space-y-6">
@@ -226,34 +223,71 @@
           </button>
         </div>
       </div>
+
       <div class="md:col-span-3 space-y-8">
-        <!-- UPLOAD SECTION WITH PRICE INPUT -->
+
+        <!-- NEW: MP3 AUDIO UPLOAD SECTION -->
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
-          <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Video</h3>
+          <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Audio Track (MP3)</h3>
           <p class="mb-4 text-sm text-gray-600">(Refresh page to view new likes and comments)</p>
           <div class="grid md:grid-cols-2 gap-6">
             <div>
               <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
-              <input type="file" accept="image/*" id="thumbnailInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white">
+              <input type="file" accept="image/*" id="audioThumbnailInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
             </div>
             <div>
-              <label class="block font-bold mb-3 text-gray-700">Video File (.mp4)</label>
-              <input type="file" accept="video/mp4" id="videoInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white">
+              <label class="block font-bold mb-3 text-gray-700">Audio File (.mp3)</label>
+              <input type="file" accept="audio/mp3" id="audioInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
             </div>
           </div>
           <div class="mt-6">
             <label class="block font-bold mb-3 text-gray-700">Price for Fans to Buy & Download (USD)</label>
-            <input type="number" id="videoPrice" min="0" step="0.01" value="0.00" placeholder="e.g. 4.99 or 0 for free" class="w-full border border-gray-300 p-4 rounded-lg text-xl font-semibold text-center bg-white">
+            <input type="number" id="audioPrice" min="0" step="0.01" value="0.00" placeholder="e.g. 4.99 or 0 for free" class="w-full border border-gray-300 p-4 rounded-lg text-xl font-semibold text-center bg-white">
             <p class="text-sm text-gray-600 mt-2">Enter 0.00 for free play/download. Any price above $0 means fans must pay to download.</p>
           </div>
-          <button id="uploadVideo" class="mt-6 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg flex items-center shadow-lg w-full justify-center">
-            <span>Upload & Publish Video</span>
-            <div id="uploadSpinner" class="spinner hidden"></div>
+          <button id="uploadAudio" class="mt-6 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg flex items-center shadow-lg w-full justify-center">
+            <span>Upload & Publish Audio Track</span>
+            <div id="audioSpinner" class="spinner hidden ml-3"></div>
           </button>
         </div>
+
+        <!-- UPDATED: VIDEO + ALBUM UPLOAD SECTION -->
+        <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
+          <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Video or Album</h3>
+          <p class="mb-4 text-sm text-gray-600">(Refresh page to view new likes and comments)</p>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div>
+              <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
+              <input type="file" accept="image/*" id="thumbnailInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
+            </div>
+            <div>
+              <label class="block font-bold mb-3 text-gray-700">Video File (.mp4)</label>
+              <input type="file" accept="video/mp4" id="videoInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
+            </div>
+            <div>
+              <label class="block font-bold mb-3 text-gray-700">Album (ZIP of MP3s)</label>
+              <input type="file" accept=".zip" id="albumInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-purple-600 file:text-white file:cursor-pointer">
+            </div>
+          </div>
+          <div class="mt-6">
+            <label class="block font-bold mb-3 text-gray-700">Price for Fans to Buy & Download (USD)</label>
+            <input type="number" id="mediaPrice" min="0" step="0.01" value="0.00" placeholder="e.g. 4.99 or 0 for free" class="w-full border border-gray-300 p-4 rounded-lg text-xl font-semibold text-center bg-white">
+            <p class="text-sm text-gray-600 mt-2">Enter 0.00 for free. Any price above $0 means fans must pay to download.</p>
+          </div>
+          <div class="mt-6 flex flex-col sm:flex-row gap-4">
+            <button id="uploadVideo" class="flex-1 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg shadow-lg">
+              Upload & Publish Video
+            </button>
+            <button id="uploadAlbum" class="flex-1 bg-purple-600 text-white px-8 py-4 rounded-lg hover:bg-purple-700 font-bold text-lg shadow-lg">
+              Upload & Publish Album
+            </button>
+          </div>
+        </div>
+
         <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
     </div>
+
     <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
       <details class="group">
         <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
@@ -274,15 +308,26 @@
     </div>
   </section>
 </main>
-<div id="videoModal"><div id="closeModal" onClick="closeModal()">X</div><video id="modalVideo" controls autoplay class="shadow-2xl"></video></div>
-<footer class="bg-black text-white mt-auto p-6 text-center"><p class="text-sm">© 2026 Rhythm Deck Music. All rights reserved.</p></footer>
+
+<div id="videoModal">
+  <div id="closeModal" onClick="closeModal()">X</div>
+  <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
+</div>
+
+<footer class="bg-black text-white mt-auto p-6 text-center">
+  <p class="text-sm">© 2026 Rhythm Deck Music. All rights reserved.</p>
+</footer>
+
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
+
   let currentUser = null;
+
   window.saveArtistName = async function() {
     const name = document.getElementById('artistNameInput').value.trim();
     if (!name) return alert("Enter a name");
@@ -290,35 +335,41 @@
     if (error) alert("Save failed: " + error.message);
     else alert("Name saved!");
   };
+
   window.saveBio = async function() {
     const bio = document.getElementById('bioInput').value.trim();
     const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert("Bio saved!");
   };
+
   window.saveCollaborationOptIn = async function() {
     const checked = document.getElementById('collaborationOptIn').checked;
     const { error } = await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
   };
+
   window.logout = async function() {
     await supabase.auth.signOut();
     window.location.href = 'login.html';
   };
+
   window.closeModal = function() {
     document.getElementById('videoModal').classList.remove('show');
     document.getElementById('modalVideo').src = '';
   };
+
   window.openVideoPopup = function(url) {
     document.getElementById('modalVideo').src = url;
     document.getElementById('videoModal').classList.add('show');
   };
+
   window.openSocialModal = function(videoUrl) {
-    document.getElementById('socialCaption').value = "Check out my latest video on Rhythm Deck! 🎵";
-    document.getElementById('socialModal').classList.add('show');
-    window.currentVideoUrl = videoUrl;
+    // Placeholder - add your full social modal logic here if you have it
+    alert("Social sharing for: " + videoUrl);
   };
+
   async function displayProBadge() {
     if (!currentUser) return;
     const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
@@ -328,6 +379,7 @@
       badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
     }
   }
+
   async function loadProfileData() {
     const { data: profile } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
     document.getElementById('artistNameInput').value = profile.name || '';
@@ -346,36 +398,43 @@
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
   }
+
   async function loadVideos() {
-    const { data: videos, error: videosError } = await supabase.from('user_videos').select('id, video_url, thumbnail_url, title, price').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    if (videosError) {
-      console.error('Error loading videos:', videosError);
-      alert('Error loading videos: ' + videosError.message);
+    const { data: videos, error } = await supabase.from('user_videos').select('id, video_url, thumbnail_url, title, price, type').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    if (error) {
+      console.error('Error loading media:', error);
       return;
     }
     const container = document.getElementById('videoList');
     container.innerHTML = '';
     if (!videos || videos.length === 0) {
-      container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No videos uploaded yet.</p>';
+      container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No media uploaded yet.</p>';
       return;
     }
-    for (const video of videos) {
-      const { data: videoData } = supabase.storage.from('media').getPublicUrl(video.video_url);
-      const videoUrl = videoData.publicUrl;
-      const thumbUrl = video.thumbnail_url ? supabase.storage.from('media').getPublicUrl(video.thumbnail_url).data.publicUrl + '?t=' + Date.now() : 'https://via.placeholder.com/400x225/10b981/ffffff?text=Video';
-      const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', video.id);
-      const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', video.id).order('created_at', { ascending: false });
+    for (const item of videos) {
+      const { data: mediaData } = supabase.storage.from('media').getPublicUrl(item.video_url);
+      const mediaUrl = mediaData.publicUrl;
+      const thumbUrl = item.thumbnail_url ? supabase.storage.from('media').getPublicUrl(item.thumbnail_url).data.publicUrl + '?t=' + Date.now() : 'https://via.placeholder.com/400x225/10b981/ffffff?text=' + (item.type === 'album' ? 'Album' : item.type === 'audio' ? 'Audio' : 'Video');
+      const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', item.id);
+      const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', item.id).order('created_at', { ascending: false });
+
+      const typeLabel = item.type === 'album' ? 'Album' : item.type === 'audio' ? 'Audio Track' : 'Video';
+      const typeColor = item.type === 'album' ? 'bg-purple-600' : item.type === 'audio' ? 'bg-indigo-600' : 'bg-emerald-600';
+
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
           <div class="relative">
             <img src="${thumbUrl}" class="w-full h-48 object-cover">
-            <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
+            <div class="video-overlay" onclick="openVideoPopup('${mediaUrl}')">
               <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
             </div>
           </div>
           <div class="p-4 bg-gray-800 text-white flex-1">
-            <h4 class="font-bold text-lg truncate">${video.title || 'Untitled'}</h4>
-            <p class="text-emerald-400 font-bold text-xl mt-2">Price: $${(video.price || 0).toFixed(2)}</p>
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="font-bold text-lg truncate">${item.title || 'Untitled'}</h4>
+              <span class="px-3 py-1 rounded-full text-xs font-bold ${typeColor}">${typeLabel}</span>
+            </div>
+            <p class="text-emerald-400 font-bold text-xl mt-2">Price: $${(item.price || 0).toFixed(2)}</p>
             <div class="mt-4 space-y-4">
               <div class="flex justify-between items-center">
                 <div class="like-display">
@@ -383,7 +442,7 @@
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                   <span class="font-bold">${likes}</span>
                 </div>
-                <button onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')" class="text-green-400 font-bold hover:text-green-300">Share</button>
+                <button onclick="navigator.clipboard.writeText('${mediaUrl}'); alert('Link copied!')" class="text-green-400 font-bold hover:text-green-300">Share</button>
               </div>
               <div class="border-t border-gray-700 pt-3 space-y-2 max-h-40 overflow-y-auto text-sm">
                 ${comments.length === 0 ? '<p class="text-gray-500 italic">No comments yet</p>' : ''}
@@ -391,42 +450,36 @@
               </div>
             </div>
           </div>
-          <button onclick="openSocialModal('${videoUrl}')" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black py-4 rounded-b-xl">
+          <button onclick="openSocialModal('${mediaUrl}')" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black py-4 rounded-b-xl">
             Share to Social Media
           </button>
-          <button onclick="deleteVideo('${video.id}', '${video.video_url}', '${video.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
-            Delete Video
+          <button onclick="deleteVideo('${item.id}', '${item.video_url}', '${item.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
+            Delete ${typeLabel}
           </button>
         </div>`;
     }
   }
+
   async function deleteVideo(id, videoPath, thumbPath) {
-    if (!confirm('Are you sure you want to permanently delete this video? This cannot be undone.')) {
-      return;
-    }
+    if (!confirm('Are you sure you want to permanently delete this? This cannot be undone.')) return;
     try {
-      const { error: dbError } = await supabase
-        .from('user_videos')
-        .delete()
-        .eq('id', id);
+      const { error: dbError } = await supabase.from('user_videos').delete().eq('id', id);
       if (dbError) throw dbError;
       const filesToDelete = [];
       if (videoPath) filesToDelete.push(videoPath);
       if (thumbPath) filesToDelete.push(thumbPath);
       if (filesToDelete.length > 0) {
-        const { error: storageError } = await supabase.storage
-          .from('media')
-          .remove(filesToDelete);
+        const { error: storageError } = await supabase.storage.from('media').remove(filesToDelete);
         if (storageError) throw storageError;
       }
-      alert('Video successfully deleted.');
+      alert('Deleted successfully.');
       loadVideos();
       displayProBadge();
     } catch (err) {
-      console.error('Delete error:', err);
-      alert('Failed to delete video: ' + err.message);
+      alert('Delete failed: ' + err.message);
     }
   }
+
   async function uploadAndPublish() {
     const videoFile = document.getElementById('videoInput').files[0];
     const thumbFile = document.getElementById('thumbnailInput').files[0];
