@@ -25,7 +25,7 @@
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
     .liked svg{fill:#ef4444;stroke:none}
     #badge-container{position:absolute;top:20px;right:20px;z-index:30}
-    /* Platinum badge — large 165px */
+    /* Platinum badge — 50% larger (165px) */
     #badge-container img {
       width: 165px;
       height: 165px;
@@ -51,7 +51,7 @@
       <h1 id="artistName" class="text-6xl md:text-8xl font-black drop-shadow-2xl">Loading...</h1>
     </div>
 
-    <!-- LIVESTREAM, CHAT & TIP BUCKET SECTION -->
+    <!-- LIVESTREAM, CHAT & TIP BUCKET SECTION – NOW VISIBLE FOR PRO & PLATINUM -->
     <div id="liveStreamSection" class="mb-20 hidden">
       <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-xl shadow-2xl border-l-8 border-purple-600">
         <h3 class="text-3xl font-black text-purple-800 mb-6">Artist is Live</h3>
@@ -75,7 +75,7 @@
             </div>
           </div>
         </div>
-        <!-- TIP BUCKET -->
+        <!-- COMPACT TIP BUCKET -->
         <div id="tipBucketSection" class="hidden bg-gradient-to-br from-emerald-100 to-green-100 p-4 rounded-xl shadow-xl border-4 border-emerald-400 text-center max-w-xl mx-auto">
           <h4 class="text-xl font-black text-emerald-800 mb-2">Support This Artist</h4>
           <p class="text-sm text-gray-700 mb-3">Send a tip ❤️</p>
@@ -134,10 +134,10 @@
     }
     let artistId = null;
     let stripeAccountId = null;
-    let plan = null; // Will be 'free', 'pro', or 'platinum'
+    let isPremium = false; // Pro or Platinum
     async function init() {
       let profile = null;
-      const { data: subdomainData, error: subErr } = await supabase
+      const { data: subdomainData } = await supabase
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
         .ilike('subdomain', rawParam)
@@ -157,12 +157,10 @@
       }
       artistId = profile.id;
       stripeAccountId = profile.stripe_account_id;
-      plan = profile.plan || 'free';
-
+      isPremium = profile.plan === 'pro' || profile.plan === 'platinum';
       document.title = `${profile.name || 'Artist'} • Rhythm Deck`;
       document.getElementById('artistName').textContent = profile.name || 'Unknown Artist';
       document.getElementById('artistBio').innerHTML = (profile.bio || "No bio yet.").replace(/\n/g, '<br>');
-
       if (profile.banner_url) {
         const bannerUrl = getMediaUrl(profile.banner_url) + '?t=' + Date.now();
         const bannerImg = document.getElementById('banner');
@@ -175,28 +173,24 @@
       if (profile.logo_url) {
         document.getElementById('logo').src = getMediaUrl(profile.logo_url) + '?t=' + Date.now();
       }
-
-      // Platinum Badge
-      const badgeContainer = document.getElementById('badge-container');
-      if (plan === 'platinum') {
-        badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
+      // Show Platinum badge only for Platinum plan
+      const badge = document.getElementById('badge-container');
+      if (profile.plan === 'platinum') {
+        badge.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
       } else {
-        badgeContainer.innerHTML = '';
+        badge.innerHTML = ''; // No badge for Free or regular Pro
       }
-
-      // Show Live Stream + Tip Bucket for Pro or Platinum
-      if (plan === 'pro' || plan === 'platinum') {
+      // Show live stream section for Pro and Platinum
+      if (isPremium) {
         document.getElementById('liveStreamSection').classList.remove('hidden');
         if (stripeAccountId) {
           document.getElementById('tipBucketSection').classList.remove('hidden');
         }
         checkLiveStatus();
-        setInterval(checkLiveStatus, 10000); // Check every 10 seconds
+        setInterval(checkLiveStatus, 10000);
       }
-
       loadVideos();
     }
-
     async function checkLiveStatus() {
       if (!artistId) return;
       const { data: session } = await supabase
@@ -221,7 +215,6 @@
         playerDiv.innerHTML = '';
       }
     }
-
     async function loadLiveChat() {
       if (!artistId) return;
       const { data: messages } = await supabase
@@ -238,7 +231,6 @@
       });
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-
     async function sendLiveMessage() {
       const name = document.getElementById('chatNameInput').value.trim() || 'Fan';
       const message = document.getElementById('chatMessageInput').value.trim();
@@ -247,7 +239,6 @@
       document.getElementById('chatMessageInput').value = '';
       loadLiveChat();
     }
-
     async function loadVideos() {
       if (!artistId) return;
       const { data: videos } = await supabase
@@ -348,9 +339,9 @@
         };
       });
     }
-
-    window.playPreview = (url) => openVideo(url);
-
+    window.playPreview = (url) => {
+      openVideo(url);
+    };
     window.buyVideo = (videoId, priceUSD, videoUrl) => {
       if (!stripeAccountId) {
         alert('Artist has not connected payments yet.');
@@ -364,25 +355,21 @@
         alert('Download started! Thank you for supporting the artist ❤️');
       }
     };
-
     window.openVideo = (url) => {
       document.getElementById('modalVideo').src = url;
       document.getElementById('videoModal').classList.remove('invisible', 'opacity-0');
       document.getElementById('videoModal').classList.add('opacity-100');
     };
-
     window.closeVideo = () => {
       document.getElementById('videoModal').classList.add('invisible', 'opacity-0');
       document.getElementById('videoModal').classList.remove('opacity-100');
       document.getElementById('modalVideo').src = '';
     };
-
     document.querySelectorAll('.tip-amount').forEach(btn => {
       btn.addEventListener('click', () => {
         document.getElementById('customTip').value = (btn.dataset.amount / 100).toFixed(2);
       });
     });
-
     document.getElementById('sendTipBtn')?.addEventListener('click', () => {
       if (!stripeAccountId) {
         alert('This artist has not enabled tips yet.');
@@ -396,7 +383,6 @@
       alert(`Thank you! $${amount.toFixed(2)} tip sent to the artist (test mode)`);
       document.getElementById('customTip').value = '';
     });
-
     init();
   </script>
 </body>
