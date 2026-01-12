@@ -13,7 +13,14 @@
       background: linear-gradient(to bottom, #000000, #0f172a);
       color: white;
     }
-    main { padding-bottom: 12rem; }
+    /* Responsive spacing */
+    main {
+      padding-bottom: 8rem; /* smaller on mobile */
+    }
+    @media (min-width: 640px) {
+      main { padding-bottom: 12rem; }
+    }
+    /* Spinning glowing music note */
     @keyframes spinGlow {
       from { transform: rotate(0deg); box-shadow: 0 0 15px 5px rgba(16, 185, 129, 0.4); }
       to { transform: rotate(360deg); box-shadow: 0 0 25px 10px rgba(16, 185, 129, 0.7); }
@@ -27,59 +34,91 @@
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-  <!-- Header -->
+  <!-- Header – responsive -->
   <header class="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-gray-800/50">
-    <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-16 h-16 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
-        <div class="flex items-center gap-3">
-          <i data-lucide="list-music" class="w-8 h-8 text-emerald-400"></i>
-          <h1 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <img
+          src="logo-1-sm.jpg"
+          alt="Rhythm Deck Logo"
+          class="w-10 sm:w-16 h-10 sm:h-16 rounded-full border-2 border-emerald-500 shadow-md object-cover"
+        />
+        <div class="flex items-center gap-2 sm:gap-3">
+          <i data-lucide="list-music" class="w-6 sm:w-8 h-6 sm:h-8 text-emerald-400"></i>
+          <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
             Rhythm Wav
           </h1>
         </div>
       </div>
-      <div class="flex items-center gap-4">
-        <button id="newPlaylistBtn" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 px-6 py-3 rounded-full font-medium transition transform hover:scale-105 shadow-lg shadow-emerald-900/30">
-          <i data-lucide="plus" class="w-5 h-5"></i>
+      <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+        <button id="newPlaylistBtn" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium transition transform hover:scale-105 shadow-lg shadow-emerald-900/30 text-sm sm:text-base">
+          <i data-lucide="plus" class="w-4 sm:w-5 h-4 sm:h-5"></i>
           New Playlist
         </button>
-        <button id="addSongBtn" class="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-full font-medium transition transform hover:scale-105 shadow-lg shadow-purple-900/30">
-          <i data-lucide="music" class="w-5 h-5"></i>
+        <button id="addSongBtn" class="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium transition transform hover:scale-105 shadow-lg shadow-purple-900/30 text-sm sm:text-base">
+          <i data-lucide="music" class="w-4 sm:w-5 h-4 sm:h-5"></i>
           Add New Song
         </button>
-        <button id="addVideoBtn" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-full font-medium transition transform hover:scale-105 shadow-lg shadow-blue-900/30">
-          <i data-lucide="video" class="w-5 h-5"></i>
+        <button id="addVideoBtn" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium transition transform hover:scale-105 shadow-lg shadow-blue-900/30 text-sm sm:text-base">
+          <i data-lucide="video" class="w-4 sm:w-5 h-4 sm:h-5"></i>
           Add New Video
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto px-6 py-12 pb-40">
-    <h2 class="text-4xl font-bold mb-3">Your Library</h2>
-    <p class="text-gray-400 mb-10">Curate and replay your tracks and videos</p>
+  <!-- Instructions Section – responsive -->
+  <section class="bg-gray-900/70 border-b border-gray-800 py-6 sm:py-8 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center sm:text-left text-emerald-400">
+        How to Use Rhythm Wav
+      </h2>
+      <div class="text-gray-300 text-sm sm:text-base leading-relaxed max-w-4xl mx-auto sm:mx-0">
+        <ol class="list-decimal list-inside space-y-3 sm:space-y-4">
+          <li><strong>Create a Playlist</strong> – Click the "New Playlist" button at the top. Give it a name and optionally upload a cover image (jpg/png).</li>
+          <li><strong>Add Songs or Videos</strong> – Use the "Add New Song" or "Add New Video" buttons. Choose a playlist from the dropdown, then upload your file (mp3/wav for songs, mp4 for videos).</li>
+          <li><strong>Browse Your Library</strong> – All playlists appear as cards below. Hover to see the play button, or click anywhere on a card (except the "Open" link) to select it for quick playback.</li>
+          <li><strong>Play Music</strong> – Selecting a playlist updates the "Now Playing" bar at the bottom — the music note spins when playing. Use the controls to play/pause.</li>
+          <li><strong>View Details</strong> – Click the "Open Playlist" link under any card to go to its full detail page (shows tracks/videos, individual play buttons, etc.).</li>
+          <li><strong>Premium Benefits</strong> – Upgrade for ad-free listening, offline mode, higher quality, and more. See the premium section for details.</li>
+        </ol>
+        <p class="mt-6 text-center sm:text-left text-gray-400 text-sm sm:text-base">
+          Enjoy building and playing your music collection!
+        </p>
+      </div>
+    </div>
+  </section>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pb-40">
+    <h2 class="text-3xl sm:text-4xl font-bold mb-3 text-center sm:text-left">Your Library</h2>
+    <p class="text-gray-400 mb-6 sm:mb-10 text-center sm:text-left">Curate and replay your purchased tracks and videos</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
       <!-- Playlist Card 1 -->
       <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="My Daily Vibes">
         <div class="relative aspect-square w-full">
-          <img src="My-Daily-Vibes.jpg" alt="My Daily Vibes" class="w-full h-full object-cover" />
+          <img
+            src="My-Daily-Vibes.jpg"
+            alt="My Daily Vibes"
+            class="w-full h-full object-cover"
+          />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0 p-6">
-            <h3 class="font-bold text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">My Daily Vibes</h3>
-            <p class="text-sm text-gray-300">18 tracks • Chill beats for work & focus</p>
+          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
+              My Daily Vibes
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-300">18 tracks • Chill beats for work & focus</p>
           </div>
           <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
-              <i data-lucide="play" class="w-10 h-10 fill-white"></i>
+            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
+              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
             </div>
           </button>
         </div>
         <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
-          <a href="playlist-detail.html?id=my-daily-vibes" target="_blank" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium">
-            <i data-lucide="external-link" class="w-5 h-5"></i>
+          <a href="playlist-detail.html?id=my-daily-vibes" target="_blank" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
+            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
             Open Playlist
           </a>
         </div>
@@ -88,21 +127,27 @@
       <!-- Playlist Card 2 -->
       <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="Rhythm Deck Favorites">
         <div class="relative aspect-square w-full">
-          <img src="rhythm-deck-favorites.jpg" alt="Rhythm Deck Favorites" class="w-full h-full object-cover" />
+          <img
+            src="rhythm-deck-favorites.jpg"
+            alt="Rhythm Deck Favorites"
+            class="w-full h-full object-cover"
+          />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0 p-6">
-            <h3 class="font-bold text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">Rhythm Deck Favorites</h3>
-            <p class="text-sm text-gray-300">24 tracks • Best purchases this month</p>
+          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
+              Rhythm Deck Favorites
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-300">24 tracks • Best purchases this month</p>
           </div>
           <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
-              <i data-lucide="play" class="w-10 h-10 fill-white"></i>
+            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
+              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
             </div>
           </button>
         </div>
         <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
-          <a href="playlist-detail.html?id=rhythm-deck-favorites" target="_blank" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium">
-            <i data-lucide="external-link" class="w-5 h-5"></i>
+          <a href="playlist-detail.html?id=rhythm-deck-favorites" target="_blank" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
+            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
             Open Playlist
           </a>
         </div>
@@ -111,21 +156,27 @@
       <!-- Playlist Card 3 -->
       <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="Late Night Grooves">
         <div class="relative aspect-square w-full">
-          <img src="Late-Night-Grooves.jpg" alt="Late Night Grooves" class="w-full h-full object-cover" />
+          <img
+            src="Late-Night-Grooves.jpg"
+            alt="Late Night Grooves"
+            class="w-full h-full object-cover"
+          />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0 p-6">
-            <h3 class="font-bold text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">Late Night Grooves</h3>
-            <p class="text-sm text-gray-300">12 tracks • Smooth vibes after dark</p>
+          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
+              Late Night Grooves
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-300">12 tracks • Smooth vibes after dark</p>
           </div>
           <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
-              <i data-lucide="play" class="w-10 h-10 fill-white"></i>
+            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
+              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
             </div>
           </button>
         </div>
         <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
-          <a href="playlist-detail.html?id=late-night-grooves" target="_blank" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium">
-            <i data-lucide="external-link" class="w-5 h-5"></i>
+          <a href="playlist-detail.html?id=late-night-grooves" target="_blank" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
+            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
             Open Playlist
           </a>
         </div>
@@ -134,113 +185,106 @@
       <!-- 4th Card – Epic Road Trip -->
       <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="Epic Road Trip">
         <div class="relative aspect-square w-full">
-          <img src="Epic-Road-Trip.jpg" alt="Epic Road Trip" class="w-full h-full object-cover" />
+          <img
+            src="Epic-Road-Trip.jpg"
+            alt="Epic Road Trip"
+            class="w-full h-full object-cover"
+          />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0 p-6">
-            <h3 class="font-bold text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">Epic Road Trip</h3>
-            <p class="text-sm text-gray-300">15 tracks • Adventure anthems</p>
+          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
+              Epic Road Trip
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-300">15 tracks • Adventure anthems</p>
           </div>
           <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
-              <i data-lucide="play" class="w-10 h-10 fill-white"></i>
+            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
+              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
             </div>
           </button>
         </div>
         <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
-          <a href="playlist-detail.html?id=epic-road-trip" target="_blank" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium">
-            <i data-lucide="external-link" class="w-5 h-5"></i>
+          <a href="playlist-detail.html?id=epic-road-trip" target="_blank" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
+            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
             Open Playlist
           </a>
         </div>
       </div>
     </div>
 
-    <!-- Now Playing section -->
-    <section class="mt-12 bg-gray-900/90 backdrop-blur-xl border border-gray-800 rounded-2xl p-5 shadow-2xl">
+    <!-- Now Playing section – responsive -->
+    <section class="mt-8 sm:mt-12 bg-gray-900/90 backdrop-blur-xl border border-gray-800 rounded-2xl p-4 sm:p-5 shadow-2xl">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-4">
-          <div id="noteContainer" class="w-14 h-14 flex items-center justify-center rounded-full">
-            <i id="musicNote" data-lucide="music" class="w-12 h-12 text-emerald-400"></i>
+          <div id="noteContainer" class="w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center rounded-full">
+            <i id="musicNote" data-lucide="music" class="w-10 sm:w-12 h-10 sm:h-12 text-emerald-400"></i>
           </div>
           <div>
-            <p id="nowPlayingTitle" class="font-semibold text-base">Select a Playlist</p>
+            <p id="nowPlayingTitle" class="font-semibold text-base sm:text-lg">Select a Playlist</p>
             <p class="text-xs text-gray-400">Ready to play</p>
           </div>
         </div>
-        <div class="flex items-center gap-6">
-          <button class="p-2 hover:bg-gray-800 rounded-full transition"><i data-lucide="skip-back" class="w-5 h-5"></i></button>
-          <button id="playBtn" class="p-4 bg-emerald-600 rounded-full hover:bg-emerald-700 transition shadow-md">
-            <i data-lucide="play" class="w-6 h-6 fill-white"></i>
+        <div class="flex items-center gap-4 sm:gap-6">
+          <button class="p-2 hover:bg-gray-800 rounded-full transition">
+            <i data-lucide="skip-back" class="w-4 sm:w-5 h-4 sm:h-5"></i>
           </button>
-          <button class="p-2 hover:bg-gray-800 rounded-full transition"><i data-lucide="skip-forward" class="w-5 h-5"></i></button>
+          <button id="playBtn" class="p-3 sm:p-4 bg-emerald-600 rounded-full hover:bg-emerald-700 transition shadow-md">
+            <i data-lucide="play" class="w-5 sm:w-6 h-5 sm:h-6 fill-white"></i>
+          </button>
+          <button class="p-2 hover:bg-gray-800 rounded-full transition">
+            <i data-lucide="skip-forward" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+          </button>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Create Playlist Modal (with image upload) -->
+  <!-- Create Playlist Modal (responsive) -->
   <div id="createModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
-    <div class="bg-gray-900 rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl">
-      <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">Create New Playlist</h3>
-      <input type="text" id="newPlaylistName" placeholder="Playlist Name" class="w-full p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" />
-      
-      <label class="block text-sm font-medium text-gray-300 mb-2">Upload Cover Image (jpg/png, optional)</label>
-      <div class="mb-6">
-        <div id="coverPreview" class="w-full aspect-square bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-600 hover:border-emerald-500 transition cursor-pointer relative overflow-hidden">
-          <div id="coverPlaceholder" class="text-center">
-            <i data-lucide="image-plus" class="w-12 h-12 text-gray-500 mb-2"></i>
-            <p class="text-sm text-gray-400">Click or drag image here</p>
-          </div>
-          <img id="coverImgPreview" class="hidden w-full h-full object-cover" alt="Cover preview" />
-          <input type="file" id="coverUpload" accept="image/jpeg,image/png" class="hidden" />
-        </div>
-      </div>
-
-      <div class="flex gap-4">
-        <button id="cancelCreate" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition">Cancel</button>
-        <button id="saveNewPlaylist" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium">Create</button>
-      </div>
+    <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
+      <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 text-center text-emerald-400">Create New Playlist</h3>
+      <input type="text" id="newPlaylistName" placeholder="Playlist Name" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" />
+      <button id="saveNewPlaylist" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition text-sm sm:text-base">Create</button>
+      <button id="cancelCreate" class="w-full mt-3 text-gray-400 hover:text-gray-300 text-sm sm:text-base">Cancel</button>
     </div>
   </div>
 
-  <!-- Add Song to Playlist Modal -->
+  <!-- Add Song to Playlist Modal (responsive) -->
   <div id="addSongModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
-    <div class="bg-gray-900 rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl">
-      <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">Add New Song to Playlist</h3>
+    <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
+      <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">Add New Song to Playlist</h3>
+
       <label class="block text-sm font-medium text-gray-300 mb-2">Choose Playlist</label>
-      <select id="playlistSelectSong" class="w-full p-4 mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500">
+      <select id="playlistSelectSong" class="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base">
         <option value="">Select a playlist...</option>
-        <option value="my-daily-vibes">My Daily Vibes</option>
-        <option value="rhythm-deck-favorites">Rhythm Deck Favorites</option>
-        <option value="late-night-grooves">Late Night Grooves</option>
-        <option value="epic-road-trip">Epic Road Trip</option>
       </select>
+
       <label class="block text-sm font-medium text-gray-300 mb-2">Upload Song (mp3 or wav)</label>
-      <input type="file" id="songUpload" accept="audio/mp3,audio/wav,audio/*" class="w-full p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700" />
+      <input type="file" id="songUpload" accept="audio/mp3,audio/wav,audio/*" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 text-sm" />
+
       <div class="flex gap-4">
-        <button id="cancelAddSong" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition">Cancel</button>
-        <button id="saveSong" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium">Add Song</button>
+        <button id="cancelAddSong" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition text-sm sm:text-base">Cancel</button>
+        <button id="saveSong" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium text-sm sm:text-base">Add Song</button>
       </div>
     </div>
   </div>
 
-  <!-- Add Video to Playlist Modal -->
+  <!-- Add Video to Playlist Modal (responsive) -->
   <div id="addVideoModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
-    <div class="bg-gray-900 rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl">
-      <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">Add New Video to Playlist</h3>
+    <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
+      <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">Add New Video to Playlist</h3>
+
       <label class="block text-sm font-medium text-gray-300 mb-2">Choose Playlist</label>
-      <select id="playlistSelectVideo" class="w-full p-4 mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500">
+      <select id="playlistSelectVideo" class="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base">
         <option value="">Select a playlist...</option>
-        <option value="my-daily-vibes">My Daily Vibes</option>
-        <option value="rhythm-deck-favorites">Rhythm Deck Favorites</option>
-        <option value="late-night-grooves">Late Night Grooves</option>
-        <option value="epic-road-trip">Epic Road Trip</option>
       </select>
+
       <label class="block text-sm font-medium text-gray-300 mb-2">Upload Video (mp4)</label>
-      <input type="file" id="videoUpload" accept="video/mp4" class="w-full p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700" />
+      <input type="file" id="videoUpload" accept="video/mp4" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 text-sm" />
+
       <div class="flex gap-4">
-        <button id="cancelAddVideo" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition">Cancel</button>
-        <button id="saveVideo" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium">Add Video</button>
+        <button id="cancelAddVideo" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition text-sm sm:text-base">Cancel</button>
+        <button id="saveVideo" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium text-sm sm:text-base">Add Video</button>
       </div>
     </div>
   </div>
@@ -259,7 +303,7 @@
       document.getElementById('createModal').classList.add('hidden');
     });
 
-    // Fake create playlist
+    // Fake create
     document.getElementById('saveNewPlaylist').addEventListener('click', () => {
       const name = document.getElementById('newPlaylistName').value.trim();
       if (name) {
@@ -314,28 +358,6 @@
       document.getElementById('addVideoModal').classList.add('hidden');
       document.getElementById('videoUpload').value = '';
     });
-
-    // Cover image preview for create playlist
-    const coverUpload = document.getElementById('coverUpload');
-    const coverPreview = document.getElementById('coverPreview');
-    const coverPlaceholder = document.getElementById('coverPlaceholder');
-    const coverImgPreview = document.getElementById('coverImgPreview');
-
-    if (coverPreview) {
-      coverPreview.addEventListener('click', () => coverUpload.click());
-      coverUpload.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            coverImgPreview.src = event.target.result;
-            coverImgPreview.classList.remove('hidden');
-            coverPlaceholder.classList.add('hidden');
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
 
     // Spinning glowing music note + dynamic playlist name
     const playBtn = document.getElementById('playBtn');
