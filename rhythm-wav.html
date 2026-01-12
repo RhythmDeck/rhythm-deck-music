@@ -67,14 +67,14 @@
     </div>
   </header>
 
-  <!-- Instructions Section – responsive -->
-  <section class="bg-gray-900/70 border-b border-gray-800 py-6 sm:py-8 px-4 sm:px-6">
-    <div class="max-w-7xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center sm:text-left text-emerald-400">
+  <!-- Instructions Section – centered, emerald green border, nice styling (same as detail page) -->
+  <section class="max-w-4xl mx-auto my-6 sm:my-8 px-4 sm:px-6">
+    <div class="bg-gray-900/70 border-2 border-emerald-600 rounded-2xl p-6 sm:p-8 shadow-xl shadow-emerald-900/30">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">
         How to Use Rhythm Wav
       </h2>
-      <div class="text-gray-300 text-sm sm:text-base leading-relaxed max-w-4xl mx-auto sm:mx-0">
-        <ol class="list-decimal list-inside space-y-3 sm:space-y-4">
+      <div class="text-gray-300 text-sm sm:text-base leading-relaxed text-center">
+        <ol class="list-decimal list-inside space-y-3 sm:space-y-4 mx-auto max-w-3xl">
           <li><strong>Create a Playlist</strong> – Click the "New Playlist" button at the top. Give it a name and optionally upload a cover image (jpg/png).</li>
           <li><strong>Add Songs or Videos</strong> – Use the "Add New Song" or "Add New Video" buttons. Choose a playlist from the dropdown, then upload your file (mp3/wav for songs, mp4 for videos).</li>
           <li><strong>Browse Your Library</strong> – All playlists appear as cards below. Hover to see the play button, or click anywhere on a card (except the "Open" link) to select it for quick playback.</li>
@@ -82,7 +82,7 @@
           <li><strong>View Details</strong> – Click the "Open Playlist" link under any card to go to its full detail page (shows tracks/videos, individual play buttons, etc.).</li>
           <li><strong>Premium Benefits</strong> – Upgrade for ad-free listening, offline mode, higher quality, and more. See the premium section for details.</li>
         </ol>
-        <p class="mt-6 text-center sm:text-left text-gray-400 text-sm sm:text-base">
+        <p class="mt-6 text-gray-400">
           Enjoy building and playing your music collection!
         </p>
       </div>
@@ -253,15 +253,12 @@
   <div id="addSongModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
     <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
       <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">Add New Song to Playlist</h3>
-
       <label class="block text-sm font-medium text-gray-300 mb-2">Choose Playlist</label>
       <select id="playlistSelectSong" class="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base">
         <option value="">Select a playlist...</option>
       </select>
-
       <label class="block text-sm font-medium text-gray-300 mb-2">Upload Song (mp3 or wav)</label>
       <input type="file" id="songUpload" accept="audio/mp3,audio/wav,audio/*" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 text-sm" />
-
       <div class="flex gap-4">
         <button id="cancelAddSong" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition text-sm sm:text-base">Cancel</button>
         <button id="saveSong" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium text-sm sm:text-base">Add Song</button>
@@ -273,15 +270,12 @@
   <div id="addVideoModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
     <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
       <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">Add New Video to Playlist</h3>
-
       <label class="block text-sm font-medium text-gray-300 mb-2">Choose Playlist</label>
       <select id="playlistSelectVideo" class="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base">
         <option value="">Select a playlist...</option>
       </select>
-
       <label class="block text-sm font-medium text-gray-300 mb-2">Upload Video (mp4)</label>
       <input type="file" id="videoUpload" accept="video/mp4" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 text-sm" />
-
       <div class="flex gap-4">
         <button id="cancelAddVideo" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition text-sm sm:text-base">Cancel</button>
         <button id="saveVideo" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium text-sm sm:text-base">Add Video</button>
