@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Playlist Detail – Rhythm Wav</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <style>
+    body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+  <header class="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="rhythm-wav.html" class="text-emerald-400 hover:text-emerald-300 flex items-center gap-2">
+        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+        Back to Library
+      </a>
+      <!-- Dropdown to choose playlist -->
+      <select id="playlistSwitcher" class="bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-emerald-500">
+        <option value="">Select Playlist</option>
+        <option value="my-daily-vibes">My Daily Vibes</option>
+        <option value="rhythm-deck-favorites">Rhythm Deck Favorites</option>
+        <option value="late-night-grooves">Late Night Grooves</option>
+        <option value="epic-road-trip">Epic Road Trip</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-12">
+    <div class="flex flex-col md:flex-row gap-12">
+      <!-- Big Cover -->
+      <div class="w-full md:w-1/3 aspect-square rounded-2xl overflow-hidden shadow-2xl">
+        <img id="playlistCover" src="https://placehold.co/800x800/gray/white?text=Cover" alt="Playlist Cover" class="w-full h-full object-cover" />
+      </div>
+
+      <!-- Info & Controls -->
+      <div class="flex-1">
+        <h1 id="detailTitle" class="text-5xl font-bold mb-4">Loading...</h1>
+        <p class="text-xl text-gray-400 mb-8">Your playlist • <span id="trackCount">0</span> tracks</p>
+
+        <div class="flex items-center gap-6 mb-12">
+          <button id="playAllBtn" class="bg-emerald-600 hover:bg-emerald-700 px-10 py-4 rounded-full font-bold text-lg flex items-center gap-3 transition transform hover:scale-105">
+            <i data-lucide="play" class="w-6 h-6 fill-white"></i>
+            Play All
+          </button>
+          <button class="p-4 bg-gray-800 hover:bg-gray-700 rounded-full transition">
+            <i data-lucide="shuffle" class="w-6 h-6"></i>
+          </button>
+          <!-- Checkbox for Play All in Order -->
+          <label class="flex items-center gap-2 text-gray-300 cursor-pointer">
+            <input type="checkbox" id="playInOrder" class="form-checkbox h-5 w-5 text-emerald-500 rounded focus:ring-emerald-500" />
+            Play All in Order
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track List (drag-and-drop enabled) -->
+    <div id="trackList" class="space-y-4">
+      <!-- Tracks will be added here -->
+    </div>
+  </main>
+
+  <!-- Video Playback Modal -->
+  <div id="videoModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-900 rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl">
+      <video controls class="w-full h-auto rounded-lg">
+        <source id="videoSource" src="" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <button id="closeVideoBtn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition">Close</button>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Mock playlists data
+    const mockPlaylists = {
+      'my-daily-vibes': {
+        name: 'My Daily Vibes',
+        cover: 'My-Daily-Vibes.jpg',
+        tracks: 18
+      },
+      'rhythm-deck-favorites': {
+        name: 'Rhythm Deck Favorites',
+        cover: 'rhythm-deck-favorites.jpg',
+        tracks: 24
+      },
+      'late-night-grooves': {
+        name: 'Late Night Grooves',
+        cover: 'Late-Night-Grooves.jpg',
+        tracks: 12
+      },
+      'epic-road-trip': {
+        name: 'Epic Road Trip',
+        cover: 'Epic-Road-Trip.jpg',
+        tracks: 15
+      }
+    };
+
+    // Get ID from URL or default to first
+    const urlParams = new URLSearchParams(window.location.search);
+    let id = urlParams.get('id') || 'my-daily-vibes';
+
+    // Load playlist on page load or switch
+    function loadPlaylist(playlistId) {
+      const playlist = mockPlaylists[playlistId];
+      if (playlist) {
+        document.getElementById('detailTitle').textContent = playlist.name;
+        document.getElementById('playlistCover').src = playlist.cover;
+        document.getElementById('trackCount').textContent = playlist.tracks;
+
+        const trackList = document.getElementById('trackList');
+        trackList.innerHTML = '';
+        const realisticNames = ['Sunrise Melody', 'Midnight Groove', 'Ocean Waves', 'Mountain Echo', 'City Lights', 'Forest Whisper', 'River Flow', 'Starlight Dance', 'Wind Breeze', 'Fire Spark', 'Earth Pulse', 'Sky Soar', 'Rain Rhythm', 'Thunder Beat', 'Snow Silence', 'Volcano Roar', 'Desert Dune', 'Jungle Call', 'Lake Lullaby', 'Valley Song', 'Hill Harmony', 'Plain Peace', 'Island Tune', 'Canyon Chorus'];
+
+        for (let i = 1; i <= playlist.tracks; i++) {
+          const isVideo = i % 3 === 0; // Every 3rd is video
+          const trackName = realisticNames[i % realisticNames.length] + (isVideo ? ' (Video)' : '');
+          const trackHTML = `
+            <div class="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800 transition cursor-move">
+              <div class="flex items-center gap-4">
+                <span class="text-gray-400">${i}</span>
+                <div>
+                  <p class="font-medium">${trackName}</p>
+                  <p class="text-sm text-gray-400">Artist Name • 3:45</p>
+                </div>
+              </div>
+              <button class="p-2 hover:bg-gray-800 rounded-full" onclick="handlePlay(${i}, ${isVideo})">
+                <i data-lucide="${isVideo ? 'video' : 'play'}" class="w-5 h-5"></i>
+              </button>
+            </div>
+          `;
+          trackList.innerHTML += trackHTML;
+        }
+        lucide.createIcons();
+
+        // Enable drag-and-drop reordering
+        new Sortable(trackList, {
+          animation: 150,
+          ghostClass: 'bg-emerald-900/50',
+          handle: '.flex', // Drag the entire row
+          onEnd: () => alert('Tracks reordered! (Mock - later save to database)')
+        });
+      } else {
+        document.getElementById('detailTitle').textContent = 'Playlist Not Found';
+      }
+    }
+
+    // Load initial playlist
+    loadPlaylist(id);
+
+    // Playlist switcher dropdown
+    document.getElementById('playlistSwitcher').addEventListener('change', (e) => {
+      id = e.target.value;
+      loadPlaylist(id);
+    });
+
+    // Play All button
+    document.getElementById('playAllBtn').addEventListener('click', () => {
+      const playInOrder = document.getElementById('playInOrder').checked;
+      alert(`Playing all tracks! ${playInOrder ? 'In order' : 'Select individual tracks'}`);
+    });
+
+    // Handle play for track or video
+    function handlePlay(num, isVideo) {
+      if (isVideo) {
+        const modal = document.getElementById('videoModal');
+        const videoSource = document.getElementById('videoSource');
+        videoSource.src = 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4'; // Real sample MP4
+        modal.classList.remove('hidden');
+      } else {
+        alert(`Playing Track ${num}`);
+      }
+    }
+
+    // Close video modal
+    document.getElementById('closeVideoBtn').addEventListener('click', () => {
+      document.getElementById('videoModal').classList.add('hidden');
+      document.getElementById('videoSource').src = '';
+    });
+  </script>
+</body>
+</html>
