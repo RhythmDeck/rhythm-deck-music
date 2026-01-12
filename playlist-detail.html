@@ -12,14 +12,15 @@
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
+  <!-- Header – responsive -->
   <header class="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-gray-800/50">
-    <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-      <a href="rhythm-wav.html" class="text-emerald-400 hover:text-emerald-300 flex items-center gap-2">
-        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <a href="rhythm-wav.html" class="text-emerald-400 hover:text-emerald-300 flex items-center gap-2 font-medium text-sm sm:text-base">
+        <i data-lucide="arrow-left" class="w-5 sm:w-6 h-5 sm:h-6"></i>
         Back to Library
       </a>
-      <!-- Dropdown to choose playlist -->
-      <select id="playlistSwitcher" class="bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-emerald-500">
+      <!-- Dropdown to choose playlist – responsive -->
+      <select id="playlistSwitcher" class="bg-gray-800 border border-gray-700 rounded-lg p-2 sm:p-3 text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base w-full sm:w-auto">
         <option value="">Select Playlist</option>
         <option value="my-daily-vibes">My Daily Vibes</option>
         <option value="rhythm-deck-favorites">Rhythm Deck Favorites</option>
@@ -29,28 +30,52 @@
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-6 py-12">
-    <div class="flex flex-col md:flex-row gap-12">
-      <!-- Big Cover -->
-      <div class="w-full md:w-1/3 aspect-square rounded-2xl overflow-hidden shadow-2xl">
+  <!-- NEW: Instructions Section – responsive -->
+  <section class="bg-gray-900/70 border-b border-gray-800 py-6 sm:py-8 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center sm:text-left text-emerald-400">
+        How to Use This Playlist
+      </h2>
+      <div class="text-gray-300 text-sm sm:text-base leading-relaxed max-w-4xl mx-auto sm:mx-0">
+        <ol class="list-decimal list-inside space-y-3 sm:space-y-4">
+          <li><strong>Switch Playlists</strong> – Use the dropdown at the top to jump to another playlist instantly.</li>
+          <li><strong>Play Everything</strong> – Click "Play All" to start the whole playlist. Check "Play All in Order" if you want tracks in sequence (uncheck for random/shuffle).</li>
+          <li><strong>Reorder Tracks</strong> – Drag and drop any track row to rearrange the order (changes save automatically in future versions).</li>
+          <li><strong>Play Individual Items</strong> – Click the play/video icon next to any track to play it alone. Songs show a simple alert (future: full player); videos open in a large popup.</li>
+          <li><strong>Watch Videos</strong> – Video tracks (marked with a video icon) open in a full-screen modal with controls. Close with the "Close" button.</li>
+        </ol>
+        <p class="mt-6 text-center sm:text-left text-gray-400 text-sm sm:text-base">
+          Enjoy your curated music and videos!
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content – responsive -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+    <div class="flex flex-col md:flex-row gap-6 sm:gap-12 mb-8 sm:mb-12">
+      <!-- Big Cover – responsive -->
+      <div class="w-full md:w-96 aspect-square rounded-2xl overflow-hidden shadow-2xl border border-gray-800 mx-auto md:mx-0">
         <img id="playlistCover" src="https://placehold.co/800x800/gray/white?text=Cover" alt="Playlist Cover" class="w-full h-full object-cover" />
       </div>
 
-      <!-- Info & Controls -->
-      <div class="flex-1">
-        <h1 id="detailTitle" class="text-5xl font-bold mb-4">Loading...</h1>
-        <p class="text-xl text-gray-400 mb-8">Your playlist • <span id="trackCount">0</span> tracks</p>
+      <!-- Info & Controls – responsive -->
+      <div class="flex-1 text-center md:text-left">
+        <h1 id="detailTitle" class="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4">Loading...</h1>
+        <p class="text-lg sm:text-xl text-gray-400 mb-6 sm:mb-8">
+          Your playlist • <span id="trackCount">0</span> tracks
+        </p>
 
-        <div class="flex items-center gap-6 mb-12">
-          <button id="playAllBtn" class="bg-emerald-600 hover:bg-emerald-700 px-10 py-4 rounded-full font-bold text-lg flex items-center gap-3 transition transform hover:scale-105">
-            <i data-lucide="play" class="w-6 h-6 fill-white"></i>
+
+        <div class="flex flex-wrap justify-center md:justify-start items-center gap-4 sm:gap-6 mb-8 sm:mb-12">
+          <button id="playAllBtn" class="bg-emerald-600 hover:bg-emerald-700 px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg flex items-center gap-3 transition transform hover:scale-105">
+            <i data-lucide="play" class="w-5 sm:w-6 h-5 sm:h-6 fill-white"></i>
             Play All
           </button>
-          <button class="p-4 bg-gray-800 hover:bg-gray-700 rounded-full transition">
-            <i data-lucide="shuffle" class="w-6 h-6"></i>
+          <button class="p-3 sm:p-4 bg-gray-800 hover:bg-gray-700 rounded-full transition">
+            <i data-lucide="shuffle" class="w-5 sm:w-6 h-5 sm:h-6"></i>
           </button>
-          <!-- Checkbox for Play All in Order -->
-          <label class="flex items-center gap-2 text-gray-300 cursor-pointer">
+          <label class="flex items-center gap-2 text-gray-300 cursor-pointer text-sm sm:text-base">
             <input type="checkbox" id="playInOrder" class="form-checkbox h-5 w-5 text-emerald-500 rounded focus:ring-emerald-500" />
             Play All in Order
           </label>
@@ -58,20 +83,20 @@
       </div>
     </div>
 
-    <!-- Track List (drag-and-drop enabled) -->
-    <div id="trackList" class="space-y-4">
+    <!-- Track List (drag-and-drop enabled) – responsive -->
+    <div id="trackList" class="space-y-3 sm:space-y-4">
       <!-- Tracks will be added here -->
     </div>
   </main>
 
-  <!-- Video Playback Modal -->
-  <div id="videoModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
-    <div class="bg-gray-900 rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl">
+  <!-- Video Playback Modal – responsive -->
+  <div id="videoModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden px-4">
+    <div class="bg-gray-900 rounded-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl">
       <video controls class="w-full h-auto rounded-lg">
         <source id="videoSource" src="" type="video/mp4">
         Your browser does not support the video tag.
       </video>
-      <button id="closeVideoBtn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition">Close</button>
+      <button id="closeVideoBtn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition text-sm sm:text-base">Close</button>
     </div>
   </div>
 
@@ -122,16 +147,16 @@
           const isVideo = i % 3 === 0; // Every 3rd is video
           const trackName = realisticNames[i % realisticNames.length] + (isVideo ? ' (Video)' : '');
           const trackHTML = `
-            <div class="flex items-center justify-between p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800 transition cursor-move">
-              <div class="flex items-center gap-4">
-                <span class="text-gray-400">${i}</span>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800 transition cursor-move gap-3 sm:gap-0">
+              <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <span class="text-gray-400 text-sm sm:text-base w-6 sm:w-8">${i}</span>
                 <div>
-                  <p class="font-medium">${trackName}</p>
-                  <p class="text-sm text-gray-400">Artist Name • 3:45</p>
+                  <p class="font-medium text-base sm:text-lg">${trackName}</p>
+                  <p class="text-xs sm:text-sm text-gray-400">Artist Name • 3:45</p>
                 </div>
               </div>
-              <button class="p-2 hover:bg-gray-800 rounded-full" onclick="handlePlay(${i}, ${isVideo})">
-                <i data-lucide="${isVideo ? 'video' : 'play'}" class="w-5 h-5"></i>
+              <button class="p-2 sm:p-3 hover:bg-gray-800 rounded-full transition self-end sm:self-auto" onclick="handlePlay(${i}, ${isVideo})">
+                <i data-lucide="${isVideo ? 'video' : 'play'}" class="w-5 sm:w-6 h-5 sm:h-6"></i>
               </button>
             </div>
           `;
@@ -148,6 +173,7 @@
         });
       } else {
         document.getElementById('detailTitle').textContent = 'Playlist Not Found';
+        document.getElementById('trackList').innerHTML = '<p class="text-center text-gray-400 py-8">This playlist does not exist.</p>';
       }
     }
 
