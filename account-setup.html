@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Your Rhythm Wav Account – Rhythm Deck</title>
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #000000, #0f172a);
+      color: white;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased flex flex-col">
+
+  <!-- Header (matching your site style) -->
+  <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <img
+          src="logo-1-sm.jpg"
+          alt="Rhythm Deck Logo"
+          class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover"
+        />
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            Rhythm Deck
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <a href="index.html" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-emerald-400 hover:text-emerald-300 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition shadow-md text-sm sm:text-base">
+          <i data-lucide="arrow-left" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Signup Form -->
+  <main class="flex-grow flex items-center justify-center px-4 sm:px-6 py-12">
+    <div class="bg-gray-900/70 rounded-2xl p-8 sm:p-12 max-w-lg w-full border border-emerald-600 shadow-2xl">
+      <h1 class="text-3xl sm:text-4xl font-bold mb-2 text-center text-emerald-400">
+        Welcome to Premium Rhythm Wav!
+      </h1>
+      <p class="text-center text-gray-300 mb-10 text-lg sm:text-xl">
+        Your subscription is active! 🎉<br>
+        Create your account to start building playlists.
+      </p>
+
+      <form id="signupForm" class="space-y-6">
+        <!-- Email -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            required 
+            autocomplete="email"
+            placeholder="you@example.com" 
+            class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white"
+          />
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Create Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            required 
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="••••••••" 
+            class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white"
+          />
+          <p class="text-xs text-gray-400 mt-1">Minimum 8 characters</p>
+        </div>
+
+        <!-- Confirm Password -->
+        <div>
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            required 
+            autocomplete="new-password"
+            placeholder="••••••••" 
+            class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white"
+          />
+        </div>
+
+        <!-- Error Message -->
+        <p id="errorMessage" class="text-red-400 text-center hidden"></p>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit"
+          class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-lg font-bold text-xl transition transform hover:scale-105 shadow-lg">
+          Create Account & Start Using Rhythm Wav
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-gray-400 mt-6">
+        Already have an account? <a href="login.html" class="text-emerald-400 hover:underline">Log in</a>
+      </p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white mt-auto p-6 sm:p-8 text-center text-sm">
+    <p>© 2026 Rhythm Deck. All rights reserved.</p>
+    <div class="mt-3 sm:mt-4 space-x-4 sm:space-x-6 flex flex-wrap justify-center gap-4 sm:gap-6">
+      <a href="privacy.html" class="hover:text-emerald-400">Privacy Policy</a>
+      <a href="terms.html" class="hover:text-emerald-400">Terms of Service</a>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    lucide.createIcons();
+
+    // === REPLACE THESE WITH YOUR REAL SUPABASE VALUES ===
+    const supabaseUrl = 'https://bxoqhmfnseskwqkywppg';          // ← From Supabase → Settings → API
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';                         // ← anon public key (safe to expose)
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const errorEl = document.getElementById('errorMessage');
+
+      errorEl.classList.add('hidden');
+      errorEl.textContent = '';
+
+      // Basic validation
+      if (password !== confirmPassword) {
+        errorEl.textContent = "Passwords do not match.";
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      if (password.length < 8) {
+        errorEl.textContent = "Password must be at least 8 characters.";
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      // Sign up with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          // Optional: Redirect after email confirmation (if enabled)
+          emailRedirectTo: window.location.origin + '/rhythm-wav-dashboard.html'
+        }
+      });
+
+      if (error) {
+        errorEl.textContent = error.message;
+        errorEl.classList.remove('hidden');
+        console.error('Signup error:', error);
+        return;
+      }
+
+      // Success: User is auto-logged in (session created)
+      if (data.user) {
+        alert('Account created successfully! You are now logged in.');
+        // Redirect to Rhythm Wav dashboard (change this URL!)
+        window.location.href = '/rhythm-wav-dashboard.html';  
+      }
+    });
+
+    // Optional: If user is already logged in, skip signup
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        console.log('Already logged in as:', session.user.email);
+        // Redirect to dashboard if they somehow reach this page
+        window.location.href = '/rhythm-wav-dashboard.html';
+      }
+    });
+  </script>
+</body>
+</html>
