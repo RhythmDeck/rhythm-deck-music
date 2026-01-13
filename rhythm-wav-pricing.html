@@ -4,12 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rhythm Wav Pricing – Rhythm Deck</title>
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Stripe.js -->
-  <script src="https://js.stripe.com/v3/"></script>
   <style>
     body {
       background: linear-gradient(to bottom, #000000, #0f172a);
@@ -51,50 +47,13 @@
       </p>
     </div>
 
-    <!-- Pricing Comparison Table -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 max-w-5xl mx-auto">
       <!-- Free Plan -->
       <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl flex flex-col">
-        <div class="bg-gradient-to-r from-gray-700 to-gray-900 p-6 sm:p-8 text-center">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-2">Free</h2>
-          <p class="text-gray-400 text-lg sm:text-xl">Start Listening Today</p>
-        </div>
-        <div class="p-6 sm:p-8 flex-grow">
-          <ul class="space-y-4 sm:space-y-6 text-base sm:text-lg">
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>Unlimited playlist creation & organization</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>Access to your purchased & uploaded tracks/videos</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>Drag & drop reordering</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4 text-gray-400">
-              <i data-lucide="x" class="w-5 sm:w-6 h-5 sm:h-6 text-red-400 mt-1 flex-shrink-0"></i>
-              <span>Ads between tracks (every 3–5 songs)</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4 text-gray-400">
-              <i data-lucide="x" class="w-5 sm:w-6 h-5 sm:h-6 text-red-400 mt-1 flex-shrink-0"></i>
-              <span>Lower audio quality (128kbps)</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4 text-gray-400">
-              <i data-lucide="x" class="w-5 sm:w-6 h-5 sm:h-6 text-red-400 mt-1 flex-shrink-0"></i>
-              <span>No offline downloads</span>
-            </li>
-          </ul>
-        </div>
-        <div class="p-6 sm:p-8 bg-gray-800/50 text-center mt-auto">
-          <button disabled class="w-full bg-gray-700 text-gray-400 py-3 sm:py-4 rounded-lg font-bold cursor-not-allowed text-sm sm:text-base">
-            Current Plan (Free)
-          </button>
-        </div>
+        <!-- ... your existing Free Plan content ... -->
       </div>
 
-      <!-- Premium Plan (Highlighted) -->
+      <!-- Premium Plan -->
       <div class="bg-gradient-to-b from-emerald-900/50 to-gray-900/50 rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-2xl flex flex-col transform md:scale-105 relative">
         <div class="absolute top-0 right-0 bg-emerald-600 text-white px-4 sm:px-6 py-1 sm:py-2 rounded-bl-lg font-bold text-sm sm:text-base">
           Recommended
@@ -109,48 +68,19 @@
           <p class="text-base sm:text-lg mt-2">or <span class="font-bold">$79/year</span> (save $17!)</p>
         </div>
         <div class="p-6 sm:p-8 flex-grow">
-          <ul class="space-y-4 sm:space-y-6 text-base sm:text-lg">
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>Everything in Free +</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>Completely ad-free listening</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>High-quality audio (320kbps or better)</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>Offline downloads for mobile</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>Unlimited skips & on-demand playback</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>Advanced playlist features (collaborative, smart sorting)</span>
-            </li>
-            <li class="flex items-start gap-3 sm:gap-4">
-              <i data-lucide="check" class="w-5 sm:w-6 h-5 sm:h-6 text-emerald-400 mt-1 flex-shrink-0"></i>
-              <span>Priority support & early access to new features</span>
-            </li>
-          </ul>
+          <!-- ... your existing features list ... -->
         </div>
         <div class="p-6 sm:p-8 bg-emerald-900/30 text-center mt-auto">
-          <!-- Monthly Button -->
-          <button 
-            onclick="startSubscription('price_1SpBIX2WyyY6hPDE81d6M4UN')"
+          <!-- Fixed Monthly Button -->
+          <button
+            onclick="subscribe('price_1SpBIX2WyyY6hPDE81d6M4UN')"
             class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition mb-3 sm:mb-4">
             Subscribe Monthly – $7.99
           </button>
 
-          <!-- Annual Button -->
-          <button 
-            onclick="startSubscription('price_1SpBKx2WyyY6hPDEPKljJNME')"
+          <!-- Fixed Annual Button -->
+          <button
+            onclick="subscribe('price_1SpBKx2WyyY6hPDEPKljJNME')"
             class="block w-full bg-emerald-700 hover:bg-emerald-800 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition">
             Subscribe Annually – $79 (Save 17%)
           </button>
@@ -160,47 +90,40 @@
 
     <!-- Additional Info -->
     <div class="text-center mt-10 sm:mt-16 max-w-3xl mx-auto px-4 sm:px-0">
-      <h3 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Why Go Premium?</h3>
-      <p class="text-base sm:text-xl text-gray-300 mb-6 sm:mb-8">
-        Enjoy uninterrupted listening, superior sound quality, and full control over your music experience.
-        Premium supports independent creators and keeps Rhythm Wav growing.
-      </p>
-      <p class="text-sm sm:text-lg text-gray-400">
-        Questions? <a href="contact.html" class="text-emerald-400 hover:underline">Contact Support</a>
-      </p>
+      <!-- ... your existing why premium section ... -->
     </div>
   </main>
 
   <!-- Footer -->
   <footer class="bg-black text-white mt-12 sm:mt-20 p-6 sm:p-8 text-center text-sm">
-    <p>© 2026 Rhythm Deck. All rights reserved.</p>
-    <div class="mt-3 sm:mt-4 space-x-4 sm:space-x-6 flex flex-wrap justify-center gap-4 sm:gap-6">
-      <a href="privacy.html" class="hover:text-emerald-400">Privacy Policy</a>
-      <a href="terms.html" class="hover:text-emerald-400">Terms of Service</a>
-    </div>
+    <!-- ... your footer ... -->
   </footer>
 
-  <!-- Stripe Checkout Script -->
+  <!-- Updated Stripe Script – FIXED -->
   <script>
-    // Initialize Stripe with your TEST publishable key
-    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
-
-    function startSubscription(priceId) {
-      stripe.redirectToCheckout({
-        lineItems: [{ price: priceId, quantity: 1 }],
-        mode: 'subscription',
-        successUrl: 'https://rhythm-deck-music.onrender.com/account-setup.html',  // After payment success
-        cancelUrl: 'https://rhythm-deck-music.onrender.com/rhythm-wav-pricing.html',  // If they cancel checkout
-        billingAddressCollection: 'required',  // Collects billing address (good for tax/invoice)
-      }).then(function (result) {
-        // If redirect fails (rare)
-        if (result.error) {
-          alert('Something went wrong: ' + result.error.message);
-        }
-      });
-    }
-
     lucide.createIcons();
+
+    async function subscribe(priceId) {
+      try {
+        const response = await fetch('/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ priceId })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          alert('Error: ' + data.error);
+          return;
+        }
+
+        // Redirect to Stripe Checkout URL from server
+        window.location.href = data.url;
+      } catch (err) {
+        alert('Something went wrong: ' + err.message);
+      }
+    }
   </script>
 </body>
 </html>
