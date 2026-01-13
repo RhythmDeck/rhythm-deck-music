@@ -59,6 +59,31 @@ app.post('/talkjs-token', async (req, res) => {
   }
 });
 // ─────────────────────────────── END OF TALKJS CODE ───────────────────────────────
+
+// NEW: Create Stripe Checkout Session for Rhythm Wav subscriptions
+app.post('/create-checkout-session', async (req, res) => {
+  const { priceId } = req.body;
+
+  if (!priceId) {
+    return res.status(400).json({ error: 'Missing priceId' });
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      line_items: [{ price: priceId, quantity: 1 }],
+      mode: 'subscription',
+      success_url: 'https://rhythm-deck-music.onrender.com/account-setup.html',
+      cancel_url: 'https://rhythm-deck-music.onrender.com/rhythm-wav-pricing.html',
+      billing_address_collection: 'required'
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Checkout session error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const PRICE_IDS = {
   '3month-trial': 'price_1SXkS4FV6v4usVQ1oHOnpMTd',
   '1year': 'price_1SLKLEFV6v4usVQ1aUro0ZbP',
@@ -118,7 +143,6 @@ app.post('/signup', async (req, res) => {
     res.status(500).json({ message: err.message || 'Server error' });
   }
 });
-
 // ───────────────────────────────
 // EXISTING WEBHOOK (unchanged)
 // ───────────────────────────────
@@ -140,14 +164,12 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
   }
   res.json({ received: true });
 });
-
 // ───────────────────────────────
 // NEW: RHYTHM WAV WEBHOOK (separate endpoint)
 // ───────────────────────────────
 app.post('/webhook/rhythm-wav', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_RHYTHM_WAV || process.env.STRIPE_WEBHOOK_SECRET; // Use separate secret if you want
-
   let event;
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
@@ -155,21 +177,18 @@ app.post('/webhook/rhythm-wav', express.raw({ type: 'application/json' }), async
     console.error(`Rhythm Wav Webhook Error: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const userId = session.metadata?.user_id; // ← Sent from Checkout
-
     if (userId) {
       const { error } = await supabase
         .from('profiles')
-        .update({ 
+        .update({
           rhythm_wav_premium: true,
           stripe_subscription_id: session.subscription,
           subscription_status: 'active'
         })
         .eq('id', userId);
-
       if (error) {
         console.error('Failed to update Rhythm Wav premium:', error);
       } else {
@@ -177,10 +196,8 @@ app.post('/webhook/rhythm-wav', express.raw({ type: 'application/json' }), async
       }
     }
   }
-
   res.json({ received: true });
 });
-
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Rhythm Deck LIVE on port ${PORT}`);
