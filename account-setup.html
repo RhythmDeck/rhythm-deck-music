@@ -15,19 +15,25 @@
       background: linear-gradient(to bottom, #000000, #0f172a);
       color: white;
     }
+    .eye {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #94a3b8;
+      font-size: 1.1rem;
+      user-select: none;
+    }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased flex flex-col">
 
-  <!-- Header (matching your site style) -->
+  <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
       <div class="flex items-center gap-3 sm:gap-4">
-        <img
-          src="logo-1-sm.jpg"
-          alt="Rhythm Deck Logo"
-          class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover"
-        />
+        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
         <div>
           <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
             Rhythm Deck
@@ -57,7 +63,7 @@
 
       <form id="signupForm" class="space-y-6">
         <!-- Email -->
-        <div>
+        <div class="relative">
           <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
           <input 
             type="email" 
@@ -70,7 +76,7 @@
         </div>
 
         <!-- Password -->
-        <div>
+        <div class="relative">
           <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Create Password</label>
           <input 
             type="password" 
@@ -79,13 +85,14 @@
             minlength="8"
             autocomplete="new-password"
             placeholder="••••••••" 
-            class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white"
+            class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white pr-14"
           />
+          <span class="eye" id="togglePassword">Show</span>
           <p class="text-xs text-gray-400 mt-1">Minimum 8 characters</p>
         </div>
 
         <!-- Confirm Password -->
-        <div>
+        <div class="relative">
           <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
           <input 
             type="password" 
@@ -93,16 +100,19 @@
             required 
             autocomplete="new-password"
             placeholder="••••••••" 
-            class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white"
+            class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white pr-14"
           />
+          <span class="eye" id="toggleConfirmPassword">Show</span>
         </div>
 
-        <!-- Error Message -->
+        <!-- Error / Loading -->
         <p id="errorMessage" class="text-red-400 text-center hidden"></p>
+        <div id="loading" class="text-center text-emerald-400 hidden">Creating account...</div>
 
         <!-- Submit Button -->
         <button 
           type="submit"
+          id="submitBtn"
           class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-lg font-bold text-xl transition transform hover:scale-105 shadow-lg">
           Create Account & Start Using Rhythm Wav
         </button>
@@ -128,64 +138,93 @@
     lucide.createIcons();
 
     // === REPLACE THESE WITH YOUR REAL SUPABASE VALUES ===
-    const supabaseUrl = 'https://bxoqhmfnseskwqkywppg';          // ← From Supabase → Settings → API
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';                         // ← anon public key (safe to expose)
+    const supabaseUrl = 'https://bxoqhmfnseskwqkywppg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
     const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
 
-    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+    // Password Show/Hide toggles
+    document.getElementById('togglePassword').addEventListener('click', () => {
+      const input = document.getElementById('password');
+      if (input.type === 'password') {
+        input.type = 'text';
+        document.getElementById('togglePassword').textContent = 'Hide';
+      } else {
+        input.type = 'password';
+        document.getElementById('togglePassword').textContent = 'Show';
+      }
+    });
+
+    document.getElementById('toggleConfirmPassword').addEventListener('click', () => {
+      const input = document.getElementById('confirmPassword');
+      if (input.type === 'password') {
+        input.type = 'text';
+        document.getElementById('toggleConfirmPassword').textContent = 'Hide';
+      } else {
+        input.type = 'password';
+        document.getElementById('toggleConfirmPassword').textContent = 'Show';
+      }
+    });
+
+    // Form submission
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       const errorEl = document.getElementById('errorMessage');
+      const loadingEl = document.getElementById('loading');
+      const submitBtn = document.getElementById('submitBtn');
 
       errorEl.classList.add('hidden');
       errorEl.textContent = '';
+      loadingEl.classList.remove('hidden');
+      submitBtn.disabled = true;
 
-      // Basic validation
       if (password !== confirmPassword) {
         errorEl.textContent = "Passwords do not match.";
         errorEl.classList.remove('hidden');
+        loadingEl.classList.add('hidden');
+        submitBtn.disabled = false;
         return;
       }
 
       if (password.length < 8) {
         errorEl.textContent = "Password must be at least 8 characters.";
         errorEl.classList.remove('hidden');
+        loadingEl.classList.add('hidden');
+        submitBtn.disabled = false;
         return;
       }
 
-      // Sign up with Supabase
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          // Optional: Redirect after email confirmation (if enabled)
-          emailRedirectTo: window.location.origin + '/rhythm-wav-dashboard.html'
-        }
-      });
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + '/rhythm-wav-dashboard.html'
+          }
+        });
 
-      if (error) {
-        errorEl.textContent = error.message;
+        if (error) throw error;
+
+        // Success: User is auto-logged in
+        loadingEl.textContent = 'Account created! Logging you in...';
+        // Redirect to Rhythm Wav dashboard (change if your dashboard path is different)
+        window.location.href = '/rhythm-wav-dashboard.html';
+      } catch (err) {
+        errorEl.textContent = err.message || 'Something went wrong. Please try again.';
         errorEl.classList.remove('hidden');
-        console.error('Signup error:', error);
-        return;
-      }
-
-      // Success: User is auto-logged in (session created)
-      if (data.user) {
-        alert('Account created successfully! You are now logged in.');
-        // Redirect to Rhythm Wav dashboard (change this URL!)
-        window.location.href = '/rhythm-wav-dashboard.html';  
+        console.error('Sign-up error:', err);
+      } finally {
+        loadingEl.classList.add('hidden');
+        submitBtn.disabled = false;
       }
     });
 
-    // Optional: If user is already logged in, skip signup
+    // Optional: If already logged in, redirect to dashboard
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        console.log('Already logged in as:', session.user.email);
-        // Redirect to dashboard if they somehow reach this page
         window.location.href = '/rhythm-wav-dashboard.html';
       }
     });
