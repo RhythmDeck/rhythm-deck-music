@@ -78,8 +78,8 @@
       border-radius: 50%;
       cursor: pointer;
     }
-    /* Play button overlay */
-    .play-overlay {
+    /* Play/Pause overlay when paused */
+    .play-pause-overlay {
       position: absolute;
       inset: 0;
       background: rgba(0,0,0,0.4);
@@ -87,11 +87,9 @@
       align-items: center;
       justify-content: center;
       transition: opacity 0.3s;
+      pointer-events: none;
     }
-    .play-overlay:hover {
-      background: rgba(0,0,0,0.3);
-    }
-    .play-btn {
+    .play-pause-btn {
       background: rgba(0,0,0,0.6);
       color: white;
       border: none;
@@ -103,10 +101,12 @@
       justify-content: center;
       cursor: pointer;
       transition: transform 0.2s;
+      pointer-events: auto;
     }
-    .play-btn:hover {
+    .play-pause-btn:hover {
       transform: scale(1.1);
     }
+    .hidden { display: none !important; }
     /* Responsive hero */
     @media (max-width: 640px) { .hero-height { height: 60vh; min-height: 400px; } }
   </style>
@@ -148,7 +148,7 @@
   </div>
 </section>
 
-<!-- PROMO VIDEO – NOW YOUTUBE-STYLE (CLICK TO PLAY) -->
+<!-- PROMO VIDEO – YOUTUBE-STYLE (CLICK TO PLAY/PAUSE) -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
     <video
@@ -160,16 +160,19 @@
       Your browser does not support the video tag.
     </video>
 
-    <!-- Big YouTube-like Play Button Overlay -->
-    <div id="playOverlay" class="play-overlay">
-      <button id="bigPlayBtn" class="play-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
+    <!-- Play/Pause Overlay (shows when paused) -->
+    <div id="playPauseOverlay" class="play-pause-overlay">
+      <button id="playPauseBtn" class="play-pause-btn">
+        <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"/>
+        </svg>
+        <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 hidden" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
         </svg>
       </button>
     </div>
 
-    <!-- Video Controls (appear on hover) -->
+    <!-- Video Controls -->
     <div class="video-controls">
       <div class="flex items-center gap-3 sm:gap-4">
         <button id="muteBtn" class="bg-white text-black px-3 sm:px-4 py-1 sm:py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm sm:text-base">
@@ -426,10 +429,9 @@
           <summary class="font-semibold text-green-400 text-base sm:text-lg">What is Rhythm Deck?</summary>
           <p class="text-sm sm:text-base text-gray-400 mt-2">Rhythm Deck Music is the ultimate destination for musicians, songwriters, bands, vocalists, producers, and music lovers of all genres to connect, share, and grow.</p>
         </details>
-        <!-- Add rest of Q&A items here if needed -->
       </div>
       <div class="space-y-4">
-        <!-- Other Q&A -->
+        <!-- Add other Q&A items here if needed -->
       </div>
     </div>
   </div>
@@ -456,13 +458,15 @@
   <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-<!-- FIXED SCRIPT – YOUTUBE-STYLE PROMO VIDEO -->
+<!-- FIXED SCRIPT – YOUTUBE-STYLE PROMO VIDEO WITH PLAY/PAUSE -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   // === PROMO VIDEO – YOUTUBE STYLE ===
   const promoVideo = document.getElementById("promoVideo");
-  const playOverlay = document.getElementById("playOverlay");
-  const bigPlayBtn = document.getElementById("bigPlayBtn");
+  const playPauseOverlay = document.getElementById("playPauseOverlay");
+  const playPauseBtn = document.getElementById("playPauseBtn");
+  const playIcon = document.getElementById("playIcon");
+  const pauseIcon = document.getElementById("pauseIcon");
   const muteBtn = document.getElementById("muteBtn");
   const volumeSlider = document.getElementById("volumeSlider");
   const progressBar = document.getElementById("progressBar");
@@ -471,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const durationEl = document.getElementById("duration");
 
   if (!promoVideo) {
-    console.error("Promo video missing!");
+    console.error("Promo video element missing!");
     return;
   }
 
@@ -481,12 +485,11 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
-  // Load duration when ready
+  // Update time and progress
   promoVideo.addEventListener("loadedmetadata", () => {
     if (durationEl) durationEl.textContent = formatTime(promoVideo.duration || 0);
   });
 
-  // Update progress and time
   promoVideo.addEventListener("timeupdate", () => {
     if (!promoVideo.duration) return;
     const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
@@ -503,19 +506,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Start video on big play button click
-  if (bigPlayBtn) {
-    bigPlayBtn.addEventListener("click", () => {
+  // Toggle play/pause
+  function togglePlayPause() {
+    if (promoVideo.paused || promoVideo.ended) {
       promoVideo.play().then(() => {
-        if (playOverlay) playOverlay.style.display = "none";
-        promoVideo.muted = false; // Start with sound
-        promoVideo.volume = 0.5;
-        if (muteBtn) muteBtn.textContent = "Mute";
-      }).catch(err => {
-        console.warn("Play failed:", err);
-      });
-    });
+        if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
+        if (playIcon) playIcon.classList.add("hidden");
+        if (pauseIcon) pauseIcon.classList.remove("hidden");
+      }).catch(err => console.warn("Play failed:", err));
+    } else {
+      promoVideo.pause();
+      if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
+      if (playIcon) playIcon.classList.remove("hidden");
+      if (pauseIcon) pauseIcon.classList.add("hidden");
+    }
   }
+
+  // Click big button or overlay to play/pause
+  if (playPauseBtn) {
+    playPauseBtn.addEventListener("click", togglePlayPause);
+  }
+
+  // Video events to sync overlay
+  promoVideo.addEventListener("play", () => {
+    if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
+    if (playIcon) playIcon.classList.add("hidden");
+    if (pauseIcon) pauseIcon.classList.remove("hidden");
+  });
+
+  promoVideo.addEventListener("pause", () => {
+    if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
+    if (playIcon) playIcon.classList.remove("hidden");
+    if (pauseIcon) pauseIcon.classList.add("hidden");
+  });
 
   // Mute toggle
   if (muteBtn) {
@@ -535,10 +558,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Hide overlay when playing
-  promoVideo.addEventListener("play", () => {
-    if (playOverlay) playOverlay.style.display = "none";
-  });
+  // Show overlay initially (paused)
+  if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
 });
 
 // Logo animation (no sound)
