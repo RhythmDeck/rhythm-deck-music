@@ -93,7 +93,7 @@
       border-radius: 50%;
       cursor: pointer;
     }
-    /* Ensure hero doesn't overflow on small screens */
+    /* Responsive hero height */
     @media (max-width: 640px) {
       .hero-height { height: 60vh; min-height: 400px; }
     }
@@ -103,7 +103,7 @@
 <!-- AUDIO -->
 <audio id="logoSound" src="logo-intro-musical.mp3" preload="auto"></audio>
 
-<!-- HEADER – now fully responsive -->
+<!-- HEADER -->
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
   <div class="flex items-center space-x-3">
     <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
@@ -120,14 +120,14 @@
     <a href="contact.html" class="hover:underline">Contact</a>
     <a href="login.html" class="bg-white text-black px-3 sm:px-4 py-1 rounded hover:bg-gray-300">Login</a>
     <a href="signup.html" class="bg-green-500 text-white px-3 sm:px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
-    <button onclick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});" 
+    <button onclick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});"
             class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 sm:px-6 py-1 sm:py-2 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
       Check out our Exclusive Rhythm Wav Play List Platform
     </button>
   </nav>
 </header>
 
-<!-- HERO – responsive height -->
+<!-- HERO -->
 <section class="relative hero-height bg-cover bg-center flex items-center justify-center" style="background-image: url('banner-cropped.jpg');">
   <div class="bg-black bg-opacity-60 p-6 sm:p-10 rounded-lg text-center max-w-4xl mx-auto">
     <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Where Music Meets Imagination</h2>
@@ -138,7 +138,7 @@
   </div>
 </section>
 
-<!-- PROMO VIDEO – responsive -->
+<!-- PROMO VIDEO -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
     <video
@@ -151,6 +151,7 @@
     >
       Your browser does not support the video tag.
     </video>
+
     <!-- Video Controls -->
     <div class="video-controls">
       <div class="flex items-center gap-3 sm:gap-4">
@@ -178,7 +179,7 @@
   </div>
 </section>
 
-<!-- ABOUT + MAIN STAGE FEATURE – responsive grid -->
+<!-- ABOUT + MAIN STAGE FEATURE -->
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 grid md:grid-cols-2 gap-6 sm:gap-8 items-start">
   <div>
     <h3 class="text-2xl sm:text-3xl font-bold mb-4">About Rhythm Deck</h3>
@@ -213,11 +214,12 @@
   </div>
 </section>
 
-<!-- FEATURED CREATORS – responsive grid -->
+<!-- FEATURED CREATORS -->
 <section class="bg-gray-200 py-10 sm:py-12">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
     <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Featured Artists</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+      <!-- Artist 1 -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="relative group cursor-pointer" data-video="Chrome-and-Gasoline.mp4">
           <img src="chrome-gasoline.jpg" alt="The Sound Makers" class="w-full object-cover aspect-video">
@@ -231,7 +233,7 @@
           <p class="font-semibold text-gray-800 text-base">Silver Spoon</p>
         </div>
       </div>
-      <!-- Repeat for other featured artists – same responsive structure -->
+      <!-- Artist 2 -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="relative group cursor-pointer" data-video="Midnight-Highway-Roar.mp4">
           <img src="Midnight-Highway-Roar-thumbnail.jpg" alt="Electric Avenue" class="w-full object-cover aspect-video">
@@ -245,6 +247,7 @@
           <p class="font-semibold text-gray-800 text-base">Ricci Moore - Song Writer</p>
         </div>
       </div>
+      <!-- Artist 3 -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="relative group cursor-pointer" data-video="The-Killer-Lives-On.mp4">
           <img src="the-killer-lives-on.jpg" alt="Vibe Studio" class="w-full object-cover aspect-video">
@@ -262,10 +265,11 @@
   </div>
 </section>
 
-<!-- CORE FEATURES SECTION – responsive grid -->
+<!-- CORE FEATURES -->
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Our Core Features</h3>
   <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
+
     <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center border-2 border-green-500">
       <h4 class="text-xl sm:text-2xl font-bold mb-4 text-green-600">Messaging</h4>
       <p class="text-sm sm:text-base text-gray-700 leading-relaxed">
@@ -278,7 +282,7 @@
         <a href="pricing.html" class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base">View Pricing</a>
       </div>
     </div>
-    <!-- Repeat for other two features with same responsive classes -->
+
     <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center border-2 border-green-500">
       <h4 class="text-xl sm:text-2xl font-bold mb-4 text-green-600">Collaboration</h4>
       <p class="text-sm sm:text-base text-gray-700 leading-relaxed">
@@ -291,6 +295,7 @@
         <a href="pricing.html" class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base">View Pricing</a>
       </div>
     </div>
+
     <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center border-2 border-yellow-500">
       <h4 class="text-xl sm:text-2xl font-bold mb-4 text-yellow-600">Rhythm Vision</h4>
       <p class="text-sm sm:text-base text-gray-700 leading-relaxed">
@@ -307,7 +312,7 @@
   </div>
 </section>
 
-<!-- FREE vs PRO PLAN SECTION – responsive -->
+<!-- FREE vs PRO PLAN -->
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Plans & Features</h3>
   <div class="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
@@ -343,7 +348,7 @@
   </div>
 </section>
 
-<!-- PLATINUM PRO PLAN SECTION – responsive -->
+<!-- PLATINUM PRO PLAN -->
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <div class="bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl shadow-2xl p-6 sm:p-10 text-white">
     <div class="text-center mb-6 sm:mb-8">
@@ -387,7 +392,7 @@
   <div class="text-center mb-8 sm:mb-10">
     <h3 class="text-3xl sm:text-4xl font-black mb-4">Discover Rhythm Wav</h3>
     <p class="text-lg sm:text-xl max-w-4xl mx-auto">
-      Rhythm Wav is your personal music library inside Rhythm Deck. Build unlimited playlists from tracks and videos you've purchased or uploaded. 
+      Rhythm Wav is your personal music library inside Rhythm Deck. Build unlimited playlists from tracks and videos you've purchased or uploaded.
       Play them anytime, anywhere — on desktop or mobile. Reorder tracks with drag & drop, share playlists with fans, and keep your favorite music organized in one place.
     </p>
     <p class="text-lg sm:text-xl mt-4 sm:mt-6 max-w-4xl mx-auto">
@@ -401,7 +406,7 @@
   </div>
 </section>
 
-<!-- Q&A SECTION – responsive grid -->
+<!-- Q&A -->
 <section class="bg-neutral-950 py-12 sm:py-16 px-4 sm:px-6">
   <div class="max-w-6xl mx-auto">
     <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center style1">Q&A</h3>
@@ -410,18 +415,18 @@
         <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
           <summary class="font-semibold text-green-400 text-base sm:text-lg">What is Rhythm Deck?</summary>
           <p class="text-sm sm:text-base text-gray-400 mt-2">Rhythm Deck Music is the ultimate destination for musicians, songwriters, bands, vocalists, producers, and music lovers of all genres to connect, share, and grow.</p>
-          <!-- ... rest of content unchanged ... -->
+          <!-- ... rest of Q&A content unchanged ... -->
         </details>
-        <!-- Other details unchanged -->
+        <!-- Other Q&A items here – unchanged -->
       </div>
       <div class="space-y-4">
-        <!-- Other Q&A items unchanged -->
+        <!-- Other Q&A items – unchanged -->
       </div>
     </div>
   </div>
 </section>
 
-<!-- VIDEO MODAL (unchanged) -->
+<!-- VIDEO MODAL -->
 <div id="videoModal" class="fixed inset-0 bg-black bg-opacity-80 items-center justify-center z-50">
   <div class="relative w-full max-w-3xl px-4">
     <video id="videoPlayer" class="w-full rounded-lg" controls preload="auto" playsinline webkit-playsinline>
@@ -432,7 +437,7 @@
   </div>
 </div>
 
-<!-- FOOTER (responsive) -->
+<!-- FOOTER -->
 <footer class="bg-black text-white mt-10 p-6 sm:p-8 text-center text-sm">
   <nav class="mb-4 space-x-4 flex flex-wrap justify-center gap-4">
     <a href="contact.html" class="hover:underline">Contact Us</a>
@@ -444,92 +449,106 @@
 
 <!-- SCRIPTS -->
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("videoModal");
-    const videoPlayer = document.getElementById("videoPlayer");
-    const videoSourceMp4 = document.getElementById("videoSourceMp4");
-    const closeBtn = document.getElementById("closeVideoBtn");
-    function openVideo(mp4Path) {
-      videoSourceMp4.src = mp4Path;
-      videoPlayer.load();
-      modal.classList.add("active");
-      videoPlayer.play().catch(err => console.warn("Play interrupted:", err));
-    }
-    function closeVideo() {
-      videoPlayer.pause();
-      videoPlayer.currentTime = 0;
-      videoSourceMp4.src = "";
-      modal.classList.remove("active");
-    }
-    modal.addEventListener("click", e => { if (e.target === modal) closeVideo(); });
-    closeBtn.addEventListener("click", closeVideo);
-    document.querySelectorAll("[data-video]").forEach(el => {
-      el.addEventListener("click", () => openVideo(el.dataset.video));
-    });
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("videoModal");
+  const videoPlayer = document.getElementById("videoPlayer");
+  const videoSourceMp4 = document.getElementById("videoSourceMp4");
+  const closeBtn = document.getElementById("closeVideoBtn");
 
-    // Promo Video Controls (unchanged)
-    const promoVideo = document.getElementById("promoVideo");
-    const muteBtn = document.getElementById("muteBtn");
-    const volumeSlider = document.getElementById("volumeSlider");
-    const playAgainBtn = document.getElementById("playAgainBtn");
-    const progressBar = document.getElementById("progressBar");
-    const progressFill = document.getElementById("progressFill");
-    const currentTimeEl = document.getElementById("currentTime");
-    const durationEl = document.getElementById("duration");
+  function openVideo(mp4Path) {
+    videoSourceMp4.src = mp4Path;
+    videoPlayer.load();
+    modal.classList.add("active");
+    videoPlayer.play().catch(err => console.warn("Play interrupted:", err));
+  }
 
-    function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
+  function closeVideo() {
+    videoPlayer.pause();
+    videoPlayer.currentTime = 0;
+    videoSourceMp4.src = "";
+    modal.classList.remove("active");
+  }
 
-    promoVideo.addEventListener("loadedmetadata", () => {
-      durationEl.textContent = formatTime(promoVideo.duration);
-    });
+  modal.addEventListener("click", e => { if (e.target === modal) closeVideo(); });
+  closeBtn.addEventListener("click", closeVideo);
 
-    promoVideo.addEventListener("timeupdate", () => {
-      const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
-      progressFill.style.width = `${percent}%`;
-      currentTimeEl.textContent = formatTime(promoVideo.currentTime);
-    });
-
-    progressBar.addEventListener("click", (e) => {
-      const rect = progressBar.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      promoVideo.currentTime = pos * promoVideo.duration;
-    });
-
-    muteBtn.addEventListener("click", () => {
-      promoVideo.muted = !promoVideo.muted;
-      muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
-    });
-
-    volumeSlider.addEventListener("input", (e) => {
-      const vol = e.target.value;
-      promoVideo.volume = vol;
-      promoVideo.muted = vol == 0;
-      muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
-    });
-
-    promoVideo.addEventListener("ended", () => {
-      playAgainBtn.classList.remove("hidden");
-    });
-
-    playAgainBtn.addEventListener("click", () => {
-      promoVideo.currentTime = 0;
-      promoVideo.play();
-      playAgainBtn.classList.add("hidden");
-    });
-
-    promoVideo.play().catch(() => {});
+  document.querySelectorAll("[data-video]").forEach(el => {
+    el.addEventListener("click", () => openVideo(el.dataset.video));
   });
 
-  window.addEventListener("load", () => {
-    const logo = document.getElementById("logo");
-    const sound = document.getElementById("logoSound");
-    logo.classList.add("logo-intro");
-    sound.play().catch(() => {});
+  // === FIXED PROMO VIDEO CONTROLS ===
+  const promoVideo = document.getElementById("promoVideo");
+  const muteBtn = document.getElementById("muteBtn");
+  const volumeSlider = document.getElementById("volumeSlider");
+  const playAgainBtn = document.getElementById("playAgainBtn");
+  const progressBar = document.getElementById("progressBar");
+  const progressFill = document.getElementById("progressFill");
+  const currentTimeEl = document.getElementById("currentTime");
+  const durationEl = document.getElementById("duration");
+
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  promoVideo.addEventListener("loadedmetadata", () => {
+    durationEl.textContent = formatTime(promoVideo.duration);
   });
+
+  promoVideo.addEventListener("timeupdate", () => {
+    const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
+    progressFill.style.width = `${percent}%`;
+    currentTimeEl.textContent = formatTime(promoVideo.currentTime);
+  });
+
+  progressBar.addEventListener("click", (e) => {
+    const rect = progressBar.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    promoVideo.currentTime = pos * promoVideo.duration;
+  });
+
+  // Mute/Unmute toggle
+  muteBtn.addEventListener("click", () => {
+    promoVideo.muted = !promoVideo.muted;
+    muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
+  });
+
+  // Volume slider – unmutes when volume raised
+  volumeSlider.addEventListener("input", (e) => {
+    const vol = parseFloat(e.target.value);
+    promoVideo.volume = vol;
+    if (vol > 0) {
+      promoVideo.muted = false;
+      muteBtn.textContent = "Mute";
+    } else {
+      promoVideo.muted = true;
+      muteBtn.textContent = "Unmute";
+    }
+  });
+
+  // Play Again
+  promoVideo.addEventListener("ended", () => {
+    playAgainBtn.classList.remove("hidden");
+  });
+
+  playAgainBtn.addEventListener("click", () => {
+    promoVideo.currentTime = 0;
+    promoVideo.play();
+    playAgainBtn.classList.add("hidden");
+  });
+
+  // Initial play (muted)
+  promoVideo.play().catch(err => console.warn("Autoplay blocked:", err));
+});
+
+// Logo animation & sound
+window.addEventListener("load", () => {
+  const logo = document.getElementById("logo");
+  const sound = document.getElementById("logoSound");
+  logo.classList.add("logo-intro");
+  sound.play().catch(() => {});
+});
 </script>
 </body>
 </html>
