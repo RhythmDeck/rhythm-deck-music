@@ -44,6 +44,9 @@
       font-size: 1.1rem;
       user-select: none;
     }
+    #loadingSpinner {
+      display: none;
+    }
   </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -75,8 +78,9 @@
         <h1 class="text-4xl font-black bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
           Welcome Back
         </h1>
-        <p class="text-gray-400 mt-2">Log in to your artist dashboard</p>
+        <p class="text-gray-400 mt-2">Log in to access your dashboard (Deck or Rhythm Wav)</p>
       </div>
+
       <form id="loginForm">
         <div class="input-group">
           <input type="email" id="loginEmail" placeholder="Email address" required
@@ -87,11 +91,20 @@
             class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/30 text-lg pr-14">
           <span class="eye" id="toggleEye">Show</span>
         </div>
+
+        <div id="loadingSpinner" class="text-center text-emerald-400 mb-4 hidden">
+          Logging in...
+        </div>
+
         <button type="submit"
+          id="loginBtn"
           class="w-full py-5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-xl rounded-xl shadow-lg transform hover:scale-105 transition mt-6">
           LOGIN
         </button>
       </form>
+
+      <p id="errorMessage" class="text-red-400 text-center mt-4 hidden"></p>
+
       <p class="text-center text-gray-400 mt-8">
         Don't have an account?
         <a href="signup.html" class="text-emerald-400 font-bold hover:underline">Sign Up Free or Upgrade to Pro</a>
@@ -124,43 +137,58 @@
     document.getElementById('loginForm').onsubmit = async (e) => {
       e.preventDefault();
 
+      const loginBtn = document.getElementById('loginBtn');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const errorMessage = document.getElementById('errorMessage');
+
+      errorMessage.classList.add('hidden');
+      errorMessage.textContent = '';
+      loginBtn.disabled = true;
+      loadingSpinner.classList.remove('hidden');
+
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        // Step 1: Sign in
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+        if (authError) throw authError;
 
-        // Get the user's profile to check plan
+        // Step 2: Get user profile
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('plan, rhythm_vision_plan')
-          .eq('id', data.user.id)
+          .select('plan, rhythm_vision_plan, rhythm_wav_premium')
+          .eq('id', authData.user.id)
           .single();
 
         if (profileError || !profile) {
           console.error('Profile fetch error:', profileError);
-          alert('Could not load your profile. Please try again or contact support.');
-          return;
+          throw new Error('Could not load your profile. Please try again.');
         }
 
-        // Redirect based on plan (works for ALL users)
-        let redirectUrl = 'profile-admin.html'; // Default for free or unknown
+        // Step 3: Decide redirect based on plans (priority order)
+        let redirectUrl = 'profile-admin.html'; // Default/fallback
 
-        if (profile.plan === 'platinum') {
-          redirectUrl = 'platinum-pro-admin.html'; // Your Platinum Pro admin page
+        if (profile.rhythm_wav_premium === true) {
+          redirectUrl = 'rhythm-wav-dashboard.html'; // ← Your Rhythm Wav dashboard
+        } else if (profile.plan === 'platinum') {
+          redirectUrl = 'platinum-pro-admin.html';
         } else if (profile.plan === 'pro') {
           redirectUrl = 'profile-admin-pro.html';
         } else if (profile.rhythm_vision_plan === 'vision') {
           redirectUrl = 'rhythm-vision-pro.html';
         }
 
-        // Optional: Add query param to show success/welcome message
+        // Optional: Add welcome param
         window.location.href = redirectUrl + '?welcome=true';
 
       } catch (err) {
         console.error('Login error:', err);
-        alert('Login failed: ' + (err.message || 'Invalid email or password'));
+        errorMessage.textContent = err.message || 'Invalid email or password. Please try again.';
+        errorMessage.classList.remove('hidden');
+      } finally {
+        loginBtn.disabled = false;
+        loadingSpinner.classList.add('hidden');
       }
     };
   </script>
