@@ -11,7 +11,7 @@
     #videoModal.active { display: flex; }
     .cursor-pointer { cursor: pointer; }
     .style1 { color: #FFFFFF }
-    /* LOGO INTRO ANIMATION */
+    /* LOGO INTRO ANIMATION (no sound) */
     @keyframes logoIntro {
       0% { transform: translate(140px, 60px) scale(4) rotate(0deg); opacity: 0; box-shadow: 0 0 0 rgba(0,255,120,0); }
       15% { opacity: 1; }
@@ -38,9 +38,6 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
-
-<!-- AUDIO FOR LOGO -->
-<audio id="logoSound" src="logo-intro-musical.mp3" preload="auto"></audio>
 
 <!-- HEADER -->
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
@@ -84,7 +81,6 @@
       id="promoVideo"
       src="Rhythm-Deck-Promo-Video.mp4"
       autoplay
-      muted
       playsinline
       class="w-full h-auto max-h-[50vh] sm:max-h-[70vh] object-contain"
     >
@@ -383,15 +379,15 @@
   <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-<!-- FIXED SCRIPT -->
+<!-- FIXED SCRIPT – SOUND WORKS ON LOAD AFTER INTERACTION -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM loaded - starting event setup");
+  console.log("DOM loaded - setting up promo video");
 
   // === PROMO VIDEO CONTROLS ===
   const promoVideo = document.getElementById("promoVideo");
   if (!promoVideo) {
-    console.error("CRITICAL: promoVideo element not found! Check <video id='promoVideo'>");
+    console.error("Promo video element missing!");
     return;
   }
 
@@ -433,13 +429,11 @@ document.addEventListener("DOMContentLoaded", () => {
     muteBtn.addEventListener("click", () => {
       promoVideo.muted = !promoVideo.muted;
       muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
-      console.log("Mute button clicked → muted:", promoVideo.muted);
+      console.log("Mute clicked → muted:", promoVideo.muted);
     });
-  } else {
-    console.error("muteBtn button not found! Check <button id='muteBtn'>");
   }
 
-  // Volume slider with forced unmute
+  // Volume slider – force unmute
   if (volumeSlider) {
     volumeSlider.addEventListener("input", (e) => {
       const vol = parseFloat(e.target.value);
@@ -447,11 +441,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (vol > 0 && promoVideo.muted) {
         promoVideo.muted = false;
         if (muteBtn) muteBtn.textContent = "Mute";
-        console.log("Volume changed → forced unmute");
+        console.log("Volume raised → unmute forced");
       }
     });
-  } else {
-    console.error("volumeSlider not found! Check <input id='volumeSlider'>");
   }
 
   // Play Again
@@ -462,39 +454,39 @@ document.addEventListener("DOMContentLoaded", () => {
   if (playAgainBtn) {
     playAgainBtn.addEventListener("click", () => {
       promoVideo.currentTime = 0;
-      promoVideo.play().catch(() => {});
+      promoVideo.play();
       playAgainBtn.classList.add("hidden");
     });
   }
 
-  // Initial muted play
+  // Attempt to play with sound on load (desktop usually works)
+  promoVideo.muted = false; // Try to start unmuted
+  promoVideo.volume = 0.5;
   promoVideo.play().catch(err => {
-    console.log("Initial autoplay blocked (normal):", err.message);
+    console.log("Autoplay with sound blocked (normal on first visit):", err.message);
+    // Fallback: mute and wait for user click
+    promoVideo.muted = true;
+    if (muteBtn) muteBtn.textContent = "Unmute";
   });
 
-  // Enable sound on first real user interaction (Chrome 2026 fix)
-  function enableSound() {
-    if (promoVideo.muted) {
-      promoVideo.muted = false;
-      if (muteBtn) muteBtn.textContent = "Mute";
-      if (volumeSlider) volumeSlider.value = 0.5;
-      promoVideo.volume = 0.5;
-      console.log("First click detected → sound unlocked");
-    }
-    document.removeEventListener('click', enableSound);
-    document.removeEventListener('touchstart', enableSound);
+  // Unlock sound on first real interaction (mobile/first visit fix)
+  function unlockAudio() {
+    promoVideo.muted = false;
+    if (muteBtn) muteBtn.textContent = "Mute";
+    promoVideo.volume = 0.5;
+    console.log("User interaction detected → sound fully unlocked");
+    document.removeEventListener('click', unlockAudio);
+    document.removeEventListener('touchstart', unlockAudio);
   }
 
-  document.addEventListener('click', enableSound, { once: true });
-  document.addEventListener('touchstart', enableSound, { once: true });
+  document.addEventListener('click', unlockAudio, { once: true });
+  document.addEventListener('touchstart', unlockAudio, { once: true });
 });
 
-// Logo animation
+// Logo animation (no sound)
 window.addEventListener("load", () => {
   const logo = document.getElementById("logo");
-  const sound = document.getElementById("logoSound");
   if (logo) logo.classList.add("logo-intro");
-  if (sound) sound.play().catch(() => console.log("Logo sound blocked - expected"));
 });
 </script>
 </body>
