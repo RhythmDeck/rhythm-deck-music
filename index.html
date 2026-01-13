@@ -11,96 +11,35 @@
     #videoModal.active { display: flex; }
     .cursor-pointer { cursor: pointer; }
     .style1 { color: #FFFFFF }
-    /* ===== LOGO INTRO ANIMATION ===== */
+    /* LOGO INTRO ANIMATION */
     @keyframes logoIntro {
-      0% {
-        transform: translate(140px, 60px) scale(4) rotate(0deg);
-        opacity: 0;
-        box-shadow: 0 0 0 rgba(0,255,120,0);
-      }
+      0% { transform: translate(140px, 60px) scale(4) rotate(0deg); opacity: 0; box-shadow: 0 0 0 rgba(0,255,120,0); }
       15% { opacity: 1; }
-      60% {
-        transform: translate(40px, 20px) scale(1.8) rotate(720deg);
-        box-shadow: 0 0 30px rgba(0,255,120,0.35);
-      }
-      100% {
-        transform: translate(0, 0) scale(1) rotate(1080deg);
-        box-shadow: none;
-      }
+      60% { transform: translate(40px, 20px) scale(1.8) rotate(720deg); box-shadow: 0 0 30px rgba(0,255,120,0.35); }
+      100% { transform: translate(0, 0) scale(1) rotate(1080deg); box-shadow: none; }
     }
-    .logo-intro {
-      animation: logoIntro 5.5s ease-out forwards;
-      transform-origin: center;
-      will-change: transform;
-    }
-    /* Video controls overlay */
+    .logo-intro { animation: logoIntro 5.5s ease-out forwards; transform-origin: center; will-change: transform; }
+    /* Video controls */
     .video-controls {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      position: absolute; bottom: 0; left: 0; right: 0;
       background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      opacity: 0; transition: opacity 0.3s ease;
     }
-    .video-container:hover .video-controls,
-    .video-controls:focus-within {
-      opacity: 1;
-    }
-    .progress-bar {
-      flex-grow: 1;
-      height: 6px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 3px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: #10b981;
-      transition: width 0.1s linear;
-    }
-    .time-text {
-      color: white;
-      font-size: 0.9rem;
-      min-width: 90px;
-      text-align: center;
-    }
-    .volume-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .volume-slider {
-      width: 80px;
-      height: 6px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 3px;
-      outline: none;
-      -webkit-appearance: none;
-    }
-    .volume-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      background: white;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    /* Responsive hero height */
-    @media (max-width: 640px) {
-      .hero-height { height: 60vh; min-height: 400px; }
-    }
+    .video-container:hover .video-controls, .video-controls:focus-within { opacity: 1; }
+    .progress-bar { flex-grow: 1; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; overflow: hidden; cursor: pointer; }
+    .progress-fill { height: 100%; width: 0%; background: #10b981; transition: width 0.1s linear; }
+    .time-text { color: white; font-size: 0.9rem; min-width: 90px; text-align: center; }
+    .volume-container { display: flex; align-items: center; gap: 8px; }
+    .volume-slider { width: 80px; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; outline: none; -webkit-appearance: none; }
+    .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: white; border-radius: 50%; cursor: pointer; }
+    /* Responsive hero */
+    @media (max-width: 640px) { .hero-height { height: 60vh; min-height: 400px; } }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
-<!-- AUDIO -->
+
+<!-- AUDIO FOR LOGO -->
 <audio id="logoSound" src="logo-intro-musical.mp3" preload="auto"></audio>
 
 <!-- HEADER -->
@@ -219,7 +158,6 @@
   <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
     <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Featured Artists</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-      <!-- Artist 1 -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="relative group cursor-pointer" data-video="Chrome-and-Gasoline.mp4">
           <img src="chrome-gasoline.jpg" alt="The Sound Makers" class="w-full object-cover aspect-video">
@@ -233,7 +171,7 @@
           <p class="font-semibold text-gray-800 text-base">Silver Spoon</p>
         </div>
       </div>
-      <!-- Artist 2 -->
+
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="relative group cursor-pointer" data-video="Midnight-Highway-Roar.mp4">
           <img src="Midnight-Highway-Roar-thumbnail.jpg" alt="Electric Avenue" class="w-full object-cover aspect-video">
@@ -247,7 +185,7 @@
           <p class="font-semibold text-gray-800 text-base">Ricci Moore - Song Writer</p>
         </div>
       </div>
-      <!-- Artist 3 -->
+
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="relative group cursor-pointer" data-video="The-Killer-Lives-On.mp4">
           <img src="the-killer-lives-on.jpg" alt="Vibe Studio" class="w-full object-cover aspect-video">
@@ -269,7 +207,6 @@
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Our Core Features</h3>
   <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
-
     <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center border-2 border-green-500">
       <h4 class="text-xl sm:text-2xl font-bold mb-4 text-green-600">Messaging</h4>
       <p class="text-sm sm:text-base text-gray-700 leading-relaxed">
@@ -312,7 +249,7 @@
   </div>
 </section>
 
-<!-- FREE vs PRO PLAN -->
+<!-- FREE vs PRO -->
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Plans & Features</h3>
   <div class="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
@@ -348,7 +285,7 @@
   </div>
 </section>
 
-<!-- PLATINUM PRO PLAN -->
+<!-- PLATINUM PRO -->
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <div class="bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl shadow-2xl p-6 sm:p-10 text-white">
     <div class="text-center mb-6 sm:mb-8">
@@ -360,8 +297,8 @@
         <h4 class="text-xl sm:text-2xl font-bold mb-4">All Pro Features + Exclusive Platinum Benefits</h4>
         <ul class="list-disc list-inside space-y-2 sm:space-y-3 text-base sm:text-lg">
           <li>All Pro Plan features</li>
-          <li><strong>Exclusive Access to Radio Station Database</strong> – Contact info for stations worldwide + professional email templates to submit your music for possible airplay</li>
-          <li><strong class="text-yellow-300">Your Own Private Merch Store</strong> – Sell t-shirts, hoodies, hats, posters, and more directly to your fans with zero upfront costs</li>
+          <li><strong>Exclusive Access to Radio Station Database</strong> – Contact info for stations worldwide + professional email templates</li>
+          <li><strong class="text-yellow-300">Your Own Private Merch Store</strong> – Sell t-shirts, hoodies, hats, posters, etc. with zero upfront costs</li>
         </ul>
         <p class="mt-4 sm:mt-6 text-base sm:text-lg">
           2- and 3-year plans coming soon with huge discounts!
@@ -415,19 +352,19 @@
         <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
           <summary class="font-semibold text-green-400 text-base sm:text-lg">What is Rhythm Deck?</summary>
           <p class="text-sm sm:text-base text-gray-400 mt-2">Rhythm Deck Music is the ultimate destination for musicians, songwriters, bands, vocalists, producers, and music lovers of all genres to connect, share, and grow.</p>
-          <!-- ... rest of Q&A content unchanged ... -->
+          <!-- Add rest of Q&A items here if needed - unchanged -->
         </details>
-        <!-- Other Q&A items here – unchanged -->
+        <!-- Other questions -->
       </div>
       <div class="space-y-4">
-        <!-- Other Q&A items – unchanged -->
+        <!-- Other Q&A -->
       </div>
     </div>
   </div>
 </section>
 
 <!-- VIDEO MODAL -->
-<div id="videoModal" class="fixed inset-0 bg-black bg-opacity-80 items-center justify-center z-50">
+<div id="videoModal" class="fixed inset-0 bg-black bg-opacity-80 items-center justify-center z-50 hidden">
   <div class="relative w-full max-w-3xl px-4">
     <video id="videoPlayer" class="w-full rounded-lg" controls preload="auto" playsinline webkit-playsinline>
       <source id="videoSourceMp4" src="" type="video/mp4">
@@ -447,9 +384,10 @@
   <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-<!-- SCRIPTS -->
+<!-- FULL SCRIPT – FIXED PROMO VIDEO SOUND -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // Video Modal
   const modal = document.getElementById("videoModal");
   const videoPlayer = document.getElementById("videoPlayer");
   const videoSourceMp4 = document.getElementById("videoSourceMp4");
@@ -493,10 +431,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   promoVideo.addEventListener("loadedmetadata", () => {
-    durationEl.textContent = formatTime(promoVideo.duration);
+    durationEl.textContent = formatTime(promoVideo.duration || 0);
   });
 
   promoVideo.addEventListener("timeupdate", () => {
+    if (!promoVideo.duration) return;
     const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
     progressFill.style.width = `${percent}%`;
     currentTimeEl.textContent = formatTime(promoVideo.currentTime);
@@ -508,46 +447,67 @@ document.addEventListener("DOMContentLoaded", () => {
     promoVideo.currentTime = pos * promoVideo.duration;
   });
 
-  // Mute/Unmute toggle
-  muteBtn.addEventListener("click", () => {
-    promoVideo.muted = !promoVideo.muted;
-    muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
-  });
+  // Mute / Unmute toggle
+  if (muteBtn) {
+    muteBtn.addEventListener("click", () => {
+      promoVideo.muted = !promoVideo.muted;
+      muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
+      console.log("Mute toggled:", promoVideo.muted);
+    });
+  }
 
-  // Volume slider – unmutes when volume raised
-  volumeSlider.addEventListener("input", (e) => {
-    const vol = parseFloat(e.target.value);
-    promoVideo.volume = vol;
-    if (vol > 0) {
-      promoVideo.muted = false;
-      muteBtn.textContent = "Mute";
-    } else {
-      promoVideo.muted = true;
-      muteBtn.textContent = "Unmute";
-    }
-  });
+  // Volume slider – force unmute when volume is raised
+  if (volumeSlider) {
+    volumeSlider.addEventListener("input", (e) => {
+      const vol = parseFloat(e.target.value);
+      promoVideo.volume = vol;
+      if (vol > 0 && promoVideo.muted) {
+        promoVideo.muted = false;
+        if (muteBtn) muteBtn.textContent = "Mute";
+        console.log("Volume raised → Unmuted automatically");
+      }
+    });
+  }
 
-  // Play Again
+  // Play Again when video ends
   promoVideo.addEventListener("ended", () => {
-    playAgainBtn.classList.remove("hidden");
+    if (playAgainBtn) playAgainBtn.classList.remove("hidden");
   });
 
-  playAgainBtn.addEventListener("click", () => {
-    promoVideo.currentTime = 0;
-    promoVideo.play();
-    playAgainBtn.classList.add("hidden");
+  if (playAgainBtn) {
+    playAgainBtn.addEventListener("click", () => {
+      promoVideo.currentTime = 0;
+      promoVideo.play().catch(() => {});
+      playAgainBtn.classList.add("hidden");
+    });
+  }
+
+  // Initial play attempt (will be muted)
+  promoVideo.play().catch(err => {
+    console.warn("Initial autoplay blocked (normal on first load):", err);
   });
 
-  // Initial play (muted)
-  promoVideo.play().catch(err => console.warn("Autoplay blocked:", err));
+  // Optional: Unmute after first user interaction anywhere on page
+  function enableSoundOnInteraction() {
+    if (promoVideo.muted) {
+      promoVideo.muted = false;
+      if (muteBtn) muteBtn.textContent = "Mute";
+      console.log("User interacted → Sound enabled");
+    }
+    document.removeEventListener('click', enableSoundOnInteraction);
+    document.removeEventListener('touchstart', enableSoundOnInteraction);
+  }
+
+  document.addEventListener('click', enableSoundOnInteraction, { once: true });
+  document.addEventListener('touchstart', enableSoundOnInteraction, { once: true });
 });
 
 // Logo animation & sound
 window.addEventListener("load", () => {
   const logo = document.getElementById("logo");
   const sound = document.getElementById("logoSound");
-  logo.classList.add("logo-intro");
-  sound.play().catch(() => {});
+  if (logo) logo.classList.add("logo-intro");
+  if (sound) sound.play().catch(() => console.log("Logo sound blocked - normal"));
 });
 </script>
 </body>
