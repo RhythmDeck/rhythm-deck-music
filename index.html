@@ -11,7 +11,7 @@
     #videoModal.active { display: flex; }
     .cursor-pointer { cursor: pointer; }
     .style1 { color: #FFFFFF }
-    /* LOGO INTRO ANIMATION (no sound) */
+    /* LOGO INTRO ANIMATION */
     @keyframes logoIntro {
       0% { transform: translate(140px, 60px) scale(4) rotate(0deg); opacity: 0; box-shadow: 0 0 0 rgba(0,255,120,0); }
       15% { opacity: 1; }
@@ -19,20 +19,94 @@
       100% { transform: translate(0, 0) scale(1) rotate(1080deg); box-shadow: none; }
     }
     .logo-intro { animation: logoIntro 5.5s ease-out forwards; transform-origin: center; will-change: transform; }
-    /* Video controls */
+    /* Video controls overlay */
     .video-controls {
-      position: absolute; bottom: 0; left: 0; right: 0;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
       background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-      padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
-      opacity: 0; transition: opacity 0.3s ease;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
-    .video-container:hover .video-controls, .video-controls:focus-within { opacity: 1; }
-    .progress-bar { flex-grow: 1; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; overflow: hidden; cursor: pointer; }
-    .progress-fill { height: 100%; width: 0%; background: #10b981; transition: width 0.1s linear; }
-    .time-text { color: white; font-size: 0.9rem; min-width: 90px; text-align: center; }
-    .volume-container { display: flex; align-items: center; gap: 8px; }
-    .volume-slider { width: 80px; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; outline: none; -webkit-appearance: none; }
-    .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: white; border-radius: 50%; cursor: pointer; }
+    .video-container:hover .video-controls, .video-controls:focus-within {
+      opacity: 1;
+    }
+    .progress-bar {
+      flex-grow: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #10b981;
+      transition: width 0.1s linear;
+    }
+    .time-text {
+      color: white;
+      font-size: 0.9rem;
+      min-width: 90px;
+      text-align: center;
+    }
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .volume-slider {
+      width: 80px;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    /* Play button overlay */
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s;
+    }
+    .play-overlay:hover {
+      background: rgba(0,0,0,0.3);
+    }
+    .play-btn {
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .play-btn:hover {
+      transform: scale(1.1);
+    }
     /* Responsive hero */
     @media (max-width: 640px) { .hero-height { height: 60vh; min-height: 400px; } }
   </style>
@@ -74,27 +148,30 @@
   </div>
 </section>
 
-<!-- PROMO VIDEO -->
+<!-- PROMO VIDEO – NOW YOUTUBE-STYLE (CLICK TO PLAY) -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
     <video
       id="promoVideo"
       src="Rhythm-Deck-Promo-Video.mp4"
-      autoplay
       playsinline
       class="w-full h-auto max-h-[50vh] sm:max-h-[70vh] object-contain"
     >
       Your browser does not support the video tag.
     </video>
 
-    <!-- Video Controls -->
+    <!-- Big YouTube-like Play Button Overlay -->
+    <div id="playOverlay" class="play-overlay">
+      <button id="bigPlayBtn" class="play-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Video Controls (appear on hover) -->
     <div class="video-controls">
       <div class="flex items-center gap-3 sm:gap-4">
-        <button id="playAgainBtn" class="hidden text-white hover:text-green-400 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </button>
         <button id="muteBtn" class="bg-white text-black px-3 sm:px-4 py-1 sm:py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm sm:text-base">
           Mute
         </button>
@@ -348,11 +425,11 @@
         <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
           <summary class="font-semibold text-green-400 text-base sm:text-lg">What is Rhythm Deck?</summary>
           <p class="text-sm sm:text-base text-gray-400 mt-2">Rhythm Deck Music is the ultimate destination for musicians, songwriters, bands, vocalists, producers, and music lovers of all genres to connect, share, and grow.</p>
-          <!-- Rest of Q&A items can be added here if needed -->
         </details>
+        <!-- Add rest of Q&A items here if needed -->
       </div>
       <div class="space-y-4">
-        <!-- Add other Q&A as needed -->
+        <!-- Other Q&A -->
       </div>
     </div>
   </div>
@@ -379,25 +456,24 @@
   <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-<!-- FIXED SCRIPT – SOUND WORKS ON LOAD AFTER INTERACTION -->
+<!-- FIXED SCRIPT – YOUTUBE-STYLE PROMO VIDEO -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM loaded - setting up promo video");
-
-  // === PROMO VIDEO CONTROLS ===
+  // === PROMO VIDEO – YOUTUBE STYLE ===
   const promoVideo = document.getElementById("promoVideo");
-  if (!promoVideo) {
-    console.error("Promo video element missing!");
-    return;
-  }
-
+  const playOverlay = document.getElementById("playOverlay");
+  const bigPlayBtn = document.getElementById("bigPlayBtn");
   const muteBtn = document.getElementById("muteBtn");
   const volumeSlider = document.getElementById("volumeSlider");
-  const playAgainBtn = document.getElementById("playAgainBtn");
   const progressBar = document.getElementById("progressBar");
   const progressFill = document.getElementById("progressFill");
   const currentTimeEl = document.getElementById("currentTime");
   const durationEl = document.getElementById("duration");
+
+  if (!promoVideo) {
+    console.error("Promo video missing!");
+    return;
+  }
 
   function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
@@ -405,17 +481,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
+  // Load duration when ready
   promoVideo.addEventListener("loadedmetadata", () => {
     if (durationEl) durationEl.textContent = formatTime(promoVideo.duration || 0);
   });
 
+  // Update progress and time
   promoVideo.addEventListener("timeupdate", () => {
-    if (!promoVideo.duration || !progressFill || !currentTimeEl) return;
+    if (!promoVideo.duration) return;
     const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
-    progressFill.style.width = `${percent}%`;
-    currentTimeEl.textContent = formatTime(promoVideo.currentTime);
+    if (progressFill) progressFill.style.width = `${percent}%`;
+    if (currentTimeEl) currentTimeEl.textContent = formatTime(promoVideo.currentTime);
   });
 
+  // Progress bar seek
   if (progressBar) {
     progressBar.addEventListener("click", (e) => {
       const rect = progressBar.getBoundingClientRect();
@@ -424,63 +503,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Mute / Unmute
+  // Start video on big play button click
+  if (bigPlayBtn) {
+    bigPlayBtn.addEventListener("click", () => {
+      promoVideo.play().then(() => {
+        if (playOverlay) playOverlay.style.display = "none";
+        promoVideo.muted = false; // Start with sound
+        promoVideo.volume = 0.5;
+        if (muteBtn) muteBtn.textContent = "Mute";
+      }).catch(err => {
+        console.warn("Play failed:", err);
+      });
+    });
+  }
+
+  // Mute toggle
   if (muteBtn) {
     muteBtn.addEventListener("click", () => {
       promoVideo.muted = !promoVideo.muted;
       muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
-      console.log("Mute clicked → muted:", promoVideo.muted);
     });
   }
 
-  // Volume slider – force unmute
+  // Volume slider
   if (volumeSlider) {
     volumeSlider.addEventListener("input", (e) => {
       const vol = parseFloat(e.target.value);
       promoVideo.volume = vol;
-      if (vol > 0 && promoVideo.muted) {
-        promoVideo.muted = false;
-        if (muteBtn) muteBtn.textContent = "Mute";
-        console.log("Volume raised → unmute forced");
-      }
+      if (vol > 0) promoVideo.muted = false;
+      if (muteBtn) muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
     });
   }
 
-  // Play Again
-  promoVideo.addEventListener("ended", () => {
-    if (playAgainBtn) playAgainBtn.classList.remove("hidden");
+  // Hide overlay when playing
+  promoVideo.addEventListener("play", () => {
+    if (playOverlay) playOverlay.style.display = "none";
   });
-
-  if (playAgainBtn) {
-    playAgainBtn.addEventListener("click", () => {
-      promoVideo.currentTime = 0;
-      promoVideo.play();
-      playAgainBtn.classList.add("hidden");
-    });
-  }
-
-  // Attempt to play with sound on load (desktop usually works)
-  promoVideo.muted = false; // Try to start unmuted
-  promoVideo.volume = 0.5;
-  promoVideo.play().catch(err => {
-    console.log("Autoplay with sound blocked (normal on first visit):", err.message);
-    // Fallback: mute and wait for user click
-    promoVideo.muted = true;
-    if (muteBtn) muteBtn.textContent = "Unmute";
-  });
-
-  // Unlock sound on first real interaction (mobile/first visit fix)
-  function unlockAudio() {
-    promoVideo.muted = false;
-    if (muteBtn) muteBtn.textContent = "Mute";
-    promoVideo.volume = 0.5;
-    console.log("User interaction detected → sound fully unlocked");
-    document.removeEventListener('click', unlockAudio);
-    document.removeEventListener('touchstart', unlockAudio);
-  }
-
-  document.addEventListener('click', unlockAudio, { once: true });
-  document.addEventListener('touchstart', unlockAudio, { once: true });
 });
 
 // Logo animation (no sound)
