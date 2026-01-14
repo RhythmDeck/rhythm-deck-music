@@ -121,14 +121,18 @@
       // Password toggles
       document.getElementById('togglePassword')?.addEventListener('click', () => {
         const input = document.getElementById('password');
-        input.type = input.type === 'password' ? 'text' : 'password';
-        document.getElementById('togglePassword').textContent = input.type === 'password' ? 'Show' : 'Hide';
+        if (input) {
+          input.type = input.type === 'password' ? 'text' : 'password';
+          document.getElementById('togglePassword').textContent = input.type === 'password' ? 'Show' : 'Hide';
+        }
       });
 
       document.getElementById('toggleConfirmPassword')?.addEventListener('click', () => {
         const input = document.getElementById('confirmPassword');
-        input.type = input.type === 'password' ? 'text' : 'password';
-        document.getElementById('toggleConfirmPassword').textContent = input.type === 'password' ? 'Show' : 'Hide';
+        if (input) {
+          input.type = input.type === 'password' ? 'text' : 'password';
+          document.getElementById('toggleConfirmPassword').textContent = input.type === 'password' ? 'Show' : 'Hide';
+        }
       });
 
       // Form submit
@@ -183,16 +187,16 @@
 
           if (signInError) throw signInError;
 
-          loadingEl.textContent = 'Success! Redirecting...';
+          loadingEl.textContent = 'Success! Redirecting to Rhythm Wav...';
 
-          await new Promise(resolve => setTimeout(resolve, 1200));
+          await new Promise(resolve => setTimeout(resolve, 1500)); // Give session time to settle
 
           window.location.replace('/rhythm-wav.html');
           return false;
         } catch (err) {
           errorEl.textContent = err.message || 'Something went wrong. Please try again.';
           errorEl.classList.remove('hidden');
-          console.error('Signup error:', err);
+          console.error('Signup/login error:', err);
           return false;
         } finally {
           loadingEl.classList.add('hidden');
