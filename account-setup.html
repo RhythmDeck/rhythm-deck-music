@@ -116,7 +116,7 @@
 
       const supabaseUrl = 'https://bxoqhmfnseskwqkywppg.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
-      const supabase = createClient(supabaseUrl, supabaseKey);  // Correct: createClient (lowercase c)
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Password toggles
       document.getElementById('togglePassword')?.addEventListener('click', () => {
@@ -177,7 +177,7 @@
 
           if (signUpError) throw signUpError;
 
-          // Immediate login to create session
+          // Immediate login
           const { error: signInError } = await supabase.auth.signInWithPassword({
             email,
             password
@@ -187,9 +187,9 @@
 
           loadingEl.textContent = 'Success! Redirecting...';
 
-          await new Promise(resolve => setTimeout(resolve, 1200)); // Wait for session sync
+          await new Promise(resolve => setTimeout(resolve, 1200));
 
-          window.location.replace('/rhythm-wav.html'); // replace() prevents history issues
+          window.location.replace('/rhythm-wav.html');
           return false;
         } catch (err) {
           errorEl.textContent = err.message || 'Something went wrong. Please try again.';
