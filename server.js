@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-// Webhooks must come BEFORE express.json() to get raw body for Stripe signature verification
+// Webhooks first to get raw body for Stripe signature verification
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
@@ -54,7 +54,7 @@ app.post('/webhook/rhythm-wav', express.raw({ type: 'application/json' }), async
   res.json({ received: true });
 });
 
-// Now normal middleware and routes
+// Normal middleware and routes
 app.use(express.json());
 app.use(express.static(__dirname, {
   index: false,
