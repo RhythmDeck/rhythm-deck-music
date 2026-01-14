@@ -166,7 +166,6 @@
         }
 
         try {
-          // Sign up
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email,
             password,
@@ -177,7 +176,6 @@
 
           if (signUpError) throw signUpError;
 
-          // Immediate login
           const { error: signInError } = await supabase.auth.signInWithPassword({
             email,
             password
