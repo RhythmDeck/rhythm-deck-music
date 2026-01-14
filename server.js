@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-// Webhooks first to get raw body for Stripe signature verification
+// Webhooks first – must be before express.json() for raw body
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
@@ -40,8 +40,11 @@ app.post('/webhook/rhythm-wav', express.raw({ type: 'application/json' }), async
         .from('profiles')
         .update({
           rhythm_wav_premium: true,
+          rhythm_wav_subscription_id: session.subscription,
           stripe_subscription_id: session.subscription,
-          subscription_status: 'active'
+          subscription_status: 'active',
+          payment_pending: false,
+          updated_at: new Date().toISOString()
         })
         .eq('id', userId);
       if (error) {
@@ -115,7 +118,7 @@ app.post('/talkjs-token', async (req, res) => {
 
 // Create Stripe Checkout Session for Rhythm Wav
 app.post('/create-checkout-session', async (req, res) => {
-  const { priceId } = req.body;
+  const { priceId, userId } = req.body;
 
   if (!priceId) {
     return res.status(400).json({ error: 'Missing priceId' });
@@ -127,7 +130,8 @@ app.post('/create-checkout-session', async (req, res) => {
       mode: 'subscription',
       success_url: 'https://rhythm-deck-music.onrender.com/account-setup.html',
       cancel_url: 'https://rhythm-deck-music.onrender.com/rhythm-wav-pricing.html',
-      billing_address_collection: 'required'
+      billing_address_collection: 'required',
+      metadata: { user_id: userId }  // Critical for webhook to know which user to update
     });
 
     res.json({ url: session.url });
