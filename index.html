@@ -112,6 +112,7 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
+
 <!-- HEADER -->
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
   <div class="flex items-center space-x-3">
@@ -121,15 +122,35 @@
       <p class="text-xs sm:text-sm text-gray-300">Unleash Your Beat</p>
     </div>
   </div>
-  <nav class="flex flex-wrap justify-center gap-3 sm:gap-4 text-sm sm:text-base">
-    <a href="index.html" class="hover:underline text-green-400">Home</a>
-    <a href="about.html" class="hover:underline">About</a>
-    <a href="benefits.html" class="hover:underline">Benefits</a>
-    <a href="pricing.html" class="hover:underline">Pricing</a>
-    <a href="contact.html" class="hover:underline">Contact</a>
-    <a href="producers-distributors.html" class="hover:underline text-purple-400 font-semibold">Producers & Distributors</a>
-    <a href="login.html" class="bg-white text-black px-3 sm:px-4 py-1 rounded hover:bg-gray-300">Login</a>
-    <a href="signup.html" class="bg-green-500 text-white px-3 sm:px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
+  <nav class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+    <!-- Main text links -->
+    <div class="flex flex-wrap justify-center gap-3 sm:gap-4 text-sm sm:text-base">
+      <a href="index.html" class="hover:underline text-green-400">Home</a>
+      <a href="about.html" class="hover:underline">About</a>
+      <a href="benefits.html" class="hover:underline">Benefits</a>
+      <a href="pricing.html" class="hover:underline">Pricing</a>
+      <a href="contact.html" class="hover:underline">Contact</a>
+      <a href="login.html" class="bg-white text-black px-3 sm:px-4 py-1 rounded hover:bg-gray-300">Login</a>
+      <a href="signup.html" class="bg-green-500 text-white px-3 sm:px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
+    </div>
+
+    <!-- Special buttons row – directly under text links -->
+    <div class="flex flex-wrap justify-center gap-3 sm:gap-4 mt-3 sm:mt-0">
+      <button onclick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});"
+              class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
+        Check out our Exclusive Rhythm Wav Play List Platform
+      </button>
+
+      <button onclick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});"
+              class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
+        Rhythm Vision
+      </button>
+
+      <a href="producers-distributors.html"
+         class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
+        Producers & Distributors
+      </a>
+    </div>
   </nav>
 </header>
 
@@ -272,7 +293,7 @@
 </section>
 
 <!-- CORE FEATURES -->
-<section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
+<section id="core-features-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Our Core Features</h3>
   <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
     <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center border-2 border-green-500">
@@ -390,7 +411,7 @@
   </div>
 </section>
 
-<!-- RHYTHM WAV SECTION (restored) -->
+<!-- RHYTHM WAV SECTION -->
 <section id="rhythm-wav-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-r from-purple-900 to-pink-900 rounded-2xl shadow-2xl text-white">
   <div class="text-center mb-8 sm:mb-10">
     <h3 class="text-3xl sm:text-4xl font-black mb-4">Discover Rhythm Wav</h3>
@@ -409,8 +430,8 @@
   </div>
 </section>
 
-<!-- PRODUCERS & DISTRIBUTORS SECTION (intro block only + Apply Now link) -->
-<section id="producers-distributors-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-r from-emerald-900/50 to-teal-900/50 rounded-2xl shadow-2xl">
+<!-- PRODUCERS & DISTRIBUTORS SECTION -->
+<section id="producers-distributors-section" class="max-w-6xl mx-auto py-16 sm:py-20 px-4 sm:px-6 bg-gradient-to-r from-emerald-900/80 via-teal-900/80 to-indigo-900/80 rounded-2xl shadow-2xl">
   <div class="text-center mb-8 sm:mb-10">
     <h3 class="text-3xl sm:text-4xl font-black mb-4 text-white">For Producers & Distributors</h3>
     <p class="text-lg sm:text-xl text-gray-200 max-w-4xl mx-auto">
@@ -427,19 +448,56 @@
   </div>
 </section>
 
-<!-- Q&A -->
-<section class="bg-neutral-950 py-12 sm:py-16 px-4 sm:px-6">
+<!-- Q&A SECTION (your exact original) -->
+<section class="bg-neutral-950 py-16 px-6">
   <div class="max-w-6xl mx-auto">
-    <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center style1">Q&A</h3>
+    <h3 class="text-3xl font-bold mb-8 text-center style1">Q&A</h3>
     <div class="grid md:grid-cols-2 gap-6">
       <div class="space-y-4">
         <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400 text-base sm:text-lg">What is Rhythm Deck?</summary>
-          <p class="text-sm sm:text-base text-gray-400 mt-2">Rhythm Deck Music is the ultimate destination for musicians, songwriters, bands, vocalists, producers, and music lovers of all genres to connect, share, and grow.</p>
+          <summary class="font-semibold text-green-400">What is Rhythm Deck?</summary>
+          <p class="text-gray-400 mt-2">Rhythm Deck Music is the ultimate destination for musicians, songwriters, bands, vocalists, producers, and music lovers of all genres to connect, share, and grow.</p>
+          <p class="text-gray-400 mt-2">Whether you’re creating original songs, producing beats, or shooting your own music videos, Rhythm Deck makes it easy to upload, share, and connect with an audience that truly appreciates the art of sound.</p>
+          <p class="text-gray-400 mt-2">Our mission is to empower independent creators with tools to shine — without the noise or limitations of mainstream platforms. Here, your music takes center stage. Join us, unleash your creativity, and be part of the next revolution in music sharing.</p>
+        </details>
+        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+          <summary class="font-semibold text-green-400">Is it really free?</summary>
+          <p class="text-gray-400 mt-2">Yes! The Free Plan includes unlimited creative tools and public uploads.</p>
+        </details>
+        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+          <summary class="font-semibold text-green-400">What do I get with Pro?</summary>
+          <p class="text-gray-400 mt-2">Pro unlocks sharing tools, fan polls, live streaming, and eligibility for Main Stage & Featured Artist slots.</p>
+        </details>
+        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+          <summary class="font-semibold text-green-400">How do I upgrade?</summary>
+          <p class="text-gray-400 mt-2">You can upgrade anytime from your profile admin page or during signup.</p>
+        </details>
+        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+          <summary class="font-semibold text-green-400">How do I get on the Main Stage or Featured artist?</summary>
+          <p class="text-gray-400 mt-2">Artists can apply or be nominated. Criteria: originality, quality, engagement, and visuals. Final approval by staff. Updated monthly.</p>
         </details>
       </div>
       <div class="space-y-4">
-        <!-- Add other Q&A items here if needed -->
+        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+          <summary class="font-semibold text-green-400">Can I collaborate with other artists?</summary>
+          <p class="text-gray-400 mt-2">Yes! Connect with others in the Rhythm Deck community to collaborate on music and visuals.</p>
+        </details>
+        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+          <summary class="font-semibold text-green-400">Can fans interact with my music?</summary>
+          <p class="text-gray-400 mt-2">Pro users can host polls, Q&A, and fan shoutouts directly from their artist page.</p>
+        </details>
+        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+          <summary class="font-semibold text-green-400">Are there limits to uploads?</summary>
+          <p class="text-gray-400 mt-2">Free users have limited file sizes, while Pro users get higher storage and priority uploads.</p>
+        </details>
+        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+          <summary class="font-semibold text-green-400">When are new features added?</summary>
+          <p class="text-gray-400 mt-2">We release new AI and community features monthly based on user feedback.</p>
+        </details>
+        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
+          <summary class="font-semibold text-green-400">Can I monetize my content?</summary>
+          <p class="text-gray-400 mt-2">Pro users will soon be able to earn from fan tips and sponsorship integrations.</p>
+        </details>
       </div>
     </div>
   </div>
