@@ -1,6 +1,60 @@
 const express = require('express');
 const path = require('path');
 const app = express();
+
+// Webhooks must come BEFORE express.json() to get raw body for Stripe signature verification
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.log('Webhook error:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const userId = session.client_reference_id;
+    await supabase.from('profiles')
+      .update({ payment_pending: false })
+      .eq('id', userId);
+  }
+  res.json({ received: true });
+});
+
+app.post('/webhook/rhythm-wav', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_RHYTHM_WAV || process.env.STRIPE_WEBHOOK_SECRET;
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  } catch (err) {
+    console.error(`Rhythm Wav Webhook Error: ${err.message}`);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const userId = session.metadata?.user_id;
+    if (userId) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          rhythm_wav_premium: true,
+          stripe_subscription_id: session.subscription,
+          subscription_status: 'active'
+        })
+        .eq('id', userId);
+      if (error) {
+        console.error('Failed to update Rhythm Wav premium:', error);
+      } else {
+        console.log(`User ${userId} upgraded to Rhythm Wav Premium!`);
+      }
+    }
+  }
+  res.json({ received: true });
+});
+
+// Now normal middleware and routes
 app.use(express.json());
 app.use(express.static(__dirname, {
   index: false,
@@ -27,12 +81,11 @@ if (process.env.STRIPE_SECRET_KEY) {
   stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 }
 // ───────────────────────────────
-// TALKJS — SECURE AUTH (ONLY NEW PART)
+// TALKJS — SECURE AUTH
 // ───────────────────────────────
-const TalkJS = require('talkjs'); // ← you already ran: npm install talkjs
-const TALKJS_APP_ID = 'tLZqiXQU'; // ← your Test App ID (hardcoded = safe)
-const TALKJS_SECRET_KEY = process.env.TALKJS_SECRET_KEY; // ← you will add this in Render
-// This endpoint gives the browser a secure TalkJS login token
+const TalkJS = require('talkjs');
+const TALKJS_APP_ID = 'tLZqiXQU';
+const TALKJS_SECRET_KEY = process.env.TALKJS_SECRET_KEY;
 app.post('/talkjs-token', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -58,9 +111,9 @@ app.post('/talkjs-token', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-// ─────────────────────────────── END OF TALKJS CODE ───────────────────────────────
+// ─────────────────────────────── END OF TALKJS ───────────────────────────────
 
-// NEW: Create Stripe Checkout Session for Rhythm Wav subscriptions
+// Create Stripe Checkout Session for Rhythm Wav
 app.post('/create-checkout-session', async (req, res) => {
   const { priceId } = req.body;
 
@@ -142,61 +195,6 @@ app.post('/signup', async (req, res) => {
     console.error('Signup error:', err);
     res.status(500).json({ message: err.message || 'Server error' });
   }
-});
-// ───────────────────────────────
-// EXISTING WEBHOOK (unchanged)
-// ───────────────────────────────
-app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.log('Webhook error:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const userId = session.client_reference_id;
-    await supabase.from('profiles')
-      .update({ payment_pending: false })
-      .eq('id', userId);
-  }
-  res.json({ received: true });
-});
-// ───────────────────────────────
-// NEW: RHYTHM WAV WEBHOOK (separate endpoint)
-// ───────────────────────────────
-app.post('/webhook/rhythm-wav', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_RHYTHM_WAV || process.env.STRIPE_WEBHOOK_SECRET; // Use separate secret if you want
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-  } catch (err) {
-    console.error(`Rhythm Wav Webhook Error: ${err.message}`);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const userId = session.metadata?.user_id; // ← Sent from Checkout
-    if (userId) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          rhythm_wav_premium: true,
-          stripe_subscription_id: session.subscription,
-          subscription_status: 'active'
-        })
-        .eq('id', userId);
-      if (error) {
-        console.error('Failed to update Rhythm Wav premium:', error);
-      } else {
-        console.log(`User ${userId} upgraded to Rhythm Wav Premium!`);
-      }
-    }
-  }
-  res.json({ received: true });
 });
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
