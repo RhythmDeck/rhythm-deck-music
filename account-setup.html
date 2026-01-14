@@ -59,6 +59,13 @@
       </p>
 
       <form id="signupForm" class="space-y-6">
+        <!-- Name -->
+        <div class="relative">
+          <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+          <input type="text" id="name" required autocomplete="name" placeholder="John Doe"
+            class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white" />
+        </div>
+
         <!-- Email -->
         <div class="relative">
           <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
@@ -141,6 +148,7 @@
         e.stopPropagation();
         e.stopImmediatePropagation();
 
+        const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
@@ -152,6 +160,14 @@
         errorEl.textContent = '';
         loadingEl.classList.remove('hidden');
         submitBtn.disabled = true;
+
+        if (!name) {
+          errorEl.textContent = "Please enter your full name.";
+          errorEl.classList.remove('hidden');
+          loadingEl.classList.add('hidden');
+          submitBtn.disabled = false;
+          return false;
+        }
 
         if (password !== confirmPassword) {
           errorEl.textContent = "Passwords do not match.";
@@ -170,6 +186,7 @@
         }
 
         try {
+          // Sign up the user
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email,
             password,
@@ -180,16 +197,31 @@
 
           if (signUpError) throw signUpError;
 
-          const { error: signInError } = await supabase.auth.signInWithPassword({
+          // Immediate auto-login (creates session)
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
             email,
             password
           });
 
           if (signInError) throw signInError;
 
-          loadingEl.textContent = 'Success! Redirecting to Rhythm Wav...';
+          // Save name and email to profiles table (upsert ensures it updates or creates)
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: signInData.user.id,
+              name: name,
+              email: email,
+              created_at: new Date().toISOString()
+            });
 
-          await new Promise(resolve => setTimeout(resolve, 1500)); // Give session time to settle
+          if (profileError) {
+            console.error('Profile save error:', profileError);
+          }
+
+          loadingEl.textContent = 'Account created & logged in! Redirecting to Rhythm Wav...';
+
+          await new Promise(resolve => setTimeout(resolve, 1500)); // Wait for everything to settle
 
           window.location.replace('/rhythm-wav.html');
           return false;
