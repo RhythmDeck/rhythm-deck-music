@@ -6,6 +6,7 @@
   <title>Create Your Rhythm Wav Account – Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase CDN – standard UMD bundle -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
@@ -59,13 +60,6 @@
       </p>
 
       <form id="signupForm" class="space-y-6">
-        <!-- Name -->
-        <div class="relative">
-          <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
-          <input type="text" id="name" required autocomplete="name" placeholder="John Doe"
-            class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white" />
-        </div>
-
         <!-- Email -->
         <div class="relative">
           <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
@@ -121,120 +115,105 @@
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
 
+      // Correct Supabase initialization – destructure from global 'supabase' object
+      const { createClient } = supabase;  // This fixes the "createClient is not defined" error
       const supabaseUrl = 'https://bxoqhmfnseskwqkywppg.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
       // Password toggles
-      document.getElementById('togglePassword')?.addEventListener('click', () => {
-        const input = document.getElementById('password');
-        if (input) {
-          input.type = input.type === 'password' ? 'text' : 'password';
-          document.getElementById('togglePassword').textContent = input.type === 'password' ? 'Show' : 'Hide';
-        }
-      });
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+      if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', () => {
+          passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+          togglePassword.textContent = passwordInput.type === 'password' ? 'Show' : 'Hide';
+        });
+      }
 
-      document.getElementById('toggleConfirmPassword')?.addEventListener('click', () => {
-        const input = document.getElementById('confirmPassword');
-        if (input) {
-          input.type = input.type === 'password' ? 'text' : 'password';
-          document.getElementById('toggleConfirmPassword').textContent = input.type === 'password' ? 'Show' : 'Hide';
-        }
-      });
+      const toggleConfirm = document.getElementById('toggleConfirmPassword');
+      const confirmInput = document.getElementById('confirmPassword');
+      if (toggleConfirm && confirmInput) {
+        toggleConfirm.addEventListener('click', () => {
+          confirmInput.type = confirmInput.type === 'password' ? 'text' : 'password';
+          toggleConfirm.textContent = confirmInput.type === 'password' ? 'Show' : 'Hide';
+        });
+      }
 
-      // Form submit
-      document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
+      // Form submit – no refresh, auto-login, redirect
+      const form = document.getElementById('signupForm');
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
 
-        const name = document.getElementById('name').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const errorEl = document.getElementById('errorMessage');
-        const loadingEl = document.getElementById('loading');
-        const submitBtn = document.getElementById('submitBtn');
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value;
+          const confirmPassword = document.getElementById('confirmPassword').value;
+          const errorEl = document.getElementById('errorMessage');
+          const loadingEl = document.getElementById('loading');
+          const submitBtn = document.getElementById('submitBtn');
 
-        errorEl.classList.add('hidden');
-        errorEl.textContent = '';
-        loadingEl.classList.remove('hidden');
-        submitBtn.disabled = true;
+          errorEl.classList.add('hidden');
+          errorEl.textContent = '';
+          loadingEl.classList.remove('hidden');
+          submitBtn.disabled = true;
 
-        if (!name) {
-          errorEl.textContent = "Please enter your full name.";
-          errorEl.classList.remove('hidden');
-          loadingEl.classList.add('hidden');
-          submitBtn.disabled = false;
-          return false;
-        }
-
-        if (password !== confirmPassword) {
-          errorEl.textContent = "Passwords do not match.";
-          errorEl.classList.remove('hidden');
-          loadingEl.classList.add('hidden');
-          submitBtn.disabled = false;
-          return false;
-        }
-
-        if (password.length < 8) {
-          errorEl.textContent = "Password must be at least 8 characters.";
-          errorEl.classList.remove('hidden');
-          loadingEl.classList.add('hidden');
-          submitBtn.disabled = false;
-          return false;
-        }
-
-        try {
-          // Sign up the user
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              emailRedirectTo: window.location.origin + '/rhythm-wav.html'
-            }
-          });
-
-          if (signUpError) throw signUpError;
-
-          // Immediate auto-login (creates session)
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password
-          });
-
-          if (signInError) throw signInError;
-
-          // Save name and email to profiles table (upsert ensures it updates or creates)
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .upsert({
-              id: signInData.user.id,
-              name: name,
-              email: email,
-              created_at: new Date().toISOString()
-            });
-
-          if (profileError) {
-            console.error('Profile save error:', profileError);
+          if (password !== confirmPassword) {
+            errorEl.textContent = "Passwords do not match.";
+            errorEl.classList.remove('hidden');
+            loadingEl.classList.add('hidden');
+            submitBtn.disabled = false;
+            return false;
           }
 
-          loadingEl.textContent = 'Account created & logged in! Redirecting to Rhythm Wav...';
+          if (password.length < 8) {
+            errorEl.textContent = "Password must be at least 8 characters.";
+            errorEl.classList.remove('hidden');
+            loadingEl.classList.add('hidden');
+            submitBtn.disabled = false;
+            return false;
+          }
 
-          await new Promise(resolve => setTimeout(resolve, 1500)); // Wait for everything to settle
+          try {
+            // Sign up
+            const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+              email,
+              password,
+              options: {
+                emailRedirectTo: window.location.origin + '/rhythm-wav.html'
+              }
+            });
 
-          window.location.replace('/rhythm-wav.html');
-          return false;
-        } catch (err) {
-          errorEl.textContent = err.message || 'Something went wrong. Please try again.';
-          errorEl.classList.remove('hidden');
-          console.error('Signup/login error:', err);
-          return false;
-        } finally {
-          loadingEl.classList.add('hidden');
-          submitBtn.disabled = false;
-        }
-      });
+            if (signUpError) throw signUpError;
+
+            // Immediate auto-login
+            const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+              email,
+              password
+            });
+
+            if (signInError) throw signInError;
+
+            loadingEl.textContent = 'Success! Redirecting...';
+
+            // Delay for session sync
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            window.location.replace('/rhythm-wav.html');
+            return false;
+          } catch (err) {
+            errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+            errorEl.classList.remove('hidden');
+            console.error('Signup/login error:', err);
+            return false;
+          } finally {
+            loadingEl.classList.add('hidden');
+            submitBtn.disabled = false;
+          }
+        });
+      }
     });
   </script>
 </body>
