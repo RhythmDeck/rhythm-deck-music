@@ -6,7 +6,8 @@
   <title>Rhythm Wav Pricing – Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Stripe.js - required for client-side Checkout -->
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     body {
       background: linear-gradient(to bottom, #000000, #0f172a);
@@ -137,16 +138,16 @@
           </ul>
         </div>
         <div class="p-6 sm:p-8 bg-emerald-900/30 text-center mt-auto">
-          <!-- Monthly Button -->
+          <!-- Monthly Subscribe Button -->
           <button
-            onclick="subscribe('price_1SpBIX2WyyY6hPDE81d6M4UN')"
+            onclick="subscribe('price_1SpBIX2WyyY6hPDE81d6M4UN')"  <!-- ← Replace with your real MONTHLY Price ID -->
             class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition mb-3 sm:mb-4">
             Subscribe Monthly – $7.99
           </button>
 
-          <!-- Annual Button -->
+          <!-- Annual Subscribe Button -->
           <button
-            onclick="subscribe('price_1SpBKx2WyyY6hPDEPKljJNME')"
+            onclick="subscribe('price_1SpBKx2WyyY6hPDEPKljJNME')"  <!-- ← Replace with your real ANNUAL Price ID -->
             class="block w-full bg-emerald-700 hover:bg-emerald-800 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition">
             Subscribe Annually – $79 (Save 17%)
           </button>
@@ -180,38 +181,36 @@
   <script>
     lucide.createIcons();
 
-    const supabaseUrl = 'https://bxoqhmfnseskwqkywppg.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Initialize Stripe with your PUBLISHABLE key (safe to expose)
+    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');  // ← REPLACE WITH YOUR REAL PUBLISHABLE KEY
 
     async function subscribe(priceId) {
       try {
-        // Get logged-in user ID
+        // Optional: Check if user is logged in (if you have Supabase auth)
+        // If you want to enforce login, uncomment and adapt:
+        /*
         const { data: { session } } = await supabase.auth.getSession();
-        const userId = session?.user?.id;
-
-        if (!userId) {
-          alert("You must be logged in to subscribe. Please log in first.");
+        if (!session?.user) {
+          alert("Please log in first to subscribe.");
           window.location.href = '/login.html';
           return;
         }
+        */
 
-        const response = await fetch('/create-checkout-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId, userId })  // Send userId to server
+        // Create Checkout Session directly from client-side
+        const { error } = await stripe.redirectToCheckout({
+          lineItems: [{ price: priceId, quantity: 1 }],
+          mode: 'subscription',
+          successUrl: window.location.origin + '/account-setup.html',  // Redirect after successful payment
+          cancelUrl: window.location.origin + '/rhythm-wav-pricing.html', // Back here if cancelled
         });
 
-        const data = await response.json();
-
-        if (data.error) {
-          alert('Error: ' + data.error);
-          return;
+        if (error) {
+          console.error(error);
+          alert('Error: ' + (error.message || 'Something went wrong. Please try again.'));
         }
-
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
       } catch (err) {
+        console.error(err);
         alert('Something went wrong: ' + err.message);
       }
     }
