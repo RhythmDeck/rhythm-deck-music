@@ -6,8 +6,6 @@
   <title>Rhythm Wav Pricing – Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Stripe.js - required for client-side Checkout -->
-  <script src="https://js.stripe.com/v3/"></script>
   <style>
     body {
       background: linear-gradient(to bottom, #000000, #0f172a);
@@ -139,19 +137,17 @@
           </ul>
         </div>
         <div class="p-6 sm:p-8 bg-emerald-900/30 text-center mt-auto">
-          <!-- Monthly Subscribe Button -->
-          <button
-            onclick="subscribe('price_1SpBIX2WyyY6hPDE81d6M4UN')"
-            class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition mb-3 sm:mb-4">
+          <!-- Monthly Payment Link -->
+          <a href="https://buy.stripe.com/test_eVqfZaaRUb5eah24XG4800d"
+             class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition mb-3 sm:mb-4 text-center">
             Subscribe Monthly – $7.99
-          </button>
+          </a>
 
-          <!-- Annual Subscribe Button -->
-          <button
-            onclick="subscribe('price_1SpBKx2WyyY6hPDEPKljJNME')"
-            class="block w-full bg-emerald-700 hover:bg-emerald-800 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition">
+          <!-- Annual Payment Link -->
+          <a href="https://buy.stripe.com/test_bJe28k0dgb5e0GsfCk4800e"
+             class="block w-full bg-emerald-700 hover:bg-emerald-800 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition text-center">
             Subscribe Annually – $79 (Save 17%)
-          </button>
+          </a>
         </div>
       </div>
     </div>
@@ -178,42 +174,9 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Scripts (only Lucide icons needed now) -->
   <script>
     lucide.createIcons();
-
-    // Initialize Stripe with your PUBLISHABLE key (replace with your real one!)
-    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW'); // ← YOUR REAL PUBLISHABLE KEY HERE
-
-    async function subscribe(priceId) {
-      try {
-        // Optional: Check if user is logged in (uncomment if using Supabase auth)
-        /*
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-          alert("Please log in first to subscribe.");
-          window.location.href = '/login.html';
-          return;
-        }
-        */
-
-        // Redirect to Stripe Checkout
-        const { error } = await stripe.redirectToCheckout({
-          lineItems: [{ price: priceId, quantity: 1 }],
-          mode: 'subscription',
-          successUrl: window.location.origin + '/account-setup.html', // After payment success
-          cancelUrl: window.location.origin + '/rhythm-wav-pricing.html'  // If cancelled
-        });
-
-        if (error) {
-          console.error(error);
-          alert('Error: ' + (error.message || 'Something went wrong. Please try again.'));
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Something went wrong: ' + err.message);
-      }
-    }
   </script>
 </body>
 </html>
