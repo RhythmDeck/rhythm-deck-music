@@ -16,6 +16,7 @@
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
+
   <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
@@ -140,14 +141,14 @@
         <div class="p-6 sm:p-8 bg-emerald-900/30 text-center mt-auto">
           <!-- Monthly Subscribe Button -->
           <button
-            onclick="subscribe('price_1SpBIX2WyyY6hPDE81d6M4UN')"  <!-- ← Replace with your real MONTHLY Price ID -->
+            onclick="subscribe('price_1SpBIX2WyyY6hPDE81d6M4UN')"
             class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition mb-3 sm:mb-4">
             Subscribe Monthly – $7.99
           </button>
 
           <!-- Annual Subscribe Button -->
           <button
-            onclick="subscribe('price_1SpBKx2WyyY6hPDEPKljJNME')"  <!-- ← Replace with your real ANNUAL Price ID -->
+            onclick="subscribe('price_1SpBKx2WyyY6hPDEPKljJNME')"
             class="block w-full bg-emerald-700 hover:bg-emerald-800 text-white py-4 sm:py-5 rounded-lg font-bold text-base sm:text-xl transition">
             Subscribe Annually – $79 (Save 17%)
           </button>
@@ -181,13 +182,12 @@
   <script>
     lucide.createIcons();
 
-    // Initialize Stripe with your PUBLISHABLE key (safe to expose)
-    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');  // ← REPLACE WITH YOUR REAL PUBLISHABLE KEY
+    // Initialize Stripe with your PUBLISHABLE key (replace with your real one!)
+    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW'); // ← YOUR REAL PUBLISHABLE KEY HERE
 
     async function subscribe(priceId) {
       try {
-        // Optional: Check if user is logged in (if you have Supabase auth)
-        // If you want to enforce login, uncomment and adapt:
+        // Optional: Check if user is logged in (uncomment if using Supabase auth)
         /*
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) {
@@ -197,12 +197,12 @@
         }
         */
 
-        // Create Checkout Session directly from client-side
+        // Redirect to Stripe Checkout
         const { error } = await stripe.redirectToCheckout({
           lineItems: [{ price: priceId, quantity: 1 }],
           mode: 'subscription',
-          successUrl: window.location.origin + '/account-setup.html',  // Redirect after successful payment
-          cancelUrl: window.location.origin + '/rhythm-wav-pricing.html', // Back here if cancelled
+          successUrl: window.location.origin + '/account-setup.html', // After payment success
+          cancelUrl: window.location.origin + '/rhythm-wav-pricing.html'  // If cancelled
         });
 
         if (error) {
