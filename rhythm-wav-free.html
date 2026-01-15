@@ -3,310 +3,427 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rhythm Wav Free – Rhythm Deck</title>
+  <title>Rhythm Wav Free – Your Library</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <style>
     body {
       background: linear-gradient(to bottom, #000000, #0f172a);
       color: white;
     }
-    .playlist-item:hover {
-      background-color: rgba(16, 185, 129, 0.1);
+    /* Responsive spacing */
+    main {
+      padding-bottom: 8rem; /* smaller on mobile */
     }
-    .ad-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    @media (min-width: 640px) {
+      main { padding-bottom: 12rem; }
     }
-    .playlist-cover {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 8px;
+    /* Spinning glowing music note (same as premium) */
+    @keyframes spinGlow {
+      from { transform: rotate(0deg); box-shadow: 0 0 15px 5px rgba(16, 185, 129, 0.4); }
+      to { transform: rotate(360deg); box-shadow: 0 0 25px 10px rgba(16, 185, 129, 0.7); }
     }
-    .spinning-note {
-      animation: spin 2s linear infinite;
+    .note-spin-glow {
+      animation: spinGlow 4s linear infinite;
+      border-radius: 50%;
+      border: 3px solid rgba(16, 185, 129, 0.6);
+      box-shadow: 0 0 15px 5px rgba(16, 185, 129, 0.4);
     }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    /* Low quality badge */
+    .low-quality-badge {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      border: 1px solid #ef4444;
     }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
+  <!-- Header – identical to premium -->
+  <header class="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
       <div class="flex items-center gap-3 sm:gap-4">
-        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
-        <div>
-          <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-            Rhythm Deck
+        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-16 h-10 sm:h-16 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
+        <div class="flex items-center gap-2 sm:gap-3">
+          <i data-lucide="list-music" class="w-6 sm:w-8 h-6 sm:h-8 text-emerald-400"></i>
+          <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            Rhythm Wav Free
           </h1>
-          <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
         </div>
       </div>
-      <div class="flex items-center gap-4">
-        <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-md text-sm sm:text-base flex items-center gap-2">
-          <i data-lucide="arrow-up-circle" class="h-5 w-5"></i>
-          Upgrade to Premium
-        </a>
+      <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+        <button id="newPlaylistBtn" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium transition transform hover:scale-105 shadow-lg shadow-emerald-900/30 text-sm sm:text-base">
+          <i data-lucide="plus" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+          New Playlist
+        </button>
+        <button id="addSongBtn" class="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium transition transform hover:scale-105 shadow-lg shadow-purple-900/30 text-sm sm:text-base">
+          <i data-lucide="music" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+          Add New Song
+        </button>
+        <button id="addVideoBtn" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium transition transform hover:scale-105 shadow-lg shadow-blue-900/30 text-sm sm:text-base">
+          <i data-lucide="video" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+          Add New Video
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-    <div class="text-center mb-10 sm:mb-16">
-      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">Rhythm Wav Free</h1>
-      <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto">
-        Build unlimited playlists from your purchased and uploaded tracks/videos. Enjoy with basic features — or <a href="rhythm-wav-pricing.html" class="text-emerald-400 hover:underline font-medium">upgrade to Premium</a> for ad-free, high-quality audio and offline downloads.
-      </p>
-    </div>
-
-    <!-- Controls (same as premium: New Playlist, Add Song, Add Video) -->
-    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-12">
-      <button onclick="openNewPlaylistModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2">
-        <i data-lucide="plus-circle" class="h-5 w-5"></i>
-        New Playlist
-      </button>
-      <button onclick="openUploadModal('song')" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2">
-        <i data-lucide="music" class="h-5 w-5"></i>
-        Add Song
-      </button>
-      <button onclick="openUploadModal('video')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2">
-        <i data-lucide="video" class="h-5 w-5"></i>
-        Add Video
-      </button>
-    </div>
-
-    <!-- Four Playlists Side by Side -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16">
-      <!-- Playlist 1: Epic Road Trip -->
-      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl cursor-pointer" onclick="switchPlaylist('epic-road-trip')">
-        <img src="Epic-Road-Trip.jpg" alt="Epic Road Trip Cover" class="w-full h-48 object-cover">
-        <div class="p-4 text-center">
-          <h3 class="text-lg font-bold">Epic Road Trip</h3>
-          <p class="text-sm text-gray-400">15 tracks • 1 hr 12 min</p>
-          <button class="mt-2 text-emerald-400 hover:underline flex items-center justify-center gap-1 w-full">
-            <i data-lucide="play-circle" class="h-4 w-4"></i>
-            Open Playlist
-          </button>
-        </div>
-      </div>
-
-      <!-- Playlist 2: Late Night Grooves -->
-      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl cursor-pointer" onclick="switchPlaylist('late-night-grooves')">
-        <img src="Late-Night-Grooves.jpg" alt="Late Night Grooves Cover" class="w-full h-48 object-cover">
-        <div class="p-4 text-center">
-          <h3 class="text-lg font-bold">Late Night Grooves</h3>
-          <p class="text-sm text-gray-400">10 tracks • 42 min</p>
-          <button class="mt-2 text-emerald-400 hover:underline flex items-center justify-center gap-1 w-full">
-            <i data-lucide="play-circle" class="h-4 w-4"></i>
-            Open Playlist
-          </button>
-        </div>
-      </div>
-
-      <!-- Playlist 3: My Daily Vibes -->
-      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl cursor-pointer" onclick="switchPlaylist('my-daily-vibes')">
-        <img src="My-Daily-Vibes.jpg" alt="My Daily Vibes Cover" class="w-full h-48 object-cover">
-        <div class="p-4 text-center">
-          <h3 class="text-lg font-bold">My Daily Vibes</h3>
-          <p class="text-sm text-gray-400">18 tracks • 1 hr 25 min</p>
-          <button class="mt-2 text-emerald-400 hover:underline flex items-center justify-center gap-1 w-full">
-            <i data-lucide="play-circle" class="h-4 w-4"></i>
-            Open Playlist
-          </button>
-        </div>
-      </div>
-
-      <!-- Playlist 4: Rhythm Deck Favorites -->
-      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl cursor-pointer" onclick="switchPlaylist('rhythm-deck-favorites')">
-        <img src="rhythm-deck-favorites.jpg" alt="Rhythm Deck Favorites Cover" class="w-full h-48 object-cover">
-        <div class="p-4 text-center">
-          <h3 class="text-lg font-bold">Rhythm Deck Favorites</h3>
-          <p class="text-sm text-gray-400">20 tracks • 1 hr 40 min</p>
-          <button class="mt-2 text-emerald-400 hover:underline flex items-center justify-center gap-1 w-full">
-            <i data-lucide="play-circle" class="h-4 w-4"></i>
-            Open Playlist
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Play Section (with spinning music note) -->
-    <div id="play-section" class="bg-gray-900/70 rounded-2xl p-8 border border-gray-700 shadow-2xl mb-8">
-      <div class="flex flex-col items-center mb-6">
-        <i data-lucide="music" class="h-16 w-16 text-emerald-400 mb-4 spinning-note"></i>
-        <h2 class="text-2xl font-bold text-emerald-400">Now Playing: Select a Playlist</h2>
-      </div>
-      <div id="current-playlist" class="space-y-4">
-        <!-- Playlist items will load here dynamically -->
-      </div>
-    </div>
-
-    <!-- Floating Upgrade CTA -->
-    <div class="fixed bottom-6 right-6 z-50">
-      <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-full shadow-2xl flex items-center gap-3 transition transform hover:scale-105">
-        <i data-lucide="arrow-up-circle" class="h-6 w-6"></i>
-        <span class="font-bold hidden sm:inline">Upgrade to Premium</span>
-      </a>
-    </div>
-
-    <!-- Ad Overlay -->
-    <div id="ad-overlay" class="ad-overlay hidden">
-      <div class="bg-gray-900 p-8 rounded-2xl max-w-lg text-center">
-        <h3 class="text-2xl font-bold text-red-400 mb-4">Ad Playing...</h3>
-        <p class="text-lg text-gray-300 mb-6">
-          Thanks for listening! Ads play after every 3–5 songs/videos in Free mode.<br>
-          Upgrade to Premium to remove ads and enjoy high-quality audio.
+  <!-- Instructions Section – identical layout, free-specific text -->
+  <section class="max-w-4xl mx-auto my-6 sm:my-8 px-4 sm:px-6">
+    <div class="bg-gray-900/70 border-2 border-emerald-600 rounded-2xl p-6 sm:p-8 shadow-xl shadow-emerald-900/30">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">
+        How to Use Rhythm Wav Free
+      </h2>
+      <div class="text-gray-300 text-sm sm:text-base leading-relaxed text-center">
+        <ol class="list-decimal list-inside space-y-3 sm:space-y-4 mx-auto max-w-3xl">
+          <li><strong>Create a Playlist</strong> – Click "New Playlist" at the top. Give it a name and optionally upload a cover image (jpg/png).</li>
+          <li><strong>Add Songs or Videos</strong> – Use "Add New Song" or "Add New Video". Choose a playlist from the dropdown, then upload your file (mp3/wav for songs, mp4 for videos).</li>
+          <li><strong>Browse Your Library</strong> – All playlists appear as cards below. Hover to see the play button, or click anywhere on a card to select it for quick playback.</li>
+          <li><strong>Play Music</strong> – Selecting a playlist updates the "Now Playing" bar at the bottom — the music note spins when playing. Use the controls to play/pause.</li>
+          <li><strong>View Details</strong> – Click the "Open Playlist" link under any card to go to its full detail page (shows tracks/videos, individual play buttons, etc.).</li>
+          <li><strong>Free Limitations</strong> – 128kbps audio quality, ads after every 3–5 songs/videos, no offline downloads. <a href="rhythm-wav-pricing.html" class="text-emerald-400 hover:underline">Upgrade to Premium</a> for full features!</li>
+        </ol>
+        <p class="mt-6 text-gray-400">
+          Enjoy building and playing your music collection!
         </p>
-        <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-lg font-bold text-lg transition">
-          Upgrade Now
-        </a>
-        <p class="mt-6 text-sm text-gray-400">Ad closes in <span id="ad-timer">5</span> seconds...</p>
       </div>
     </div>
+  </section>
 
-    <!-- New Playlist Modal -->
-    <div id="newPlaylistModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
-      <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4">
-        <h2 class="text-2xl font-bold mb-6 text-emerald-400">Create New Playlist</h2>
-        <form class="space-y-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Playlist Name</label>
-            <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white" placeholder="My Chill Vibes">
+  <!-- Main Content – identical layout -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pb-40">
+    <h2 class="text-3xl sm:text-4xl font-bold mb-3 text-center sm:text-left">Your Library (Free)</h2>
+    <p class="text-gray-400 mb-6 sm:mb-10 text-center sm:text-left">Curate and replay your purchased tracks and videos</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+      <!-- Playlist Card 1 -->
+      <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="My Daily Vibes">
+        <div class="relative aspect-square w-full">
+          <img src="My-Daily-Vibes.jpg" alt="My Daily Vibes" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
+              My Daily Vibes
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-300">18 tracks • Chill beats for work & focus</p>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Cover Image (optional)</label>
-            <input type="file" accept="image/*" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white">
-          </div>
-          <div class="flex gap-4">
-            <button type="button" onclick="closeModal('newPlaylistModal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg">Cancel</button>
-            <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg">Create Playlist</button>
-          </div>
-        </form>
+          <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
+              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
+            </div>
+          </button>
+        </div>
+        <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
+          <a href="playlist-detail-free.html?id=my-daily-vibes" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
+            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+            Open Playlist
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Upload Modal -->
-    <div id="uploadModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
-      <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4">
-        <h2 id="uploadTitle" class="text-2xl font-bold mb-6 text-emerald-400">Upload Song / Video</h2>
-        <p class="text-gray-300 mb-6">Upload your MP3/MP4 files (Free plan: low quality playback).</p>
-        <input type="file" id="uploadFile" accept="audio/*,video/*" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white mb-6">
-        <div class="flex gap-4">
-          <button type="button" onclick="closeModal('uploadModal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg">Cancel</button>
-          <button type="button" onclick="uploadSuccess()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg">Upload</button>
+      <!-- Playlist Card 2 -->
+      <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="Rhythm Deck Favorites">
+        <div class="relative aspect-square w-full">
+          <img src="rhythm-deck-favorites.jpg" alt="Rhythm Deck Favorites" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
+              Rhythm Deck Favorites
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-300">24 tracks • Best purchases this month</p>
+          </div>
+          <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
+              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
+            </div>
+          </button>
+        </div>
+        <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
+          <a href="playlist-detail-free.html?id=rhythm-deck-favorites" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
+            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+            Open Playlist
+          </a>
+        </div>
+      </div>
+
+      <!-- Playlist Card 3 -->
+      <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="Late Night Grooves">
+        <div class="relative aspect-square w-full">
+          <img src="Late-Night-Grooves.jpg" alt="Late Night Grooves" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
+              Late Night Grooves
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-300">12 tracks • Smooth vibes after dark</p>
+          </div>
+          <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
+              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
+            </div>
+          </button>
+        </div>
+        <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
+          <a href="playlist-detail-free.html?id=late-night-grooves" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
+            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+            Open Playlist
+          </a>
+        </div>
+      </div>
+
+      <!-- Playlist Card 4 -->
+      <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="Epic Road Trip">
+        <div class="relative aspect-square w-full">
+          <img src="Epic-Road-Trip.jpg" alt="Epic Road Trip" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
+              Epic Road Trip
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-300">15 tracks • Adventure anthems</p>
+          </div>
+          <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
+              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
+            </div>
+          </button>
+        </div>
+        <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
+          <a href="playlist-detail-free.html?id=epic-road-trip" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
+            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+            Open Playlist
+          </a>
         </div>
       </div>
     </div>
 
-  <!-- Scripts -->
+    <!-- Now Playing section – identical to premium, with spinning note -->
+    <section class="mt-8 sm:mt-12 bg-gray-900/90 backdrop-blur-xl border border-gray-800 rounded-2xl p-4 sm:p-5 shadow-2xl">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div id="noteContainer" class="w-12 sm:w-14 h-12 sm:h-14 flex items-center justify-center rounded-full">
+            <i id="musicNote" data-lucide="music" class="w-10 sm:w-12 h-10 sm:h-12 text-emerald-400"></i>
+          </div>
+          <div>
+            <p id="nowPlayingTitle" class="font-semibold text-base sm:text-lg">Select a Playlist</p>
+            <p class="text-xs text-gray-400">Ready to play (128kbps – Free)</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 sm:gap-6">
+          <button class="p-2 hover:bg-gray-800 rounded-full transition">
+            <i data-lucide="skip-back" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+          </button>
+          <button id="playBtn" class="p-3 sm:p-4 bg-emerald-600 rounded-full hover:bg-emerald-700 transition shadow-md">
+            <i data-lucide="play" class="w-5 sm:w-6 h-5 sm:h-6 fill-white"></i>
+          </button>
+          <button class="p-2 hover:bg-gray-800 rounded-full transition">
+            <i data-lucide="skip-forward" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Create Playlist Modal – identical layout -->
+  <div id="createModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
+      <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 text-center text-emerald-400">Create New Playlist</h3>
+      <input type="text" id="newPlaylistName" placeholder="Playlist Name" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" />
+      <!-- Image Upload with Preview -->
+      <label class="block text-sm font-medium text-gray-300 mb-2">Cover Image (jpg/png, optional)</label>
+      <div class="mb-6">
+        <div id="coverPreview" class="w-full aspect-square bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-600 hover:border-emerald-500 transition cursor-pointer relative overflow-hidden">
+          <div id="coverPlaceholder" class="text-center">
+            <i data-lucide="image-plus" class="w-12 h-12 text-gray-500 mb-2"></i>
+            <p class="text-sm text-gray-400">Click or drag image here</p>
+          </div>
+          <img id="coverImgPreview" class="hidden w-full h-full object-cover" alt="Cover preview" />
+          <input type="file" id="coverUpload" accept="image/jpeg,image/png" class="hidden" />
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <button id="cancelCreate" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition text-sm sm:text-base">Cancel</button>
+        <button id="saveNewPlaylist" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium text-sm sm:text-base">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Song Modal – identical -->
+  <div id="addSongModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
+      <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">Add New Song to Playlist</h3>
+      <label class="block text-sm font-medium text-gray-300 mb-2">Choose Playlist</label>
+      <select id="playlistSelectSong" class="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base">
+        <option value="">Select a playlist...</option>
+        <option value="my-daily-vibes">My Daily Vibes</option>
+        <option value="rhythm-deck-favorites">Rhythm Deck Favorites</option>
+        <option value="late-night-grooves">Late Night Grooves</option>
+        <option value="epic-road-trip">Epic Road Trip</option>
+      </select>
+      <label class="block text-sm font-medium text-gray-300 mb-2">Upload Song (mp3 or wav)</label>
+      <input type="file" id="songUpload" accept="audio/mp3,audio/wav,audio/*" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 text-sm" />
+      <div class="flex gap-4">
+        <button id="cancelAddSong" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition text-sm sm:text-base">Cancel</button>
+        <button id="saveSong" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium text-sm sm:text-base">Add Song</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Video Modal – identical -->
+  <div id="addVideoModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
+      <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">Add New Video to Playlist</h3>
+      <label class="block text-sm font-medium text-gray-300 mb-2">Choose Playlist</label>
+      <select id="playlistSelectVideo" class="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base">
+        <option value="">Select a playlist...</option>
+        <option value="my-daily-vibes">My Daily Vibes</option>
+        <option value="rhythm-deck-favorites">Rhythm Deck Favorites</option>
+        <option value="late-night-grooves">Late Night Grooves</option>
+        <option value="epic-road-trip">Epic Road Trip</option>
+      </select>
+      <label class="block text-sm font-medium text-gray-300 mb-2">Upload Video (mp4)</label>
+      <input type="file" id="videoUpload" accept="video/mp4" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 text-sm" />
+      <div class="flex gap-4">
+        <button id="cancelAddVideo" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg transition text-sm sm:text-base">Cancel</button>
+        <button id="saveVideo" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg transition font-medium text-sm sm:text-base">Add Video</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript – identical core logic, with free-specific additions -->
   <script>
     lucide.createIcons();
 
-    // Modal Helpers
-    function openNewPlaylistModal() {
-      document.getElementById('newPlaylistModal').classList.remove('hidden');
-    }
-    function openUploadModal(type) {
-      document.getElementById('uploadTitle').textContent = `Upload ${type.charAt(0).toUpperCase() + type.slice(1)}`;
-      document.getElementById('uploadFile').accept = type === 'song' ? 'audio/*' : 'video/*';
-      document.getElementById('uploadModal').classList.remove('hidden');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-    function uploadSuccess() {
-      alert("Upload successful! Your file will appear in your playlists soon.");
-      closeModal('uploadModal');
-    }
+    // Mock playlists data – used for both cards and dropdowns
+    const mockPlaylists = [
+      { id: 'my-daily-vibes', name: 'My Daily Vibes', cover: 'My-Daily-Vibes.jpg' },
+      { id: 'rhythm-deck-favorites', name: 'Rhythm Deck Favorites', cover: 'rhythm-deck-favorites.jpg' },
+      { id: 'late-night-grooves', name: 'Late Night Grooves', cover: 'Late-Night-Grooves.jpg' },
+      { id: 'epic-road-trip', name: 'Epic Road Trip', cover: 'Epic-Road-Trip.jpg' }
+    ];
 
-    // Switch Playlist to Play Section
-    function switchPlaylist(id) {
-      const playlists = {
-        'epic-road-trip': {
-          title: 'Epic Road Trip',
-          items: [
-            { title: 'Back in 59', artist: 'RetroRock Music', type: 'audio', src: 'sample-low.mp3' },
-            { title: 'Chrome and Gasoline', artist: 'Silver Spoon', type: 'video', src: 'sample-video-low.mp4' },
-            // Add more
-          ]
-        },
-        'late-night-grooves': {
-          title: 'Late Night Grooves',
-          items: [
-            { title: 'Midnight Highway Roar', artist: 'Ricci Moore', type: 'audio', src: 'sample-low.mp3' },
-            // Add more
-          ]
-        },
-        'my-daily-vibes': {
-          title: 'My Daily Vibes',
-          items: [
-            { title: 'The Killer Lives On', artist: 'Vibe Studio', type: 'video', src: 'sample-video-low.mp4' },
-            // Add more
-          ]
-        },
-        'rhythm-deck-favorites': {
-          title: 'Rhythm Deck Favorites',
-          items: [
-            { title: 'Featured Track', artist: 'Various Artists', type: 'audio', src: 'sample-low.mp3' },
-            // Add more
-          ]
+    // Populate playlist dropdowns in modals
+    function populatePlaylistDropdowns() {
+      const songSelect = document.getElementById('playlistSelectSong');
+      const videoSelect = document.getElementById('playlistSelectVideo');
+      songSelect.innerHTML = '<option value="">Select a playlist...</option>';
+      videoSelect.innerHTML = '<option value="">Select a playlist...</option>';
+      mockPlaylists.forEach(playlist => {
+        const opt = document.createElement('option');
+        opt.value = playlist.id;
+        opt.textContent = playlist.name;
+        songSelect.appendChild(opt.cloneNode(true));
+        videoSelect.appendChild(opt);
+      });
+    }
+    window.addEventListener('load', populatePlaylistDropdowns);
+
+    // Create Playlist Modal
+    const createModal = document.getElementById('createModal');
+    const coverUpload = document.getElementById('coverUpload');
+    const coverPreview = document.getElementById('coverPreview');
+    const coverPlaceholder = document.getElementById('coverPlaceholder');
+    const coverImgPreview = document.getElementById('coverImgPreview');
+    document.getElementById('newPlaylistBtn').addEventListener('click', () => {
+      createModal.classList.remove('hidden');
+    });
+    document.getElementById('cancelCreate').addEventListener('click', () => {
+      createModal.classList.add('hidden');
+      document.getElementById('newPlaylistName').value = '';
+      coverImgPreview.src = '';
+      coverImgPreview.classList.add('hidden');
+      coverPlaceholder.classList.remove('hidden');
+    });
+    if (coverPreview) {
+      coverPreview.addEventListener('click', () => coverUpload.click());
+      coverUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            coverImgPreview.src = event.target.result;
+            coverImgPreview.classList.remove('hidden');
+            coverPlaceholder.classList.add('hidden');
+          };
+          reader.readAsDataURL(file);
         }
-      };
-
-      const playlist = playlists[id];
-      if (playlist) {
-        document.querySelector('#play-section h2').textContent = `Now Playing: ${playlist.title}`;
-        const container = document.getElementById('current-playlist');
-        container.innerHTML = '';
-        playlist.items.forEach(item => {
-          const el = document.createElement('div');
-          el.className = 'playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move';
-          el.innerHTML = `
-            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
-            <div class="flex-grow">
-              <p class="font-medium">${item.title}</p>
-              <p class="text-sm text-gray-400">${item.artist}</p>
-            </div>
-            <${item.type} controls class="w-32 sm:w-48">
-              <source src="${item.src}" type="${item.type}/mp${item.type === 'audio' ? 3 : 4}">
-            </${item.type}>
-          `;
-          container.appendChild(el);
-        });
-        lucide.createIcons(); // Reload icons
-        Sortable.create(container, { animation: 150, handle: '.grip-vertical' });
-      }
+      });
     }
+    document.getElementById('saveNewPlaylist').addEventListener('click', () => {
+      const name = document.getElementById('newPlaylistName').value.trim();
+      if (name) {
+        alert(`Playlist "${name}" created successfully!\n(This is a mock – later it will save to Supabase)`);
+        createModal.classList.add('hidden');
+      } else {
+        alert("Please enter a name!");
+      }
+    });
 
-    // Ad Simulation
+    // Add Song / Add Video Modals
+    ['addSongBtn', 'addVideoBtn'].forEach(btnId => {
+      document.getElementById(btnId).addEventListener('click', () => {
+        const modalId = btnId === 'addSongBtn' ? 'addSongModal' : 'addVideoModal';
+        document.getElementById(modalId).classList.remove('hidden');
+      });
+    });
+    ['cancelAddSong', 'cancelAddVideo'].forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        document.getElementById(id.replace('cancel', 'add') + 'Modal').classList.add('hidden');
+      });
+    });
+    ['saveSong', 'saveVideo'].forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        const modalId = id === 'saveSong' ? 'addSongModal' : 'addVideoModal';
+        alert(`Item added successfully!\n(This is a mock – later it will save to Supabase)`);
+        document.getElementById(modalId).classList.add('hidden');
+      });
+    });
+
+    // Spinning glowing music note + dynamic playlist name (identical to premium)
+    const playBtn = document.getElementById('playBtn');
+    const musicNote = document.getElementById('musicNote');
+    const noteContainer = document.getElementById('noteContainer');
+    const nowPlayingTitle = document.getElementById('nowPlayingTitle');
+    let isPlaying = false;
+
+    document.querySelectorAll('.group[data-playlist]').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return;
+        const playlistName = card.getAttribute('data-playlist');
+        nowPlayingTitle.textContent = playlistName;
+        if (!isPlaying) {
+          isPlaying = true;
+          musicNote.classList.add('note-spin-glow');
+          noteContainer.classList.add('note-spin-glow');
+          playBtn.innerHTML = '<i data-lucide="pause" class="w-6 h-6 fill-white"></i>';
+          lucide.createIcons();
+        }
+      });
+    });
+
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        musicNote.classList.add('note-spin-glow');
+        noteContainer.classList.add('note-spin-glow');
+        playBtn.innerHTML = '<i data-lucide="pause" class="w-6 h-6 fill-white"></i>';
+      } else {
+        musicNote.classList.remove('note-spin-glow');
+        noteContainer.classList.remove('note-spin-glow');
+        playBtn.innerHTML = '<i data-lucide="play" class="w-6 h-6 fill-white"></i>';
+      }
+      lucide.createIcons();
+    });
+
+    // Free-only: Simulate ads after 3–5 plays
     let playCount = 0;
     document.addEventListener('play', (e) => {
       if (e.target.tagName === 'AUDIO' || e.target.tagName === 'VIDEO') {
         playCount++;
         if (playCount >= 3 && Math.random() < 0.6) {
-          const ad = document.getElementById('ad-overlay');
-          ad.classList.remove('hidden');
-          let timer = 5;
-          const countdown = setInterval(() => {
-            timer--;
-            document.getElementById('ad-timer').textContent = timer;
-            if (timer <= 0) {
-              ad.classList.add('hidden');
-              clearInterval(countdown);
-            }
-          }, 1000);
+          alert('Ad would play here in Free mode (mock). Upgrade to remove ads!');
           playCount = 0;
         }
       }
