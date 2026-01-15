@@ -12,11 +12,30 @@
       background: linear-gradient(to bottom, #000000, #0f172a);
       color: white;
     }
+    .playlist-item:hover {
+      background-color: rgba(16, 185, 129, 0.1);
+    }
+    .ad-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .playlist-cover {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
+
   <!-- Header -->
-  <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
+  <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
       <div class="flex items-center gap-3 sm:gap-4">
         <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
@@ -27,14 +46,11 @@
           <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
         </div>
       </div>
-      <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-8">
-        <a href="index.html" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-emerald-400 hover:text-emerald-300 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition shadow-md text-sm sm:text-base">
-          <i data-lucide="arrow-left" class="w-4 sm:w-5 h-4 sm:h-5"></i>
-          Back to Home
+      <div class="flex items-center gap-4">
+        <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-md text-sm sm:text-base flex items-center gap-2">
+          <i data-lucide="arrow-up-circle" class="h-5 w-5"></i>
+          Upgrade to Premium
         </a>
-        <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent text-center sm:text-right">
-          Rhythm Wav Free
-        </h1>
       </div>
     </div>
   </header>
@@ -42,62 +58,165 @@
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
     <div class="text-center mb-10 sm:mb-16">
-      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">Your Personal Music Library – Free Edition</h1>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">Rhythm Wav Free</h1>
       <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto">
-        Create unlimited playlists from your purchased and uploaded tracks. Enjoy with basic features, or upgrade for premium quality and ad-free listening.
+        Build unlimited playlists from your purchased and uploaded tracks/videos. Enjoy with basic features — or <a href="rhythm-wav-pricing.html" class="text-emerald-400 hover:underline font-medium">upgrade to Premium</a> for ad-free, high-quality audio and offline downloads.
       </p>
     </div>
 
-    <!-- Playlist Section -->
-    <div class="bg-gray-900/70 rounded-2xl p-6 sm:p-8 border border-gray-700 shadow-2xl mb-8">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 class="text-2xl font-bold text-emerald-400">Your Playlist</h2>
-        <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-medium transition flex items-center gap-2 text-sm">
-          <i data-lucide="arrow-up-circle" class="h-5 w-5"></i>
-          Upgrade to Premium
-        </a>
+    <!-- Controls -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+      <div class="flex flex-wrap gap-3">
+        <button onclick="openNewPlaylistModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-lg font-medium transition flex items-center gap-2">
+          <i data-lucide="plus-circle" class="h-5 w-5"></i>
+          Add New Playlist
+        </button>
+        <button onclick="openUploadModal()" class="bg-gray-700 hover:bg-gray-800 text-white px-5 py-3 rounded-lg font-medium transition flex items-center gap-2">
+          <i data-lucide="upload" class="h-5 w-5"></i>
+          Upload Track / Video
+        </button>
+      </div>
+      <a href="rhythm-wav-pricing.html" class="text-emerald-400 hover:underline font-medium flex items-center gap-2">
+        <i data-lucide="arrow-up-circle" class="h-5 w-5"></i>
+        Upgrade for More Features
+      </a>
+    </div>
+
+    <!-- All Playlists -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+      <!-- Playlist 1: Epic Road Trip -->
+      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
+        <div class="bg-gradient-to-r from-emerald-900/50 to-gray-900 p-6">
+          <div class="flex items-center gap-4">
+            <img src="Epic-Road-Trip.jpg" alt="Epic Road Trip Cover" class="playlist-cover">
+            <div>
+              <h3 class="text-xl sm:text-2xl font-bold">Epic Road Trip</h3>
+              <p class="text-sm text-gray-400">15 tracks • 1 hr 12 min</p>
+            </div>
+          </div>
+        </div>
+        <div id="playlist-epic" class="p-4 sm:p-6 space-y-3">
+          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
+            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
+            <div class="flex-grow">
+              <p class="font-medium">Back in 59</p>
+              <p class="text-sm text-gray-400">RetroRock Music</p>
+            </div>
+            <audio controls class="w-32 sm:w-48">
+              <source src="sample-low.mp3" type="audio/mpeg">
+            </audio>
+          </div>
+          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
+            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
+            <div class="flex-grow">
+              <p class="font-medium">Chrome and Gasoline</p>
+              <p class="text-sm text-gray-400">Silver Spoon</p>
+            </div>
+            <video controls class="w-32 sm:w-48">
+              <source src="sample-video-low.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- More mock items can be added here -->
+        </div>
       </div>
 
-      <!-- Drag & Drop Playlist -->
-      <div id="playlist" class="space-y-4">
-        <!-- Sample tracks (replace with dynamic data in real app) -->
-        <div class="bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
-          <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
-          <div class="flex-grow">
-            <p class="font-medium">Track 1 - Purchased Song</p>
-            <p class="text-sm text-gray-400">Artist Name</p>
+      <!-- Playlist 2: Late Night Grooves -->
+      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
+        <div class="bg-gradient-to-r from-purple-900/50 to-gray-900 p-6">
+          <div class="flex items-center gap-4">
+            <img src="Late-Night-Grooves.jpg" alt="Late Night Grooves Cover" class="playlist-cover">
+            <div>
+              <h3 class="text-xl sm:text-2xl font-bold">Late Night Grooves</h3>
+              <p class="text-sm text-gray-400">10 tracks • 42 min</p>
+            </div>
           </div>
-          <audio controls class="w-32 sm:w-48">
-            <source src="your-track1-low-quality.mp3" type="audio/mpeg">
-          </audio>
         </div>
-        <div class="bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
-          <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
-          <div class="flex-grow">
-            <p class="font-medium">Track 2 - Uploaded Video</p>
-            <p class="text-sm text-gray-400">Your Upload</p>
+        <div id="playlist-late" class="p-4 sm:p-6 space-y-3">
+          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
+            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
+            <div class="flex-grow">
+              <p class="font-medium">Midnight Highway Roar</p>
+              <p class="text-sm text-gray-400">Ricci Moore</p>
+            </div>
+            <audio controls class="w-32 sm:w-48">
+              <source src="sample-low.mp3" type="audio/mpeg">
+            </audio>
           </div>
-          <video controls class="w-32 sm:w-48">
-            <source src="your-video-low-quality.mp4" type="video/mp4">
-          </video>
         </div>
-        <!-- Add more tracks dynamically -->
       </div>
 
-      <!-- Ad Placeholder (simulated) -->
-      <div id="ad-placeholder" class="mt-6 p-4 bg-red-900/50 rounded-lg text-center hidden">
-        <p class="font-bold text-red-300">Ad Playing...</p>
-        <p class="text-sm text-gray-300">Ads play after every 3 songs in Free mode. Upgrade to remove ads.</p>
+      <!-- Playlist 3: My Daily Vibes -->
+      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
+        <div class="bg-gradient-to-r from-teal-900/50 to-gray-900 p-6">
+          <div class="flex items-center gap-4">
+            <img src="My-Daily-Vibes.jpg" alt="My Daily Vibes Cover" class="playlist-cover">
+            <div>
+              <h3 class="text-xl sm:text-2xl font-bold">My Daily Vibes</h3>
+              <p class="text-sm text-gray-400">18 tracks • 1 hr 25 min</p>
+            </div>
+          </div>
+        </div>
+        <div id="playlist-daily" class="p-4 sm:p-6 space-y-3">
+          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
+            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
+            <div class="flex-grow">
+              <p class="font-medium">The Killer Lives On</p>
+              <p class="text-sm text-gray-400">Vibe Studio</p>
+            </div>
+            <video controls class="w-32 sm:w-48">
+              <source src="sample-video-low.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playlist 4: Rhythm Deck Favorites -->
+      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
+        <div class="bg-gradient-to-r from-indigo-900/50 to-gray-900 p-6">
+          <div class="flex items-center gap-4">
+            <img src="rhythm-deck-favorites.jpg" alt="Rhythm Deck Favorites Cover" class="playlist-cover">
+            <div>
+              <h3 class="text-xl sm:text-2xl font-bold">Rhythm Deck Favorites</h3>
+              <p class="text-sm text-gray-400">20 tracks • 1 hr 40 min</p>
+            </div>
+          </div>
+        </div>
+        <div id="playlist-favorites" class="p-4 sm:p-6 space-y-3">
+          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
+            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
+            <div class="flex-grow">
+              <p class="font-medium">Featured Track</p>
+              <p class="text-sm text-gray-400">Various Artists</p>
+            </div>
+            <audio controls class="w-32 sm:w-48">
+              <source src="sample-low.mp3" type="audio/mpeg">
+            </audio>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Upgrade CTA -->
-    <div class="text-center mt-12">
-      <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-bold text-xl transition transform hover:scale-105 shadow-2xl inline-flex items-center gap-3">
+    <!-- Floating Upgrade CTA -->
+    <div class="fixed bottom-6 right-6 z-50">
+      <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-full shadow-2xl flex items-center gap-3 transition transform hover:scale-105">
         <i data-lucide="arrow-up-circle" class="h-6 w-6"></i>
-        Upgrade to Premium Now
+        <span class="font-bold hidden sm:inline">Upgrade to Premium</span>
       </a>
-      <p class="mt-4 text-gray-300">Get ad-free, high-quality audio, offline downloads, and more for just $7.99/month.</p>
+    </div>
+
+    <!-- Ad Overlay -->
+    <div id="ad-overlay" class="ad-overlay hidden">
+      <div class="bg-gray-900 p-8 rounded-2xl max-w-lg text-center">
+        <h3 class="text-2xl font-bold text-red-400 mb-4">Ad Playing...</h3>
+        <p class="text-lg text-gray-300 mb-6">
+          Thanks for listening! Ads play after every 3–5 songs/videos in Free mode.<br>
+          Upgrade to Premium to remove ads and enjoy high-quality audio.
+        </p>
+        <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-lg font-bold text-lg transition">
+          Upgrade Now
+        </a>
+        <p class="mt-6 text-sm text-gray-400">Ad closes in <span id="ad-timer">5</span> seconds...</p>
+      </div>
     </div>
   </main>
 
@@ -110,26 +229,33 @@
   <script>
     lucide.createIcons();
 
-    // Drag & Drop for Playlist
-    const playlist = document.getElementById('playlist');
-    if (playlist) {
-      Sortable.create(playlist, {
+    // Drag & Drop for all playlists
+    document.querySelectorAll('[id^="playlist-"]').forEach(el => {
+      Sortable.create(el, {
         animation: 150,
         handle: '.grip-vertical',
       });
-    }
+    });
 
-    // Simulate ads after 3 songs (basic example - expand for real audio logic)
-    let songCount = 0;
-    const audioElements = document.querySelectorAll('audio, video');
-    audioElements.forEach(el => {
-      el.addEventListener('ended', () => {
-        songCount++;
-        if (songCount % 3 === 0) {
-          document.getElementById('ad-placeholder').classList.remove('hidden');
-          setTimeout(() => {
-            document.getElementById('ad-placeholder').classList.add('hidden');
-          }, 5000); // Simulate 5-second ad
+    // Ad Simulation (after 3–5 random plays)
+    let playCount = 0;
+    const mediaElements = document.querySelectorAll('audio, video');
+    mediaElements.forEach(el => {
+      el.addEventListener('play', () => {
+        playCount++;
+        if (playCount >= 3 && Math.random() < 0.6) { // ~every 3–5 plays
+          const ad = document.getElementById('ad-overlay');
+          ad.classList.remove('hidden');
+          let timer = 5;
+          const countdown = setInterval(() => {
+            timer--;
+            document.getElementById('ad-timer').textContent = timer;
+            if (timer <= 0) {
+              ad.classList.add('hidden');
+              clearInterval(countdown);
+            }
+          }, 1000);
+          playCount = 0; // Reset after ad
         }
       });
     });
