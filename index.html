@@ -230,9 +230,9 @@
   </div>
   <div>
     <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-left">Main Stage Feature</h3>
-    <div class="relative w-full overflow-hidden rounded-lg shadow-lg cursor-pointer" data-video="Back-in-59.mp4">
+    <div class="relative w-full overflow-hidden rounded-lg shadow-lg cursor-pointer group" data-video="Back-in-59.mp4">
       <img src="back-in-59.png" alt="Main Stage Video" class="w-full object-cover aspect-video">
-      <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition">
+      <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 sm:h-16 sm:w-16 text-white" fill="currentColor" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"/>
         </svg>
@@ -252,7 +252,7 @@
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="relative group cursor-pointer" data-video="Chrome-and-Gasoline.mp4">
           <img src="chrome-gasoline.jpg" alt="The Sound Makers" class="w-full object-cover aspect-video">
-          <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition">
+          <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z"/>
             </svg>
@@ -265,7 +265,7 @@
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="relative group cursor-pointer" data-video="Midnight-Highway-Roar.mp4">
           <img src="Midnight-Highway-Roar-thumbnail.jpg" alt="Electric Avenue" class="w-full object-cover aspect-video">
-          <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition">
+          <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z"/>
             </svg>
@@ -278,7 +278,7 @@
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="relative group cursor-pointer" data-video="The-Killer-Lives-On.mp4">
           <img src="the-killer-lives-on.jpg" alt="Vibe Studio" class="w-full object-cover aspect-video">
-          <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition">
+          <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z"/>
             </svg>
@@ -335,7 +335,6 @@
     </div>
   </div>
 </section>
-
 
 <!-- FREE vs PRO -->
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
@@ -431,7 +430,7 @@
   </div>
 </section>
 
-<!-- PRODUCERS & DISTRIBUTORS SECTION (increased padding for more space) -->
+<!-- PRODUCERS & DISTRIBUTORS SECTION (with extra space above) -->
 <section id="producers-distributors-section" class="max-w-6xl mx-auto py-20 sm:py-28 px-4 sm:px-6 bg-gradient-to-r from-emerald-900/80 via-teal-900/80 to-indigo-900/80 rounded-2xl shadow-2xl">
   <div class="text-center mb-8 sm:mb-10">
     <h3 class="text-3xl sm:text-4xl font-black mb-4 text-white">For Producers & Distributors</h3>
@@ -525,7 +524,7 @@
   <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-<!-- FIXED SCRIPT – YOUTUBE-STYLE PROMO VIDEO WITH PLAY/PAUSE -->
+<!-- SCRIPT – YOUTUBE-STYLE PROMO + MODAL FOR FEATURED/MAIN STAGE VIDEOS -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   // === PROMO VIDEO – YOUTUBE STYLE ===
@@ -541,92 +540,124 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentTimeEl = document.getElementById("currentTime");
   const durationEl = document.getElementById("duration");
 
-  if (!promoVideo) {
-    console.error("Promo video element missing!");
-    return;
-  }
+  if (promoVideo) {
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
 
-  function formatTime(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  // Update time and progress
-  promoVideo.addEventListener("loadedmetadata", () => {
-    if (durationEl) durationEl.textContent = formatTime(promoVideo.duration || 0);
-  });
-
-  promoVideo.addEventListener("timeupdate", () => {
-    if (!promoVideo.duration) return;
-    const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
-    if (progressFill) progressFill.style.width = `${percent}%`;
-    if (currentTimeEl) currentTimeEl.textContent = formatTime(promoVideo.currentTime);
-  });
-
-  // Progress bar seek
-  if (progressBar) {
-    progressBar.addEventListener("click", (e) => {
-      const rect = progressBar.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      promoVideo.currentTime = pos * promoVideo.duration;
+    promoVideo.addEventListener("loadedmetadata", () => {
+      if (durationEl) durationEl.textContent = formatTime(promoVideo.duration || 0);
     });
-  }
 
-  // Toggle play/pause
-  function togglePlayPause() {
-    if (promoVideo.paused || promoVideo.ended) {
-      promoVideo.play().then(() => {
-        if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
-        if (playIcon) playIcon.classList.add("hidden");
-        if (pauseIcon) pauseIcon.classList.remove("hidden");
-      }).catch(err => console.warn("Play failed:", err));
-    } else {
-      promoVideo.pause();
+    promoVideo.addEventListener("timeupdate", () => {
+      if (!promoVideo.duration) return;
+      const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
+      if (progressFill) progressFill.style.width = `${percent}%`;
+      if (currentTimeEl) currentTimeEl.textContent = formatTime(promoVideo.currentTime);
+    });
+
+    if (progressBar) {
+      progressBar.addEventListener("click", (e) => {
+        const rect = progressBar.getBoundingClientRect();
+        const pos = (e.clientX - rect.left) / rect.width;
+        promoVideo.currentTime = pos * promoVideo.duration;
+      });
+    }
+
+    function togglePlayPause() {
+      if (promoVideo.paused || promoVideo.ended) {
+        promoVideo.play().then(() => {
+          if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
+          if (playIcon) playIcon.classList.add("hidden");
+          if (pauseIcon) pauseIcon.classList.remove("hidden");
+        }).catch(err => console.warn("Play failed:", err));
+      } else {
+        promoVideo.pause();
+        if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
+        if (playIcon) playIcon.classList.remove("hidden");
+        if (pauseIcon) pauseIcon.classList.add("hidden");
+      }
+    }
+
+    if (playPauseBtn) playPauseBtn.addEventListener("click", togglePlayPause);
+
+    promoVideo.addEventListener("play", () => {
+      if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
+      if (playIcon) playIcon.classList.add("hidden");
+      if (pauseIcon) pauseIcon.classList.remove("hidden");
+    });
+
+    promoVideo.addEventListener("pause", () => {
       if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
       if (playIcon) playIcon.classList.remove("hidden");
       if (pauseIcon) pauseIcon.classList.add("hidden");
+    });
+
+    if (muteBtn) {
+      muteBtn.addEventListener("click", () => {
+        promoVideo.muted = !promoVideo.muted;
+        muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
+      });
     }
-  }
 
-  if (playPauseBtn) {
-    playPauseBtn.addEventListener("click", togglePlayPause);
-  }
+    if (volumeSlider) {
+      volumeSlider.addEventListener("input", (e) => {
+        const vol = parseFloat(e.target.value);
+        promoVideo.volume = vol;
+        if (vol > 0) promoVideo.muted = false;
+        if (muteBtn) muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
+      });
+    }
 
-  promoVideo.addEventListener("play", () => {
-    if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
-    if (playIcon) playIcon.classList.add("hidden");
-    if (pauseIcon) pauseIcon.classList.remove("hidden");
-  });
-
-  promoVideo.addEventListener("pause", () => {
+    // Show overlay initially (paused)
     if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
-    if (playIcon) playIcon.classList.remove("hidden");
-    if (pauseIcon) pauseIcon.classList.add("hidden");
+  }
+
+  // === MODAL VIDEO PLAYER FOR MAIN STAGE & FEATURED ARTISTS ===
+  const videoModal = document.getElementById("videoModal");
+  const videoPlayer = document.getElementById("videoPlayer");
+  const videoSource = document.getElementById("videoSourceMp4");
+  const closeVideoBtn = document.getElementById("closeVideoBtn");
+
+  // Open modal when clicking any video thumbnail
+  document.querySelectorAll('.cursor-pointer[data-video]').forEach(card => {
+    card.addEventListener('click', () => {
+      const videoFile = card.getAttribute('data-video');
+      if (videoFile && videoSource && videoPlayer) {
+        videoSource.src = videoFile; // load the correct video
+        videoPlayer.load();          // reload player with new source
+        videoModal.classList.remove('hidden');
+        videoModal.classList.add('active');
+        videoPlayer.play().catch(err => console.warn("Auto-play blocked:", err));
+      }
+    });
   });
 
-  if (muteBtn) {
-    muteBtn.addEventListener("click", () => {
-      promoVideo.muted = !promoVideo.muted;
-      muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
+  // Close modal
+  if (closeVideoBtn) {
+    closeVideoBtn.addEventListener('click', () => {
+      if (videoModal) {
+        videoModal.classList.add('hidden');
+        videoModal.classList.remove('active');
+      }
+      if (videoPlayer) videoPlayer.pause();
     });
   }
 
-  if (volumeSlider) {
-    volumeSlider.addEventListener("input", (e) => {
-      const vol = parseFloat(e.target.value);
-      promoVideo.volume = vol;
-      if (vol > 0) promoVideo.muted = false;
-      if (muteBtn) muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
+  // Close modal when clicking outside video
+  if (videoModal) {
+    videoModal.addEventListener('click', (e) => {
+      if (e.target === videoModal) {
+        videoModal.classList.add('hidden');
+        videoModal.classList.remove('active');
+        if (videoPlayer) videoPlayer.pause();
+      }
     });
   }
 
-  // Show overlay initially (paused)
-  if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
-});
-
-// Logo animation (no sound)
-window.addEventListener("load", () => {
+  // Logo animation
   const logo = document.getElementById("logo");
   if (logo) logo.classList.add("logo-intro");
 });
