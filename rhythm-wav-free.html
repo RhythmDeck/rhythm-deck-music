@@ -30,6 +30,13 @@
       object-fit: cover;
       border-radius: 8px;
     }
+    .spinning-note {
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
@@ -64,135 +71,85 @@
       </p>
     </div>
 
-    <!-- Controls -->
-    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-      <div class="flex flex-wrap gap-3">
-        <button onclick="openNewPlaylistModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-lg font-medium transition flex items-center gap-2">
-          <i data-lucide="plus-circle" class="h-5 w-5"></i>
-          Add New Playlist
-        </button>
-        <button onclick="openUploadModal()" class="bg-gray-700 hover:bg-gray-800 text-white px-5 py-3 rounded-lg font-medium transition flex items-center gap-2">
-          <i data-lucide="upload" class="h-5 w-5"></i>
-          Upload Track / Video
-        </button>
-      </div>
-      <a href="rhythm-wav-pricing.html" class="text-emerald-400 hover:underline font-medium flex items-center gap-2">
-        <i data-lucide="arrow-up-circle" class="h-5 w-5"></i>
-        Upgrade for More Features
-      </a>
+    <!-- Controls (same as premium: New Playlist, Add Song, Add Video) -->
+    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-12">
+      <button onclick="openNewPlaylistModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2">
+        <i data-lucide="plus-circle" class="h-5 w-5"></i>
+        New Playlist
+      </button>
+      <button onclick="openUploadModal('song')" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2">
+        <i data-lucide="music" class="h-5 w-5"></i>
+        Add Song
+      </button>
+      <button onclick="openUploadModal('video')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2">
+        <i data-lucide="video" class="h-5 w-5"></i>
+        Add Video
+      </button>
     </div>
 
-    <!-- All Playlists -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+    <!-- Four Playlists Side by Side -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16">
       <!-- Playlist 1: Epic Road Trip -->
-      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
-        <div class="bg-gradient-to-r from-emerald-900/50 to-gray-900 p-6">
-          <div class="flex items-center gap-4">
-            <img src="Epic-Road-Trip.jpg" alt="Epic Road Trip Cover" class="playlist-cover">
-            <div>
-              <h3 class="text-xl sm:text-2xl font-bold">Epic Road Trip</h3>
-              <p class="text-sm text-gray-400">15 tracks • 1 hr 12 min</p>
-            </div>
-          </div>
-        </div>
-        <div id="playlist-epic" class="p-4 sm:p-6 space-y-3">
-          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
-            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
-            <div class="flex-grow">
-              <p class="font-medium">Back in 59</p>
-              <p class="text-sm text-gray-400">RetroRock Music</p>
-            </div>
-            <audio controls class="w-32 sm:w-48">
-              <source src="sample-low.mp3" type="audio/mpeg">
-            </audio>
-          </div>
-          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
-            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
-            <div class="flex-grow">
-              <p class="font-medium">Chrome and Gasoline</p>
-              <p class="text-sm text-gray-400">Silver Spoon</p>
-            </div>
-            <video controls class="w-32 sm:w-48">
-              <source src="sample-video-low.mp4" type="video/mp4">
-            </video>
-          </div>
-          <!-- More mock items can be added here -->
+      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl cursor-pointer" onclick="switchPlaylist('epic-road-trip')">
+        <img src="Epic-Road-Trip.jpg" alt="Epic Road Trip Cover" class="w-full h-48 object-cover">
+        <div class="p-4 text-center">
+          <h3 class="text-lg font-bold">Epic Road Trip</h3>
+          <p class="text-sm text-gray-400">15 tracks • 1 hr 12 min</p>
+          <button class="mt-2 text-emerald-400 hover:underline flex items-center justify-center gap-1 w-full">
+            <i data-lucide="play-circle" class="h-4 w-4"></i>
+            Open Playlist
+          </button>
         </div>
       </div>
 
       <!-- Playlist 2: Late Night Grooves -->
-      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
-        <div class="bg-gradient-to-r from-purple-900/50 to-gray-900 p-6">
-          <div class="flex items-center gap-4">
-            <img src="Late-Night-Grooves.jpg" alt="Late Night Grooves Cover" class="playlist-cover">
-            <div>
-              <h3 class="text-xl sm:text-2xl font-bold">Late Night Grooves</h3>
-              <p class="text-sm text-gray-400">10 tracks • 42 min</p>
-            </div>
-          </div>
-        </div>
-        <div id="playlist-late" class="p-4 sm:p-6 space-y-3">
-          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
-            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
-            <div class="flex-grow">
-              <p class="font-medium">Midnight Highway Roar</p>
-              <p class="text-sm text-gray-400">Ricci Moore</p>
-            </div>
-            <audio controls class="w-32 sm:w-48">
-              <source src="sample-low.mp3" type="audio/mpeg">
-            </audio>
-          </div>
+      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl cursor-pointer" onclick="switchPlaylist('late-night-grooves')">
+        <img src="Late-Night-Grooves.jpg" alt="Late Night Grooves Cover" class="w-full h-48 object-cover">
+        <div class="p-4 text-center">
+          <h3 class="text-lg font-bold">Late Night Grooves</h3>
+          <p class="text-sm text-gray-400">10 tracks • 42 min</p>
+          <button class="mt-2 text-emerald-400 hover:underline flex items-center justify-center gap-1 w-full">
+            <i data-lucide="play-circle" class="h-4 w-4"></i>
+            Open Playlist
+          </button>
         </div>
       </div>
 
       <!-- Playlist 3: My Daily Vibes -->
-      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
-        <div class="bg-gradient-to-r from-teal-900/50 to-gray-900 p-6">
-          <div class="flex items-center gap-4">
-            <img src="My-Daily-Vibes.jpg" alt="My Daily Vibes Cover" class="playlist-cover">
-            <div>
-              <h3 class="text-xl sm:text-2xl font-bold">My Daily Vibes</h3>
-              <p class="text-sm text-gray-400">18 tracks • 1 hr 25 min</p>
-            </div>
-          </div>
-        </div>
-        <div id="playlist-daily" class="p-4 sm:p-6 space-y-3">
-          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
-            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
-            <div class="flex-grow">
-              <p class="font-medium">The Killer Lives On</p>
-              <p class="text-sm text-gray-400">Vibe Studio</p>
-            </div>
-            <video controls class="w-32 sm:w-48">
-              <source src="sample-video-low.mp4" type="video/mp4">
-            </video>
-          </div>
+      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl cursor-pointer" onclick="switchPlaylist('my-daily-vibes')">
+        <img src="My-Daily-Vibes.jpg" alt="My Daily Vibes Cover" class="w-full h-48 object-cover">
+        <div class="p-4 text-center">
+          <h3 class="text-lg font-bold">My Daily Vibes</h3>
+          <p class="text-sm text-gray-400">18 tracks • 1 hr 25 min</p>
+          <button class="mt-2 text-emerald-400 hover:underline flex items-center justify-center gap-1 w-full">
+            <i data-lucide="play-circle" class="h-4 w-4"></i>
+            Open Playlist
+          </button>
         </div>
       </div>
 
       <!-- Playlist 4: Rhythm Deck Favorites -->
-      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
-        <div class="bg-gradient-to-r from-indigo-900/50 to-gray-900 p-6">
-          <div class="flex items-center gap-4">
-            <img src="rhythm-deck-favorites.jpg" alt="Rhythm Deck Favorites Cover" class="playlist-cover">
-            <div>
-              <h3 class="text-xl sm:text-2xl font-bold">Rhythm Deck Favorites</h3>
-              <p class="text-sm text-gray-400">20 tracks • 1 hr 40 min</p>
-            </div>
-          </div>
+      <div class="bg-gray-900/70 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl cursor-pointer" onclick="switchPlaylist('rhythm-deck-favorites')">
+        <img src="rhythm-deck-favorites.jpg" alt="Rhythm Deck Favorites Cover" class="w-full h-48 object-cover">
+        <div class="p-4 text-center">
+          <h3 class="text-lg font-bold">Rhythm Deck Favorites</h3>
+          <p class="text-sm text-gray-400">20 tracks • 1 hr 40 min</p>
+          <button class="mt-2 text-emerald-400 hover:underline flex items-center justify-center gap-1 w-full">
+            <i data-lucide="play-circle" class="h-4 w-4"></i>
+            Open Playlist
+          </button>
         </div>
-        <div id="playlist-favorites" class="p-4 sm:p-6 space-y-3">
-          <div class="playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move">
-            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
-            <div class="flex-grow">
-              <p class="font-medium">Featured Track</p>
-              <p class="text-sm text-gray-400">Various Artists</p>
-            </div>
-            <audio controls class="w-32 sm:w-48">
-              <source src="sample-low.mp3" type="audio/mpeg">
-            </audio>
-          </div>
-        </div>
+      </div>
+    </div>
+
+    <!-- Play Section (with spinning music note) -->
+    <div id="play-section" class="bg-gray-900/70 rounded-2xl p-8 border border-gray-700 shadow-2xl mb-8">
+      <div class="flex flex-col items-center mb-6">
+        <i data-lucide="music" class="h-16 w-16 text-emerald-400 mb-4 spinning-note"></i>
+        <h2 class="text-2xl font-bold text-emerald-400">Now Playing: Select a Playlist</h2>
+      </div>
+      <div id="current-playlist" class="space-y-4">
+        <!-- Playlist items will load here dynamically -->
       </div>
     </div>
 
@@ -218,32 +175,127 @@
         <p class="mt-6 text-sm text-gray-400">Ad closes in <span id="ad-timer">5</span> seconds...</p>
       </div>
     </div>
-  </main>
 
-  <!-- Footer -->
-  <footer class="bg-black text-white mt-12 p-6 text-center text-sm">
-    <p>© 2026 Rhythm Deck. All rights reserved.</p>
-  </footer>
+    <!-- New Playlist Modal -->
+    <div id="newPlaylistModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+      <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4">
+        <h2 class="text-2xl font-bold mb-6 text-emerald-400">Create New Playlist</h2>
+        <form class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Playlist Name</label>
+            <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white" placeholder="My Chill Vibes">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Cover Image (optional)</label>
+            <input type="file" accept="image/*" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white">
+          </div>
+          <div class="flex gap-4">
+            <button type="button" onclick="closeModal('newPlaylistModal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg">Cancel</button>
+            <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg">Create Playlist</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+      <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4">
+        <h2 id="uploadTitle" class="text-2xl font-bold mb-6 text-emerald-400">Upload Song / Video</h2>
+        <p class="text-gray-300 mb-6">Upload your MP3/MP4 files (Free plan: low quality playback).</p>
+        <input type="file" id="uploadFile" accept="audio/*,video/*" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white mb-6">
+        <div class="flex gap-4">
+          <button type="button" onclick="closeModal('uploadModal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg">Cancel</button>
+          <button type="button" onclick="uploadSuccess()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg">Upload</button>
+        </div>
+      </div>
+    </div>
 
   <!-- Scripts -->
   <script>
     lucide.createIcons();
 
-    // Drag & Drop for all playlists
-    document.querySelectorAll('[id^="playlist-"]').forEach(el => {
-      Sortable.create(el, {
-        animation: 150,
-        handle: '.grip-vertical',
-      });
-    });
+    // Modal Helpers
+    function openNewPlaylistModal() {
+      document.getElementById('newPlaylistModal').classList.remove('hidden');
+    }
+    function openUploadModal(type) {
+      document.getElementById('uploadTitle').textContent = `Upload ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+      document.getElementById('uploadFile').accept = type === 'song' ? 'audio/*' : 'video/*';
+      document.getElementById('uploadModal').classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+    function uploadSuccess() {
+      alert("Upload successful! Your file will appear in your playlists soon.");
+      closeModal('uploadModal');
+    }
 
-    // Ad Simulation (after 3–5 random plays)
+    // Switch Playlist to Play Section
+    function switchPlaylist(id) {
+      const playlists = {
+        'epic-road-trip': {
+          title: 'Epic Road Trip',
+          items: [
+            { title: 'Back in 59', artist: 'RetroRock Music', type: 'audio', src: 'sample-low.mp3' },
+            { title: 'Chrome and Gasoline', artist: 'Silver Spoon', type: 'video', src: 'sample-video-low.mp4' },
+            // Add more
+          ]
+        },
+        'late-night-grooves': {
+          title: 'Late Night Grooves',
+          items: [
+            { title: 'Midnight Highway Roar', artist: 'Ricci Moore', type: 'audio', src: 'sample-low.mp3' },
+            // Add more
+          ]
+        },
+        'my-daily-vibes': {
+          title: 'My Daily Vibes',
+          items: [
+            { title: 'The Killer Lives On', artist: 'Vibe Studio', type: 'video', src: 'sample-video-low.mp4' },
+            // Add more
+          ]
+        },
+        'rhythm-deck-favorites': {
+          title: 'Rhythm Deck Favorites',
+          items: [
+            { title: 'Featured Track', artist: 'Various Artists', type: 'audio', src: 'sample-low.mp3' },
+            // Add more
+          ]
+        }
+      };
+
+      const playlist = playlists[id];
+      if (playlist) {
+        document.querySelector('#play-section h2').textContent = `Now Playing: ${playlist.title}`;
+        const container = document.getElementById('current-playlist');
+        container.innerHTML = '';
+        playlist.items.forEach(item => {
+          const el = document.createElement('div');
+          el.className = 'playlist-item bg-gray-800 p-4 rounded-lg flex items-center gap-4 cursor-move';
+          el.innerHTML = `
+            <i data-lucide="grip-vertical" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
+            <div class="flex-grow">
+              <p class="font-medium">${item.title}</p>
+              <p class="text-sm text-gray-400">${item.artist}</p>
+            </div>
+            <${item.type} controls class="w-32 sm:w-48">
+              <source src="${item.src}" type="${item.type}/mp${item.type === 'audio' ? 3 : 4}">
+            </${item.type}>
+          `;
+          container.appendChild(el);
+        });
+        lucide.createIcons(); // Reload icons
+        Sortable.create(container, { animation: 150, handle: '.grip-vertical' });
+      }
+    }
+
+    // Ad Simulation
     let playCount = 0;
-    const mediaElements = document.querySelectorAll('audio, video');
-    mediaElements.forEach(el => {
-      el.addEventListener('play', () => {
+    document.addEventListener('play', (e) => {
+      if (e.target.tagName === 'AUDIO' || e.target.tagName === 'VIDEO') {
         playCount++;
-        if (playCount >= 3 && Math.random() < 0.6) { // ~every 3–5 plays
+        if (playCount >= 3 && Math.random() < 0.6) {
           const ad = document.getElementById('ad-overlay');
           ad.classList.remove('hidden');
           let timer = 5;
@@ -255,10 +307,10 @@
               clearInterval(countdown);
             }
           }, 1000);
-          playCount = 0; // Reset after ad
+          playCount = 0;
         }
-      });
-    });
+      }
+    }, true);
   </script>
 </body>
 </html>
