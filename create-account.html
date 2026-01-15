@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Free Account – Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #000000, #0f172a);
+      color: white;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            Rhythm Deck
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
+        </div>
+      </div>
+      <a href="rhythm-wav-pricing.html" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-emerald-400 hover:text-emerald-300 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition shadow-md text-sm sm:text-base">
+        <i data-lucide="arrow-left" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+        Back to Pricing
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-md mx-auto px-4 sm:px-6 py-12 sm:py-20">
+    <div class="text-center mb-10">
+      <h1 class="text-3xl sm:text-4xl font-bold mb-4">Create Your Free Rhythm Wav Account</h1>
+      <p class="text-lg text-gray-300">
+        Start building playlists from your purchased and uploaded tracks — no credit card required.
+      </p>
+    </div>
+
+    <div class="bg-gray-900/70 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl">
+      <form id="signupForm" class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+          <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Doe">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+          <input type="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="you@example.com">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+          <input type="password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="••••••••">
+        </div>
+        <div class="flex items-center">
+          <input type="checkbox" id="terms" required class="h-4 w-4 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
+          <label for="terms" class="ml-2 text-sm text-gray-300">
+            I agree to the <a href="terms.html" class="text-emerald-400 hover:underline">Terms of Service</a> and <a href="privacy.html" class="text-emerald-400 hover:underline">Privacy Policy</a>
+          </label>
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-lg font-bold text-lg transition">
+          Create Free Account
+        </button>
+      </form>
+      <p class="text-center mt-6 text-gray-400">
+        Already have an account? <a href="login.html" class="text-emerald-400 hover:underline">Log in</a>
+      </p>
+    </div>
+
+    <!-- Upgrade Teaser -->
+    <div class="text-center mt-12">
+      <p class="text-gray-300 mb-4">Want ad-free, high-quality audio, offline downloads, and more?</p>
+      <a href="rhythm-wav-pricing.html" class="text-emerald-400 hover:underline font-medium">
+        See Premium Plans →
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white mt-12 p-6 text-center text-sm">
+    <p>© 2026 Rhythm Deck. All rights reserved.</p>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+
+    // Simple form submission handler (redirect simulation)
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // In real app: send to Supabase auth here
+      alert("Account created! Redirecting to your free Rhythm Wav library...");
+      setTimeout(() => {
+        window.location.href = "rhythm-wav-free.html";
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
