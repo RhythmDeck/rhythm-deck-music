@@ -146,10 +146,10 @@
         Rhythm Vision
       </button>
 
-      <a href="producers-distributors.html"
-         class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
+      <button onclick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});"
+              class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
         Producers & Distributors
-      </a>
+      </button>
     </div>
   </nav>
 </header>
@@ -429,7 +429,7 @@
     </a>
   </div>
 </section>
-<br><br>
+
 <!-- PRODUCERS & DISTRIBUTORS SECTION (with extra space above) -->
 <section id="producers-distributors-section" class="max-w-6xl mx-auto py-20 sm:py-28 px-4 sm:px-6 bg-gradient-to-r from-emerald-900/80 via-teal-900/80 to-indigo-900/80 rounded-2xl shadow-2xl">
   <div class="text-center mb-8 sm:mb-10">
@@ -448,7 +448,7 @@
   </div>
 </section>
 
-<!-- Q&A SECTION (your exact original with all 10 items) -->
+<!-- Q&A SECTION -->
 <section class="bg-neutral-950 py-16 px-6">
   <div class="max-w-6xl mx-auto">
     <h3 class="text-3xl font-bold mb-8 text-center style1">Q&A</h3>
@@ -526,6 +526,7 @@
 
 <!-- SCRIPT – YOUTUBE-STYLE PROMO + MODAL FOR FEATURED/MAIN STAGE VIDEOS -->
 <script>
+
 document.addEventListener("DOMContentLoaded", () => {
   // === PROMO VIDEO – YOUTUBE STYLE ===
   const promoVideo = document.getElementById("promoVideo");
@@ -611,7 +612,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Show overlay initially (paused)
     if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
   }
 
@@ -621,13 +621,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const videoSource = document.getElementById("videoSourceMp4");
   const closeVideoBtn = document.getElementById("closeVideoBtn");
 
-  // Open modal when clicking any video thumbnail
   document.querySelectorAll('.cursor-pointer[data-video]').forEach(card => {
     card.addEventListener('click', () => {
       const videoFile = card.getAttribute('data-video');
       if (videoFile && videoSource && videoPlayer) {
-        videoSource.src = videoFile; // load the correct video
-        videoPlayer.load();          // reload player with new source
+        videoSource.src = videoFile;
+        videoPlayer.load();
         videoModal.classList.remove('hidden');
         videoModal.classList.add('active');
         videoPlayer.play().catch(err => console.warn("Auto-play blocked:", err));
@@ -635,18 +634,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Close modal
   if (closeVideoBtn) {
     closeVideoBtn.addEventListener('click', () => {
-      if (videoModal) {
-        videoModal.classList.add('hidden');
-        videoModal.classList.remove('active');
-      }
+      videoModal.classList.add('hidden');
+      videoModal.classList.remove('active');
       if (videoPlayer) videoPlayer.pause();
     });
   }
 
-  // Close modal when clicking outside video
   if (videoModal) {
     videoModal.addEventListener('click', (e) => {
       if (e.target === videoModal) {
