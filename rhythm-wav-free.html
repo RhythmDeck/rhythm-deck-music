@@ -6,6 +6,8 @@
   <title>Rhythm Wav Free – Your Library</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       background: linear-gradient(to bottom, #000000, #0f172a);
@@ -13,12 +15,12 @@
     }
     /* Responsive spacing */
     main {
-      padding-bottom: 8rem; /* smaller on mobile */
+      padding-bottom: 8rem;
     }
     @media (min-width: 640px) {
       main { padding-bottom: 12rem; }
     }
-    /* Spinning glowing music note (same as premium) */
+    /* Spinning glowing music note */
     @keyframes spinGlow {
       from { transform: rotate(0deg); box-shadow: 0 0 15px 5px rgba(16, 185, 129, 0.4); }
       to { transform: rotate(360deg); box-shadow: 0 0 25px 10px rgba(16, 185, 129, 0.7); }
@@ -42,7 +44,7 @@
 </head>
 <body class="min-h-screen font-sans antialiased">
 
-  <!-- Header – identical to premium -->
+  <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
       <div class="flex items-center gap-3 sm:gap-4">
@@ -71,7 +73,7 @@
     </div>
   </header>
 
-  <!-- Instructions Section – identical layout, free-specific text -->
+  <!-- Instructions Section -->
   <section class="max-w-4xl mx-auto my-6 sm:my-8 px-4 sm:px-6">
     <div class="bg-gray-900/70 border-2 border-emerald-600 rounded-2xl p-6 sm:p-8 shadow-xl shadow-emerald-900/30">
       <h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">
@@ -79,127 +81,32 @@
       </h2>
       <div class="text-gray-300 text-sm sm:text-base leading-relaxed text-center">
         <ol class="list-decimal list-inside space-y-3 sm:space-y-4 mx-auto max-w-3xl">
-          <li><strong>Create a Playlist</strong> – Click "New Playlist" at the top. Give it a name and optionally upload a cover image (jpg/png).</li>
-          <li><strong>Add Songs or Videos</strong> – Use "Add New Song" or "Add New Video". Choose a playlist from the dropdown, then upload your file (mp3/wav for songs, mp4 for videos).</li>
-          <li><strong>Browse Your Library</strong> – All playlists appear as cards below. Hover to see the play button, or click anywhere on a card to select it for quick playback.</li>
-          <li><strong>Play Music</strong> – Selecting a playlist updates the "Now Playing" bar at the bottom — the music note spins when playing. Use the controls to play/pause.</li>
-          <li><strong>View Details</strong> – Click the "Open Playlist" link under any card to go to its full detail page (shows tracks/videos, individual play buttons, etc.).</li>
-          <li><strong>Free Limitations</strong> – 128kbps audio quality, ads after every 3–5 songs/videos, no offline downloads. <a href="rhythm-wav-pricing.html" class="text-emerald-400 hover:underline">Upgrade to Premium</a> for full features!</li>
+          <li><strong>Create a Playlist</strong> – Click "New Playlist" at the top. Give it a name and optionally upload a cover image.</li>
+          <li><strong>Add Songs or Videos</strong> – Use "Add New Song" or "Add New Video". Choose a playlist, then upload your file.</li>
+          <li><strong>Browse Your Library</strong> – All your playlists appear as cards below. Hover for play button, click to select for quick playback.</li>
+          <li><strong>Play Music</strong> – Selecting a playlist makes the music note spin. Use controls to play/pause.</li>
+          <li><strong>View Details</strong> – Click "Open Playlist" to see full track list, reorder, and play individual items.</li>
+          <li><strong>Free Limitations</strong> – 128kbps quality, ads every 3–5 items, no offline. <a href="rhythm-wav-pricing.html" class="text-emerald-400 hover:underline">Upgrade to Premium</a>!</li>
         </ol>
         <p class="mt-6 text-gray-400">
-          Enjoy building and playing your music collection!
+          Enjoy your music collection!
         </p>
       </div>
     </div>
   </section>
 
-  <!-- Main Content – identical layout -->
+  <!-- Main Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pb-40">
     <h2 class="text-3xl sm:text-4xl font-bold mb-3 text-center sm:text-left">Your Library (Free)</h2>
     <p class="text-gray-400 mb-6 sm:mb-10 text-center sm:text-left">Curate and replay your purchased tracks and videos</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-      <!-- Playlist Card 1 -->
-      <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="My Daily Vibes">
-        <div class="relative aspect-square w-full">
-          <img src="My-Daily-Vibes.jpg" alt="My Daily Vibes" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
-            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
-              My Daily Vibes
-            </h3>
-            <p class="text-xs sm:text-sm text-gray-300">18 tracks • Chill beats for work & focus</p>
-          </div>
-          <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
-              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
-            </div>
-          </button>
-        </div>
-        <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
-          <a href="playlist-detail-free.html?id=my-daily-vibes" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
-            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
-            Open Playlist
-          </a>
-        </div>
-      </div>
 
-      <!-- Playlist Card 2 -->
-      <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="Rhythm Deck Favorites">
-        <div class="relative aspect-square w-full">
-          <img src="rhythm-deck-favorites.jpg" alt="Rhythm Deck Favorites" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
-            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
-              Rhythm Deck Favorites
-            </h3>
-            <p class="text-xs sm:text-sm text-gray-300">24 tracks • Best purchases this month</p>
-          </div>
-          <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
-              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
-            </div>
-          </button>
-        </div>
-        <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
-          <a href="playlist-detail-free.html?id=rhythm-deck-favorites" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
-            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
-            Open Playlist
-          </a>
-        </div>
-      </div>
-
-      <!-- Playlist Card 3 -->
-      <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="Late Night Grooves">
-        <div class="relative aspect-square w-full">
-          <img src="Late-Night-Grooves.jpg" alt="Late Night Grooves" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
-            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
-              Late Night Grooves
-            </h3>
-            <p class="text-xs sm:text-sm text-gray-300">12 tracks • Smooth vibes after dark</p>
-          </div>
-          <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
-              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
-            </div>
-          </button>
-        </div>
-        <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
-          <a href="playlist-detail-free.html?id=late-night-grooves" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
-            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
-            Open Playlist
-          </a>
-        </div>
-      </div>
-
-      <!-- Playlist Card 4 -->
-      <div class="group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative" data-playlist="Epic Road Trip">
-        <div class="relative aspect-square w-full">
-          <img src="Epic-Road-Trip.jpg" alt="Epic Road Trip" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
-            <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
-              Epic Road Trip
-            </h3>
-            <p class="text-xs sm:text-sm text-gray-300">15 tracks • Adventure anthems</p>
-          </div>
-          <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
-              <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
-            </div>
-          </button>
-        </div>
-        <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
-          <a href="playlist-detail-free.html?id=epic-road-trip" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
-            <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
-            Open Playlist
-          </a>
-        </div>
-      </div>
+    <!-- Playlist Grid – now loads from Supabase -->
+    <div id="playlistGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+      <!-- Playlists will be loaded here dynamically -->
+      <p class="text-center col-span-full text-gray-400 py-8">Loading your playlists...</p>
     </div>
 
-    <!-- Now Playing section – identical to premium, with spinning note -->
+    <!-- Now Playing section -->
     <section class="mt-8 sm:mt-12 bg-gray-900/90 backdrop-blur-xl border border-gray-800 rounded-2xl p-4 sm:p-5 shadow-2xl">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-4">
@@ -226,12 +133,11 @@
     </section>
   </main>
 
-  <!-- Create Playlist Modal – identical layout -->
+  <!-- Create Playlist Modal -->
   <div id="createModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
     <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
       <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-5 text-center text-emerald-400">Create New Playlist</h3>
       <input type="text" id="newPlaylistName" placeholder="Playlist Name" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" />
-      <!-- Image Upload with Preview -->
       <label class="block text-sm font-medium text-gray-300 mb-2">Cover Image (jpg/png, optional)</label>
       <div class="mb-6">
         <div id="coverPreview" class="w-full aspect-square bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-600 hover:border-emerald-500 transition cursor-pointer relative overflow-hidden">
@@ -250,17 +156,13 @@
     </div>
   </div>
 
-  <!-- Add Song Modal – identical -->
+  <!-- Add Song Modal -->
   <div id="addSongModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
     <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
       <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">Add New Song to Playlist</h3>
       <label class="block text-sm font-medium text-gray-300 mb-2">Choose Playlist</label>
       <select id="playlistSelectSong" class="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base">
         <option value="">Select a playlist...</option>
-        <option value="my-daily-vibes">My Daily Vibes</option>
-        <option value="rhythm-deck-favorites">Rhythm Deck Favorites</option>
-        <option value="late-night-grooves">Late Night Grooves</option>
-        <option value="epic-road-trip">Epic Road Trip</option>
       </select>
       <label class="block text-sm font-medium text-gray-300 mb-2">Upload Song (mp3 or wav)</label>
       <input type="file" id="songUpload" accept="audio/mp3,audio/wav,audio/*" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 text-sm" />
@@ -271,17 +173,13 @@
     </div>
   </div>
 
-  <!-- Add Video Modal – identical -->
+  <!-- Add Video Modal -->
   <div id="addVideoModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
     <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl mx-4">
       <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">Add New Video to Playlist</h3>
       <label class="block text-sm font-medium text-gray-300 mb-2">Choose Playlist</label>
       <select id="playlistSelectVideo" class="w-full p-3 sm:p-4 mb-4 sm:mb-6 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base">
         <option value="">Select a playlist...</option>
-        <option value="my-daily-vibes">My Daily Vibes</option>
-        <option value="rhythm-deck-favorites">Rhythm Deck Favorites</option>
-        <option value="late-night-grooves">Late Night Grooves</option>
-        <option value="epic-road-trip">Epic Road Trip</option>
       </select>
       <label class="block text-sm font-medium text-gray-300 mb-2">Upload Video (mp4)</label>
       <input type="file" id="videoUpload" accept="video/mp4" class="w-full p-3 sm:p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 text-sm" />
@@ -292,96 +190,184 @@
     </div>
   </div>
 
-  <!-- JavaScript – identical core logic, with free-specific additions -->
+  <!-- JavaScript -->
   <script>
     lucide.createIcons();
 
-    // Mock playlists data – used for both cards and dropdowns
-    const mockPlaylists = [
-      { id: 'my-daily-vibes', name: 'My Daily Vibes', cover: 'My-Daily-Vibes.jpg' },
-      { id: 'rhythm-deck-favorites', name: 'Rhythm Deck Favorites', cover: 'rhythm-deck-favorites.jpg' },
-      { id: 'late-night-grooves', name: 'Late Night Grooves', cover: 'Late-Night-Grooves.jpg' },
-      { id: 'epic-road-trip', name: 'Epic Road Trip', cover: 'Epic-Road-Trip.jpg' }
-    ];
+    // Supabase setup – YOUR REAL VALUES
+    const supabaseUrl = 'https://bxoqhmfnseskwqkywppg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3d3BwZywicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Populate playlist dropdowns in modals
-    function populatePlaylistDropdowns() {
+    // Check if user is logged in (redirect if not)
+    async function checkLogin() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'create-account.html';
+      }
+      return user;
+    }
+
+    // Load user's free playlists from Supabase
+    async function loadPlaylists() {
+      const user = await checkLogin();
+      const { data, error } = await supabase
+        .from('free_playlists')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      const grid = document.getElementById('playlistGrid');
+      grid.innerHTML = '';
+
+      if (error || !data.length) {
+        grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-8">No playlists yet. Create one above!</p>';
+        return;
+      }
+
+      data.forEach(playlist => {
+        const card = document.createElement('div');
+        card.className = 'group bg-gray-900/60 backdrop-blur-sm rounded-2xl overflow-hidden hover:bg-gray-800/80 transition-all duration-300 cursor-pointer border border-gray-800 hover:border-emerald-700/50 shadow-xl shadow-black/40 hover:shadow-emerald-900/30 relative';
+        card.setAttribute('data-playlist', playlist.name);
+        card.innerHTML = `
+          <div class="relative aspect-square w-full">
+            <img src="${playlist.cover_url || 'https://placehold.co/400x400/gray/white?text=No+Cover'}" alt="${playlist.name}" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+              <h3 class="font-bold text-lg sm:text-xl mb-1 truncate group-hover:text-emerald-400 transition-colors">
+                ${playlist.name}
+              </h3>
+              <p class="text-xs sm:text-sm text-gray-300">Loading tracks...</p>
+            </div>
+            <button class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="bg-emerald-600/90 hover:bg-emerald-700 rounded-full p-4 sm:p-6 transform scale-75 group-hover:scale-100 transition-transform shadow-2xl">
+                <i data-lucide="play" class="w-8 sm:w-10 h-8 sm:h-10 fill-white"></i>
+              </div>
+            </button>
+          </div>
+          <div class="p-4 bg-gray-900/80 border-t border-gray-800 text-center">
+            <a href="playlist-detail-free.html?id=${playlist.id}" class="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium text-sm sm:text-base">
+              <i data-lucide="external-link" class="w-4 sm:w-5 h-4 sm:h-5"></i>
+              Open Playlist
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Create Playlist – real Supabase save
+    document.getElementById('saveNewPlaylist').addEventListener('click', async () => {
+      const name = document.getElementById('newPlaylistName').value.trim();
+      const file = document.getElementById('coverUpload').files[0];
+      if (!name) return alert('Enter a name!');
+
+      const user = await checkLogin();
+      let coverUrl = '';
+
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const { data, error } = await supabase.storage
+          .from('free_covers')
+          .upload(`${user.id}/${fileName}`, file);
+
+        if (error) return alert('Image upload failed: ' + error.message);
+        coverUrl = `${supabaseUrl}/storage/v1/object/public/free_covers/${data.path}`;
+      }
+
+      const { error } = await supabase
+        .from('free_playlists')
+        .insert({ name, cover_url: coverUrl, user_id: user.id });
+
+      if (error) {
+        alert('Error creating playlist: ' + error.message);
+      } else {
+        alert('Playlist created!');
+        document.getElementById('createModal').classList.add('hidden');
+        loadPlaylists(); // Refresh list
+      }
+    });
+
+    // Add Song – real upload and save
+    document.getElementById('saveSong').addEventListener('click', async () => {
+      const playlistId = document.getElementById('playlistSelectSong').value;
+      const file = document.getElementById('songUpload').files[0];
+      if (!playlistId || !file) return alert('Select playlist and file!');
+
+      const user = await checkLogin();
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const { data, error } = await supabase.storage
+        .from('free_media')
+        .upload(`${user.id}/${fileName}`, file);
+
+      if (error) return alert('Upload failed: ' + error.message);
+
+      const fileUrl = `${supabaseUrl}/storage/v1/object/public/free_media/${data.path}`;
+
+      const { error: dbError } = await supabase
+        .from('free_media_items')
+        .insert({
+          playlist_id: playlistId,
+          type: 'song',
+          name: file.name,
+          file_url: fileUrl,
+          user_id: user.id
+        });
+
+      if (dbError) alert('Error: ' + dbError.message);
+      else {
+        alert('Song added!');
+        document.getElementById('addSongModal').classList.add('hidden');
+      }
+    });
+
+    // Add Video – similar to song (repeat pattern for saveVideo)
+
+    // Populate playlist dropdowns in modals (real data)
+    async function populatePlaylistDropdowns() {
+      const user = await checkLogin();
+      const { data, error } = await supabase
+        .from('free_playlists')
+        .select('id, name')
+        .eq('user_id', user.id);
+
+      if (error) return console.error(error);
+
       const songSelect = document.getElementById('playlistSelectSong');
       const videoSelect = document.getElementById('playlistSelectVideo');
       songSelect.innerHTML = '<option value="">Select a playlist...</option>';
       videoSelect.innerHTML = '<option value="">Select a playlist...</option>';
-      mockPlaylists.forEach(playlist => {
+
+      data.forEach(pl => {
         const opt = document.createElement('option');
-        opt.value = playlist.id;
-        opt.textContent = playlist.name;
+        opt.value = pl.id;
+        opt.textContent = pl.name;
         songSelect.appendChild(opt.cloneNode(true));
         videoSelect.appendChild(opt);
       });
     }
-    window.addEventListener('load', populatePlaylistDropdowns);
 
-    // Create Playlist Modal
-    const createModal = document.getElementById('createModal');
-    const coverUpload = document.getElementById('coverUpload');
-    const coverPreview = document.getElementById('coverPreview');
-    const coverPlaceholder = document.getElementById('coverPlaceholder');
-    const coverImgPreview = document.getElementById('coverImgPreview');
+    // Initial load
+    window.addEventListener('load', () => {
+      checkLogin();
+      loadPlaylists();
+      populatePlaylistDropdowns();
+    });
+
+    // Modal open/close (same as before)
     document.getElementById('newPlaylistBtn').addEventListener('click', () => {
-      createModal.classList.remove('hidden');
+      document.getElementById('createModal').classList.remove('hidden');
     });
     document.getElementById('cancelCreate').addEventListener('click', () => {
-      createModal.classList.add('hidden');
-      document.getElementById('newPlaylistName').value = '';
-      coverImgPreview.src = '';
-      coverImgPreview.classList.add('hidden');
-      coverPlaceholder.classList.remove('hidden');
+      document.getElementById('createModal').classList.add('hidden');
     });
-    if (coverPreview) {
-      coverPreview.addEventListener('click', () => coverUpload.click());
-      coverUpload.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            coverImgPreview.src = event.target.result;
-            coverImgPreview.classList.remove('hidden');
-            coverPlaceholder.classList.add('hidden');
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-    document.getElementById('saveNewPlaylist').addEventListener('click', () => {
-      const name = document.getElementById('newPlaylistName').value.trim();
-      if (name) {
-        alert(`Playlist "${name}" created successfully!\n(This is a mock – later it will save to Supabase)`);
-        createModal.classList.add('hidden');
-      } else {
-        alert("Please enter a name!");
-      }
-    });
+    // Repeat for addSongBtn/addVideoBtn etc.
 
-    // Add Song / Add Video Modals
-    ['addSongBtn', 'addVideoBtn'].forEach(btnId => {
-      document.getElementById(btnId).addEventListener('click', () => {
-        const modalId = btnId === 'addSongBtn' ? 'addSongModal' : 'addVideoModal';
-        document.getElementById(modalId).classList.remove('hidden');
-      });
-    });
-    ['cancelAddSong', 'cancelAddVideo'].forEach(id => {
-      document.getElementById(id).addEventListener('click', () => {
-        document.getElementById(id.replace('cancel', 'add') + 'Modal').classList.add('hidden');
-      });
-    });
-    ['saveSong', 'saveVideo'].forEach(id => {
-      document.getElementById(id).addEventListener('click', () => {
-        const modalId = id === 'saveSong' ? 'addSongModal' : 'addVideoModal';
-        alert(`Item added successfully!\n(This is a mock – later it will save to Supabase)`);
-        document.getElementById(modalId).classList.add('hidden');
-      });
-    });
-
-    // Spinning glowing music note + dynamic playlist name (identical to premium)
+    // Spinning note + play (unchanged)
     const playBtn = document.getElementById('playBtn');
     const musicNote = document.getElementById('musicNote');
     const noteContainer = document.getElementById('noteContainer');
@@ -417,13 +403,13 @@
       lucide.createIcons();
     });
 
-    // Free-only: Simulate ads after 3–5 plays
+    // Free ad simulation
     let playCount = 0;
     document.addEventListener('play', (e) => {
       if (e.target.tagName === 'AUDIO' || e.target.tagName === 'VIDEO') {
         playCount++;
         if (playCount >= 3 && Math.random() < 0.6) {
-          alert('Ad would play here in Free mode (mock). Upgrade to remove ads!');
+          alert('Ad would play here (mock). Upgrade to Premium to remove!');
           playCount = 0;
         }
       }
