@@ -7,38 +7,46 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
-    .spinning-note {
-      animation: spin 2s linear infinite;
+    .ad-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    .low-quality-badge {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      border: 1px solid #ef4444;
     }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
 
-  <!-- Header – identical to premium -->
+  <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
       <a href="rhythm-wav-free.html" class="text-emerald-400 hover:text-emerald-300 flex items-center gap-2 font-medium text-sm sm:text-base">
         <i data-lucide="arrow-left" class="w-5 sm:w-6 h-5 sm:h-6"></i>
         Back to Library
       </a>
-      <!-- Dropdown to choose playlist – same as premium -->
       <select id="playlistSwitcher" class="bg-gray-800 border border-gray-700 rounded-lg p-2 sm:p-3 text-white focus:outline-none focus:border-emerald-500 text-sm sm:text-base w-full sm:w-auto">
         <option value="">Select Playlist</option>
-        <option value="epic-road-trip">Epic Road Trip</option>
-        <option value="late-night-grooves">Late Night Grooves</option>
-        <option value="my-daily-vibes">My Daily Vibes</option>
-        <option value="rhythm-deck-favorites">Rhythm Deck Favorites</option>
+        <!-- Will be populated dynamically -->
       </select>
     </div>
   </header>
 
-  <!-- Instructions Section – identical to premium -->
+  <!-- Instructions -->
   <section class="max-w-4xl mx-auto my-6 sm:my-8 px-4 sm:px-6">
     <div class="bg-gray-900/70 border-2 border-emerald-600 rounded-2xl p-6 sm:p-8 shadow-xl shadow-emerald-900/30">
       <h2 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-emerald-400">
@@ -48,20 +56,20 @@
         <ol class="list-decimal list-inside space-y-3 sm:space-y-4 mx-auto max-w-3xl">
           <li><strong>Switch Playlists</strong> – Use the dropdown at the top right to jump to another playlist.</li>
           <li><strong>Play Everything</strong> – Click "Play All" to start the whole playlist. Check "Play All in Order" for sequence (uncheck for random).</li>
-          <li><strong>Shuffle Mode</strong> – Click the shuffle button to toggle random order (highlights when active).</li>
-          <li><strong>Reorder Tracks</strong> – Drag and drop any track row to rearrange (changes are mock in free version).</li>
-          <li><strong>Play Individual Items</strong> – Click play/video icon next to any track to play it alone.</li>
-          <li><strong>Watch Videos</strong> – Video tracks open in a large popup with controls.</li>
-          <li><strong>Ads</strong> – In Free mode, ads play after every 3–5 songs/videos. Upgrade to Premium to remove them.</li>
+          <li><strong>Shuffle Mode</strong> – Click the shuffle button to toggle random order.</li>
+          <li><strong>Reorder Tracks</strong> – Drag and drop any track row (mock – no save in free).</li>
+          <li><strong>Play Individual Items</strong> – Click play/video icon next to any track.</li>
+          <li><strong>Watch Videos</strong> – Video tracks open in a large popup.</li>
+          <li><strong>Free Limitations</strong> – 128kbps quality, ads every 3–5 items, no offline. <a href="rhythm-wav-pricing.html" class="text-emerald-400 hover:underline">Upgrade to Premium</a>!</li>
         </ol>
         <p class="mt-6 text-gray-400">
-          Enjoy your curated music and videos! <strong>Free version limits audio to 128kbps.</strong>
+          Enjoy your curated music and videos!
         </p>
       </div>
     </div>
   </section>
 
-  <!-- Main Content – identical layout to premium -->
+  <!-- Main Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
     <div class="flex flex-col md:flex-row gap-6 sm:gap-12 mb-8 sm:mb-12">
       <!-- Big Cover -->
@@ -69,12 +77,11 @@
         <img id="playlistCover" src="https://placehold.co/800x800/gray/white?text=Cover" alt="Playlist Cover" class="w-full h-full object-cover" />
       </div>
 
-
       <!-- Info & Controls -->
       <div class="flex-1 text-center md:text-left">
         <h1 id="detailTitle" class="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4">Loading...</h1>
         <p class="text-lg sm:text-xl text-gray-400 mb-6 sm:mb-8">
-          Your playlist • <span id="trackCount">0</span> tracks • <span class="text-red-400 font-medium">128kbps (Free)</span>
+          Your playlist • <span id="trackCount">0</span> tracks • <span class="low-quality-badge px-2 py-1 rounded-full text-xs">128kbps (Free)</span>
         </p>
         <div class="flex flex-wrap justify-center md:justify-start items-center gap-4 sm:gap-6 mb-8 sm:mb-12">
           <button id="playAllBtn" class="bg-emerald-600 hover:bg-emerald-700 px-8 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg flex items-center gap-3 transition transform hover:scale-105">
@@ -85,20 +92,20 @@
             <i data-lucide="shuffle" class="w-5 sm:w-6 h-5 sm:h-6"></i>
           </button>
           <label class="flex items-center gap-2 text-gray-300 cursor-pointer text-sm sm:text-base">
-            <input type="checkbox" id="playInOrder" class="form-checkbox h-5 w-5 text-emerald-500 rounded focus:ring-emerald-500" checked />
+            <input type="checkbox" id="playInOrder" class="form-checkbox h-5 w-5 text-emerald-500 rounded focus:ring-emerald-500" />
             Play All in Order
           </label>
         </div>
       </div>
     </div>
 
-    <!-- Track List (drag-and-drop) -->
+    <!-- Track List -->
     <div id="trackList" class="space-y-3 sm:space-y-4">
-      <!-- Tracks loaded dynamically -->
+      <!-- Tracks loaded from Supabase -->
     </div>
   </main>
 
-  <!-- Video Playback Modal – identical to premium -->
+  <!-- Video Modal -->
   <div id="videoModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden px-4">
     <div class="bg-gray-900 rounded-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-emerald-800/50 shadow-2xl">
       <video controls class="w-full h-auto rounded-lg">
@@ -110,12 +117,12 @@
   </div>
 
   <!-- Ad Overlay (Free only) -->
-  <div id="ad-overlay" class="fixed inset-0 bg-black/85 flex items-center justify-center z-50 hidden">
+  <div id="ad-overlay" class="ad-overlay hidden">
     <div class="bg-gray-900 p-8 rounded-2xl max-w-lg text-center border border-red-600/50 shadow-2xl">
       <h3 class="text-2xl font-bold text-red-400 mb-4">Ad Playing...</h3>
       <p class="text-lg text-gray-300 mb-6">
         Thanks for listening! Ads appear after every 3–5 items in Free mode.<br>
-        <strong>Upgrade to Premium</strong> for ad-free, high-quality audio (320kbps+), offline downloads, and more.
+        <strong>Upgrade to Premium</strong> for ad-free, 320kbps+ quality, offline downloads, and more.
       </p>
       <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-lg font-bold text-lg transition inline-block">
         Upgrade Now
@@ -124,7 +131,7 @@
     </div>
   </div>
 
-  <!-- Floating Upgrade CTA (Free only) -->
+  <!-- Floating Upgrade CTA -->
   <div class="fixed bottom-6 right-6 z-50">
     <a href="rhythm-wav-pricing.html" class="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-full shadow-2xl flex items-center gap-3 transition transform hover:scale-105">
       <i data-lucide="arrow-up-circle" class="h-6 w-6"></i>
@@ -135,121 +142,106 @@
   <script>
     lucide.createIcons();
 
-    // Mock playlists data (same as premium)
-    const mockPlaylists = {
-      'my-daily-vibes': {
-        name: 'My Daily Vibes',
-        cover: 'My-Daily-Vibes.jpg',
-        tracks: 18
-      },
-      'rhythm-deck-favorites': {
-        name: 'Rhythm Deck Favorites',
-        cover: 'rhythm-deck-favorites.jpg',
-        tracks: 24
-      },
-      'late-night-grooves': {
-        name: 'Late Night Grooves',
-        cover: 'Late-Night-Grooves.jpg',
-        tracks: 12
-      },
-      'epic-road-trip': {
-        name: 'Epic Road Trip',
-        cover: 'Epic-Road-Trip.jpg',
-        tracks: 15
+    // Supabase setup – YOUR REAL VALUES
+    const supabaseUrl = 'https://bxoqhmfnseskwqkywppg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3d3dwcGciLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcxNjA5Mjk4MywiZXhwIjoyMDMyNjY4OTgzfQ.YourActualAnonKeyHere'; // ← REPLACE WITH YOUR REAL ANON KEY
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Check if user is logged in
+    async function checkLogin() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'create-account.html';
       }
-    };
-
-    // Get playlist ID from URL or default
-    const urlParams = new URLSearchParams(window.location.search);
-    let currentId = urlParams.get('id') || 'my-daily-vibes';
-
-    // Load playlist
-    function loadPlaylist(playlistId) {
-      const playlist = mockPlaylists[playlistId];
-      if (playlist) {
-        document.getElementById('detailTitle').textContent = playlist.name;
-        document.getElementById('playlistCover').src = playlist.cover;
-        document.getElementById('trackCount').textContent = playlist.tracks;
-
-        const trackList = document.getElementById('trackList');
-        trackList.innerHTML = '';
-
-        const realisticNames = [
-          'Sunrise Melody', 'Midnight Groove', 'Ocean Waves', 'Mountain Echo', 'City Lights',
-          'Forest Whisper', 'River Flow', 'Starlight Dance', 'Wind Breeze', 'Fire Spark',
-          'Earth Pulse', 'Sky Soar', 'Rain Rhythm', 'Thunder Beat', 'Snow Silence'
-        ];
-
-        for (let i = 1; i <= playlist.tracks; i++) {
-          const isVideo = i % 3 === 0; // Every 3rd is video
-          const trackName = realisticNames[(i-1) % realisticNames.length] + (isVideo ? ' (Video)' : '');
-
-          const trackHTML = `
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800 transition cursor-move gap-3 sm:gap-0">
-              <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                <span class="text-gray-400 text-sm sm:text-base w-6 sm:w-8">${i}</span>
-                <div>
-                  <p class="font-medium text-base sm:text-lg">${trackName}</p>
-                  <p class="text-xs sm:text-sm text-gray-400">Artist Name • 3:45</p>
-                </div>
-              </div>
-              <button class="p-2 sm:p-3 hover:bg-gray-800 rounded-full transition self-end sm:self-auto" onclick="handlePlay(${i}, ${isVideo})">
-                <i data-lucide="${isVideo ? 'video' : 'play'}" class="w-5 sm:w-6 h-5 sm:h-6"></i>
-              </button>
-            </div>
-          `;
-          trackList.innerHTML += trackHTML;
-        }
-
-        lucide.createIcons();
-
-        // Enable drag-and-drop
-        new Sortable(trackList, {
-          animation: 150,
-          ghostClass: 'bg-emerald-900/50',
-          handle: '.flex',
-          onEnd: () => {
-            // Mock save (in free version, no real persistence)
-            console.log('Tracks reordered (mock)');
-          }
-        });
-      } else {
-        document.getElementById('detailTitle').textContent = 'Playlist Not Found';
-        document.getElementById('trackList').innerHTML = '<p class="text-center text-gray-400 py-8">This playlist does not exist.</p>';
-      }
+      return user;
     }
 
-    // Initial load
-    loadPlaylist(currentId);
+    // Load playlist from Supabase
+    async function loadPlaylist(playlistId) {
+      const user = await checkLogin();
 
-    // Playlist switcher
-    document.getElementById('playlistSwitcher').addEventListener('change', (e) => {
-      currentId = e.target.value;
-      if (currentId) loadPlaylist(currentId);
-    });
+      const { data: playlist, error } = await supabase
+        .from('free_playlists')
+        .select('*')
+        .eq('id', playlistId)
+        .eq('user_id', user.id)
+        .single();
 
-    // Play All button
-    document.getElementById('playAllBtn').addEventListener('click', () => {
-      const playInOrder = document.getElementById('playInOrder').checked;
-      alert(`Playing all tracks! ${playInOrder ? 'In order' : 'Shuffled'}`);
-    });
+      if (error || !playlist) {
+        document.getElementById('detailTitle').textContent = 'Playlist Not Found';
+        document.getElementById('trackList').innerHTML = '<p class="text-center text-gray-400 py-8">This playlist does not exist or is not yours.</p>';
+        return;
+      }
 
-    // Shuffle button toggle (visual highlight)
-    document.getElementById('shuffleBtn').addEventListener('click', () => {
-      const btn = document.getElementById('shuffleBtn');
-      btn.classList.toggle('bg-emerald-600');
-      alert('Shuffle mode toggled (mock)');
-    });
+      document.getElementById('detailTitle').textContent = playlist.name;
+      document.getElementById('playlistCover').src = playlist.cover_url || 'https://placehold.co/800x800/gray/white?text=No+Cover';
+      document.getElementById('trackCount').textContent = 'Loading...';
 
-    // Handle play (same as premium)
-    function handlePlay(num, isVideo) {
+      // Load media items
+      const { data: items, error: itemsError } = await supabase
+        .from('free_media_items')
+        .select('*')
+        .eq('playlist_id', playlistId);
+
+      if (itemsError) {
+        console.error(itemsError);
+        document.getElementById('trackCount').textContent = 'Error loading tracks';
+        return;
+      }
+
+      const trackList = document.getElementById('trackList');
+      trackList.innerHTML = '';
+      document.getElementById('trackCount').textContent = items.length;
+
+      items.forEach((item, index) => {
+        const isVideo = item.type === 'video';
+        const trackHTML = `
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-900/50 rounded-lg hover:bg-gray-800 transition cursor-move gap-3 sm:gap-0">
+            <div class="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              <span class="text-gray-400 text-sm sm:text-base w-6 sm:w-8">${index + 1}</span>
+              <div>
+                <p class="font-medium text-base sm:text-lg">${item.name}</p>
+                <p class="text-xs sm:text-sm text-gray-400">${item.artist || 'Unknown Artist'} • ${item.duration || 'Unknown'} • 128kbps (Free)</p>
+              </div>
+            </div>
+            <button class="p-2 sm:p-3 hover:bg-gray-800 rounded-full transition self-end sm:self-auto" onclick="handlePlay('${item.file_url}', ${isVideo})">
+              <i data-lucide="${isVideo ? 'video' : 'play'}" class="w-5 sm:w-6 h-5 sm:h-6"></i>
+            </button>
+          </div>
+        `;
+        trackList.innerHTML += trackHTML;
+      });
+
+      lucide.createIcons();
+
+      // Drag & drop (mock - no real save in free)
+      new Sortable(trackList, {
+        animation: 150,
+        ghostClass: 'bg-emerald-900/50',
+        handle: '.flex',
+        onEnd: () => alert('Tracks reordered! (Mock - no save in free)')
+      });
+
+      // Populate switcher dropdown
+      const switcher = document.getElementById('playlistSwitcher');
+      const { data: allPlaylists } = await supabase.from('free_playlists').select('id, name').eq('user_id', user.id);
+      allPlaylists.forEach(pl => {
+        const opt = document.createElement('option');
+        opt.value = pl.id;
+        opt.textContent = pl.name;
+        switcher.appendChild(opt);
+      });
+      switcher.value = playlistId;
+    }
+
+    // Handle play (song alert, video modal)
+    function handlePlay(url, isVideo) {
       if (isVideo) {
         const modal = document.getElementById('videoModal');
-        const videoSource = document.getElementById('videoSource');
-        videoSource.src = 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4'; // Sample video
+        document.getElementById('videoSource').src = url;
         modal.classList.remove('hidden');
       } else {
-        alert(`Playing Track ${num} (128kbps - Free)`);
+        alert(`Playing song (128kbps - Free)`);
       }
       simulateAd();
     }
@@ -260,26 +252,44 @@
       document.getElementById('videoSource').src = '';
     });
 
-    // Ad Simulation (Free only – after 3–5 plays)
+    // Ad simulation
     let playCount = 0;
     function simulateAd() {
       playCount++;
-      if (playCount >= 3 && Math.random() < 0.6) { // Random chance after min 3 plays
-        const ad = document.getElementById('ad-overlay');
-        ad.classList.remove('hidden');
+      if (playCount >= 3 && Math.random() < 0.6) {
+        document.getElementById('ad-overlay').classList.remove('hidden');
         let timer = 5;
         document.getElementById('ad-timer').textContent = timer;
         const countdown = setInterval(() => {
           timer--;
           document.getElementById('ad-timer').textContent = timer;
           if (timer <= 0) {
-            ad.classList.add('hidden');
+            document.getElementById('ad-overlay').classList.add('hidden');
             clearInterval(countdown);
           }
         }, 1000);
-        playCount = 0; // Reset
+        playCount = 0;
       }
     }
+
+    // Playlist switcher
+    document.getElementById('playlistSwitcher').addEventListener('change', (e) => {
+      const newId = e.target.value;
+      if (newId) {
+        window.location.href = `playlist-detail-free.html?id=${newId}`;
+      }
+    });
+
+    // Play All (mock)
+    document.getElementById('playAllBtn').addEventListener('click', () => {
+      const playInOrder = document.getElementById('playInOrder').checked;
+      alert(`Playing all tracks! ${playInOrder ? 'In order' : 'Shuffled'} (Free mode)`);
+    });
+
+    // Initial load
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id') || 'my-daily-vibes';
+    loadPlaylist(id);
   </script>
 </body>
 </html>
