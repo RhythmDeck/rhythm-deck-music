@@ -6,6 +6,8 @@
   <title>Create Free Account – Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       background: linear-gradient(to bottom, #000000, #0f172a);
@@ -47,15 +49,15 @@
       <form id="signupForm" class="space-y-6">
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
-          <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Doe">
+          <input type="text" id="fullName" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Doe">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-          <input type="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="you@example.com">
+          <input type="email" id="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="you@example.com">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-          <input type="password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="••••••••">
+          <input type="password" id="password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="••••••••">
         </div>
         <div class="flex items-center">
           <input type="checkbox" id="terms" required class="h-4 w-4 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
@@ -89,14 +91,59 @@
   <script>
     lucide.createIcons();
 
-    // Simple form submission handler (redirect simulation)
-    document.getElementById('signupForm').addEventListener('submit', function(e) {
+    // Supabase setup - REPLACE THESE WITH YOUR REAL VALUES
+    const supabaseUrl = 'https://bxoqhmfnseskwqkywppg.supabase.co'; // ← Your Project URL
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'; // ← Your anon key
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Form submission with real Supabase sign-up
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      // In real app: send to Supabase auth here
-      alert("Account created! Redirecting to your free Rhythm Wav library...");
-      setTimeout(() => {
-        window.location.href = "rhythm-wav-free.html";
-      }, 1500);
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const termsChecked = document.getElementById('terms').checked;
+
+      if (!termsChecked) {
+        alert('Please agree to the Terms of Service and Privacy Policy.');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters long.');
+        return;
+      }
+
+      // Show loading state
+      const submitBtn = document.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating...';
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              is_premium: false // Explicitly mark as FREE user
+            }
+          }
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        alert('Account created successfully! Welcome to Rhythm Wav Free.');
+        window.location.href = 'rhythm-wav-free.html';
+
+      } catch (error) {
+        alert('Error creating account: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Free Account';
+      }
     });
   </script>
 </body>
