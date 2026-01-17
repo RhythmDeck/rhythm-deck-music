@@ -66,12 +66,10 @@
       <div class="absolute bottom-4 left-4 w-32 h-32 rounded-full border-8 border-white shadow-2xl overflow-hidden bg-white">
         <img id="logoPreview" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
       </div>
-
       <input type="file" id="bannerInput" accept="image/*" class="hidden">
       <button id="changeBannerBtn" class="absolute bottom-4 right-4 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg flex items-center disabled:opacity-50" disabled>
         Upload Banner <span id="bannerSpinner" class="spinner hidden"></span>
       </button>
-
       <input type="file" id="logoInput" accept="image/*" class="hidden">
       <button id="changeLogoBtn" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm flex items-center disabled:opacity-50" disabled>
         Change Logo <span id="logoSpinner" class="spinner hidden"></span>
@@ -106,7 +104,7 @@
           <div class="bg-green-50 p-5 rounded-xl shadow text-center">
             <p class="text-sm text-gray-600">Your Public Page:</p>
             <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
-            <a id="publicLink" href="#" target="_blank" rel="noopener noreferrer" class="block mt-2 text-sm text-blue-600 underline">Open Public Page</a>
+            <a id="publicLink" href="#" target="_blank" class="block mt-2 text-sm text-blue-600 underline">Open Public Page</a>
           </div>
         </div>
 
@@ -147,9 +145,7 @@
               <span class="inline-block w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center text-2xl group-open:rotate-45 transition">X</span>
               Danger Zone: Delete Account
             </span>
-            <svg class="w-8 h-8 group-open:rotate-180 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
+            <svg class="w-8 h-8 group-open:rotate-180 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </summary>
           <div class="mt-8">
             <p class="text-red-900 font-bold mb-4">Type "Delete My Account" to confirm:</p>
@@ -180,7 +176,7 @@
   <script>
     lucide.createIcons();
 
-    // Use global supabase (no redeclaration!)
+    // Use the global supabase from the CDN (no redeclaration!)
     const sb = supabase.createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
@@ -194,12 +190,7 @@
     }
 
     function logout() {
-      sb.auth.signOut().then(() => {
-        window.location.href = 'login.html';
-      }).catch(err => {
-        console.error('Logout failed:', err);
-        alert('Logout failed');
-      });
+      sb.auth.signOut().then(() => window.location.href = 'login.html');
     }
 
     function closeModal() {
@@ -208,102 +199,93 @@
     }
 
     async function loadProfile() {
-      try {
-        const { data, error } = await sb
-          .from('profiles')
-          .select('name, bio, banner_url, logo_url, subdomain')
-          .eq('id', currentUser.id)
-          .single();
-
-        if (error) throw error;
-
-        document.getElementById('artistNameInput').value = data.name || '';
-        document.getElementById('bioInput').value = data.bio || '';
-
-        if (data.banner_url) {
-          const { data: urlData } = sb.storage.from('media').getPublicUrl(data.banner_url);
-          document.getElementById('bannerPreview').src = urlData.publicUrl + '?t=' + Date.now();
-          document.getElementById('bannerPreview').classList.remove('hidden');
-          document.getElementById('bannerPlaceholder').classList.add('hidden');
-        }
-
-        if (data.logo_url) {
-          const { data: urlData } = sb.storage.from('media').getPublicUrl(data.logo_url);
-          document.getElementById('logoPreview').src = urlData.publicUrl + '?t=' + Date.now();
-        }
-
-        const subdomain = data.subdomain || currentUser.id;
-        const publicUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${subdomain}`;
-        document.getElementById('publicUrl').textContent = publicUrl;
-        document.getElementById('publicLink').href = publicUrl;
-      } catch (err) {
-        console.error('Profile load failed:', err);
-        document.getElementById('publicUrl').textContent = 'Error loading public page';
+      const { data, error } = await sb.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
+      if (error) {
+        console.error('Profile load error:', error);
+        document.getElementById('publicUrl').textContent = 'Error loading';
+        return;
       }
+
+      document.getElementById('artistNameInput').value = data.name || '';
+      document.getElementById('bioInput').value = data.bio || '';
+
+      if (data.banner_url) {
+        const { data: urlData } = sb.storage.from('media').getPublicUrl(data.banner_url);
+        document.getElementById('bannerPreview').src = urlData.publicUrl + '?t=' + Date.now();
+        document.getElementById('bannerPreview').classList.remove('hidden');
+        document.getElementById('bannerPlaceholder').classList.add('hidden');
+      }
+
+      if (data.logo_url) {
+        const { data: urlData } = sb.storage.from('media').getPublicUrl(data.logo_url);
+        document.getElementById('logoPreview').src = urlData.publicUrl + '?t=' + Date.now();
+      }
+
+      const subdomain = data.subdomain || currentUser.id;
+      const publicUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${subdomain}`;
+      document.getElementById('publicUrl').textContent = publicUrl;
+      document.getElementById('publicLink').href = publicUrl;
     }
 
     async function loadVideos() {
       const container = document.getElementById('videoList');
-      container.innerHTML = '<p class="col-span-full text-center py-12 text-xl text-gray-600">Loading...</p>';
+      container.innerHTML = '<p class="col-span-full text-center py-12 text-xl text-gray-600">Loading videos...</p>';
 
-      const { data: videos, error } = await sb
-        .from('user_videos')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
-
+      const { data: videos, error } = await sb.from('user_videos').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
       if (error) {
         container.innerHTML = '<p class="col-span-full text-center text-red-600">Error loading videos</p>';
         return;
       }
 
       if (videos.length === 0) {
-        container.innerHTML = '<p class="col-span-full text-center italic py-12 text-xl text-gray-600">No videos yet</p>';
+        container.innerHTML = '<p class="col-span-full text-center italic py-12 text-xl text-gray-600">No videos yet. Upload your first one!</p>';
         return;
       }
 
       container.innerHTML = '';
       for (const v of videos) {
         const videoUrl = sb.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
-        const thumbUrl = v.thumbnail_url ? sb.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225?text=Video';
+        const thumbUrl = v.thumbnail_url ? sb.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225/10b981/ffffff?text=Video';
 
         container.innerHTML += `
-          <div class="bg-white rounded-xl shadow overflow-hidden">
+          <div class="bg-white rounded-xl shadow-xl overflow-hidden">
             <div class="relative">
               <img src="${thumbUrl}" class="w-full h-48 object-cover">
-              <div class="video-overlay" onclick="document.getElementById('modalVideo').src='${videoUrl}'; document.getElementById('videoModal').classList.add('show')">
+              <div class="video-overlay" onclick="openVideoPopup('${videoUrl}')">
                 <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
               </div>
             </div>
             <div class="p-4">
-              <h4 class="font-bold truncate">${v.title || 'Untitled'}</h4>
-              <button onclick="if(confirm('Delete forever?')) deleteVideo('${v.id}', '${v.video_url}', '${v.thumbnail_url || ''}')" class="mt-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete</button>
+              <h4 class="font-bold text-lg truncate">${v.title || 'Untitled'}</h4>
+              <button onclick="if(confirm('Delete this video forever?')) deleteVideo('${v.id}', '${v.video_url}', '${v.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
+                Delete Video
+              </button>
             </div>
           </div>`;
       }
     }
 
+    function openVideoPopup(url) {
+      document.getElementById('modalVideo').src = url;
+      document.getElementById('videoModal').classList.add('show');
+    }
+
     async function deleteVideo(id, videoPath, thumbPath) {
-      try {
-        await sb.from('user_videos').delete().eq('id', id);
-        await sb.storage.from('media').remove([videoPath]);
-        if (thumbPath) await sb.storage.from('media').remove([thumbPath]);
-        loadVideos();
-        showSuccess('Video deleted');
-      } catch (err) {
-        alert('Delete failed: ' + err.message);
-      }
+      await sb.from('user_videos').delete().eq('id', id);
+      await sb.storage.from('media').remove([videoPath]);
+      if (thumbPath) await sb.storage.from('media').remove([thumbPath]);
+      showSuccess('Video deleted!');
+      loadVideos();
+      updateRisingStarBadge();
     }
 
     async function updateRisingStarBadge() {
-      const { count } = await sb
-        .from('user_videos')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', currentUser.id);
-
-      document.getElementById('badge-container').innerHTML = count >= 3
-        ? `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-artist-badge-transparent.png" alt="Rising Star">`
-        : '';
+      const { count } = await sb.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+      const container = document.getElementById('badge-container');
+      container.innerHTML = '';
+      if (count >= 3) {
+        container.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/rising-artist-badge-transparent.png" alt="Rising Artist Badge">`;
+      }
     }
 
     async function saveArtistName() {
@@ -320,6 +302,75 @@
       if (error) alert('Failed: ' + error.message);
       else showSuccess('Bio saved!');
     }
+
+    document.getElementById('saveNameBtn').onclick = saveArtistName;
+    document.getElementById('saveBioBtn').onclick = saveBio;
+
+    // Banner upload
+    document.getElementById('changeBannerBtn').onclick = () => document.getElementById('bannerInput').click();
+
+    document.getElementById('bannerInput').onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const btn = document.getElementById('changeBannerBtn');
+      btn.disabled = true;
+      document.getElementById('bannerSpinner').classList.remove('hidden');
+
+      try {
+        const path = `banners/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+        const { error: uploadErr } = await sb.storage.from('media').upload(path, file, { upsert: true });
+        if (uploadErr) throw uploadErr;
+
+        const { error: updateErr } = await sb.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
+        if (updateErr) throw updateErr;
+
+        const { data } = sb.storage.from('media').getPublicUrl(path);
+        document.getElementById('bannerPreview').src = data.publicUrl + '?t=' + Date.now();
+        document.getElementById('bannerPreview').classList.remove('hidden');
+        document.getElementById('bannerPlaceholder').classList.add('hidden');
+
+        showSuccess('Banner uploaded!');
+      } catch (err) {
+        alert('Banner upload failed: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        document.getElementById('bannerSpinner').classList.add('hidden');
+        e.target.value = '';
+      }
+    };
+
+    // Logo upload
+    document.getElementById('changeLogoBtn').onclick = () => document.getElementById('logoInput').click();
+
+    document.getElementById('logoInput').onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const btn = document.getElementById('changeLogoBtn');
+      btn.disabled = true;
+      document.getElementById('logoSpinner').classList.remove('hidden');
+
+      try {
+        const path = `logos/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+        const { error: uploadErr } = await sb.storage.from('media').upload(path, file, { upsert: true });
+        if (uploadErr) throw uploadErr;
+
+        const { error: updateErr } = await sb.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
+        if (updateErr) throw updateErr;
+
+        const { data } = sb.storage.from('media').getPublicUrl(path);
+        document.getElementById('logoPreview').src = data.publicUrl + '?t=' + Date.now();
+
+        showSuccess('Logo uploaded!');
+      } catch (err) {
+        alert('Logo upload failed: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        document.getElementById('logoSpinner').classList.add('hidden');
+        e.target.value = '';
+      }
+    };
 
     // Upload video
     document.getElementById('uploadVideoBtn').onclick = async () => {
@@ -361,27 +412,20 @@
       }
     };
 
-    // Start the app
+    // Start
     window.addEventListener('load', async () => {
-      try {
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) return window.location.href = 'login.html';
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return window.location.href = 'login.html';
 
-        currentUser = user;
-        console.log('Logged in as:', user.email);
+      currentUser = user;
 
-        await Promise.all([
-          loadProfile(),
-          loadVideos(),
-          updateRisingStarBadge()
-        ]);
+      await Promise.all([
+        loadProfile(),
+        loadVideos(),
+        updateRisingStarBadge()
+      ]);
 
-        document.querySelectorAll('button[disabled]').forEach(btn => btn.disabled = false);
-
-      } catch (err) {
-        console.error('Failed to start:', err);
-        alert('Failed to load. Please refresh or log in.');
-      }
+      document.querySelectorAll('button[disabled]').forEach(b => b.disabled = false);
     });
   </script>
 </body>
