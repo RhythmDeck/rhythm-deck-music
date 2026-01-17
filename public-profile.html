@@ -17,7 +17,10 @@
     #videoModal.show {opacity:1;visibility:visible}
     #modalVideo {max-width:90%;max-height:85vh;border:4px solid #10b981;border-radius:12px;box-shadow:0 0 40px rgba(16,185,129,.5)}
     #closeModal {position:absolute;top:20px;right:20px;background:#10b981;color:white;width:50px;height:50px;border-radius:50%;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(0,0,0,.6);z-index:10}
-    .glow-emerald {color:#10b981;text-shadow:0 0 15px rgba(16,185,129,0.7),0 0 30px rgba(16,185,129,0.4);}
+    .name-glow {
+      color: #10b981;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
@@ -28,16 +31,16 @@
     <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-5xl font-bold opacity-50">
       Loading Banner...
     </div>
-    <!-- Logo badge (bottom-left) -->
-    <div class="absolute -bottom-16 left-8 w-40 h-40 rounded-full border-[12px] border-white/90 shadow-2xl overflow-hidden bg-white z-10">
+    <!-- Logo badge - moved up so full circle is visible -->
+    <div class="absolute bottom-8 left-8 w-40 h-40 rounded-full border-[12px] border-white/90 shadow-2xl overflow-hidden bg-white z-10">
       <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
     </div>
   </section>
 
   <!-- Name + Bio -->
   <div class="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
-    <h1 id="name" class="text-6xl md:text-7xl font-bold glow-emerald mb-6 tracking-tight">Loading...</h1>
-    <p id="bio" class="text-xl md:text-2xl text-gray-700 font-light max-w-4xl mx-auto leading-relaxed">Loading bio...</p>
+    <h1 id="name" class="text-6xl md:text-7xl font-bold name-glow mb-6 tracking-tight">Loading...</h1>
+    <p id="bio" class="text-lg md:text-xl text-gray-700 font-light max-w-4xl mx-auto leading-relaxed">Loading bio...</p>
   </div>
 
   <!-- Videos -->
@@ -154,7 +157,7 @@
           .order('created_at', { ascending: false });
 
         container.innerHTML += `
-          <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300">
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="relative">
               <img src="${thumbUrl}" class="w-full h-64 object-cover">
               <div class="video-overlay" onclick="document.getElementById('modalVideo').src='${videoUrl}'; document.getElementById('videoModal').classList.add('show')">
