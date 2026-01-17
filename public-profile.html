@@ -9,40 +9,30 @@
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;}
     @keyframes spin {0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .video-overlay {position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
+    .video-overlay:hover {opacity:1}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 min-h-screen">
 
   <div class="max-w-6xl mx-auto">
-    <!-- Banner + Logo (exact same layout as profile-admin) -->
+    <!-- Banner + Logo (exact same as profile-admin) -->
     <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
       <img id="banner" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
       <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-4xl font-bold opacity-70">
         Loading Banner...
       </div>
-
-      <!-- Logo badge (bottom-left, same as admin) -->
+      <!-- Logo badge bottom-left -->
       <div class="absolute bottom-4 left-4 w-32 h-32 rounded-full border-8 border-white shadow-2xl overflow-hidden bg-white">
         <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
       </div>
     </section>
 
-    <!-- Name + Bio (under banner) -->
-    <div class="max-w-4xl mx-auto px-4 py-12 text-center md:text-left">
-      <h1 id="name" class="text-5xl md:text-6xl font-black text-gray-900 mb-4">Loading...</h1>
-      <p id="bio" class="text-xl text-gray-700 max-w-3xl mx-auto md:mx-0">Loading bio...</p>
+    <!-- Name (large) + Bio underneath -->
+    <div class="max-w-4xl mx-auto px-4 py-12 text-center">
+      <h1 id="name" class="text-5xl md:text-6xl font-black text-gray-900 mb-6">Loading...</h1>
+      <p id="bio" class="text-xl text-gray-700 max-w-3xl mx-auto">Loading bio...</p>
     </div>
-
-    <!-- Upgrade CTA -->
-    <section class="max-w-6xl mx-auto px-4 py-12">
-      <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-10 rounded-xl shadow-2xl text-center">
-        <h2 class="text-4xl font-black mb-6">Want to Go Live with Your Fans?</h2>
-        <p class="text-2xl mb-8">Live streaming is a Pro Plan feature</p>
-        <a href="pricing.html" class="inline-block bg-white text-purple-600 font-black text-2xl px-12 py-5 rounded-2xl shadow-2xl hover:bg-gray-100 transition transform hover:scale-105">
-          Upgrade to Pro Now
-        </a>
-      </div>
-    </section>
 
     <!-- Videos -->
     <section class="max-w-6xl mx-auto px-4 pb-20">
@@ -63,27 +53,30 @@
     const id = urlParams.get('id');
 
     async function loadProfile() {
-      if (!id) return document.getElementById('name').textContent = 'Profile not found';
+      if (!id) {
+        document.getElementById('name').textContent = 'Profile not found';
+        return;
+      }
 
-      const { data: profile, error } = await sb
+      // Try subdomain first, fallback to ID
+      let { data: profile } = await sb
         .from('profiles')
         .select('name, bio, banner_url, logo_url')
         .eq('subdomain', id)
         .single();
 
-      if (error || !profile) {
-        // Fallback to id if subdomain not found
-        const { data: fallback, error: fbErr } = await sb
+      if (!profile) {
+        const { data } = await sb
           .from('profiles')
           .select('name, bio, banner_url, logo_url')
           .eq('id', id)
           .single();
+        profile = data;
+      }
 
-        if (fbErr || !fallback) {
-          document.getElementById('name').textContent = 'Profile not found';
-          return;
-        }
-        profile = fallback;
+      if (!profile) {
+        document.getElementById('name').textContent = 'Profile not found';
+        return;
       }
 
       document.getElementById('name').textContent = profile.name || 'Artist';
@@ -98,6 +91,7 @@
 
       if (profile.logo_url) {
         const { data } = sb.storage.from('media').getPublicUrl(profile.logo_url);
+
         document.getElementById('logo').src = data.publicUrl + '?t=' + Date.now();
       }
     }
@@ -106,18 +100,18 @@
       const container = document.getElementById('videoList');
       container.innerHTML = '<p class="col-span-full text-center py-12 text-xl text-gray-600">Loading videos...</p>';
 
-      const { data: profile } = await sb
+      let { data: profile } = await sb
         .from('profiles')
         .select('id')
         .eq('subdomain', id)
         .single();
 
       if (!profile) {
-        // Fallback
-        const { data: fb } = await sb.from('profiles').select('id').eq('id', id).single();
-        if (!fb) return container.innerHTML = '<p class="col-span-full text-center text-red-600 text-xl py-12">No videos available</p>';
-        profile = fb;
+        const { data } = await sb.from('profiles').select('id').eq('id', id).single();
+        profile = data;
       }
+
+      if (!profile) return container.innerHTML = '<p class="col-span-full text-center text-red-600 text-xl py-12">No videos available</p>';
 
       const { data: videos } = await sb
         .from('user_videos')
@@ -135,6 +129,17 @@
         const videoUrl = sb.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
         const thumbUrl = v.thumbnail_url ? sb.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225?text=Video';
 
+        const { count: likes } = await sb
+          .from('video_likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('video_id', v.id);
+
+        const { data: comments } = await sb
+          .from('video_comments')
+          .select('name, comment, created_at')
+          .eq('video_id', v.id)
+          .order('created_at', { ascending: false });
+
         container.innerHTML += `
           <div class="bg-white rounded-xl shadow overflow-hidden">
             <div class="relative">
@@ -143,8 +148,71 @@
                 <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
               </div>
             </div>
+            <div class="p-5">
+              <h4 class="font-bold text-xl truncate">${v.title || 'Untitled'}</h4>
+              <div class="flex justify-between items-center mt-4">
+                <button class="flex items-center gap-3 text-2xl font-bold hover:text-red-600 transition" onclick="likeVideo('${v.id}', this)">
+                  ❤️ ${likes || 0}
+                </button>
+                <button onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')" class="text-green-600 font-bold hover:text-green-700 text-lg">
+                  Share
+                </button>
+              </div>
+
+              <!-- Comments -->
+              <div class="mt-6 border-t pt-4">
+                <h5 class="font-bold mb-3">Comments</h5>
+                ${comments.length === 0 ? '<p class="text-gray-500 italic">No comments yet</p>' : ''}
+                ${comments.map(c => `<div class="mb-3"><strong>${c.name}:</strong> ${c.comment}</div>`).join('')}
+              </div>
+
+              <!-- Comment form -->
+              <div class="mt-4">
+                <input type="text" id="commentName-${v.id}" placeholder="Your name" class="w-full p-2 border rounded mb-2">
+                <textarea id="commentText-${v.id}" placeholder="Add a comment..." class="w-full p-2 border rounded mb-2" rows="2"></textarea>
+                <button onclick="addComment('${v.id}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                  Post Comment
+                </button>
+              </div>
+            </div>
           </div>`;
       }
+    }
+
+    async function likeVideo(videoId, button) {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return alert("Log in to like");
+
+      const { data: existing } = await sb
+        .from('video_likes')
+        .select('id')
+        .eq('video_id', videoId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (existing) {
+        await sb.from('video_likes').delete().eq('id', existing.id);
+      } else {
+        await sb.from('video_likes').insert({ video_id: videoId, user_id: user.id });
+      }
+
+      loadVideos(); // refresh count
+    }
+
+    async function addComment(videoId) {
+      const name = document.getElementById(`commentName-${videoId}`).value.trim();
+      const comment = document.getElementById(`commentText-${videoId}`).value.trim();
+      if (!name || !comment) return alert("Name and comment required");
+
+      await sb.from('video_comments').insert({
+        video_id: videoId,
+        name,
+        comment
+      });
+
+      document.getElementById(`commentName-${videoId}`).value = '';
+      document.getElementById(`commentText-${videoId}`).value = '';
+      loadVideos(); // refresh comments
     }
 
     window.addEventListener('load', () => {
