@@ -12,6 +12,16 @@
     @keyframes spin {0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     .video-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
     .video-overlay:hover{opacity:1}
+    #videoModal{position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
+    #videoModal.show{opacity:1;visibility:visible}
+    #modalVideo{max-width:90%;max-height:90%;border:4px solid #10b981;border-radius:12px}
+    #closeModal{position:absolute;top:20px;right:20px;background:white;color:black;width:50px;height:50px;border-radius:50%;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(0,0,0,.8);z-index:10}
+    #badge-container{position:absolute;top:16px;right:16px;z-index:30}
+    #badge-container img{width:100px;height:100px;filter:drop-shadow(0 0 20px rgba(255,255,255,.8));transition:all .4s ease}
+    #badge-container img:hover{transform:scale(1.25) rotate(15deg)}
+    #successPopup{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .3s}
+    #successPopup.show{opacity:1;visibility:visible}
+    #successPopup .box{background:#10b981;color:white;padding:2.5rem 4rem;border-radius:1.5rem;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.4);max-width:90%;font-size:1.5rem;font-weight:bold}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -135,11 +145,13 @@
   </section>
 </main>
 
-<!-- Success Popup -->
+<!-- Success Popup (now big, centered, clear message) -->
 <div id="successPopup">
   <div class="box">
     <h3 id="successMessage">Saved!</h3>
-    <button onclick="document.getElementById('successPopup').classList.remove('show')">OK</button>
+    <button onclick="document.getElementById('successPopup').classList.remove('show')" class="mt-4 bg-white text-[#10b981] px-6 py-3 rounded-full font-bold hover:bg-gray-200">
+      OK
+    </button>
   </div>
 </div>
 
@@ -172,13 +184,6 @@
     document.getElementById('videoModal').classList.remove('show');
     document.getElementById('modalVideo').src = '';
   }
-
-  // Close success popup
-  document.getElementById('successPopup').addEventListener('click', (e) => {
-    if (e.target.id === 'successPopup' || e.target.tagName === 'BUTTON') {
-      document.getElementById('successPopup').classList.remove('show');
-    }
-  });
 
   async function loadProfile() {
     try {
@@ -279,7 +284,7 @@
     try {
       const { error } = await sb.from('profiles').update({ name }).eq('id', currentUser.id);
       if (error) throw error;
-      showSuccess('Name saved!');
+      showSuccess('Name Saved!');
     } catch (err) {
       alert('Failed: ' + err.message);
     }
@@ -290,15 +295,11 @@
     try {
       const { error } = await sb.from('profiles').update({ bio }).eq('id', currentUser.id);
       if (error) throw error;
-      showSuccess('Bio saved!');
+      showSuccess('Bio Saved!');
     } catch (err) {
       alert('Failed: ' + err.message);
     }
   }
-
-  // Attach save buttons
-  document.getElementById('saveNameBtn').onclick = saveArtistName;
-  document.getElementById('saveBioBtn').onclick = saveBio;
 
   // Banner upload
   document.getElementById('changeBannerBtn').onclick = () => document.getElementById('bannerInput').click();
@@ -402,8 +403,8 @@
     ]);
 
     // Attach save buttons
-    document.getElementById('saveNameBtn').onclick = saveArtistName;
-    document.getElementById('saveBioBtn').onclick = saveBio;
+    document.getElementById('saveNameBtn').addEventListener('click', saveArtistName);
+    document.getElementById('saveBioBtn').addEventListener('click', saveBio);
 
     document.querySelectorAll('button[disabled]').forEach(btn => btn.disabled = false);
   });
