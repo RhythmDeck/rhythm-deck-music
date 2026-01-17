@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Public Profile | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;}
@@ -17,31 +16,36 @@
 <body class="bg-gray-100 text-gray-900">
 
   <div class="max-w-6xl mx-auto p-4">
-    <!-- Banner -->
-    <img id="banner" src="" alt="Banner" class="w-full h-64 object-cover rounded-xl shadow-lg mb-6 hidden">
+    <!-- Banner (exact same as admin) -->
+    <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden rounded-xl shadow-2xl mb-8">
+      <img id="banner" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
+      <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-4xl font-bold opacity-70">
+        Banner Loading...
+      </div>
+    </section>
 
-    <!-- Logo + Name + Bio -->
-    <div class="flex items-center gap-6 mb-8">
-      <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-32 h-32 rounded-full border-4 border-white shadow-xl object-cover">
-      <div>
-        <h1 id="name" class="text-4xl font-bold">Loading...</h1>
-        <p id="bio" class="text-lg text-gray-700 mt-2">Loading bio...</p>
+    <!-- Logo + Large Name + Bio (under banner) -->
+    <div class="flex flex-col md:flex-row items-center gap-8 mb-12">
+      <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-40 h-40 rounded-full border-8 border-white shadow-2xl object-cover">
+      <div class="text-center md:text-left">
+        <h1 id="name" class="text-5xl md:text-6xl font-bold text-gray-900">Loading...</h1>
+        <p id="bio" class="text-xl text-gray-700 mt-4 max-w-3xl">Loading bio...</p>
       </div>
     </div>
 
-    <!-- Upgrade CTA -->
-    <section class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-xl shadow-2xl mb-12 text-center">
-      <h2 class="text-3xl font-bold mb-4">Want to Go Live with Your Fans?</h2>
-      <p class="text-xl mb-6">Live streaming is a Pro Plan feature</p>
-      <a href="pricing.html" class="inline-block bg-white text-purple-600 font-bold px-10 py-4 rounded-full text-lg hover:bg-gray-100 transition">
+    <!-- Upgrade CTA (same as in admin) -->
+    <section class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-10 rounded-xl shadow-2xl mb-12 text-center">
+      <h2 class="text-4xl font-black mb-6">Want to Go Live with Your Fans?</h2>
+      <p class="text-2xl mb-8">Live streaming is a Pro Plan feature</p>
+      <a href="pricing.html" class="inline-block bg-white text-purple-600 font-black text-2xl px-12 py-5 rounded-2xl shadow-2xl hover:bg-gray-100 transition transform hover:scale-105">
         Upgrade to Pro Now
       </a>
     </section>
 
     <!-- Videos -->
-    <h2 class="text-3xl font-bold mb-6">Videos</h2>
+    <h2 class="text-4xl font-bold mb-8 text-center">Videos</h2>
     <div id="videoList" class="grid md:grid-cols-3 gap-8">
-      <p class="col-span-full text-center text-gray-600 py-12">Loading videos...</p>
+      <p class="col-span-full text-center text-gray-600 py-12 text-xl">Loading videos...</p>
     </div>
   </div>
 
@@ -51,16 +55,18 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    // Get ?id= from URL
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
 
     async function loadProfile() {
-      if (!id) return document.getElementById('name').textContent = 'Profile not found';
+      if (!id) {
+        document.getElementById('name').textContent = 'Profile not found';
+        return;
+      }
 
       const { data: profile, error } = await sb
         .from('profiles')
-        .select('name, bio, banner_url, logo_url, subdomain')
+        .select('name, bio, banner_url, logo_url')
         .or(`subdomain.eq.${id},id.eq.${id}`)
         .single();
 
@@ -76,6 +82,7 @@
         const { data } = sb.storage.from('media').getPublicUrl(profile.banner_url);
         document.getElementById('banner').src = data.publicUrl + '?t=' + Date.now();
         document.getElementById('banner').classList.remove('hidden');
+        document.getElementById('bannerPlaceholder').classList.add('hidden');
       }
 
       if (profile.logo_url) {
@@ -86,7 +93,7 @@
 
     async function loadVideos() {
       const container = document.getElementById('videoList');
-      container.innerHTML = '<p class="col-span-full text-center py-12 text-gray-600">Loading videos...</p>';
+      container.innerHTML = '<p class="col-span-full text-center py-12 text-xl text-gray-600">Loading videos...</p>';
 
       const { data: profile } = await sb
         .from('profiles')
@@ -94,16 +101,16 @@
         .or(`subdomain.eq.${id},id.eq.${id}`)
         .single();
 
-      if (!profile) return container.innerHTML = '<p class="col-span-full text-center text-red-600">Profile not found</p>';
+      if (!profile) return container.innerHTML = '<p class="col-span-full text-center text-red-600 text-xl py-12">No profile found</p>';
 
-      const { data: videos, error } = await sb
+      const { data: videos } = await sb
         .from('user_videos')
         .select('*')
         .eq('user_id', profile.id)
         .order('created_at', { ascending: false });
 
-      if (error || !videos?.length) {
-        container.innerHTML = '<p class="col-span-full text-center italic py-12 text-gray-600">No videos yet</p>';
+      if (!videos?.length) {
+        container.innerHTML = '<p class="col-span-full text-center italic py-12 text-xl text-gray-600">No videos yet</p>';
         return;
       }
 
@@ -112,7 +119,7 @@
         const videoUrl = sb.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
         const thumbUrl = v.thumbnail_url ? sb.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225?text=Video';
 
-        const { count: likes = 0 } = await sb
+        const { count: likes } = await sb
           .from('video_likes')
           .select('*', { count: 'exact', head: true })
           .eq('video_id', v.id);
@@ -120,19 +127,20 @@
         container.innerHTML += `
           <div class="bg-white rounded-xl shadow overflow-hidden">
             <div class="relative">
-              <img src="${thumbUrl}" class="w-full h-48 object-cover">
+              <img src="${thumbUrl}" class="w-full h-64 object-cover">
               <div class="video-overlay" onclick="window.open('${videoUrl}', '_blank')">
                 <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
               </div>
             </div>
-            <div class="p-4">
-              <h4 class="font-bold truncate">${v.title || 'Untitled'}</h4>
+            <div class="p-5">
+              <h4 class="font-bold text-xl truncate">${v.title || 'Untitled'}</h4>
               <div class="flex justify-between items-center mt-4">
-                <button class="flex items-center gap-2 text-xl font-bold hover:text-red-600 transition" onclick="likeVideo('${v.id}', this)">
-                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                  ${likes}
+                <button class="flex items-center gap-3 text-2xl font-bold hover:text-red-600 transition" onclick="likeVideo('${v.id}', this)">
+                  ❤️ ${likes || 0}
                 </button>
-                <button onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')" class="text-green-600 font-bold hover:text-green-700">Share</button>
+                <button onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')" class="text-green-600 font-bold hover:text-green-700 text-lg">
+                  Share
+                </button>
               </div>
             </div>
           </div>`;
@@ -141,7 +149,7 @@
 
     async function likeVideo(videoId, button) {
       const { data: { user } } = await sb.auth.getUser();
-      if (!user) return alert("Please log in to like");
+      if (!user) return alert("Log in to like videos");
 
       const { data: existing } = await sb
         .from('video_likes')
@@ -156,7 +164,7 @@
         await sb.from('video_likes').insert({ video_id: videoId, user_id: user.id });
       }
 
-      loadVideos(); // refresh likes count
+      loadVideos(); // Refresh likes count
     }
 
     window.addEventListener('load', () => {
