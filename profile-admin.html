@@ -267,6 +267,11 @@
                 ${comments.length === 0 ? '<p class="text-gray-500 italic">No comments yet</p>' : ''}
                 ${comments.map(c => `<div class="mb-3"><strong>${c.name}:</strong> ${c.comment}</div>`).join('')}
               </div>
+
+              <!-- Delete Button -->
+              <button onclick="if(confirm('Delete this video forever?')) deleteVideo('${v.id}', '${v.video_url}', '${v.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-4 rounded">
+                Delete Video
+              </button>
             </div>
           </div>`;
       }
@@ -317,10 +322,6 @@
       alert('Failed: ' + err.message);
     }
   }
-
-  // Attach save buttons
-  document.getElementById('saveNameBtn').onclick = saveArtistName;
-  document.getElementById('saveBioBtn').onclick = saveBio;
 
   // Banner upload
   document.getElementById('changeBannerBtn').onclick = () => document.getElementById('bannerInput').click();
@@ -417,10 +418,16 @@
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return window.location.href = 'login.html';
     currentUser = user;
+
+    // Attach save buttons
+    document.getElementById('saveNameBtn').onclick = saveArtistName;
+    document.getElementById('saveBioBtn').onclick = saveBio;
+
     await Promise.all([
       loadProfile(),
       loadVideos()
     ]);
+
     document.querySelectorAll('button[disabled]').forEach(btn => btn.disabled = false);
   });
 </script>
