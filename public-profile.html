@@ -6,42 +6,47 @@
   <title>Public Profile | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
+    body { font-family: 'Poppins', sans-serif; }
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;}
     @keyframes spin {0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     .video-overlay {position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
     .video-overlay:hover {opacity:1}
+    .glow-emerald {
+      text-shadow: 0 0 20px #10b981, 0 0 40px #10b981, 0 0 60px #10b981;
+      color: #10b981;
+    }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-900 min-h-screen">
+<body class="bg-gradient-to-b from-gray-50 to-gray-200 text-gray-900 min-h-screen">
 
-  <div class="max-w-6xl mx-auto">
-    <!-- Banner + Logo (exact same as profile-admin) -->
-    <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
-      <img id="banner" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
-      <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-4xl font-bold opacity-70">
-        Loading Banner...
-      </div>
-      <!-- Logo badge bottom-left -->
-      <div class="absolute bottom-4 left-4 w-32 h-32 rounded-full border-8 border-white shadow-2xl overflow-hidden bg-white">
-        <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
-      </div>
-    </section>
-
-    <!-- Name (large) + Bio underneath -->
-    <div class="max-w-4xl mx-auto px-4 py-12 text-center">
-      <h1 id="name" class="text-5xl md:text-6xl font-black text-gray-900 mb-6">Loading...</h1>
-      <p id="bio" class="text-xl text-gray-700 max-w-3xl mx-auto">Loading bio...</p>
+  <!-- Full-width Banner -->
+  <section class="relative h-[400px] bg-gradient-to-br from-purple-950 to-blue-950 overflow-hidden shadow-2xl">
+    <img id="banner" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
+    <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-5xl font-bold opacity-60 tracking-wider">
+      Loading Banner...
     </div>
 
-    <!-- Videos -->
-    <section class="max-w-6xl mx-auto px-4 pb-20">
-      <h2 class="text-4xl font-bold text-center mb-10">Videos</h2>
-      <div id="videoList" class="grid md:grid-cols-3 gap-8">
-        <p class="col-span-full text-center text-gray-600 py-12 text-xl">Loading videos...</p>
-      </div>
-    </section>
+    <!-- Logo badge (bottom-left, professional look) -->
+    <div class="absolute -bottom-16 left-8 w-40 h-40 rounded-full border-[12px] border-white/90 shadow-2xl overflow-hidden bg-white z-10">
+      <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
+    </div>
+  </section>
+
+  <!-- Name + Bio (under banner, centered, glowing name) -->
+  <div class="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
+    <h1 id="name" class="text-6xl md:text-8xl font-extrabold glow-emerald mb-6 tracking-tight">Loading...</h1>
+    <p id="bio" class="text-2xl md:text-3xl text-gray-800 font-light max-w-4xl mx-auto leading-relaxed">Loading bio...</p>
   </div>
+
+  <!-- Videos Section -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-5xl font-bold text-center mb-16 text-gray-900 tracking-wide">Videos</h2>
+    <div id="videoList" class="grid md:grid-cols-3 gap-10">
+      <p class="col-span-full text-center text-gray-600 py-20 text-2xl">Loading videos...</p>
+    </div>
+  </section>
 
   <script>
     const sb = supabase.createClient(
@@ -91,14 +96,13 @@
 
       if (profile.logo_url) {
         const { data } = sb.storage.from('media').getPublicUrl(profile.logo_url);
-
         document.getElementById('logo').src = data.publicUrl + '?t=' + Date.now();
       }
     }
 
     async function loadVideos() {
       const container = document.getElementById('videoList');
-      container.innerHTML = '<p class="col-span-full text-center py-12 text-xl text-gray-600">Loading videos...</p>';
+      container.innerHTML = '<p class="col-span-full text-center py-20 text-2xl text-gray-600">Loading videos...</p>';
 
       let { data: profile } = await sb
         .from('profiles')
@@ -111,7 +115,7 @@
         profile = data;
       }
 
-      if (!profile) return container.innerHTML = '<p class="col-span-full text-center text-red-600 text-xl py-12">No videos available</p>';
+      if (!profile) return container.innerHTML = '<p class="col-span-full text-center text-red-600 text-2xl py-20">No videos available</p>';
 
       const { data: videos } = await sb
         .from('user_videos')
@@ -120,7 +124,7 @@
         .order('created_at', { ascending: false });
 
       if (!videos?.length) {
-        container.innerHTML = '<p class="col-span-full text-center italic py-12 text-xl text-gray-600">No videos yet</p>';
+        container.innerHTML = '<p class="col-span-full text-center italic py-20 text-2xl text-gray-600">No videos yet</p>';
         return;
       }
 
@@ -129,90 +133,16 @@
         const videoUrl = sb.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
         const thumbUrl = v.thumbnail_url ? sb.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl : 'https://via.placeholder.com/400x225?text=Video';
 
-        const { count: likes } = await sb
-          .from('video_likes')
-          .select('*', { count: 'exact', head: true })
-          .eq('video_id', v.id);
-
-        const { data: comments } = await sb
-          .from('video_comments')
-          .select('name, comment, created_at')
-          .eq('video_id', v.id)
-          .order('created_at', { ascending: false });
-
         container.innerHTML += `
-          <div class="bg-white rounded-xl shadow overflow-hidden">
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.03] transition-all duration-300">
             <div class="relative">
               <img src="${thumbUrl}" class="w-full h-64 object-cover">
               <div class="video-overlay" onclick="window.open('${videoUrl}', '_blank')">
-                <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
-              </div>
-            </div>
-            <div class="p-5">
-              <h4 class="font-bold text-xl truncate">${v.title || 'Untitled'}</h4>
-              <div class="flex justify-between items-center mt-4">
-                <button class="flex items-center gap-3 text-2xl font-bold hover:text-red-600 transition" onclick="likeVideo('${v.id}', this)">
-                  ❤️ ${likes || 0}
-                </button>
-                <button onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')" class="text-green-600 font-bold hover:text-green-700 text-lg">
-                  Share
-                </button>
-              </div>
-
-              <!-- Comments -->
-              <div class="mt-6 border-t pt-4">
-                <h5 class="font-bold mb-3">Comments</h5>
-                ${comments.length === 0 ? '<p class="text-gray-500 italic">No comments yet</p>' : ''}
-                ${comments.map(c => `<div class="mb-3"><strong>${c.name}:</strong> ${c.comment}</div>`).join('')}
-              </div>
-
-              <!-- Comment form -->
-              <div class="mt-4">
-                <input type="text" id="commentName-${v.id}" placeholder="Your name" class="w-full p-2 border rounded mb-2">
-                <textarea id="commentText-${v.id}" placeholder="Add a comment..." class="w-full p-2 border rounded mb-2" rows="2"></textarea>
-                <button onclick="addComment('${v.id}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                  Post Comment
-                </button>
+                <svg class="w-20 h-20 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
               </div>
             </div>
           </div>`;
       }
-    }
-
-    async function likeVideo(videoId, button) {
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) return alert("Log in to like");
-
-      const { data: existing } = await sb
-        .from('video_likes')
-        .select('id')
-        .eq('video_id', videoId)
-        .eq('user_id', user.id)
-        .single();
-
-      if (existing) {
-        await sb.from('video_likes').delete().eq('id', existing.id);
-      } else {
-        await sb.from('video_likes').insert({ video_id: videoId, user_id: user.id });
-      }
-
-      loadVideos(); // refresh count
-    }
-
-    async function addComment(videoId) {
-      const name = document.getElementById(`commentName-${videoId}`).value.trim();
-      const comment = document.getElementById(`commentText-${videoId}`).value.trim();
-      if (!name || !comment) return alert("Name and comment required");
-
-      await sb.from('video_comments').insert({
-        video_id: videoId,
-        name,
-        comment
-      });
-
-      document.getElementById(`commentName-${videoId}`).value = '';
-      document.getElementById(`commentText-${videoId}`).value = '';
-      loadVideos(); // refresh comments
     }
 
     window.addEventListener('load', () => {
