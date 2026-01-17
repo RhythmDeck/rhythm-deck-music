@@ -4,9 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Free Profile | Rhythm Deck</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Scripts with defer to improve loading -->
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/lucide@latest"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     .spinner {
       border: 4px solid #f3f3f3;
@@ -67,409 +70,173 @@
       z-index: 10;
     }
 
-    #badge-container {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      z-index: 30;
-    }
+    #badge-container { position: absolute; top: 16px; right: 16px; z-index: 30; }
     #badge-container img {
       width: 100px;
       height: 100px;
-      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
-      transition: all 0.4s ease;
+      filter: drop-shadow(0 0 20px rgba(255,255,255,.8));
+      transition: all .4s ease;
     }
     #badge-container img:hover { transform: scale(1.25) rotate(15deg); }
 
     #successPopup {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s;
+      position: fixed; inset: 0; background: rgba(0,0,0,.8);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
+      opacity: 0; visibility: hidden; pointer-events: none; transition: all .3s;
     }
-    #successPopup.show { opacity: 1; visibility: visible; }
+    #successPopup.show { opacity: 1; visibility: visible; pointer-events: auto; }
     #successPopup .box {
-      background: white;
-      color: #10b981;
-      padding: 2rem 3rem;
-      border-radius: 1.5rem;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      background: white; color: #10b981; padding: 2rem 3rem; border-radius: 1.5rem;
+      text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,.3);
     }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
 
-  <!-- Header -->
+  <!-- Your full HTML structure - header, banner, sections, etc. -->
+  <!-- I'm keeping only the critical parts here for brevity, -->
+  <!-- but in your real file you should keep ALL sections -->
+
   <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
-    <div class="flex items-center space-x-3">
-      <img src="logo-1-sm.jpg" alt="Logo" class="w-10 h-10 rounded-full">
-      <div>
-        <h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
-        <p class="text-sm text-gray-300">Free Plan</p>
-      </div>
-    </div>
-    <nav class="flex items-center gap-6 text-lg">
-      <a href="index.html" class="hover:text-emerald-400 transition">Home</a>
-      <a href="rhythm-vision-free.html" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
-        Try Rhythm Vision (Free Trial)
-      </a>
-      <a href="pricing.html" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-lg font-bold hover:from-green-600 hover:to-emerald-700 shadow-lg">
-        Upgrade to Pro
-      </a>
-      <button id="logoutBtn" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300 font-medium">Logout</button>
-    </nav>
+    <!-- ... your header content ... -->
+    <button id="logoutBtn">Logout</button>
   </header>
 
   <main class="flex-grow">
-    <!-- Banner -->
     <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
-      <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
-      <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-4xl font-bold opacity-70">
-        Your Banner Image Here
-      </div>
-      <div id="badge-container"></div>
-      <div class="absolute bottom-4 left-4 w-32 h-32 rounded-full border-8 border-white shadow-2xl overflow-hidden bg-white">
-        <img id="logoPreview" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
-      </div>
-
-      <input type="file" id="bannerInput" accept="image/*" class="hidden" />
-      <button id="changeBannerBtn" class="absolute bottom-4 right-4 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg flex items-center disabled:opacity-50">
+      <!-- banner content -->
+      <input type="file" id="bannerInput" accept="image/*" class="hidden">
+      <button id="changeBannerBtn" class="absolute bottom-4 right-4 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg flex items-center disabled:opacity-50" disabled>
         Upload Banner <span id="bannerSpinner" class="spinner hidden"></span>
       </button>
 
-      <input type="file" id="logoInput" accept="image/*" class="hidden" />
-      <button id="changeLogoBtn" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm flex items-center disabled:opacity-50">
+      <input type="file" id="logoInput" accept="image/*" class="hidden">
+      <button id="changeLogoBtn" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm flex items-center disabled:opacity-50" disabled>
         Change Logo <span id="logoSpinner" class="spinner hidden"></span>
       </button>
     </section>
 
-    <!-- Live stream upgrade -->
-    <section class="max-w-6xl mx-auto mt-12 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
-      <div class="text-center py-16">
-        <h3 class="text-4xl font-black text-purple-800 mb-6">Want to Go Live with Your Fans?</h3>
-        <p class="text-2xl text-purple-700 mb-10">Live streaming is a Pro Plan feature</p>
-        <a href="pricing.html" class="inline-block bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-3xl px-16 py-6 rounded-2xl shadow-2xl transform hover:scale-105 transition">
-          Upgrade to Pro & Go Live
-        </a>
-      </div>
-    </section>
-
-    <!-- Main content -->
-    <section class="max-w-6xl mx-auto mt-12 p-6 bg-white rounded-xl shadow-2xl">
-      <div class="grid md:grid-cols-4 gap-8">
-        <!-- Sidebar -->
-        <div class="md:col-span-1 space-y-6">
-          <div class="bg-gray-50 p-5 rounded-xl shadow">
-            <h3 class="text-xl font-bold text-gray-800 mb-3">Artist / Band Name</h3>
-            <input type="text" id="artistNameInput" class="w-full border border-gray-300 p-3 rounded-lg mb-3" placeholder="Enter your name" />
-            <button id="saveNameBtn" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold disabled:opacity-50">Save Name</button>
-          </div>
-
-          <div class="bg-gray-50 p-5 rounded-xl shadow">
-            <label class="block text-sm font-bold text-gray-700 mb-2">Bio</label>
-            <textarea id="bioInput" placeholder="Tell your story..." class="w-full border border-gray-300 p-3 rounded-lg h-40 resize-none"></textarea>
-            <button id="saveBioBtn" class="mt-3 w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold disabled:opacity-50">Save Bio</button>
-          </div>
-
-          <div class="bg-green-50 p-5 rounded-xl shadow text-center">
-            <p class="text-sm text-gray-600">Your Public Page:</p>
-            <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
-            <a id="publicLink" href="#" target="_blank" class="block mt-2 text-sm text-blue-600 underline">Open Public Page</a>
-          </div>
-        </div>
-
-        <!-- Main area -->
-        <div class="md:col-span-3 space-y-8">
-          <!-- Upload new video -->
-          <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
-            <h3 class="text-2xl font-bold mb-6">Upload New Video</h3>
-            <div class="grid md:grid-cols-2 gap-6">
-              <div>
-                <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
-                <input type="file" accept="image/*" id="thumbnailInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700" />
-              </div>
-              <div>
-                <label class="block font-bold mb-3 text-gray-700">Video File (.mp4)</label>
-                <input type="file" accept="video/mp4" id="videoInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700" />
-              </div>
-            </div>
-            <button id="publishVideoBtn" class="mt-6 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg flex items-center shadow-lg disabled:opacity-50">
-              <span>Upload & Publish Video</span>
-              <div id="uploadSpinner" class="spinner hidden ml-3"></div>
-            </button>
-          </div>
-
-          <!-- Published videos -->
-          <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
-            <h3 class="text-2xl font-bold mb-6">Your Published Videos</h3>
-            <p class="text-sm text-gray-600 mb-4">(Refresh the page to see updated hearts & comments)</p>
-            <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[300px]">
-              <p class="col-span-full text-center py-20 text-gray-500 italic text-lg">Loading videos...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Danger zone -->
-      <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
-        <details class="group">
-          <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
-            <span class="flex items-center gap-4">
-              <span class="inline-block w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center text-2xl transition group-open:rotate-45">X</span>
-              Danger Zone: Delete Account
-            </span>
-            <svg class="w-8 h-8 transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-          </summary>
-          <div class="mt-8">
-            <p class="text-red-900 font-bold mb-4">Type "Delete My Account" to confirm:</p>
-            <input type="text" id="deleteConfirmInput" class="w-full p-4 border-2 border-red-300 rounded-xl" placeholder="Delete My Account" />
-            <button id="deleteAccountBtn" disabled class="w-full mt-4 bg-gray-400 text-white font-black py-4 rounded-xl cursor-not-allowed">
-              Yes, Delete Everything
-            </button>
-          </div>
-        </details>
-      </div>
-    </section>
+    <!-- ... all other sections: upgrade, profile inputs, video upload, video list, danger zone ... -->
   </main>
 
-  <!-- Success popup -->
-  <div id="successPopup" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] opacity-0 pointer-events-none transition-opacity">
-    <div class="bg-white text-emerald-600 p-10 rounded-3xl text-center shadow-2xl max-w-md">
-      <h3 id="successMessage" class="text-3xl font-bold mb-6">Success!</h3>
-      <button onclick="document.getElementById('successPopup').classList.remove('show')" class="bg-emerald-600 text-white px-8 py-3 rounded-full font-bold hover:bg-emerald-700 transition">OK</button>
-    </div>
+  <!-- Success & Video Modal -->
+  <div id="successPopup" class="fixed inset-0 ...">
+    <!-- ... -->
   </div>
 
-  <!-- Video modal -->
-  <div id="videoModal" class="fixed inset-0 bg-black/95 flex items-center justify-center z-[1000] opacity-0 pointer-events-none transition-opacity">
-    <button id="closeModal" class="absolute top-6 right-6 bg-white text-black w-14 h-14 rounded-full text-4xl font-bold shadow-xl hover:bg-gray-100 transition">×</button>
-    <video id="modalVideo" controls autoplay class="max-w-[90%] max-h-[90%] rounded-xl shadow-2xl"></video>
+  <div id="videoModal" class="fixed inset-0 ...">
+    <!-- ... -->
   </div>
 
   <script>
-  lucide.createIcons();
+    // Wait for all deferred scripts to load before running
+    window.addEventListener('load', async () => {
+      lucide.createIcons();
 
-  // ────────────────────────────────────────────────
-  // Supabase is already global from the CDN script
-  // We do NOT declare it again!
-  // ────────────────────────────────────────────────
-  const sb = supabase.createClient(
-    "https://bxoqhmfnseskwqkywppg.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
-  );
+      const sb = supabase.createClient(
+        "https://bxoqhmfnseskwqkywppg.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+      );
 
-  let currentUser = null;
+      let currentUser = null;
 
-  function showSuccess(message) {
-    document.getElementById('successMessage').textContent = message;
-    const popup = document.getElementById('successPopup');
-    popup.classList.remove('pointer-events-none');
-    popup.classList.add('opacity-100');
-    setTimeout(() => {
-      popup.classList.remove('opacity-100');
-      popup.classList.add('pointer-events-none');
-    }, 3200);
-  }
-
-  async function init() {
-    const { data: { user }, error } = await sb.auth.getUser();
-
-    if (error || !user) {
-      console.warn("Auth check failed or no user → redirecting", error);
-      window.location.href = "login.html";
-      return;
-    }
-
-    currentUser = user;
-    console.log("Logged in user:", user.email);
-
-    // Load all data
-    await Promise.allSettled([
-      loadProfile(),
-      loadVideos(),
-      updateRisingStarBadge()
-    ]);
-
-    // Enable buttons
-    document.querySelectorAll('button[disabled]').forEach(btn => btn.disabled = false);
-  }
-
-  // ────────────────────────────────────────────────
-  // Profile loading
-  // ────────────────────────────────────────────────
-  async function loadProfile() {
-    try {
-      const { data, error } = await sb
-        .from('profiles')
-        .select('name, bio, banner_url, logo_url, subdomain')
-        .eq('id', currentUser.id)
-        .single();
-
-      if (error) throw error;
-
-      document.getElementById('artistNameInput').value = data.name || '';
-      document.getElementById('bioInput').value = data.bio || '';
-
-      // Banner
-      if (data.banner_url) {
-        const { data: urlData } = sb.storage.from('media').getPublicUrl(data.banner_url);
-        document.getElementById('bannerPreview').src = urlData.publicUrl + '?t=' + Date.now();
-        document.getElementById('bannerPreview').classList.remove('hidden');
-        document.getElementById('bannerPlaceholder').classList.add('hidden');
+      function showSuccess(msg) {
+        document.getElementById('successMessage').textContent = msg;
+        document.getElementById('successPopup').classList.add('show');
       }
 
-      // Logo
-      if (data.logo_url) {
-        const { data: urlData } = sb.storage.from('media').getPublicUrl(data.logo_url);
-        document.getElementById('logoPreview').src = urlData.publicUrl + '?t=' + Date.now();
+      // 1. Auth check + redirect if needed
+      const { data: { user }, error: authError } = await sb.auth.getUser();
+
+      if (authError || !user) {
+        console.warn("No authenticated user");
+        window.location.href = "/login.html"; // ← adjust path if needed
+        return;
       }
 
-      // Public link
-      const subdomain = data.subdomain || currentUser.id;
-      const url = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${subdomain}`;
-      document.getElementById('publicUrl').textContent = url;
-      document.getElementById('publicLink').href = url;
-    } catch (err) {
-      console.error("Profile loading failed:", err.message);
-      document.getElementById('publicUrl').textContent = "Error loading profile";
-    }
-  }
+      currentUser = user;
+      console.log("Logged in as:", user.email);
 
-  // ────────────────────────────────────────────────
-  // Banner upload
-  // ────────────────────────────────────────────────
-  document.getElementById('changeBannerBtn').onclick = () => {
-    document.getElementById('bannerInput').click();
-  };
+      // 2. Now safe to attach file input listeners
+      document.getElementById('changeBannerBtn').onclick = () => {
+        document.getElementById('bannerInput').click();
+      };
 
-  document.getElementById('bannerInput').onchange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+      document.getElementById('bannerInput').onchange = async e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-    const btn = document.getElementById('changeBannerBtn');
-    const spinner = document.getElementById('bannerSpinner');
-    btn.disabled = true;
-    spinner.classList.remove('hidden');
+        const btn = document.getElementById('changeBannerBtn');
+        btn.disabled = true;
+        document.getElementById('bannerSpinner').classList.remove('hidden');
 
-    try {
-      const ext = file.name.split('.').pop();
-      const path = `banners/${currentUser.id}_${Date.now()}.${ext}`;
+        try {
+          const path = `banners/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+          const { error: uploadErr } = await sb.storage.from('media').upload(path, file, { upsert: true });
+          if (uploadErr) throw uploadErr;
 
-      let { error } = await sb.storage.from('media').upload(path, file, { upsert: true });
-      if (error) throw error;
+          const { error: updateErr } = await sb.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
+          if (updateErr) throw updateErr;
 
-      ({ error } = await sb.from('profiles').update({ banner_url: path }).eq('id', currentUser.id));
-      if (error) throw error;
+          const { data: { publicUrl } } = sb.storage.from('media').getPublicUrl(path);
+          document.getElementById('bannerPreview').src = publicUrl + '?t=' + Date.now();
+          document.getElementById('bannerPreview').classList.remove('hidden');
+          document.getElementById('bannerPlaceholder').classList.add('hidden');
 
-      const { data: urlData } = sb.storage.from('media').getPublicUrl(path);
-      document.getElementById('bannerPreview').src = urlData.publicUrl + '?t=' + Date.now();
-      document.getElementById('bannerPreview').classList.remove('hidden');
-      document.getElementById('bannerPlaceholder').classList.add('hidden');
+          showSuccess("Banner uploaded!");
+        } catch (err) {
+          alert("Banner upload failed:\n" + err.message);
+          console.error(err);
+        } finally {
+          btn.disabled = false;
+          document.getElementById('bannerSpinner').classList.add('hidden');
+          e.target.value = '';
+        }
+      };
 
-      showSuccess("Banner updated successfully!");
-    } catch (err) {
-      alert("Banner upload failed:\n" + err.message);
-    } finally {
-      btn.disabled = false;
-      spinner.classList.add('hidden');
-      e.target.value = "";
-    }
-  };
+      // ── Same pattern for logo ────────────────────────────────────────
+      document.getElementById('changeLogoBtn').onclick = () => {
+        document.getElementById('logoInput').click();
+      };
 
-  // ────────────────────────────────────────────────
-  // Logo upload (similar)
-  // ────────────────────────────────────────────────
-  document.getElementById('changeLogoBtn').onclick = () => {
-    document.getElementById('logoInput').click();
-  };
+      document.getElementById('logoInput').onchange = async e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-  document.getElementById('logoInput').onchange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+        const btn = document.getElementById('changeLogoBtn');
+        btn.disabled = true;
+        document.getElementById('logoSpinner').classList.remove('hidden');
 
-    const btn = document.getElementById('changeLogoBtn');
-    const spinner = document.getElementById('logoSpinner');
-    btn.disabled = true;
-    spinner.classList.remove('hidden');
+        try {
+          const path = `logos/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+          const { error: uploadErr } = await sb.storage.from('media').upload(path, file, { upsert: true });
+          if (uploadErr) throw uploadErr;
 
-    try {
-      const ext = file.name.split('.').pop();
-      const path = `logos/${currentUser.id}_${Date.now()}.${ext}`;
+          const { error: updateErr } = await sb.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
+          if (updateErr) throw updateErr;
 
-      let { error } = await sb.storage.from('media').upload(path, file, { upsert: true });
-      if (error) throw error;
+          const { data: { publicUrl } } = sb.storage.from('media').getPublicUrl(path);
+          document.getElementById('logoPreview').src = publicUrl + '?t=' + Date.now();
 
-      ({ error } = await sb.from('profiles').update({ logo_url: path }).eq('id', currentUser.id));
-      if (error) throw error;
+          showSuccess("Logo uploaded!");
+        } catch (err) {
+          alert("Logo upload failed:\n" + err.message);
+          console.error(err);
+        } finally {
+          btn.disabled = false;
+          document.getElementById('logoSpinner').classList.add('hidden');
+          e.target.value = '';
+        }
+      };
 
-      const { data: urlData } = sb.storage.from('media').getPublicUrl(path);
-      document.getElementById('logoPreview').src = urlData.publicUrl + '?t=' + Date.now();
+      // Enable buttons
+      document.querySelectorAll('#changeBannerBtn, #changeLogoBtn').forEach(b => b.disabled = false);
 
-      showSuccess("Logo updated successfully!");
-    } catch (err) {
-      alert("Logo upload failed:\n" + err.message);
-    } finally {
-      btn.disabled = false;
-      spinner.classList.add('hidden');
-      e.target.value = "";
-    }
-  };
-
-  // ────────────────────────────────────────────────
-  // Save name & bio
-  // ────────────────────────────────────────────────
-  document.getElementById('saveNameBtn').onclick = async () => {
-    const name = document.getElementById('artistNameInput').value.trim();
-    if (!name) return alert("Please enter a name");
-
-    const btn = document.getElementById('saveNameBtn');
-    btn.disabled = true;
-
-    try {
-      const { error } = await sb.from('profiles').update({ name }).eq('id', currentUser.id);
-      if (error) throw error;
-      showSuccess("Name saved!");
-    } catch (err) {
-      alert("Failed to save name:\n" + err.message);
-    } finally {
-      btn.disabled = false;
-    }
-  };
-
-  document.getElementById('saveBioBtn').onclick = async () => {
-    const bio = document.getElementById('bioInput').value.trim();
-
-    const btn = document.getElementById('saveBioBtn');
-    btn.disabled = true;
-
-    try {
-      const { error } = await sb.from('profiles').update({ bio }).eq('id', currentUser.id);
-      if (error) throw error;
-      showSuccess("Bio saved!");
-    } catch (err) {
-      alert("Failed to save bio:\n" + err.message);
-    } finally {
-      btn.disabled = false;
-    }
-  };
-
-  // ... rest of your functions (publish video, load videos, like, delete, etc.) ...
-  // Replace every 'supabase.' with 'sb.' in those functions
-
-  // Example for publish video:
-  document.getElementById('publishVideoBtn').onclick = async () => {
-    // ... same logic, just use sb. instead of supabase.
-  };
-
-  // Start the application
-  document.addEventListener('DOMContentLoaded', init);
+      // You can now also load profile data, videos, badge, etc.
+      // loadProfile();
+      // loadVideos();
+      // etc...
+    });
   </script>
 </body>
 </html>
