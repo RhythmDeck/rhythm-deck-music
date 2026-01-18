@@ -571,7 +571,7 @@
     }
   }
 
-  // NEW: Check subscription before opening Rhythm Vision
+  // Check subscription before opening Rhythm Vision
   window.checkAndOpenVision = async function() {
     if (!currentUser) {
       alert("Please log in first");
@@ -589,11 +589,10 @@
       return;
     }
 
-    // Platinum users (or Pro/Vision) can access Rhythm Vision directly
+    // Allow access for Platinum, Pro, or Vision plan
     if (profile.plan === 'platinum' || profile.plan === 'pro' || profile.rhythm_vision_plan === 'vision') {
       window.location.href = 'rhythm-vision-pro.html';
     } else {
-      // Show popup and redirect to pricing
       alert("You need a Rhythm Vision or Pro subscription to access this page");
       window.location.href = 'pricing.html';
     }
