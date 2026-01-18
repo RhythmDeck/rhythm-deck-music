@@ -45,6 +45,16 @@
       transform: translateY(-4px) scale(1.04);
       box-shadow: 0 15px 35px rgba(168,85,247,0.6);
     }
+    .btn-dashboard {
+      background: linear-gradient(to right, #d4af37, #b8860b);
+      color: #1a0f2e;
+      transition: all 0.4s;
+      box-shadow: 0 8px 20px rgba(212,175,55,0.5);
+    }
+    .btn-dashboard:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(212,175,55,0.7);
+    }
     .section-premium {
       background: linear-gradient(to bottom right, rgba(30,27,71,0.85), rgba(59,37,89,0.85));
       border: 2px solid #d4af37;
@@ -68,9 +78,15 @@
           <p class="text-2xl text-purple-300 mt-2">Elite AI Music Video Creation Studio</p>
         </div>
       </div>
-      <div class="flex items-center gap-10">
+      <div class="flex items-center gap-6">
         <div class="premium-badge">PLATINUM PRO</div>
         <p class="text-xl font-semibold">Welcome, <span id="userName" class="title-gold">Platinum Artist</span></p>
+        
+        <!-- NEW: Back to Dashboard button -->
+        <a href="platinum-pro-admin.html" class="btn-dashboard font-bold px-8 py-4 rounded-xl shadow-xl transition text-lg">
+          ← Back to Dashboard
+        </a>
+
         <button id="logoutBtn" class="bg-red-700 hover:bg-red-800 text-white font-bold px-8 py-4 rounded-xl shadow-xl transition">
           Logout
         </button>
@@ -106,6 +122,7 @@
         </p>
       </div>
 
+      <!-- Rest of your content remains exactly the same -->
       <div class="space-y-16">
         <div class="grid md:grid-cols-2 gap-12">
           <div>
@@ -121,10 +138,8 @@
         <div class="p-10 bg-gradient-to-br from-black to-purple-950 rounded-2xl border-2 border-amber-600">
           <h2 class="text-4xl font-black title-gold text-center mb-4">Step 1: Craft Your Vision</h2>
           <p class="text-center text-amber-300 mb-10 text-xl">Premium prompt builder — designed for maximum quality output</p>
-
           <label class="block text-2xl font-bold title-gold mb-4">Lyrics Concept / Story Idea</label>
           <textarea id="songConcept" rows="5" class="w-full bg-purple-950 border border-amber-600 rounded-xl p-6 text-lg text-white focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="A powerful anthem about rising above challenges..."></textarea>
-
           <div class="grid md:grid-cols-3 gap-8 mt-8">
             <div>
               <label class="block text-xl font-bold title-gold mb-4">Genre</label>
@@ -140,7 +155,6 @@
               </button>
             </div>
           </div>
-
           <div class="flex flex-wrap gap-10 justify-center mt-10">
             <label class="text-xl text-amber-200 flex items-center gap-3">
               <input type="checkbox" id="hasChorus" checked class="w-6 h-6 accent-amber-500"> Chorus
@@ -152,7 +166,6 @@
               <input type="checkbox" id="hasOutro" checked class="w-6 h-6 accent-amber-500"> Outro
             </label>
           </div>
-
           <h3 class="text-3xl font-bold title-gold text-center mt-12 mb-8">Choose Premium AI</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <button id="grokBtn" class="btn-premium text-white font-bold text-xl py-6 rounded-xl">Grok</button>
@@ -482,7 +495,6 @@ Make it powerful, emotional, and radio/premium-ready. Use [Verse 1], [Chorus], e
       if (confirm("Reset everything?")) location.reload();
     }
 
-    // Button listeners
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('grokBtn')?.addEventListener('click', () => openAIAndCopy('grok'));
       document.getElementById('geminiBtn')?.addEventListener('click', () => openAIAndCopy('gemini'));
