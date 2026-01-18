@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhythm Deck - Rhythm Vision Platinum Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom, #1a0f2e, #2d1b47, #3b2559);
+      color: #f3e8ff;
+      min-height: 100vh;
+    }
+    .spinner {
+      border: 6px solid #4b2e83;
+      border-top: 6px solid #d4af37;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .title-gold {
+      color: #d4af37;
+      font-weight: 900;
+      text-shadow: 0 0 12px rgba(212,175,55,0.6);
+    }
+    .premium-badge {
+      background: linear-gradient(135deg, #d4af37, #b8860b);
+      color: #1a0f2e;
+      font-weight: 900;
+      padding: 0.6rem 1.8rem;
+      border-radius: 9999px;
+      box-shadow: 0 0 25px rgba(212,175,55,0.7);
+      font-size: 1.2rem;
+    }
+    .btn-premium {
+      background: linear-gradient(to right, #6b21a8, #a855f7, #d946ef);
+      transition: all 0.4s;
+      box-shadow: 0 10px 25px rgba(168,85,247,0.4);
+    }
+    .btn-premium:hover {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 15px 35px rgba(168,85,247,0.6);
+    }
+    .section-premium {
+      background: linear-gradient(to bottom right, rgba(30,27,71,0.85), rgba(59,37,89,0.85));
+      border: 2px solid #d4af37;
+      box-shadow: 0 0 30px rgba(212,175,55,0.35);
+    }
+    .license-box {
+      background: linear-gradient(to right, #1e1b4b, #2d1b47);
+      border: 4px solid #d4af37;
+      box-shadow: 0 0 40px rgba(212,175,55,0.4);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <header class="bg-black/90 border-b-4 border-amber-600 py-8 backdrop-blur-lg">
+    <div class="max-w-7xl mx-auto px-8 flex items-center justify-between">
+      <div class="flex items-center gap-8">
+        <img src="logo-1-sm.jpg" alt="Logo" class="w-24 h-24 rounded-full shadow-2xl ring-4 ring-amber-500/60">
+        <div>
+          <h1 class="text-6xl md:text-7xl font-black title-gold">Rhythm Deck</h1>
+          <h2 class="text-5xl md:text-6xl font-extrabold text-amber-400">Rhythm Vision Platinum</h2>
+          <p class="text-2xl text-purple-300 mt-2">Elite AI Music Video Creation Studio</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-10">
+        <div class="premium-badge">PLATINUM PRO</div>
+        <p class="text-xl font-semibold">Welcome, <span id="userName" class="title-gold">Platinum Artist</span></p>
+        <button id="logoutBtn" class="bg-red-700 hover:bg-red-800 text-white font-bold px-8 py-4 rounded-xl shadow-xl transition">
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="w-full bg-gradient-to-r from-amber-900 via-purple-950 to-amber-900 py-16 text-center border-b-4 border-amber-500 shadow-2xl">
+    <h2 class="text-5xl md:text-6xl font-black title-gold mb-6">Platinum Pro Exclusive Experience</h2>
+    <p class="text-2xl md:text-3xl text-amber-200 max-w-5xl mx-auto px-6">
+      Unlimited scenes • Up to 30 images per scene • Full HD watermark-free videos • Full commercial rights • Priority generation
+    </p>
+  </div>
+
+  <div class="w-full h-[500px] md:h-[600px] overflow-hidden border-b-4 border-amber-600">
+    <img src="rhythm-vision-banner.png" alt="Platinum Banner" class="w-full h-full object-cover">
+  </div>
+
+  <main class="flex-1 container max-w-5xl mx-auto p-10 md:p-12">
+    <div class="section-premium rounded-3xl p-10 md:p-14">
+      <div class="mb-16 p-10 bg-gradient-to-br from-purple-950 to-black rounded-2xl border border-amber-500/40">
+        <h3 class="text-4xl md:text-5xl font-black title-gold mb-10 text-center">How to Create Platinum-Level Videos</h3>
+        <ol class="space-y-8 text-xl text-purple-100 list-decimal ml-8 md:ml-12 leading-relaxed">
+          <li><strong>Elite Lyrics Creation:</strong> Use Grok, Gemini or ChatGPT — premium prompts optimized for maximum emotional impact.</li>
+          <li><strong>Unlimited Scenes:</strong> Generate as many cinematic scenes as your vision requires — no artificial limits.</li>
+          <li><strong>Premium Music Generation:</strong> Higher quality voices, richer instrumentation, longer tracks supported.</li>
+          <li><strong>Up to 30 Images per Scene:</strong> Ultra-detailed, high-resolution visuals for truly cinematic music videos.</li>
+          <li><strong>Full Commercial Rights:</strong> You own everything 100% — monetize on YouTube, Spotify, ads, sync licensing, live shows, merchandise — no restrictions.</li>
+          <li><strong>Watermark-Free HD/4K Output:</strong> Professional final videos ready for immediate commercial release.</li>
+        </ol>
+        <p class="mt-12 text-center text-amber-400 font-bold text-3xl">
+          Platinum = Unlimited creative freedom + Full commercial ownership
+        </p>
+      </div>
+
+      <div class="space-y-16">
+        <div class="grid md:grid-cols-2 gap-12">
+          <div>
+            <label class="block text-2xl md:text-3xl font-bold title-gold mb-5">Video Title</label>
+            <input id="videoTitle" type="text" class="w-full bg-purple-950 border-2 border-amber-600 rounded-xl p-6 text-xl text-white focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="Epic Platinum Anthem">
+          </div>
+          <div>
+            <label class="block text-2xl md:text-3xl font-bold title-gold mb-5">Duration (seconds)</label>
+            <input id="videoDuration" type="number" value="300" min="60" max="900" class="w-full bg-purple-950 border-2 border-amber-600 rounded-xl p-6 text-xl text-white focus:ring-amber-500 focus:border-amber-500 outline-none">
+          </div>
+        </div>
+
+        <div class="p-10 bg-gradient-to-br from-black to-purple-950 rounded-2xl border-2 border-amber-600">
+          <h2 class="text-4xl font-black title-gold text-center mb-4">Step 1: Craft Your Vision</h2>
+          <p class="text-center text-amber-300 mb-10 text-xl">Premium prompt builder — designed for maximum quality output</p>
+
+          <label class="block text-2xl font-bold title-gold mb-4">Lyrics Concept / Story Idea</label>
+          <textarea id="songConcept" rows="5" class="w-full bg-purple-950 border border-amber-600 rounded-xl p-6 text-lg text-white focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="A powerful anthem about rising above challenges..."></textarea>
+
+          <div class="grid md:grid-cols-3 gap-8 mt-8">
+            <div>
+              <label class="block text-xl font-bold title-gold mb-4">Genre</label>
+              <input id="musicGenre" type="text" value="epic cinematic" class="w-full bg-purple-950 border border-amber-600 rounded-xl p-5 text-lg text-white focus:ring-amber-500 focus:border-amber-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xl font-bold title-gold mb-4">Number of Verses</label>
+              <input id="numVerses" type="number" value="4" min="1" max="8" class="w-full bg-purple-950 border border-amber-600 rounded-xl p-5 text-lg text-white focus:ring-amber-500 focus:border-amber-500 outline-none">
+            </div>
+            <div class="flex flex-col justify-end">
+              <button id="generatePromptBtn" class="btn-premium text-white font-bold text-xl py-5 rounded-xl w-full">
+                Generate Premium Prompt
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-10 justify-center mt-10">
+            <label class="text-xl text-amber-200 flex items-center gap-3">
+              <input type="checkbox" id="hasChorus" checked class="w-6 h-6 accent-amber-500"> Chorus
+            </label>
+            <label class="text-xl text-amber-200 flex items-center gap-3">
+              <input type="checkbox" id="hasBridge" checked class="w-6 h-6 accent-amber-500"> Bridge
+            </label>
+            <label class="text-xl text-amber-200 flex items-center gap-3">
+              <input type="checkbox" id="hasOutro" checked class="w-6 h-6 accent-amber-500"> Outro
+            </label>
+          </div>
+
+          <h3 class="text-3xl font-bold title-gold text-center mt-12 mb-8">Choose Premium AI</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <button id="grokBtn" class="btn-premium text-white font-bold text-xl py-6 rounded-xl">Grok</button>
+            <button id="geminiBtn" class="btn-premium text-white font-bold text-xl py-6 rounded-xl">Gemini</button>
+            <button id="chatgptBtn" class="btn-premium text-white font-bold text-xl py-6 rounded-xl">ChatGPT</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-3xl font-bold title-gold mb-6">Step 2: Paste Your Lyrics</label>
+          <textarea id="lyrics" rows="16" class="w-full bg-purple-950 border-2 border-amber-600 rounded-2xl p-8 text-xl font-mono text-white focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="Paste your full lyrics here..."></textarea>
+        </div>
+
+        <div class="p-12 bg-gradient-to-br from-black to-purple-950 rounded-2xl border-2 border-amber-600">
+          <h2 class="text-4xl font-black title-gold text-center mb-10">Generate Premium Music Track</h2>
+          <div class="grid md:grid-cols-2 gap-12 mb-12">
+            <div>
+              <label class="block text-2xl font-bold title-gold mb-5">Voice Gender</label>
+              <div class="flex gap-12">
+                <label class="text-xl text-amber-200 flex items-center gap-4">
+                  <input type="radio" name="voiceGender" value="male" checked class="w-6 h-6 accent-amber-500"> Male
+                </label>
+                <label class="text-xl text-amber-200 flex items-center gap-4">
+                  <input type="radio" name="voiceGender" value="female" class="w-6 h-6 accent-amber-500"> Female
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-2xl font-bold title-gold mb-5">Voice Tone</label>
+              <select id="voiceTone" class="w-full bg-purple-950 border-2 border-amber-600 rounded-xl p-6 text-xl text-white focus:ring-amber-500 focus:border-amber-500 outline-none">
+                <option value="powerful">Powerful / Epic</option>
+                <option value="soulful">Soulful / Emotional</option>
+                <option value="deep">Deep / Cinematic</option>
+                <option value="bright">Bright / Uplifting</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="block text-2xl font-bold title-gold mb-6">Instruments (Select Multiple)</label>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 text-lg">
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="piano" class="w-5 h-5 accent-amber-500"> Piano</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="electric guitar" class="w-5 h-5 accent-amber-500"> Electric Guitar</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="acoustic guitar" class="w-5 h-5 accent-amber-500"> Acoustic Guitar</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="bass" class="w-5 h-5 accent-amber-500"> Bass</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="drums" class="w-5 h-5 accent-amber-500"> Drums</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="saxophone" class="w-5 h-5 accent-amber-500"> Saxophone</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="trombone" class="w-5 h-5 accent-amber-500"> Trombone</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="trumpet" class="w-5 h-5 accent-amber-500"> Trumpet</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="orchestra" class="w-5 h-5 accent-amber-500"> Orchestra</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="harmonica" class="w-5 h-5 accent-amber-500"> Harmonica</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="slide guitar" class="w-5 h-5 accent-amber-500"> Slide Guitar</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="full orchestra" class="w-5 h-5 accent-amber-500"> Full Orchestra</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="violin" class="w-5 h-5 accent-amber-500"> Violin</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="cello" class="w-5 h-5 accent-amber-500"> Cello</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="flute" class="w-5 h-5 accent-amber-500"> Flute</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="banjo" class="w-5 h-5 accent-amber-500"> Banjo</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="fiddle" class="w-5 h-5 accent-amber-500"> Fiddle</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="steel guitar" class="w-5 h-5 accent-amber-500"> Steel Guitar</label>
+            <label class="flex items-center gap-3 text-amber-200"><input type="checkbox" value="synthesizer" class="w-5 h-5 accent-amber-500"> Synthesizer</label>
+          </div>
+
+          <button id="generateMusicBtn" class="w-full btn-premium text-white font-black text-2xl py-8 rounded-2xl shadow-2xl">
+            Generate Elite Music Track (MP3) - Platinum Quality
+          </button>
+        </div>
+
+        <div id="audioSection" class="mt-16 p-12 bg-black/80 rounded-2xl border-2 border-amber-600 hidden">
+          <h2 class="text-4xl font-black title-gold text-center mb-8">Your Platinum Track</h2>
+          <audio id="audioPlayer" controls class="w-full mb-8"></audio>
+          <div class="flex flex-col md:flex-row gap-8 justify-center">
+            <button id="downloadAudioBtn" class="btn-premium text-white font-bold text-xl py-6 px-12 rounded-xl">Download MP3</button>
+            <button id="redoMusicBtn" class="bg-red-700 hover:bg-red-800 text-white font-bold text-xl py-6 px-12 rounded-xl">Generate New Track</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
+          <button id="generateScenesBtn" class="btn-premium text-white font-bold text-xl py-6 rounded-xl">Step 3: Generate Scenes</button>
+          <button id="generateTimelineBtn" class="btn-premium text-white font-bold text-xl py-6 rounded-xl">Generate Timeline</button>
+          <button id="generateImagesBtn" class="btn-premium text-white font-bold text-xl py-6 rounded-xl">Step 4: Generate Images</button>
+          <button id="resetAllBtn" class="bg-gray-800 hover:bg-gray-900 text-white font-bold text-xl py-6 rounded-xl">Reset All</button>
+        </div>
+
+        <div id="scenesContainer" class="space-y-10 mt-12"></div>
+
+        <div id="timelineOutput" class="mt-16 p-12 bg-black/80 rounded-2xl border-2 border-amber-600 hidden">
+          <div class="flex justify-between items-center mb-8">
+            <h2 class="text-4xl font-black title-gold">Premium Video Timeline</h2>
+            <button id="copyTimelineBtn" class="bg-amber-700 hover:bg-amber-800 text-white px-8 py-4 rounded-xl">Copy Timeline</button>
+          </div>
+          <div id="timelineContent" class="grid md:grid-cols-2 gap-8"></div>
+        </div>
+
+        <div id="imagesOutput" class="mt-20 hidden">
+          <h2 class="text-4xl font-black title-gold text-center mb-12">Generated Premium Images</h2>
+          <div id="imagesContent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+        </div>
+
+        <div class="mt-20 p-12 bg-gradient-to-br from-black to-purple-950 rounded-2xl border-2 border-amber-600">
+          <h2 class="text-4xl font-black title-gold text-center mb-10">Step 5: Create Platinum Music Video</h2>
+          <p class="text-center text-amber-300 mb-10 text-xl">Full HD, watermark-free, 100% commercial rights</p>
+          <button id="createVideoBtn" class="w-full btn-premium text-white font-black text-2xl py-8 rounded-2xl shadow-2xl">
+            Generate Full Platinum Music Video (MP4)
+          </button>
+          <div id="videoSection" class="mt-16 hidden">
+            <video id="finalVideo" controls class="w-full rounded-2xl shadow-2xl border-2 border-amber-500"></video>
+            <div class="flex justify-center mt-10">
+              <button id="downloadVideoBtn" class="btn-premium text-white font-bold text-xl py-6 px-16 rounded-xl">
+                Download Watermark-Free MP4
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="license-box mt-24 p-12 rounded-3xl text-center">
+          <h3 class="text-5xl font-black title-gold mb-8">FULL COMMERCIAL RIGHTS – YOUR CONTENT, YOUR WAY</h3>
+          <p class="text-2xl text-amber-100 leading-relaxed max-w-4xl mx-auto">
+            When you create with Rhythm Vision Platinum, you receive <strong>full commercial rights</strong> to every video, audio track, image, and lyric generated.<br><br>
+            This means you can:
+          </p>
+          <ul class="text-xl text-amber-200 list-disc list-inside mt-8 space-y-4 max-w-3xl mx-auto text-left">
+            <li>Monetize on YouTube, TikTok, Spotify Canvas, Apple Music, etc.</li>
+            <li>Use in advertisements, brand campaigns, and promotions</li>
+            <li>License/sync to TV, film, games, or other media</li>
+            <li>Sell as NFTs, merchandise, or digital downloads</li>
+            <li>Perform live or stream commercially</li>
+          </ul>
+          <p class="text-2xl text-amber-100 mt-10">
+            <strong>No watermarks. No usage restrictions. 100% yours forever.</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="loading" class="fixed inset-0 bg-black/95 flex items-center justify-center z-50 hidden">
+    <div class="text-center">
+      <div class="spinner mb-10"></div>
+      <p class="text-5xl title-gold font-black" id="loadingText">Creating Platinum Masterpiece...</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
+
+    let sceneCounter = 0;
+    let audioUrl = '';
+
+    function showMessage(msg, loading = false) {
+      document.getElementById('loadingText').textContent = msg;
+      document.getElementById('loading').classList.toggle('hidden', !loading);
+      if (!loading) setTimeout(() => document.getElementById('loading').classList.add('hidden'), 4000);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const { data: profile } = await supabase.from('profiles')
+        .select('name')
+        .eq('id', user.id)
+        .single();
+
+      const displayName = profile?.name || user.email?.split('@')[0] || 'Platinum Artist';
+      document.getElementById('userName').textContent = displayName;
+
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        window.location.href = 'index.html';
+      });
+
+      addScene("Epic golden sunrise over majestic mountains, powerful warrior rising, cinematic lighting, ultra-detailed, premium quality", 20);
+    });
+
+    function openAIAndCopy(ai) {
+      const title = document.getElementById('videoTitle')?.value || "Platinum Anthem";
+      const concept = document.getElementById('songConcept')?.value || "epic story of triumph";
+      const genre = document.getElementById('musicGenre')?.value || "epic cinematic";
+      const verses = document.getElementById('numVerses')?.value || "4";
+      let structure = `${verses} verses`;
+      if (document.getElementById('hasChorus')?.checked) structure += ", powerful chorus";
+      if (document.getElementById('hasBridge')?.checked) structure += ", dramatic bridge";
+      if (document.getElementById('hasOutro')?.checked) structure += ", epic outro";
+      const prompt = `Write professional ${genre} lyrics titled "${title}".
+Concept: ${concept}
+Structure: ${structure}
+Make it powerful, emotional, and radio/premium-ready. Use [Verse 1], [Chorus], etc.`;
+      navigator.clipboard.writeText(prompt).then(() => {
+        alert(`Premium prompt copied!\nOpening ${ai.toUpperCase()}...`);
+      }).catch(() => {
+        alert('Prompt ready (copy manually):\n\n' + prompt);
+      });
+      if (ai === 'grok') window.open('https://grok.x.ai', '_blank');
+      if (ai === 'gemini') window.open('https://gemini.google.com', '_blank');
+      if (ai === 'chatgpt') window.open('https://chatgpt.com', '_blank');
+    }
+
+    function addScene(description = '', images = 20) {
+      sceneCounter++;
+      const div = document.createElement('div');
+      div.className = 'p-8 bg-purple-950/80 rounded-2xl border border-amber-600 shadow-xl';
+      div.innerHTML = `
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-3xl font-black title-gold">Scene ${sceneCounter}</h3>
+          <button onclick="this.closest('div').remove(); sceneCounter--; renumber()" class="text-amber-400 hover:text-amber-300 text-4xl font-bold">×</button>
+        </div>
+        <textarea class="w-full bg-black border border-amber-700 rounded-xl p-6 text-white text-lg resize-y min-h-40">${description}</textarea>
+        <div class="mt-6 flex items-center gap-6">
+          <span class="text-xl text-amber-300">Premium Images per Scene:</span>
+          <input type="number" value="${images}" min="6" max="30" class="w-24 bg-purple-950 border border-amber-600 rounded p-4 text-white text-center focus:ring-amber-500 focus:border-amber-500 outline-none">
+        </div>
+      `;
+      document.getElementById('scenesContainer').appendChild(div);
+    }
+
+    function renumber() {
+      document.querySelectorAll('#scenesContainer > div').forEach((el, i) => {
+        el.querySelector('h3').textContent = `Scene ${i+1}`;
+      });
+    }
+
+    function generateScenes() {
+      const lyrics = document.getElementById('lyrics').value.trim();
+      if (!lyrics) return showMessage('Paste lyrics first');
+      document.getElementById('scenesContainer').innerHTML = '';
+      sceneCounter = 0;
+      const sections = lyrics.match(/\[([^\]]+)\][\s\S]*?(?=\[|$)/g) || [lyrics];
+      sections.forEach((section, index) => {
+        const header = section.match(/\[([^\]]+)\]/)?.[1]?.trim() || `Section ${index + 1}`;
+        const content = section.replace(/\[([^\]]+)\]/g, '').trim();
+        let desc = `${header} - cinematic premium scene, ultra-detailed, epic lighting, professional quality`;
+        addScene(desc, 20);
+      });
+      showMessage('Premium scenes generated!', false);
+    }
+
+    function generateTimeline() {
+      const duration = parseFloat(document.getElementById('videoDuration').value) || 300;
+      const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
+      if (scenes.length === 0) return showMessage("No scenes");
+      const totalImages = scenes.reduce((sum, s) => sum + parseInt(s.querySelector('input[type=number]').value || 20, 10), 0);
+      const secPerImage = duration / totalImages;
+      let time = 0;
+      document.getElementById('timelineContent').innerHTML = '';
+      scenes.forEach((s, i) => {
+        const desc = s.querySelector('textarea').value.slice(0, 60) + (s.querySelector('textarea').value.length > 60 ? "..." : "");
+        const images = parseInt(s.querySelector('input[type=number]').value || 20);
+        const start = time.toFixed(1);
+        time += images * secPerImage;
+        const end = time.toFixed(1);
+        document.getElementById('timelineContent').innerHTML += `
+          <div class="bg-purple-950 p-6 rounded-xl border border-amber-600">
+            <p class="font-bold title-gold text-xl">Scene ${i+1}</p>
+            <p class="text-amber-200 mt-2">${desc}</p>
+            <p class="text-sm text-amber-400 mt-3">${start}s → ${end}s (${images} premium images)</p>
+          </div>`;
+      });
+      document.getElementById('timelineOutput').classList.remove('hidden');
+      showMessage('Premium timeline created', false);
+    }
+
+    async function generateImages() {
+      const scenes = Array.from(document.querySelectorAll('#scenesContainer > div'));
+      if (scenes.length === 0) return showMessage("Generate scenes first!");
+      document.getElementById('imagesOutput').classList.remove('hidden');
+      document.getElementById('imagesContent').innerHTML = '';
+      for (const scene of scenes) {
+        const prompt = scene.querySelector('textarea').value.trim();
+        const num = parseInt(scene.querySelector('input[type=number]').value) || 20;
+        for (let i = 0; i < num; i++) {
+          const div = document.createElement('div');
+          div.className = "bg-purple-950 rounded-2xl overflow-hidden shadow-2xl border border-amber-600";
+          div.innerHTML = `<div class="w-full h-80 flex items-center justify-center"><div class="spinner"></div></div>`;
+          document.getElementById('imagesContent').appendChild(div);
+          const encoded = encodeURIComponent(prompt + ", ultra hd, premium cinematic, platinum quality");
+          const img = new Image();
+          img.onload = () => div.innerHTML = `<img src="${img.src}" class="w-full h-80 object-cover hover:scale-105 transition duration-500">`;
+          img.onerror = () => {
+            div.innerHTML = `<div class="w-full h-80 bg-purple-900 flex items-center justify-center text-amber-300">Premium image loading...</div>`;
+          };
+          img.src = `https://source.unsplash.com/featured/1600x900/?${encoded}&sig=${Date.now()+i}`;
+        }
+      }
+      showMessage('Premium images generating...', false);
+    }
+
+    async function generateMusic() {
+      const lyrics = document.getElementById('lyrics').value.trim();
+      if (!lyrics) return showMessage("Add lyrics first!");
+      showMessage("Generating premium music... (30-90s)", true);
+      setTimeout(() => {
+        showMessage("Premium track ready (demo)!", false);
+        document.getElementById('audioSection').classList.remove('hidden');
+      }, 3000);
+    }
+
+    function downloadAudio() {
+      alert("Download MP3 feature (implement your real download logic here)");
+    }
+
+    function createVideo() {
+      showMessage("Rendering full HD Platinum video...", true);
+      setTimeout(() => {
+        document.getElementById('videoSection').classList.remove('hidden');
+        document.getElementById('finalVideo').src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+        showMessage("Platinum video ready!", false);
+      }, 4000);
+    }
+
+    function downloadVideo() {
+      alert("Download watermark-free MP4 (implement your real download logic here)");
+    }
+
+    function copyTimeline() {
+      const text = document.getElementById('timelineContent').innerText;
+      navigator.clipboard.writeText(text);
+      showMessage("Timeline copied to clipboard!");
+    }
+
+    function resetAll() {
+      if (confirm("Reset everything?")) location.reload();
+    }
+
+    // Button listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('grokBtn')?.addEventListener('click', () => openAIAndCopy('grok'));
+      document.getElementById('geminiBtn')?.addEventListener('click', () => openAIAndCopy('gemini'));
+      document.getElementById('chatgptBtn')?.addEventListener('click', () => openAIAndCopy('chatgpt'));
+      document.getElementById('generateMusicBtn')?.addEventListener('click', generateMusic);
+      document.getElementById('downloadAudioBtn')?.addEventListener('click', downloadAudio);
+      document.getElementById('redoMusicBtn')?.addEventListener('click', generateMusic);
+      document.getElementById('generateScenesBtn')?.addEventListener('click', generateScenes);
+      document.getElementById('generateTimelineBtn')?.addEventListener('click', generateTimeline);
+      document.getElementById('generateImagesBtn')?.addEventListener('click', generateImages);
+      document.getElementById('resetAllBtn')?.addEventListener('click', resetAll);
+      document.getElementById('copyTimelineBtn')?.addEventListener('click', copyTimeline);
+      document.getElementById('createVideoBtn')?.addEventListener('click', createVideo);
+      document.getElementById('downloadVideoBtn')?.addEventListener('click', downloadVideo);
+    });
+  </script>
+</body>
+</html>
