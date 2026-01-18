@@ -13,6 +13,19 @@
     .modal.active {display: flex;}
     video { outline: none; }
     .stat-badge {background: rgba(16,185,129,0.2); border: 1px solid #10b981; padding: 6px 12px; border-radius: 999px; font-size: 0.9rem;}
+    .btn-dashboard {
+      background: linear-gradient(to right, #d4af37, #b8860b);
+      color: #1a0f2e;
+      padding: 0.5rem 1.5rem;
+      border-radius: 0.75rem;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+    }
+    .btn-dashboard:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212,175,55,0.6);
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -23,7 +36,9 @@
       <h1 class="text-4xl font-black tracking-wider">RHYTHM DECK</h1>
     </div>
     <nav class="space-x-8 flex items-center">
-      <a href="profile-admin-pro.html" class="hover:text-purple-400 transition">Dashboard</a>
+      <button onclick="goToDashboard()" class="btn-dashboard">
+        Dashboard
+      </button>
       <a href="message-dashboard.html" class="hover:text-emerald-400 transition">Messages</a>
       <button onClick="logout()" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold">Logout</button>
     </nav>
@@ -84,7 +99,6 @@
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
@@ -95,6 +109,27 @@
   let currentUser = null;
   let targetArtistId = null;
   let targetArtistName = null;
+
+  // Smart Dashboard redirect: Platinum → platinum-pro-admin, others → profile-admin-pro
+  window.goToDashboard = async function() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("Please log in first");
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.plan === 'platinum') {
+      window.location.href = 'platinum-pro-admin.html';
+    } else {
+      window.location.href = 'profile-admin-pro.html';
+    }
+  };
 
   window.openCollabModal = function(artistId, artistName) {
     targetArtistId = artistId;
@@ -114,15 +149,12 @@
 
   window.sendCollabMessage = async function() {
     if (!targetArtistId) return alert('Error: No artist selected');
-
     const name = document.getElementById('collabName').value.trim();
     const email = document.getElementById('collabEmail').value.trim();
     const message = document.getElementById('collabMessage').value.trim();
-
     if (!name || !email || !message) {
       return alert('Please fill all fields');
     }
-
     const { error } = await supabase
       .from('collab_requests')
       .insert({
@@ -132,7 +164,6 @@
         message: message,
         status: 'pending'
       });
-
     if (error) {
       console.error('Send error:', error);
       alert('Failed to send: ' + error.message);
@@ -185,13 +216,11 @@
     for (const artist of artists) {
       const logo = artist.logo_url ? getMediaUrl(artist.logo_url) : 'https://placehold.co/200x200/emerald/white?text=Artist';
 
-      // Get videos
       const { data: videos } = await supabase
         .from('user_videos')
         .select('id, title, video_url')
         .eq('user_id', artist.id);
 
-      // Get total hearts and comments
       let totalHearts = 0;
       let totalComments = 0;
       if (videos) {
@@ -217,7 +246,6 @@
               <img src="${logo}" class="w-20 h-20 rounded-full border-4 border-emerald-500 shadow-xl object-cover" onerror="this.src='https://placehold.co/80x80/emerald/white?text=A'">
               <h3 class="text-2xl font-black">${artist.name || 'Unknown Artist'}</h3>
             </div>
-
             <div class="flex justify-center gap-6 mb-6">
               <div class="stat-badge">
                 ❤️ ${totalHearts} Hearts
@@ -226,17 +254,16 @@
                 💬 ${totalComments} Comments
               </div>
             </div>
-
             <div class="mb-6 bg-black/60 rounded-xl p-4 max-h-48 overflow-y-auto text-sm">
               ${videoList}
             </div>
-
             <div class="space-y-3">
               <a href="${publicLink}" target="_blank" class="block">
                 <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition shadow-lg">
                   View Public Profile
                 </button>
               </a>
+
               <button onclick="openCollabModal('${artist.id}', '${(artist.name || 'Artist').replace(/'/g, "\\'")}')"
                 class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-4 rounded-xl shadow-xl transition transform hover:scale-105">
                 Message for Collab
