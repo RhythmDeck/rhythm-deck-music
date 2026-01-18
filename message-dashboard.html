@@ -69,9 +69,10 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script>
-    const supabase = window.supabase.createClient(
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
@@ -88,13 +89,19 @@
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('plan')
         .eq('id', user.id)
         .single();
 
-      if (profile?.plan === 'platinum') {
+      if (error || !profile) {
+        console.error("Error fetching plan:", error);
+        alert("Could not determine your dashboard. Please contact support.");
+        return;
+      }
+
+      if (profile.plan === 'platinum') {
         window.location.href = 'platinum-pro-admin.html';
       } else {
         window.location.href = 'profile-admin-pro.html';
@@ -122,8 +129,11 @@
         sender_name: currentUserName,
         message: message,
         status: 'pending'
-      }).select();
-      if (!error) {
+      });
+      if (error) {
+        console.error('Send reply error:', error);
+        alert('Failed to send reply: ' + error.message);
+      } else {
         alert('Reply sent!');
         closeReplyModal();
         loadMessages();
@@ -132,8 +142,13 @@
 
     async function deleteMessage(id) {
       if (!confirm('Delete this message permanently?')) return;
-      const { error } = await supabase.from('collab_requests').delete().eq('id', id).eq('artist_id', currentUserId).select();
-      if (!error) loadMessages();
+      const { error } = await supabase.from('collab_requests').delete().eq('id', id).eq('artist_id', currentUserId);
+      if (error) {
+        console.error('Delete error:', error);
+        alert('Failed to delete: ' + error.message);
+      } else {
+        loadMessages();
+      }
     }
 
     function showMessage(msg) {
@@ -170,15 +185,24 @@
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return location.href = 'login.html';
       currentUserId = user.id;
+
       const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
       currentUserName = profile?.name || 'You';
-      const { data: messages } = await supabase
+
+      const { data: messages, error } = await supabase
         .from('collab_requests')
         .select('*')
         .eq('artist_id', currentUserId)
         .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Load messages error:', error);
+        return;
+      }
+
       const list = document.getElementById('conversationList');
       list.innerHTML = messages?.length ? '' : '<p class="p-8 text-center text-gray-400">No messages yet.</p>';
+
       messages?.forEach(m => {
         const hasEmail = m.sender_email?.trim();
         const isUnread = m.status === 'pending';
@@ -198,6 +222,7 @@
             </div>
           </div>`;
       });
+
       if (messages?.length && window.innerWidth >= 1024) {
         showMessage(messages[0]);
       }
