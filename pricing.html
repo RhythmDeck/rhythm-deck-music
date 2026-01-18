@@ -15,6 +15,25 @@
     }
     .opacity-0 { opacity: 0; transition: opacity 1s; }
     .opacity-100 { opacity: 1; }
+    .plan-card {
+      transition: all 0.3s ease;
+    }
+    .plan-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    .recommended {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: #d4af37;
+      color: #1a0f2e;
+      font-weight: bold;
+      padding: 0.25rem 1rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 10px rgba(212,175,55,0.5);
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -51,10 +70,10 @@
 <!-- MAIN CONTENT -->
 <main class="flex-grow py-16 px-6">
   <div class="max-w-6xl mx-auto">
-    <!-- TOP ROW: Free Plan + Rhythm Vision Standalone -->
+    <!-- TOP ROW: Free Plan + Rhythm Vision Pro -->
     <div class="grid md:grid-cols-2 gap-8 mb-12">
       <!-- FREE PLAN -->
-      <div class="bg-white border-4 border-green-400 shadow-lg rounded-xl p-8">
+      <div class="bg-white border-4 border-green-400 shadow-lg rounded-xl p-8 plan-card">
         <h3 class="text-3xl font-bold text-center text-green-500 mb-6">Free Plan</h3>
         <ul class="list-disc list-inside text-gray-700 space-y-3 mb-8">
           <li>Upload & Share Unlimited Videos</li>
@@ -83,21 +102,26 @@
         </div>
       </div>
 
-      <!-- RHYTHM VISION STAND-ALONE -->
-      <div class="bg-white border-4 border-purple-500 shadow-lg rounded-xl p-8">
-        <h3 class="text-3xl font-bold text-center text-purple-600 mb-6">Rhythm Vision Only</h3>
+      <!-- RHYTHM VISION PRO (UPDATED) -->
+      <div class="bg-white border-4 border-purple-500 shadow-lg rounded-xl p-8 plan-card relative">
+        <div class="absolute top-0 right-0 bg-purple-600 text-white font-bold px-6 py-2 rounded-bl-xl">
+          Popular
+        </div>
+        <h3 class="text-3xl font-bold text-center text-purple-600 mb-6">Rhythm Vision Pro</h3>
         <p class="text-gray-700 text-center mb-6">
-          Powerful AI music video creator — no social platform needed.
+          Professional AI music video creation — perfect for serious creators.
         </p>
         <ul class="list-disc list-inside text-gray-700 space-y-3 mb-8">
           <li>Full access to Rhythm Vision AI tool</li>
           <li>Generate unlimited music videos from lyrics & audio</li>
-          <li>Custom scenes, images, timelines & MP4 exports</li>
-          <li>Standalone — no messaging or collaboration features</li>
+          <li>Up to 6 high-quality images per scene</li>
+          <li>Custom scenes, timelines & MP4 exports</li>
+          <li>Watermarked previews + standard generation queue</li>
+          <li>Standalone or included in Pro Plan</li>
         </ul>
         <div class="text-center mb-8">
           <a href="signup.html" class="bg-purple-600 text-white px-8 py-3 rounded-md hover:bg-purple-500 font-bold text-lg">
-            Get Rhythm Vision
+            Get Rhythm Vision Pro
           </a>
         </div>
         <div class="text-center">
@@ -105,6 +129,48 @@
           <p class="text-xl my-2">or</p>
           <p class="text-3xl font-bold text-green-600">$89.95 <span class="text-lg font-normal">/ year</span></p>
           <p class="text-gray-600 text-sm mt-2">(Save ~25% with annual billing)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW: RHYTHM VISION PLATINUM -->
+    <div class="bg-gradient-to-r from-amber-900 to-yellow-900 rounded-2xl shadow-2xl p-10 text-white mb-12 relative plan-card">
+      <div class="recommended text-black font-bold text-lg">Recommended</div>
+      <div class="text-center mb-8">
+        <h3 class="text-4xl font-black mb-4 text-amber-300">Rhythm Vision Platinum</h3>
+        <p class="text-xl">Unlimited power, priority generation & full commercial rights</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-10 items-start">
+        <div>
+          <h4 class="text-2xl font-bold mb-4 text-amber-200">All Pro Features + Elite Platinum Upgrades</h4>
+          <ul class="list-disc list-inside space-y-3 text-lg">
+            <li>Unlimited scenes — no limits on video length or complexity</li>
+            <li>Up to 30 ultra-premium images per scene</li>
+            <li>Full commercial license — watermark-free videos, monetize on any platform (YouTube, Spotify, sync, ads, etc.)</li>
+            <li>Priority generation queue — faster processing</li>
+            <li>Higher quality output & longer tracks supported</li>
+            <li>Exclusive Platinum tools & future premium features</li>
+          </ul>
+          <p class="mt-6 text-lg">
+            Perfect for professional artists, labels, and creators who need maximum creative freedom.
+          </p>
+        </div>
+        <div class="text-center md:text-left">
+          <h4 class="text-2xl font-bold mb-6 text-amber-200">Pricing</h4>
+          <p class="text-4xl font-bold mb-4">$12.95 <span class="text-2xl font-normal">/ month</span></p>
+          <p class="text-3xl font-bold mb-8 text-green-300">$130.00 <span class="text-xl font-normal">/ year</span></p>
+          <a href="signup.html" class="inline-block bg-amber-500 text-black px-12 py-5 rounded-xl hover:bg-amber-400 font-bold text-2xl transition transform hover:scale-105 shadow-xl">
+            Upgrade to Platinum
+          </a>
+          <div class="mt-10 flex flex-col items-center">
+            <div class="w-40 h-40 rounded-full overflow-hidden shadow-2xl border-4 border-amber-400">
+              <img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Vision Badge" class="w-full h-full object-contain">
+            </div>
+            <p class="mt-4 text-2xl font-bold text-amber-300">Platinum Vision Badge</p>
+            <p class="text-center max-w-xs mt-2 text-amber-200">
+              Exclusive badge displayed on your profile — shows you're a premium creator
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -123,7 +189,7 @@
             <li>Live Streaming + Chat</li>
             <li><strong>Messaging</strong> – Private DMs with artists, fans & industry pros</li>
             <li><strong>Collaboration</strong> – Co-create with file sharing & feedback tools</li>
-            <li><strong>Rhythm Vision</strong> – Full AI music video creator included</li>
+            <li><strong>Rhythm Vision Pro</strong> – Full AI music video creator included</li>
             <li><strong>Rhythm Decks Exclusive Tip Bucket</strong> – Receive tips from fans during Livestream and Chat Sessions</li>
             <li><strong>Monetize Your Video Uploads</strong> – Full control over prices to sell your videos</li>
             <li>Fan Q&A, Polls & Comments</li>
@@ -167,8 +233,8 @@
           <h4 class="text-2xl font-bold mb-4">All Pro Features + Exclusive Platinum Benefits</h4>
           <ul class="list-disc list-inside space-y-3 text-lg">
             <li>All Pro Plan features</li>
-            <li><strong>Exclusive Access to Radio Station Database</strong> – Contact info for stations worldwide + professional email templates to submit your music for possible airplay</li>
-            <li><strong class="text-yellow-300">Your Own Private Merch Store</strong> – Sell t-shirts, hoodies, hats, posters, and more directly to your fans with zero upfront costs</li>
+            <li><strong class="text-yellow-300">Exclusive Access to Radio Station Database</strong> – Contact info for stations worldwide + professional email templates</li>
+            <li><strong class="text-yellow-300">Your Own Private Merch Store</strong> – Sell t-shirts, hoodies, hats, posters, etc. with zero upfront costs</li>
           </ul>
           <p class="mt-6 text-lg">
             2- and 3-year plans coming soon with huge discounts!
