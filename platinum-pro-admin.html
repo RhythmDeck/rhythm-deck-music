@@ -51,9 +51,9 @@
   </div>
   <nav class="flex flex-wrap items-center justify-center gap-4 text-lg">
     <a href="index.html" class="hover:text-emerald-400 transition">Home</a>
-    <a href="rhythm-vision-pro.html" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
+    <button onclick="checkAndOpenVision()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
       Rhythm Vision
-    </a>
+    </button>
     <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold transition">
       Collaboration Network
     </a>
@@ -105,7 +105,7 @@
         <span class="font-bold text-lg">TikTok</span>
       </button>
       <button class="social-btn bg-red-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2">
-        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.03-.655 2.569-.994 3.995-.283 1.193.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.099.119.112.223.083.343-.029.119-.096.362-.109.413-.017.07-.055.085-.113.052-1.013-.548-1.647-2.266-1.647-3.647 0-2.969 2.156-5.694 6.218-5.694 3.267 0 5.807 2.329 5.807 5.434 0 3.24-2.046 5.852-4.884 5.852-1.002 0-1.945-.523-2.266-1.139 0 0-.497 1.89-.617 2.353-.222.857-.821 1.93-1.223 2.582.918.284 1.89.436 2.9.436 6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
         <span class="font-bold text-lg">YouTube</span>
       </button>
       <button class="social-btn bg-blue-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2">
@@ -121,11 +121,11 @@
         <span class="font-bold text-lg">Spotify</span>
       </button>
       <button class="social-btn bg-black p-4 rounded-xl shadow-lg flex flex-col items-center gap-2">
-        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M17.9 10.9c-3.6 0-6.5 2.9-6.5 6.5s2.9 6.5 6.5 6.5 6.5-2.9 6.5-6.5-2.9-6.5-6.5-6.5zm0 10.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm-9.4-6.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4.5 0c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M17.9 10.9c-3.6 0-6.5 2.9-6.5 6.5s2.9 6.5 6.5 6.5 6.5-2.9 6.5-6.5-2.9-6.5-6.5-6.5zm0 10.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm-9.4-6.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4.5 0c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM22 12.5c0-2.485-2.015-4.5-4.5-4.5-.345 0-.68.04-1 .115v9.77c.32.075.655.115 1 .115 2.485 0 4.5-2.015 4.5-4.5z"/></svg>
         <span class="font-bold text-lg">Apple Music</span>
       </button>
       <button class="social-btn bg-orange-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2">
-        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M1.5 8.5v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zM22 12.5c0-2.485-2.015-4.5-4.5-4.5-.345 0-.68.04-1 .115v9.77c.32.075.655.115 1 .115 2.485 0 4.5-2.015 4.5-4.5z"/></svg>
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M1.5 8.5v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zM22 12.5c0-2.485-2.015-4.5-4.5-4.5-.345 0-.68.04-1 .115v9.77c.32.075.655.115 1 .115 2.485 0 4.5-2.015 4.5-4.5z"/></svg>
         <span class="font-bold text-lg">SoundCloud</span>
       </button>
       <button class="social-btn bg-blue-900 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2">
@@ -282,7 +282,9 @@
         <div class="mt-8">
           <p class="text-red-900 font-bold mb-4">Type "Delete My Account" to confirm:</p>
           <input type="text" id="deleteConfirmInput" class="w-full p-4 border-2 border-red-300 rounded-xl" placeholder="Delete My Account">
-          <button id="deleteAccountBtn" disabled class="w-full mt-4 bg-gray-400 text-white font-black py-4 rounded-xl cursor-not-allowed">Yes, Delete Everything</button>
+          <button id="deleteAccountBtn" disabled class="w-full mt-4 bg-gray-400 text-white font-black py-4 rounded-xl cursor-not-allowed">
+            Yes, Delete Everything
+          </button>
         </div>
       </details>
     </div>
@@ -301,7 +303,9 @@
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
+
   let currentUser = null;
+
   window.saveArtistName = async function() {
     const name = document.getElementById('artistNameInput').value.trim();
     if (!name) return alert("Enter a name");
@@ -309,33 +313,40 @@
     if (error) alert("Save failed: " + error.message);
     else alert("Name saved!");
   };
+
   window.saveBio = async function() {
     const bio = document.getElementById('bioInput').value.trim();
     const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert("Bio saved!");
   };
+
   window.saveCollaborationOptIn = async function() {
     const checked = document.getElementById('collaborationOptIn').checked;
     const { error } = await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
   };
+
   window.logout = async function() {
     await supabase.auth.signOut();
     window.location.href = 'login.html';
   };
+
   window.closeModal = function() {
     document.getElementById('videoModal').classList.remove('show');
     document.getElementById('modalVideo').src = '';
   };
+
   window.openVideoPopup = function(url) {
     document.getElementById('modalVideo').src = url;
     document.getElementById('videoModal').classList.add('show');
   };
+
   window.openSocialModal = function(videoUrl) {
     alert("Social sharing for: " + videoUrl);
   };
+
   async function displayProBadge() {
     if (!currentUser) return;
     const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
@@ -345,6 +356,7 @@
       badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
     }
   }
+
   async function loadProfileData() {
     const { data: profile } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
     document.getElementById('artistNameInput').value = profile.name || '';
@@ -363,6 +375,7 @@
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
   }
+
   async function loadVideos() {
     const { data: videos, error } = await supabase
       .from('user_videos')
@@ -425,6 +438,7 @@
         </div>`;
     }
   }
+
   async function deleteVideo(id, videoPath, thumbPath) {
     if (!confirm('Are you sure you want to permanently delete this? This cannot be undone.')) return;
     try {
@@ -444,6 +458,7 @@
       alert('Delete failed: ' + err.message);
     }
   }
+
   async function uploadAudio() {
     const thumbFile = document.getElementById('audioThumbnailInput')?.files[0];
     const audioFile = document.getElementById('audioInput')?.files[0];
@@ -478,6 +493,7 @@
       spinner.classList.add('hidden');
     }
   }
+
   async function uploadAndPublish() {
     const videoFile = document.getElementById('videoInput')?.files[0];
     const thumbFile = document.getElementById('thumbnailInput')?.files[0];
@@ -512,6 +528,7 @@
       spinner.classList.add('hidden');
     }
   }
+
   async function uploadBanner(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -520,6 +537,7 @@
     await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
     loadProfileData();
   }
+
   async function uploadLogo(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -528,6 +546,7 @@
     await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
     loadProfileData();
   }
+
   async function deleteAccount() {
     if (confirm('Delete EVERYTHING forever?')) {
       await supabase.from('profiles').delete().eq('id', currentUser.id);
@@ -535,6 +554,7 @@
       window.location.href = 'index.html';
     }
   }
+
   async function checkStripeConnection() {
     const { data: profile } = await supabase.from('profiles').select('stripe_account_id').eq('id', currentUser.id).single();
     const statusDiv = document.getElementById('stripeStatus');
@@ -550,6 +570,35 @@
       btn.textContent = 'Enable Tip Bucket – Connect Stripe';
     }
   }
+
+  // NEW: Check subscription before opening Rhythm Vision
+  window.checkAndOpenVision = async function() {
+    if (!currentUser) {
+      alert("Please log in first");
+      return;
+    }
+
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('plan, rhythm_vision_plan')
+      .eq('id', currentUser.id)
+      .single();
+
+    if (error || !profile) {
+      alert("Error checking subscription: " + (error?.message || 'Unknown error'));
+      return;
+    }
+
+    // Platinum users (or Pro/Vision) can access Rhythm Vision directly
+    if (profile.plan === 'platinum' || profile.plan === 'pro' || profile.rhythm_vision_plan === 'vision') {
+      window.location.href = 'rhythm-vision-pro.html';
+    } else {
+      // Show popup and redirect to pricing
+      alert("You need a Rhythm Vision or Pro subscription to access this page");
+      window.location.href = 'pricing.html';
+    }
+  };
+
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
