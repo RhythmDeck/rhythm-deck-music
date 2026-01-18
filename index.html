@@ -109,10 +109,21 @@
     .hidden { display: none !important; }
     /* Responsive hero */
     @media (max-width: 640px) { .hero-height { height: 60vh; min-height: 400px; } }
+    /* Platinum comparison table */
+    .plan-card {
+      background: rgba(30, 27, 71, 0.6);
+      border: 2px solid #6b7280;
+      border-radius: 1rem;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .plan-card.pro { border-color: #10b981; }
+    .plan-card.platinum { border-color: #d4af37; background: rgba(59, 37, 89, 0.7); }
+    .plan-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .plan-badge { background: #d4af37; color: #1a0f2e; font-weight: bold; padding: 0.5rem 1rem; border-radius: 999px; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
-
 <!-- HEADER -->
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
   <div class="flex items-center space-x-3">
@@ -133,20 +144,17 @@
       <a href="login.html" class="bg-white text-black px-3 sm:px-4 py-1 rounded hover:bg-gray-300">Login</a>
       <a href="signup.html" class="bg-green-500 text-white px-3 sm:px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
     </div>
-
     <!-- Special buttons (directly under main links, right-aligned on desktop) -->
     <div class="flex flex-wrap justify-end gap-3 sm:gap-4">
-      <button onclick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});"
+      <button onClick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});"
               class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
         Check out our Exclusive Rhythm Wav Play List Platform
       </button>
-
-      <button onclick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});"
+      <button onClick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});"
               class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
         Rhythm Vision
       </button>
-
-      <button onclick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});"
+      <button onClick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});"
               class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
         Producers & Distributors
       </button>
@@ -336,6 +344,95 @@
   </div>
 </section>
 
+<!-- NEW: RHYTHM VISION PLANS COMPARISON -->
+<section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-gray-900 to-black text-white">
+  <h3 class="text-3xl sm:text-4xl font-black mb-10 text-center bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
+    Choose Your Rhythm Vision Experience
+  </h3>
+  <p class="text-center text-lg sm:text-xl text-gray-300 mb-12 max-w-4xl mx-auto">
+    Rhythm Vision Pro gives you powerful AI music video creation. Upgrade to Platinum for unlimited creative freedom, priority generation, and full commercial rights.
+  </p>
+  <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+    <!-- Pro Card -->
+    <div class="plan-card pro p-8 flex flex-col h-full">
+      <div class="text-center mb-6">
+        <h4 class="text-3xl font-bold text-emerald-400 mb-2">Rhythm Vision Pro</h4>
+        <p class="text-xl font-semibold text-emerald-300">Included in Pro Plan</p>
+        <p class="text-sm text-gray-400 mt-2">Perfect for creators getting started</p>
+      </div>
+      <ul class="space-y-4 text-gray-200 flex-grow">
+        <li class="flex items-start gap-3">
+          <span class="text-emerald-400 text-2xl">✓</span>
+          <span>AI-generated music videos from lyrics & music</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-emerald-400 text-2xl">✓</span>
+          <span>Up to 6 high-quality images per scene</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-emerald-400 text-2xl">✓</span>
+          <span>Scene & timeline generation</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-emerald-400 text-2xl">✓</span>
+          <span>Watermarked preview videos</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-emerald-400 text-2xl">✓</span>
+          <span>Standard generation queue</span>
+        </li>
+      </ul>
+      <div class="mt-8 text-center">
+        <a href="pricing.html" class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl text-lg transition">
+          Get Pro Plan
+        </a>
+      </div>
+    </div>
+
+    <!-- Platinum Card (highlighted) -->
+    <div class="plan-card platinum p-8 flex flex-col h-full relative overflow-hidden">
+      <div class="absolute top-0 right-0 bg-yellow-500 text-black font-bold px-6 py-2 rounded-bl-xl">
+        Recommended
+      </div>
+      <div class="text-center mb-6">
+        <div class="inline-block bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold px-6 py-2 rounded-full mb-4 plan-badge">
+          PLATINUM
+        </div>
+        <h4 class="text-3xl font-bold text-amber-400 mb-2">Rhythm Vision Platinum</h4>
+        <p class="text-xl font-semibold text-amber-300">$49/mo or $399/year</p>
+        <p class="text-sm text-amber-200 mt-2">Unlimited power for professional creators</p>
+      </div>
+      <ul class="space-y-4 text-gray-200 flex-grow">
+        <li class="flex items-start gap-3">
+          <span class="text-amber-400 text-2xl">★</span>
+          <span><strong>Unlimited scenes</strong> – no limits on how many you create</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-amber-400 text-2xl">★</span>
+          <span><strong>Up to 30 premium images per scene</strong> – ultra-detailed cinematic quality</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-amber-400 text-2xl">★</span>
+          <span><strong>Full commercial license</strong> – watermark-free, monetize anywhere (YouTube, Spotify, sync, ads, etc.)</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-amber-400 text-2xl">★</span>
+          <span><strong>Priority generation queue</strong> – faster processing</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-amber-400 text-2xl">★</span>
+          <span>All Pro features + exclusive Platinum tools</span>
+        </li>
+      </ul>
+      <div class="mt-8 text-center">
+        <a href="pricing.html" class="inline-block bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-bold px-8 py-4 rounded-xl text-lg transition transform hover:scale-105 shadow-xl">
+          Upgrade to Platinum
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FREE vs PRO -->
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Plans & Features</h3>
@@ -346,7 +443,7 @@
     <div class="grid gap-6">
       <div class="bg-white rounded-lg shadow p-6 border-2 border-green-400">
         <h4 class="text-xl sm:text-2xl font-bold mb-4 text-center">Free Plan</h4>
-        <ul class="space-y-2 text-sm sm:text-base text-gray-700">
+        <ul class="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700">
           <li>Upload & Share Unlimited Videos</li>
           <li>Personalized Profile Page. Add your own banner, logo, bio and upload your video content you want to showcase on your personal public feed.</li>
           <li>and much more</li>
@@ -357,7 +454,7 @@
       </div>
       <div class="bg-white rounded-lg shadow p-6 border-2 border-yellow-400">
         <h4 class="text-xl sm:text-2xl font-bold mb-4 text-center text-yellow-500">Pro Plan</h4>
-        <ul class="space-y-2 text-sm sm:text-base text-gray-700">
+        <ul class="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700">
           <li>All Free Features +</li>
           <li>Live Streaming</li>
           <li>Cross-Platform Sharing (Facebook, YouTube, X and more coming)</li>
@@ -429,7 +526,9 @@
     </a>
   </div>
 </section>
+
 <br><br>
+
 <!-- PRODUCERS & DISTRIBUTORS SECTION (with extra space above) -->
 <section id="producers-distributors-section" class="max-w-6xl mx-auto py-20 sm:py-28 px-4 sm:px-6 bg-gradient-to-r from-emerald-900/80 via-teal-900/80 to-indigo-900/80 rounded-2xl shadow-2xl">
   <div class="text-center mb-8 sm:mb-10">
@@ -441,13 +540,15 @@
     </p>
   </div>
   <div class="text-center">
-    <a href="producers-distributors.html" 
+    <a href="producers-distributors.html"
        class="inline-block bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xl sm:text-2xl px-10 sm:px-14 py-5 sm:py-6 rounded-full transition transform hover:scale-105 shadow-2xl">
       Apply Now – Become a Verified Producer/Distributor
     </a>
   </div>
 </section>
+
 <br><br>
+
 <!-- Q&A SECTION -->
 <section class="bg-neutral-950 py-16 px-6">
   <div class="max-w-6xl mx-auto">
@@ -526,7 +627,6 @@
 
 <!-- SCRIPT – YOUTUBE-STYLE PROMO + MODAL FOR FEATURED/MAIN STAGE VIDEOS -->
 <script>
-
 document.addEventListener("DOMContentLoaded", () => {
   // === PROMO VIDEO – YOUTUBE STYLE ===
   const promoVideo = document.getElementById("promoVideo");
@@ -540,25 +640,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const progressFill = document.getElementById("progressFill");
   const currentTimeEl = document.getElementById("currentTime");
   const durationEl = document.getElementById("duration");
-
   if (promoVideo) {
     function formatTime(seconds) {
       const mins = Math.floor(seconds / 60);
       const secs = Math.floor(seconds % 60);
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
-
     promoVideo.addEventListener("loadedmetadata", () => {
       if (durationEl) durationEl.textContent = formatTime(promoVideo.duration || 0);
     });
-
     promoVideo.addEventListener("timeupdate", () => {
       if (!promoVideo.duration) return;
       const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
       if (progressFill) progressFill.style.width = `${percent}%`;
       if (currentTimeEl) currentTimeEl.textContent = formatTime(promoVideo.currentTime);
     });
-
     if (progressBar) {
       progressBar.addEventListener("click", (e) => {
         const rect = progressBar.getBoundingClientRect();
@@ -566,7 +662,6 @@ document.addEventListener("DOMContentLoaded", () => {
         promoVideo.currentTime = pos * promoVideo.duration;
       });
     }
-
     function togglePlayPause() {
       if (promoVideo.paused || promoVideo.ended) {
         promoVideo.play().then(() => {
@@ -581,28 +676,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pauseIcon) pauseIcon.classList.add("hidden");
       }
     }
-
     if (playPauseBtn) playPauseBtn.addEventListener("click", togglePlayPause);
-
     promoVideo.addEventListener("play", () => {
       if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
       if (playIcon) playIcon.classList.add("hidden");
       if (pauseIcon) pauseIcon.classList.remove("hidden");
     });
-
     promoVideo.addEventListener("pause", () => {
       if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
       if (playIcon) playIcon.classList.remove("hidden");
       if (pauseIcon) pauseIcon.classList.add("hidden");
     });
-
     if (muteBtn) {
       muteBtn.addEventListener("click", () => {
         promoVideo.muted = !promoVideo.muted;
         muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
       });
     }
-
     if (volumeSlider) {
       volumeSlider.addEventListener("input", (e) => {
         const vol = parseFloat(e.target.value);
@@ -611,7 +701,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (muteBtn) muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
       });
     }
-
     if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
   }
 
@@ -620,7 +709,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const videoPlayer = document.getElementById("videoPlayer");
   const videoSource = document.getElementById("videoSourceMp4");
   const closeVideoBtn = document.getElementById("closeVideoBtn");
-
   document.querySelectorAll('.cursor-pointer[data-video]').forEach(card => {
     card.addEventListener('click', () => {
       const videoFile = card.getAttribute('data-video');
@@ -633,7 +721,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-
   if (closeVideoBtn) {
     closeVideoBtn.addEventListener('click', () => {
       videoModal.classList.add('hidden');
@@ -641,7 +728,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (videoPlayer) videoPlayer.pause();
     });
   }
-
   if (videoModal) {
     videoModal.addEventListener('click', (e) => {
       if (e.target === videoModal) {
