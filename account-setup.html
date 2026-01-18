@@ -6,7 +6,7 @@
   <title>Create Your Rhythm Wav Account – Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase CDN – standard UMD bundle -->
+  <!-- Supabase CDN – standard UMD bundle (kept as-is for your preference) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
@@ -26,7 +26,6 @@
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased flex flex-col">
-
   <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
@@ -115,13 +114,13 @@
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
 
-      // Correct Supabase initialization – destructure from global 'supabase' object
-      const { createClient } = supabase;  // This fixes the "createClient is not defined" error
-      const supabaseUrl = 'https://bxoqhmfnseskwqkywppg.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
-      const supabaseClient = createClient(supabaseUrl, supabaseKey);
+      // Supabase client (using global from UMD bundle)
+      const supabase = window.supabase.createClient(
+        'https://bxoqhmfnseskwqkywppg.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+      );
 
-      // Password toggles
+      // Password visibility toggles
       const togglePassword = document.getElementById('togglePassword');
       const passwordInput = document.getElementById('password');
       if (togglePassword && passwordInput) {
@@ -140,7 +139,7 @@
         });
       }
 
-      // Form submit – no refresh, auto-login, redirect
+      // Form submit handler
       const form = document.getElementById('signupForm');
       if (form) {
         form.addEventListener('submit', async (e) => {
@@ -158,6 +157,7 @@
           errorEl.classList.add('hidden');
           errorEl.textContent = '';
           loadingEl.classList.remove('hidden');
+          loadingEl.textContent = 'Creating account...';
           submitBtn.disabled = true;
 
           if (password !== confirmPassword) {
@@ -165,7 +165,7 @@
             errorEl.classList.remove('hidden');
             loadingEl.classList.add('hidden');
             submitBtn.disabled = false;
-            return false;
+            return;
           }
 
           if (password.length < 8) {
@@ -173,12 +173,12 @@
             errorEl.classList.remove('hidden');
             loadingEl.classList.add('hidden');
             submitBtn.disabled = false;
-            return false;
+            return;
           }
 
           try {
-            // Sign up
-            const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+            // 1. Sign up the user
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
               email,
               password,
               options: {
@@ -188,26 +188,37 @@
 
             if (signUpError) throw signUpError;
 
-            // Immediate auto-login
-            const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+            // 2. Wait a moment for Supabase to process the user
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // 3. Immediately sign in to establish session
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
               email,
               password
             });
 
             if (signInError) throw signInError;
 
-            loadingEl.textContent = 'Success! Redirecting...';
+            // 4. Poll to confirm session is active (critical fix)
+            let attempts = 0;
+            while (attempts < 10) {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session?.user) {
+                loadingEl.textContent = 'Success! Redirecting to Rhythm Wav...';
+                await new Promise(resolve => setTimeout(resolve, 800));
+                window.location.replace('/rhythm-wav.html');
+                return;
+              }
+              await new Promise(resolve => setTimeout(resolve, 800));
+              attempts++;
+            }
 
-            // Delay for session sync
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            throw new Error("Session not established after signup. Please try logging in manually.");
 
-            window.location.replace('/rhythm-wav.html');
-            return false;
           } catch (err) {
             errorEl.textContent = err.message || 'Something went wrong. Please try again.';
             errorEl.classList.remove('hidden');
             console.error('Signup/login error:', err);
-            return false;
           } finally {
             loadingEl.classList.add('hidden');
             submitBtn.disabled = false;
