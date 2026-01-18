@@ -51,8 +51,8 @@
   </div>
   <nav class="flex flex-wrap items-center justify-center gap-4 text-lg">
     <a href="index.html" class="hover:text-emerald-400 transition">Home</a>
-    <button onclick="checkAndOpenVision()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
-      Rhythm Vision
+    <button onclick="openPlatinumVision()" class="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
+      Rhythm Vision Platinum
     </button>
     <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold transition">
       Collaboration Network
@@ -571,8 +571,8 @@
     }
   }
 
-  // Check subscription before opening Rhythm Vision
-  window.checkAndOpenVision = async function() {
+  // FIXED FUNCTION: Direct access to Platinum Vision page - no popup for Platinum users
+  window.openPlatinumVision = async function() {
     if (!currentUser) {
       alert("Please log in first");
       return;
@@ -580,20 +580,21 @@
 
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('plan, rhythm_vision_plan')
+      .select('plan')
       .eq('id', currentUser.id)
       .single();
 
     if (error || !profile) {
-      alert("Error checking subscription: " + (error?.message || 'Unknown error'));
+      alert("Error checking your plan. Please try again.");
       return;
     }
 
-    // Allow access for Platinum, Pro, or Vision plan
-    if (profile.plan === 'platinum' || profile.plan === 'pro' || profile.rhythm_vision_plan === 'vision') {
-      window.location.href = 'rhythm-vision-pro.html';
+    if (profile.plan === 'platinum') {
+      // Platinum user - direct access, no popup, no pricing redirect
+      window.location.href = 'rhythm-vision-platinum.html';
     } else {
-      alert("You need a Rhythm Vision or Pro subscription to access this page");
+      // Safety for non-Platinum (shouldn't happen on this page, but just in case)
+      alert("Rhythm Vision Platinum is exclusive to Platinum Pro Plan users.\nYou can upgrade on the pricing page.");
       window.location.href = 'pricing.html';
     }
   };
@@ -606,16 +607,19 @@
       return;
     }
     currentUser = user;
+
     await Promise.all([
       loadProfileData(),
       loadVideos(),
       displayProBadge(),
       checkStripeConnection()
     ]);
+
     document.getElementById('bannerInput').addEventListener('change', uploadBanner);
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadAudio').addEventListener('click', uploadAudio);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
+
     document.getElementById('connectStripeBtn').addEventListener('click', async () => {
       try {
         const { data, error } = await supabase.functions.invoke('stripe-onboard', {
@@ -627,6 +631,7 @@
         alert('Error starting onboarding: ' + err.message);
       }
     });
+
     document.getElementById('deleteConfirmInput').addEventListener('input', e => {
       const val = e.target.value.trim();
       const btn = document.getElementById('deleteAccountBtn');
@@ -642,6 +647,7 @@
         btn.textContent = 'Yes, Delete Everything';
       }
     });
+
     document.getElementById('deleteAccountBtn').addEventListener('click', deleteAccount);
   });
 </script>
