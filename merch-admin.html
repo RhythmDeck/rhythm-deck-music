@@ -10,6 +10,19 @@
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;display:inline-block;}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .btn-dashboard {
+      background: linear-gradient(to right, #d4af37, #b8860b);
+      color: #1a0f2e;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+    }
+    .btn-dashboard:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212,175,55,0.6);
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -23,9 +36,11 @@
       </div>
     </div>
     <div class="flex gap-4">
-      <a href="dashboard.html" class="bg-gray-700 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-bold transition shadow-lg">
+      <!-- FIXED: Smart Back to Dashboard button -->
+      <button onclick="goToDashboard()" class="btn-dashboard">
         ← Back to Dashboard
-      </a>
+      </button>
+
       <a href="public-merch.html" class="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white px-8 py-3 rounded-lg font-bold transition shadow-lg">
         View Public Merch Page →
       </a>
@@ -37,12 +52,10 @@
     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
       <p class="text-white text-4xl md:text-5xl font-black text-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">Your Merch Store Admin</p>
     </div>
-
     <!-- Logo: Full overlay on bottom left -->
     <div class="absolute bottom-4 left-8 z-10">
       <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Your Store Logo" class="w-36 h-36 rounded-full object-cover border-8 border-white shadow-2xl">
     </div>
-
     <!-- Upload Logo Button - Right of logo, same level as Upload Banner -->
     <div class="absolute bottom-4 left-52 z-20">
       <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-2 px-4 text-sm rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
@@ -54,7 +67,6 @@
       </label>
       <p id="logoStatus" class="text-white font-bold mt-1 text-sm hidden">Updated!</p>
     </div>
-
     <!-- Upload Banner Button - Bottom Right -->
     <div class="absolute bottom-4 right-4 z-20">
       <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-2 px-4 text-sm rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
@@ -102,37 +114,30 @@
       <h2 class="text-4xl font-black text-orange-800 mb-6" id="formTitle">Add New Product</h2>
       <form id="addProductForm" class="space-y-6">
         <input type="hidden" id="editProductId">
-
         <div>
           <label class="block text-gray-700 font-bold mb-2">Product Name</label>
           <input type="text" id="productName" required class="w-full border border-gray-300 rounded-lg p-3 focus:border-orange-500">
         </div>
-
         <div>
           <label class="block text-gray-700 font-bold mb-2">Description</label>
           <textarea id="productDescription" required class="w-full border border-gray-300 rounded-lg p-3 h-32 focus:border-orange-500"></textarea>
         </div>
-
         <div>
           <label class="block text-gray-700 font-bold mb-2">Main Product Image</label>
           <input type="file" id="productImage" accept="image/*" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-orange-600 file:text-white">
           <p class="text-sm text-gray-600 mt-2">Leave empty when editing if you don't want to change it.</p>
         </div>
-
-        <!-- Sizes / Colors & Prices - Directly on page (no separate button) -->
+        <!-- Sizes / Colors & Prices -->
         <div class="space-y-6">
           <h3 class="text-2xl font-bold text-orange-700">Sizes / Colors & Prices</h3>
           <p class="text-gray-700">Add each size/color variant with its own price. You can add as many as you want.</p>
-
           <div id="variantsContainer" class="space-y-4">
             <!-- Variants added here dynamically -->
           </div>
-
           <button type="button" id="addVariantBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">
             + Add Size/Color Variant
           </button>
         </div>
-
         <div class="flex gap-4">
           <button type="submit" class="flex-1 bg-orange-600 text-white font-black py-4 rounded-lg hover:bg-orange-700 transition flex items-center justify-center">
             <span id="submitText">Add Product</span>
@@ -167,6 +172,27 @@
     let currentUser = null;
     let editingProductId = null;
 
+    // Smart Dashboard redirect: Platinum → platinum-pro-admin, others → profile-admin-pro
+    window.goToDashboard = async function() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert("Please log in first");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.plan === 'platinum') {
+        window.location.href = 'platinum-pro-admin.html';
+      } else {
+        window.location.href = 'profile-admin-pro.html';
+      }
+    };
+
     // Load branding (logo/banner)
     async function loadBranding() {
       const { data, error } = await supabase
@@ -174,9 +200,7 @@
         .select('logo_url, banner_url')
         .eq('id', currentUser.id)
         .single();
-
       if (error && error.code !== 'PGRST116') return;
-
       if (data) {
         if (data.logo_url) document.getElementById('currentLogoPreview').src = data.logo_url;
         if (data.banner_url) document.getElementById('userBannerSection').style.backgroundImage = `url('${data.banner_url}')`;
@@ -218,7 +242,7 @@
       }
     });
 
-    // Variant functions - FIXED to always show
+    // Variant functions
     function createVariantHTML(variant = { option: '', price: '', stock: '' }) {
       return `
         <div class="variant-item">
@@ -263,32 +287,27 @@
       return variants;
     }
 
-    // Load products - shows all details including variants & prices
+    // Load products
     async function loadProducts() {
       const { data: products, error } = await supabase
         .from('merch_products')
         .select('id, name, description, image_url, variants')
         .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
-
       if (error) {
         console.error('Load error:', error);
         alert('Error loading products');
         return;
       }
-
       const container = document.getElementById('productList');
       container.innerHTML = products.length === 0 ? '<p class="text-center text-gray-500 italic text-lg py-10">No products yet. Add one above!</p>' : '';
-
       products.forEach(product => {
         let imgSrc = 'https://placehold.co/600x400?text=No+Image';
         if (product.image_url) {
           const { data: imgData } = supabase.storage.from('merch_images').getPublicUrl(product.image_url);
           imgSrc = imgData.publicUrl;
         }
-
         const variantList = (product.variants || []).map(v => `${v.option || 'N/A'} - $${v.price?.toFixed(2) || '0.00'}`).join('<br>') || 'No variants';
-
         container.innerHTML += `
           <div class="bg-gray-50 rounded-xl shadow-lg p-6">
             <img src="${imgSrc}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4">
@@ -299,20 +318,19 @@
               ${variantList}
             </div>
             <div class="flex gap-3">
-              <button class="edit-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold" 
-                      data-id="${product.id}" 
-                      data-name="${product.name.replace(/'/g, "\\'")}" 
-                      data-description="${product.description.replace(/'/g, "\\'")}" 
-                      data-image="${product.image_url || ''}" 
+              <button class="edit-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold"
+                      data-id="${product.id}"
+                      data-name="${product.name.replace(/'/g, "\\'")}"
+                      data-description="${product.description.replace(/'/g, "\\'")}"
+                      data-image="${product.image_url || ''}"
                       data-variants='${JSON.stringify(product.variants || [])}'>Edit</button>
-              <button class="delete-btn flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold" 
-                      data-id="${product.id}" 
+              <button class="delete-btn flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold"
+                      data-id="${product.id}"
                       data-image="${product.image_url || ''}">Delete</button>
             </div>
           </div>
         `;
       });
-
       document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
@@ -323,7 +341,6 @@
           editProduct(id, name, description, imageUrl, variants);
         });
       });
-
       document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
@@ -341,11 +358,9 @@
       document.getElementById('productName').value = name;
       document.getElementById('productDescription').value = description;
       document.getElementById('editProductId').value = id;
-
       const container = document.getElementById('variantsContainer');
       container.innerHTML = '';
       variants.forEach(v => addVariant(v));
-
       document.getElementById('cancelEdit').classList.remove('hidden');
       window.scrollTo({ top: document.getElementById('addProductForm').offsetTop - 100, behavior: 'smooth' });
     }
@@ -375,25 +390,21 @@
       }
     }
 
-    // Form submit - FIXED to save variants properly
+    // Form submit
     document.getElementById('addProductForm').onsubmit = async (e) => {
       e.preventDefault();
       const name = document.getElementById('productName').value.trim();
       const description = document.getElementById('productDescription').value.trim();
       const file = document.getElementById('productImage').files[0];
       const variants = collectVariants();
-
       if (!name || !description || variants.length === 0) {
         alert('Please fill product name, description, and add at least one variant with price.');
         return;
       }
-
       const spinner = document.getElementById('uploadSpinner');
       spinner.classList.remove('hidden');
-
       try {
         let imagePath = null;
-
         if (file || editingProductId) {
           if (editingProductId && !file) {
             const { data, error } = await supabase
@@ -418,14 +429,12 @@
             if (uploadError) throw uploadError;
           }
         }
-
         const productData = {
           name,
           description,
           image_url: imagePath,
           variants
         };
-
         if (editingProductId) {
           await supabase.from('merch_products').update(productData).eq('id', editingProductId);
           alert('Product updated successfully!');
@@ -434,7 +443,6 @@
           await supabase.from('merch_products').insert(productData);
           alert('Product added successfully!');
         }
-
         document.getElementById('addProductForm').reset();
         document.getElementById('variantsContainer').innerHTML = '';
         addVariant();
@@ -443,7 +451,6 @@
         document.getElementById('formTitle').textContent = 'Add New Product';
         document.getElementById('submitText').textContent = 'Add Product';
         editingProductId = null;
-
         loadProducts();
       } catch (err) {
         console.error(err);
@@ -468,7 +475,6 @@
     }
 
     document.getElementById('addVariantBtn').onclick = () => addVariant();
-
     window.onload = init;
   </script>
 </body>
