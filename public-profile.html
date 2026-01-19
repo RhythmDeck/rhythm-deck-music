@@ -26,6 +26,7 @@
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
     .join-live-btn {background:#ef4444;color:white;font-weight:900;font-size:1.5rem;padding:1.25rem 3rem;border-radius:1rem;box-shadow:0 10px 25px rgba(239,68,68,0.4);transition:all .3s;}
     .join-live-btn:hover {background:#dc2626;transform:scale(1.05);box-shadow:0 15px 35px rgba(239,68,68,0.6);}
+    .custom-tip-input {background:white;border:2px solid #10b981;border-radius:0.5rem;padding:0.75rem;text-align:center;font-size:1.25rem;font-weight:bold;color:#065f46;}
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
@@ -81,7 +82,7 @@
       </div>
 
       <div class="mt-8 text-center flex flex-col sm:flex-row gap-6 justify-center items-center">
-        <!-- JOIN LIVESTREAM button - ALWAYS visible when section is shown -->
+        <!-- JOIN LIVESTREAM button - always visible -->
         <button id="joinLiveBtn" class="join-live-btn" onclick="joinLivestream()">
           Join Livestream
         </button>
@@ -89,16 +90,31 @@
         <!-- Tip Bucket - only if Stripe connected -->
         <div id="tipBucketSection" class="hidden w-full sm:w-auto">
           <div class="bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-xl shadow-xl border-4 border-emerald-400 text-center">
-            <h4 class="text-2xl font-black text-emerald-800 mb-3">Enable Fan Tips</h4>
-            <p class="text-sm text-gray-700 mb-4">Support the artist directly</p>
+            <h4 class="text-2xl font-black text-emerald-800 mb-3">Support the Artist</h4>
+            <p class="text-sm text-gray-700 mb-4">Send a tip — choose an amount or enter your own</p>
             <div id="stripeStatus" class="mb-4 text-lg font-bold text-green-700">Tip Bucket Active!</div>
-            <div class="flex flex-wrap justify-center gap-4">
+            
+            <!-- Preset Tip Buttons -->
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
               <button onclick="sendTip(5)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$5</button>
               <button onclick="sendTip(10)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$10</button>
               <button onclick="sendTip(20)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$20</button>
               <button onclick="sendTip(50)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$50</button>
             </div>
-            <p class="text-xs text-gray-500 mt-3">Powered by Stripe • Secure</p>
+
+            <!-- Custom Amount Input -->
+            <div class="mt-4">
+              <label class="block text-gray-700 font-bold mb-2">Or enter custom amount ($)</label>
+              <div class="relative max-w-xs mx-auto">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                <input type="number" id="customTipAmount" min="1" step="0.01" placeholder="Your amount" class="custom-tip-input w-full pl-10 pr-4 py-3 border-2 border-emerald-500 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-400 rounded-lg text-center text-xl font-bold">
+              </div>
+              <button onclick="sendCustomTip()" class="mt-4 bg-emerald-700 hover:bg-emerald-800 text-white font-black py-3 px-10 rounded-lg shadow-lg w-full max-w-xs mx-auto">
+                Send Custom Tip
+              </button>
+            </div>
+
+            <p class="text-xs text-gray-500 mt-6">Powered by Stripe • Secure & Instant</p>
           </div>
         </div>
       </div>
@@ -287,13 +303,22 @@
       loadVideos();
     }
 
-    // Basic placeholder functions (for testing)
+    // Placeholder functions (for testing)
     function sendChatMessage() {
-      alert("Chat message sent! (This is test mode - real chat coming later)");
+      alert("Chat message sent! (Test mode - real chat coming later)");
     }
 
     function sendTip(amount) {
       alert(`Sending $${amount} tip! (Test mode - real Stripe coming later)`);
+    }
+
+    function sendCustomTip() {
+      const amount = document.getElementById('customTipAmount').value;
+      if (!amount || amount <= 0) {
+        alert("Please enter a valid amount greater than 0");
+        return;
+      }
+      alert(`Sending custom $${amount} tip! (Test mode - real Stripe coming later)`);
     }
 
     function joinLivestream() {
