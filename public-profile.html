@@ -18,12 +18,14 @@
     #modalVideo {max-width:90%;max-height:85vh;border:4px solid #10b981;border-radius:12px;box-shadow:0 0 40px rgba(16,185,129,.5)}
     #closeModal {position:absolute;top:20px;right:20px;background:#10b981;color:white;width:50px;height:50px;border-radius:50%;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(0,0,0,.6);z-index:10}
     .name-glow { color: #10b981; text-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-    /* Exact styles copied from Platinum Pro Admin */
+    /* Exact styles from your Platinum Pro Admin */
     .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
     @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
     .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
     .comment-name{font-weight:700;color:#10b981}
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
+    .join-live-btn {background:#ef4444;color:white;font-weight:900;font-size:1.5rem;padding:1.25rem 3rem;border-radius:1rem;box-shadow:0 10px 25px rgba(239,68,68,0.4);transition:all .3s;}
+    .join-live-btn:hover {background:#dc2626;transform:scale(1.05);box-shadow:0 15px 35px rgba(239,68,68,0.6);}
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
@@ -53,7 +55,7 @@
     </div>
   </section>
 
-  <!-- Livestream, Live Chat & Tip Bucket – Exact match to Platinum Pro Admin -->
+  <!-- Livestream, Live Chat & Tip Bucket – Exact match to your Platinum Pro Admin -->
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
     <div id="proFeaturesSection" class="hidden">
       <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
@@ -79,10 +81,12 @@
       </div>
 
       <div class="mt-8 text-center flex flex-col sm:flex-row gap-6 justify-center items-center">
-        <button id="joinLiveBtn" class="bg-red-600 hover:bg-red-700 text-white font-black text-xl px-10 py-5 rounded-xl shadow-lg transform hover:scale-105 transition hidden">
+        <!-- JOIN LIVESTREAM button - ALWAYS visible when section is shown -->
+        <button id="joinLiveBtn" class="join-live-btn" onclick="joinLivestream()">
           Join Livestream
         </button>
 
+        <!-- Tip Bucket - only if Stripe connected -->
         <div id="tipBucketSection" class="hidden w-full sm:w-auto">
           <div class="bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-xl shadow-xl border-4 border-emerald-400 text-center">
             <h4 class="text-2xl font-black text-emerald-800 mb-3">Enable Fan Tips</h4>
@@ -163,7 +167,7 @@
       if (profile.plan === 'pro' || profile.plan === 'platinum') {
         document.getElementById('proFeaturesSection').classList.remove('hidden');
 
-        // Show Tip Bucket only if Stripe is connected
+        // Show Tip Bucket only if Stripe connected
         if (profile.stripe_account_id) {
           document.getElementById('tipBucketSection').classList.remove('hidden');
         }
@@ -283,32 +287,25 @@
       loadVideos();
     }
 
-    // Placeholder functions (replace with real logic later)
+    // Basic placeholder functions (for testing)
     function sendChatMessage() {
-      const input = document.getElementById('chatInput');
-      if (!input) return;
-      const msg = input.value.trim();
-      if (!msg) return;
-      const chatDiv = document.getElementById('liveChatMessages');
-      chatDiv.innerHTML += `<div class="comment-bubble"><span class="comment-name">You:</span> <span class="comment-text">${msg}</span></div>`;
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-      input.value = '';
+      alert("Chat message sent! (This is test mode - real chat coming later)");
     }
 
     function sendTip(amount) {
-      alert(`Sending $${amount} tip! (Connect real Stripe payment here)`);
+      alert(`Sending $${amount} tip! (Test mode - real Stripe coming later)`);
     }
 
     function joinLivestream() {
-      alert("Joining the livestream! (Connect to your actual stream URL/player here)");
+      alert("Join Livestream clicked! (Test mode - real stream join coming later)");
     }
 
     window.addEventListener('load', async () => {
       await loadProfile();
       await loadVideos();
 
-      // Show Join button only if live (you can make this dynamic later)
-      if (document.getElementById('liveIndicator') && !document.getElementById('liveIndicator').classList.contains('hidden')) {
+      // Make sure Join Livestream button is always visible when section shows
+      if (!document.getElementById('proFeaturesSection').classList.contains('hidden')) {
         document.getElementById('joinLiveBtn').classList.remove('hidden');
       }
     });
