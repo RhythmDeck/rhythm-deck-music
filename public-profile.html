@@ -18,14 +18,16 @@
     #modalVideo {max-width:90%;max-height:85vh;border:4px solid #10b981;border-radius:12px;box-shadow:0 0 40px rgba(16,185,129,.5)}
     #closeModal {position:absolute;top:20px;right:20px;background:#10b981;color:white;width:50px;height:50px;border-radius:50%;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(0,0,0,.6);z-index:10}
     .name-glow { color: #10b981; text-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-    /* Live Stream & Chat Styles */
-    .live-section { background: linear-gradient(to bottom, #1a0033, #0d001a); }
-    .live-badge { position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem; }
-    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)} 70%{box-shadow:0 0 0 16px rgba(239,68,68,0)} 100%{box-shadow:0 0 0 0 rgba(239,68,68,0)} }
-    .chat-message { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; }
-    .chat-name { color: #10b981; font-weight: bold; }
-    .tip-btn { background: linear-gradient(to right, #22c55e, #16a34a); }
-    .tip-btn:hover { background: linear-gradient(to right, #16a34a, #15803d); }
+    /* Live Stream & Chat Styles (matched to admin pages) */
+    .live-badge {position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+    .comment-bubble {background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
+    .comment-name {font-weight:700;color:#10b981}
+    .comment-text {color:#1f2937;margin-left:.5rem;font-weight:500}
+    .tip-btn {background:linear-gradient(to right,#22c55e,#16a34a);transition:all .3s}
+    .tip-btn:hover {background:linear-gradient(to right,#16a34a,#15803d);transform:scale(1.05)}
+    .join-live-btn {background:linear-gradient(to right,#ef4444,#dc2626);transition:all .3s}
+    .join-live-btn:hover {background:linear-gradient(to right,#dc2626,#b91c1c);transform:scale(1.05)}
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
@@ -35,7 +37,7 @@
     <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-5xl font-bold opacity-50">
       Loading Banner...
     </div>
-    <!-- Logo badge - moved up so full circle is visible -->
+    <!-- Logo badge -->
     <div class="absolute bottom-8 left-8 w-40 h-40 rounded-full border-[12px] border-white/90 shadow-2xl overflow-hidden bg-white z-10">
       <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
     </div>
@@ -55,10 +57,10 @@
     </div>
   </section>
 
-  <!-- NEW: Livestream, Live Chat & Tip Bucket (Pro/Platinum Only) -->
-  <section class="max-w-6xl mx-auto px-6 pb-24 live-section rounded-3xl shadow-2xl text-white">
-    <div id="proFeaturesSection" class="hidden">
-      <h2 class="text-5xl font-black text-center mb-12 text-emerald-400 drop-shadow-lg">Live Stream & Fan Interaction</h2>
+  <!-- Livestream, Live Chat & Tip Bucket (Pro/Platinum Only) -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <div id="proFeaturesSection" class="hidden bg-gradient-to-br from-purple-900 to-pink-900 rounded-3xl shadow-2xl p-8 text-white">
+      <h2 class="text-5xl font-black text-center mb-12 drop-shadow-lg">Live with Fans</h2>
 
       <!-- Live Stream Player -->
       <div class="relative rounded-2xl overflow-hidden shadow-2xl mb-12 aspect-video bg-black">
@@ -69,30 +71,37 @@
         <div id="liveIndicator" class="live-badge hidden">LIVE NOW</div>
       </div>
 
-      <div class="grid md:grid-cols-2 gap-12">
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Join Livestream Button (prominent for fans) -->
+        <div class="lg:col-span-3 text-center mb-10">
+          <button id="joinLiveBtn" class="join-live-btn text-white font-black text-3xl px-16 py-8 rounded-2xl shadow-2xl transform hover:scale-105 transition hidden">
+            JOIN LIVESTREAM
+          </button>
+        </div>
+
         <!-- Live Chat -->
-        <div class="bg-black/40 rounded-xl p-6 backdrop-blur-md border border-emerald-500/30">
-          <h3 class="text-3xl font-bold mb-6 text-emerald-400">Live Chat</h3>
-          <div id="liveChatMessages" class="h-96 overflow-y-auto space-y-4 mb-6 bg-black/30 p-4 rounded-lg">
-            <p class="text-center text-gray-400 italic">Chat appears when the artist goes live</p>
+        <div class="lg:col-span-2 bg-black/40 rounded-xl p-8 backdrop-blur-md border border-purple-500/50">
+          <h3 class="text-4xl font-black mb-8 text-purple-300">Live Chat</h3>
+          <div id="liveChatMessages" class="h-96 overflow-y-auto space-y-4 mb-8 bg-black/50 p-6 rounded-xl">
+            <p class="text-center text-gray-400 italic text-xl">Chat appears when the artist goes live</p>
           </div>
-          <div class="flex gap-3">
-            <input id="chatInput" type="text" placeholder="Send a message..." class="flex-1 bg-black/50 border border-emerald-500/50 rounded-lg p-4 text-white focus:outline-none focus:border-emerald-400">
-            <button onclick="sendChatMessage()" class="bg-emerald-600 hover:bg-emerald-700 px-8 py-4 rounded-lg font-bold transition">Send</button>
+          <div class="flex gap-4">
+            <input id="chatInput" type="text" placeholder="Send a message to the artist..." class="flex-1 bg-black/60 border border-purple-500/50 rounded-xl p-5 text-white text-lg focus:outline-none focus:border-purple-400">
+            <button onclick="sendChatMessage()" class="bg-purple-600 hover:bg-purple-700 px-10 py-5 rounded-xl font-black text-xl transition">Send</button>
           </div>
         </div>
 
-        <!-- Tip Bucket -->
-        <div class="bg-gradient-to-br from-emerald-900 to-teal-900 rounded-xl p-8 text-center border border-emerald-500/30 shadow-inner">
-          <h3 class="text-4xl font-black mb-6 text-emerald-300">Support the Artist</h3>
-          <p class="text-xl mb-8">Send a tip to show love — 100% goes to the artist (Platinum) or 90% (Pro)</p>
+        <!-- Tip Bucket (only if Stripe connected) -->
+        <div id="tipBucketSection" class="hidden bg-gradient-to-br from-emerald-900 to-teal-900 rounded-xl p-10 text-center border border-emerald-500/50 shadow-inner">
+          <h3 class="text-4xl font-black mb-8 text-emerald-300">Support the Artist</h3>
+          <p class="text-xl mb-10">Send a tip to show love — 100% to artist (Platinum) or 90% (Pro)</p>
           <div class="flex flex-wrap justify-center gap-6 mb-10">
-            <button onclick="sendTip(5)" class="tip-btn text-white font-bold px-10 py-5 rounded-xl text-2xl shadow-lg transform hover:scale-105 transition">$5</button>
-            <button onclick="sendTip(10)" class="tip-btn text-white font-bold px-10 py-5 rounded-xl text-2xl shadow-lg transform hover:scale-105 transition">$10</button>
-            <button onclick="sendTip(20)" class="tip-btn text-white font-bold px-10 py-5 rounded-xl text-2xl shadow-lg transform hover:scale-105 transition">$20</button>
-            <button onclick="sendTip(50)" class="tip-btn text-white font-bold px-10 py-5 rounded-xl text-2xl shadow-lg transform hover:scale-105 transition">$50</button>
+            <button onclick="sendTip(5)" class="tip-btn text-white font-black px-12 py-6 rounded-xl text-3xl shadow-xl transform hover:scale-105 transition">$5</button>
+            <button onclick="sendTip(10)" class="tip-btn text-white font-black px-12 py-6 rounded-xl text-3xl shadow-xl transform hover:scale-105 transition">$10</button>
+            <button onclick="sendTip(20)" class="tip-btn text-white font-black px-12 py-6 rounded-xl text-3xl shadow-xl transform hover:scale-105 transition">$20</button>
+            <button onclick="sendTip(50)" class="tip-btn text-white font-black px-12 py-6 rounded-xl text-3xl shadow-xl transform hover:scale-105 transition">$50</button>
           </div>
-          <div class="text-sm opacity-80">Powered by Stripe • Secure & Instant</div>
+          <div class="text-sm opacity-80 mt-6">Powered by Stripe • Secure & Instant</div>
         </div>
       </div>
     </div>
@@ -122,14 +131,14 @@
       let profile;
       let { data } = await sb
         .from('profiles')
-        .select('id, name, bio, banner_url, logo_url, plan')
+        .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
         .eq('subdomain', id)
         .single();
 
       if (!data) {
         ({ data } = await sb
           .from('profiles')
-          .select('id, name, bio, banner_url, logo_url, plan')
+          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
           .eq('id', id)
           .single());
       }
@@ -159,6 +168,11 @@
       // Show live features only for Pro / Platinum
       if (profile.plan === 'pro' || profile.plan === 'platinum') {
         document.getElementById('proFeaturesSection').classList.remove('hidden');
+
+        // Show Tip Bucket only if Stripe is connected
+        if (profile.stripe_account_id) {
+          document.getElementById('tipBucketSection').classList.remove('hidden');
+        }
       }
     }
 
@@ -262,7 +276,7 @@
       } else {
         await sb.from('video_likes').insert({ video_id: videoId, user_id: user.id });
       }
-      loadVideos(); // refresh
+      loadVideos();
     }
 
     async function addComment(videoId) {
@@ -277,32 +291,47 @@
       loadVideos();
     }
 
-    // NEW: Check if user is Pro/Platinum and enable live features
+    // Check Pro/Platinum status and Stripe connection
     async function checkProStatus() {
       const { data: profile } = await sb
         .from('profiles')
-        .select('plan')
-        .eq('id', id) // using the viewed profile's ID
+        .select('plan, stripe_account_id')
+        .eq('id', id)
         .single();
 
       if (profile?.plan === 'pro' || profile?.plan === 'platinum') {
         document.getElementById('proFeaturesSection').classList.remove('hidden');
+
+        // Show Tip Bucket only if Stripe connected
+        if (profile.stripe_account_id) {
+          document.getElementById('tipBucketSection').classList.remove('hidden');
+        }
       }
     }
 
-    // NEW: Placeholder functions for live/chat/tips (expand with your real implementation)
+    // Basic placeholder functions (you can replace with real logic later)
     function sendChatMessage() {
-      alert("Chat message sent! (Connect real-time with Supabase Realtime or Socket.io)");
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      const chatDiv = document.getElementById('liveChatMessages');
+      chatDiv.innerHTML += `<div class="comment-bubble"><span class="comment-name">You:</span> <span class="comment-text">${msg}</span></div>`;
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+      input.value = '';
     }
 
     function sendTip(amount) {
-      alert(`$${amount} tip sent! (Integrate Stripe Checkout here for real payments)`);
+      alert(`Sending $${amount} tip! (Replace with real Stripe payment flow)`);
     }
 
-    window.addEventListener('load', () => {
-      loadProfile();
-      loadVideos();
-      checkProStatus(); // NEW: Check and show live features
+    function joinLivestream() {
+      alert("Joining the livestream! (Replace with real stream join logic)");
+    }
+
+    window.addEventListener('load', async () => {
+      await loadProfile();
+      await loadVideos();
+      await checkProStatus();
     });
   </script>
 </body>
