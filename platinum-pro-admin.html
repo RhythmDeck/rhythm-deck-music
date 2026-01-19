@@ -17,7 +17,7 @@
     #videoModal.show{opacity:1;visibility:visible}
     #modalVideo{max-width:90%;max-height:90%;border:8px solid #10b981;border-radius:16px}
     #closeModal{position:absolute;top:20px;right:20px;background:white;color:black;width:60px;height:60px;border-radius:50%;font-size:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;font-weight:bold}
-    .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
+    .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem;position:relative;padding-right:2.5rem;}
     .comment-name{font-weight:700;color:#10b981}
     .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
     .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;}
@@ -38,9 +38,30 @@
     .social-btn:hover {transform:scale(1.05);}
     #socialModal {position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .3s;}
     #socialModal.show {opacity:1;visibility:visible;}
+    .delete-comment-btn {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 14px;
+      line-height: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .delete-comment-btn:hover {
+      background: #dc2626;
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg gap-4">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -77,7 +98,9 @@
     </button>
   </nav>
 </header>
+
 <main class="flex-grow">
+
   <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
     <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center">
@@ -92,6 +115,7 @@
     <input type="file" id="logoInput" accept="image/*" class="hidden">
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
+
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-br from-purple-800 to-pink-800 rounded-xl shadow-2xl text-white">
     <h3 class="text-4xl font-black mb-6 text-center">Share Your Content to Social Media</h3>
     <p class="text-center mb-8 opacity-90 text-lg">Connect your accounts and post videos, updates, and music with one click</p>
@@ -125,7 +149,7 @@
         <span class="font-bold text-lg">Apple Music</span>
       </button>
       <button class="social-btn bg-orange-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2">
-        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M1.5 8.5v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zM22 12.5c0-2.485-2.015-4.5-4.5-4.5-.345 0-.68.04-1 .115v9.77c.32.075.655.115 1 .115 2.485 0 4.5-2.015 4.5-4.5z"/></svg>
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M1.5 8.5v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zm2 0v7h1v-7h-1zM22 12.5c0-2.485-2.015-4.5-4.5-4.5-.345 0-.68.04-1 .115v9.77c.32.075.655.115 1 .115 2.485 0 4.5-2.015 4.5-4.5z"/></svg>
         <span class="font-bold text-lg">SoundCloud</span>
       </button>
       <button class="social-btn bg-blue-900 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2">
@@ -146,6 +170,7 @@
       </button>
     </div>
   </section>
+
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
     <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
     <div class="grid lg:grid-cols-3 gap-8 mb-8">
@@ -186,6 +211,7 @@
       </div>
     </div>
   </section>
+
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
       <div class="md:col-span-1 space-y-6">
@@ -268,6 +294,7 @@
         <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
     </div>
+
     <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
       <details class="group">
         <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
@@ -289,14 +316,18 @@
       </details>
     </div>
   </section>
+
 </main>
+
 <div id="videoModal">
   <div id="closeModal" onClick="closeModal()">X</div>
   <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
 </div>
+
 <footer class="bg-black text-white mt-auto p-6 text-center">
   <p class="text-sm">© 2026 Rhythm Deck Music. All rights reserved.</p>
 </footer>
+
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
   const supabase = createClient(
@@ -382,25 +413,47 @@
       .select('id, video_url, thumbnail_url, title, price, type')
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false });
+
     if (error) {
       console.error('Error loading media:', error);
       return;
     }
+
     const container = document.getElementById('videoList');
     container.innerHTML = '';
+
     if (!videos || videos.length === 0) {
       container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No media uploaded yet.</p>';
       return;
     }
+
     for (const item of videos) {
       const mediaUrl = supabase.storage.from('media').getPublicUrl(item.video_url).data.publicUrl;
       const thumbUrl = item.thumbnail_url
         ? supabase.storage.from('media').getPublicUrl(item.thumbnail_url).data.publicUrl + '?t=' + Date.now()
         : `https://via.placeholder.com/400x225/111/fff?text=${item.type || 'Media'}`;
+
       const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', item.id);
-      const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', item.id).order('created_at', { ascending: false });
+
+      const { data: comments = [] } = await supabase
+        .from('video_comments')
+        .select('id, name, comment')
+        .eq('video_id', item.id)
+        .order('created_at', { ascending: false });
+
       const typeLabel = item.type === 'audio' ? 'Audio Track' : 'Video';
       const typeColor = item.type === 'audio' ? 'bg-indigo-600' : 'bg-emerald-600';
+
+      let commentsHTML = comments.length === 0 
+        ? '<p class="text-gray-500 italic">No comments yet</p>'
+        : comments.map(c => `
+            <div class="comment-bubble">
+              <span class="comment-name">${c.name}:</span> 
+              <span class="comment-text">${c.comment}</span>
+              <button class="delete-comment-btn" onclick="deleteComment('${c.id}')">×</button>
+            </div>
+          `).join('');
+
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
           <div class="relative">
@@ -424,8 +477,7 @@
                 <button onclick="navigator.clipboard.writeText('${mediaUrl}'); alert('Link copied!')" class="text-green-400 font-bold hover:text-green-300">Share</button>
               </div>
               <div class="border-t border-gray-700 pt-3 space-y-2 max-h-40 overflow-y-auto text-sm">
-                ${comments.length === 0 ? '<p class="text-gray-500 italic">No comments yet</p>' : ''}
-                ${comments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name}:</span> <span class="comment-text">${c.comment}</span></div>`).join('')}
+                ${commentsHTML}
               </div>
             </div>
           </div>
@@ -441,23 +493,47 @@
 
   async function deleteVideo(id, videoPath, thumbPath) {
     if (!confirm('Are you sure you want to permanently delete this? This cannot be undone.')) return;
+
     try {
       const { error: dbError } = await supabase.from('user_videos').delete().eq('id', id);
       if (dbError) throw dbError;
+
       const filesToDelete = [];
       if (videoPath) filesToDelete.push(videoPath);
       if (thumbPath) filesToDelete.push(thumbPath);
+
       if (filesToDelete.length > 0) {
         const { error: storageError } = await supabase.storage.from('media').remove(filesToDelete);
         if (storageError) throw storageError;
       }
+
       alert('Deleted successfully.');
       loadVideos();
       displayProBadge();
     } catch (err) {
+      console.error('Delete video error:', err);
       alert('Delete failed: ' + err.message);
     }
   }
+
+  window.deleteComment = async function(commentId) {
+    if (!confirm('Delete this comment permanently?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('video_comments')
+        .delete()
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      alert('Comment deleted.');
+      loadVideos(); // Refresh → comment disappears from admin and public
+    } catch (err) {
+      console.error('Delete comment error:', err);
+      alert('Failed to delete comment: ' + err.message);
+    }
+  };
 
   async function uploadAudio() {
     const thumbFile = document.getElementById('audioThumbnailInput')?.files[0];
@@ -571,29 +647,23 @@
     }
   }
 
-  // FIXED FUNCTION: Direct access to Platinum Vision page - no popup for Platinum users
   window.openPlatinumVision = async function() {
     if (!currentUser) {
       alert("Please log in first");
       return;
     }
-
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('plan')
       .eq('id', currentUser.id)
       .single();
-
     if (error || !profile) {
       alert("Error checking your plan. Please try again.");
       return;
     }
-
     if (profile.plan === 'platinum') {
-      // Platinum user - direct access, no popup, no pricing redirect
       window.location.href = 'rhythm-vision-platinum.html';
     } else {
-      // Safety for non-Platinum (shouldn't happen on this page, but just in case)
       alert("Rhythm Vision Platinum is exclusive to Platinum Pro Plan users.\nYou can upgrade on the pricing page.");
       window.location.href = 'pricing.html';
     }
@@ -619,7 +689,6 @@
     document.getElementById('logoInput').addEventListener('change', uploadLogo);
     document.getElementById('uploadAudio').addEventListener('click', uploadAudio);
     document.getElementById('uploadVideo').addEventListener('click', uploadAndPublish);
-
     document.getElementById('connectStripeBtn').addEventListener('click', async () => {
       try {
         const { data, error } = await supabase.functions.invoke('stripe-onboard', {
@@ -631,7 +700,6 @@
         alert('Error starting onboarding: ' + err.message);
       }
     });
-
     document.getElementById('deleteConfirmInput').addEventListener('input', e => {
       const val = e.target.value.trim();
       const btn = document.getElementById('deleteAccountBtn');
@@ -647,7 +715,6 @@
         btn.textContent = 'Yes, Delete Everything';
       }
     });
-
     document.getElementById('deleteAccountBtn').addEventListener('click', deleteAccount);
   });
 </script>
