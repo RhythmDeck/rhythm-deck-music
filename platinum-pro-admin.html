@@ -23,15 +23,8 @@
     .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;}
     .like-display svg{width:28px;height:28px;stroke:#ef4444;fill:none}
     #badge-container {position: absolute;top: 16px;right: 16px;z-index: 30;}
-    #badge-container img {
-      width: 144px;
-      height: 144px;
-      filter: drop-shadow(0 0 30px rgba(255,215,0,0.8));
-      transition: all 0.4s ease;
-    }
-    #badge-container img:hover {
-      transform: scale(1.2) rotate(10deg);
-    }
+    #badge-container img {width: 144px;height: 144px;filter: drop-shadow(0 0 30px rgba(255,215,0,0.8));transition: all 0.4s ease;}
+    #badge-container img:hover {transform: scale(1.2) rotate(10deg);}
     .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
     @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
     .social-btn {transition:all .3s;transform:scale(1);}
@@ -39,26 +32,8 @@
     .social-btn input:checked + div {background: rgba(255,255,255,0.4) !important;}
     #socialShareModal {position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .3s;}
     #socialShareModal.show {opacity:1;visibility:visible;}
-    .delete-comment-btn {
-      position: absolute;
-      top: 4px;
-      right: 6px;
-      background: #ef4444;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      font-size: 14px;
-      line-height: 20px;
-      text-align: center;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    }
-    .delete-comment-btn:hover {
-      background: #dc2626;
-    }
+    .delete-comment-btn {position: absolute;top: 4px;right: 6px;background: #ef4444;color: white;border: none;border-radius: 50%;width: 22px;height: 22px;font-size: 14px;line-height: 20px;text-align: center;cursor: pointer;font-weight: bold;box-shadow: 0 1px 3px rgba(0,0,0,0.3);}
+    .delete-comment-btn:hover {background: #dc2626;}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -119,10 +94,10 @@
 
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-br from-purple-800 to-pink-800 rounded-xl shadow-2xl text-white">
     <h3 class="text-4xl font-black mb-6 text-center">Share Your Content to Social Media</h3>
-    <p class="text-center mb-8 opacity-90 text-lg">Select platforms, add comment & media, then send (active after going live)</p>
+    <p class="text-center mb-8 opacity-90 text-lg">Connect your accounts and post videos, updates, and music with one click</p>
 
-    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 mb-8">
-      <!-- Instagram -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8">
+      <!-- Row 1 (6 platforms) -->
       <label class="social-btn bg-gradient-to-br from-pink-500 to-purple-500 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="instagram" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -131,7 +106,6 @@
         <span class="font-bold text-sm">Instagram</span>
       </label>
 
-      <!-- TikTok -->
       <label class="social-btn bg-black p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="tiktok" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -140,7 +114,6 @@
         <span class="font-bold text-sm">TikTok</span>
       </label>
 
-      <!-- YouTube -->
       <label class="social-btn bg-red-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="youtube" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -149,7 +122,6 @@
         <span class="font-bold text-sm">YouTube</span>
       </label>
 
-      <!-- Facebook -->
       <label class="social-btn bg-blue-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="facebook" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -158,16 +130,14 @@
         <span class="font-bold text-sm">Facebook</span>
       </label>
 
-      <!-- X (Twitter) -->
       <label class="social-btn bg-black p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
-        <input type="checkbox" name="social" value="x" class="hidden peer">
+        <input type="checkbox" name="social" value="twitter" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
           <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </div>
         <span class="font-bold text-sm">X (Twitter)</span>
       </label>
 
-      <!-- Spotify -->
       <label class="social-btn bg-green-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="spotify" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -176,16 +146,15 @@
         <span class="font-bold text-sm">Spotify</span>
       </label>
 
-      <!-- Apple Music -->
+      <!-- Row 2 (6 platforms) -->
       <label class="social-btn bg-black p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="applemusic" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
-          <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M17.9 10.9c-3.6 0-6.5 2.9-6.5 6.5s2.9 6.5 6.5 6.5 6.5-2.9 6.5-6.5-2.9-6.5-6.5-6.5zm0 10.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm-9.4-6.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4.5 0c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM22 12.5c0-2.485-2.015-4.5-4.5-4.5-.345 0-.68.04-1 .115v9.77c.32.075.655.115 1 .115 2.485 0 4.5-2.015 4.5-4.5z"/></svg>
         </div>
         <span class="font-bold text-sm">Apple Music</span>
       </label>
 
-      <!-- SoundCloud -->
       <label class="social-btn bg-orange-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="soundcloud" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -194,7 +163,6 @@
         <span class="font-bold text-sm">SoundCloud</span>
       </label>
 
-      <!-- Bandcamp -->
       <label class="social-btn bg-blue-900 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="bandcamp" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -203,7 +171,6 @@
         <span class="font-bold text-sm">Bandcamp</span>
       </label>
 
-      <!-- Reddit -->
       <label class="social-btn bg-orange-500 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="reddit" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -212,7 +179,6 @@
         <span class="font-bold text-sm">Reddit</span>
       </label>
 
-      <!-- Discord -->
       <label class="social-btn bg-indigo-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="discord" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -221,7 +187,6 @@
         <span class="font-bold text-sm">Discord</span>
       </label>
 
-      <!-- Pinterest -->
       <label class="social-btn bg-red-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="pinterest" class="hidden peer">
         <div class="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full peer-checked:bg-white/40 transition">
@@ -232,39 +197,39 @@
     </div>
 
     <div class="text-center mt-8">
-      <button id="openSocialShareBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-12 rounded-xl text-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition">
-        Share to Selected Platforms
+      <button id="openSocialShareBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-5 px-16 rounded-xl text-2xl shadow-2xl transition transform hover:scale-105">
+        Send to Social Media
       </button>
     </div>
 
-    <!-- Share Modal -->
-    <div id="socialShareModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] hidden">
-      <div class="bg-gray-900 rounded-2xl p-8 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto relative text-white">
-        <button id="closeSocialModal" class="absolute top-4 right-6 text-4xl font-bold hover:text-gray-400">×</button>
+    <!-- Modal -->
+    <div id="socialShareModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[9999] hidden">
+      <div class="bg-gray-900 rounded-2xl p-8 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto relative text-white border-2 border-emerald-600">
+        <button id="closeSocialModal" class="absolute top-5 right-6 text-5xl font-bold hover:text-emerald-400 transition">×</button>
 
-        <h2 class="text-3xl font-bold mb-6 text-center">Create Post</h2>
+        <h2 class="text-4xl font-black mb-8 text-center text-emerald-400">Share Your Post</h2>
 
-        <div id="selectedPlatformsList" class="flex flex-wrap gap-3 mb-6 justify-center"></div>
+        <div id="selectedPlatformsList" class="flex flex-wrap gap-3 mb-8 justify-center"></div>
 
-        <textarea id="socialComment" rows="5" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-xl placeholder-gray-400 focus:outline-none focus:border-emerald-500 mb-6" placeholder="Write your caption / comment here..."></textarea>
+        <textarea id="socialComment" rows="6" class="w-full p-5 bg-gray-800 border border-gray-700 rounded-xl text-lg placeholder-gray-400 focus:outline-none focus:border-emerald-500 mb-8 resize-none" placeholder="Write your caption or message here..."></textarea>
 
-        <div class="mb-6">
-          <label class="block text-lg font-semibold mb-2">Attach Media (optional)</label>
-          <div class="flex flex-col sm:flex-row gap-4">
-            <label class="flex-1">
-              <span class="block text-sm text-gray-400 mb-1">Video (.mp4)</span>
-              <input type="file" id="socialVideoInput" accept="video/mp4" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg file:bg-emerald-600 file:text-white file:border-0 file:py-2 file:px-4 file:rounded cursor-pointer">
-            </label>
-            <label class="flex-1">
-              <span class="block text-sm text-gray-400 mb-1">Audio (.mp3)</span>
-              <input type="file" id="socialAudioInput" accept="audio/mp3" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg file:bg-emerald-600 file:text-white file:border-0 file:py-2 file:px-4 file:rounded cursor-pointer">
-            </label>
+        <div class="mb-8">
+          <label class="block text-xl font-bold mb-4 text-center">Attach Media (optional)</label>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-lg mb-2">Video (.mp4)</label>
+              <input type="file" id="socialVideoInput" accept="video/mp4" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-xl file:bg-emerald-600 file:text-white file:border-0 file:py-3 file:px-6 file:rounded-lg cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-lg mb-2">Audio (.mp3)</label>
+              <input type="file" id="socialAudioInput" accept="audio/mp3" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-xl file:bg-emerald-600 file:text-white file:border-0 file:py-3 file:px-6 file:rounded-lg cursor-pointer">
+            </div>
           </div>
-          <p class="text-sm text-gray-500 mt-2 italic">Attach either video or audio (not both). Send functionality activates after going live.</p>
+          <p class="text-center text-sm text-gray-500 mt-4 italic">You can attach video, audio, or both. Sending activates after going live.</p>
         </div>
 
-        <button id="sendSocialPostBtn" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-4 rounded-xl text-xl shadow-lg transition">
-          Send (Coming soon – active after going live)
+        <button id="sendSocialPostBtn" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-5 rounded-xl text-2xl shadow-2xl transition transform hover:scale-105">
+          Send
         </button>
       </div>
     </div>
@@ -594,55 +559,38 @@
 
   async function deleteVideo(id, videoPath, thumbPath) {
     if (!confirm('Are you sure you want to permanently delete this? This cannot be undone.')) return;
-
     try {
-      console.log('Deleting video - ID:', id);
-      console.log('Video path:', videoPath);
-      console.log('Thumbnail path:', thumbPath || '(none)');
-
       const { error: dbError } = await supabase.from('user_videos').delete().eq('id', id);
-      if (dbError) {
-        console.error('Database delete failed:', dbError);
-        throw dbError;
-      }
-
+      if (dbError) throw dbError;
       const filesToDelete = [];
-      if (videoPath && videoPath.trim() !== '') filesToDelete.push(videoPath);
-      if (thumbPath && thumbPath.trim() !== '' && thumbPath !== 'null') filesToDelete.push(thumbPath);
-
+      if (videoPath) filesToDelete.push(videoPath);
+      if (thumbPath) filesToDelete.push(thumbPath);
       if (filesToDelete.length > 0) {
-        console.log('Deleting storage files:', filesToDelete);
         const { error: storageError } = await supabase.storage.from('media').remove(filesToDelete);
-        if (storageError) {
-          console.warn('Storage cleanup failed (files may remain):', storageError);
-        }
+        if (storageError) throw storageError;
       }
-
       alert('Deleted successfully.');
       loadVideos();
       displayProBadge();
     } catch (err) {
-      console.error('Delete failed:', err);
-      alert('Delete failed: ' + (err.message || 'Unknown error - check console'));
+      console.error('Delete video error:', err);
+      alert('Delete failed: ' + err.message);
     }
   }
 
   window.deleteComment = async function(commentId) {
     if (!confirm('Delete this comment permanently?')) return;
-
     try {
       const { error } = await supabase
         .from('video_comments')
         .delete()
         .eq('id', commentId);
-
       if (error) throw error;
-
       alert('Comment deleted.');
       loadVideos();
     } catch (err) {
       console.error('Delete comment error:', err);
-      alert('Failed to delete comment: ' + (err.message || 'Unknown error'));
+      alert('Failed to delete comment: ' + err.message);
     }
   };
 
@@ -788,19 +736,19 @@
   const sendSocialPostBtn = document.getElementById('sendSocialPostBtn');
 
   openSocialShareBtn.addEventListener('click', () => {
-    const checkedBoxes = document.querySelectorAll('input[name="social"]:checked');
-    if (checkedBoxes.length === 0) {
+    const checked = document.querySelectorAll('input[name="social"]:checked');
+    if (checked.length === 0) {
       alert("Please select at least one platform first.");
       return;
     }
 
     selectedPlatformsList.innerHTML = '';
-    checkedBoxes.forEach(box => {
-      const platform = box.value.charAt(0).toUpperCase() + box.value.slice(1);
-      const tag = document.createElement('span');
-      tag.className = 'bg-gray-700 px-4 py-2 rounded-full text-sm font-medium';
-      tag.textContent = platform;
-      selectedPlatformsList.appendChild(tag);
+    checked.forEach(checkbox => {
+      const name = checkbox.value.charAt(0).toUpperCase() + checkbox.value.slice(1);
+      const span = document.createElement('span');
+      span.className = 'bg-gray-700 px-5 py-2 rounded-full text-base font-medium';
+      span.textContent = name;
+      selectedPlatformsList.appendChild(span);
     });
 
     socialShareModal.classList.remove('hidden');
