@@ -15,15 +15,16 @@
     .video-overlay:hover {opacity:1}
     #videoModal {position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
     #videoModal.show {opacity:1;visibility:visible}
-    #modalVideo {max-width:90%;max-height:85vh;border:4px solid #10b981;border-radius:12px;box-shadow:0 0 40px rgba(16,185,129,.5)}
+    #modalVideo {max-width:90%;max-height:85vh;border:4px solid #10b981;border-radius:12px;box-shadow:0 0 40px rgba(16,185,129,.5);background:#000;}
     #closeModal {position:absolute;top:20px;right:20px;background:#10b981;color:white;width:50px;height:50px;border-radius:50%;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(0,0,0,.6);z-index:10}
     .name-glow { color: #10b981; text-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-    video[controlslist="nodownload"]::-webkit-media-controls-download-button,
-    video[controlslist="nodownload"]::-webkit-media-controls-overflow-button {
-      display: none !important;
-    }
     video.no-controls::-webkit-media-controls,
-    video.no-controls::-webkit-media-controls-enclosure {
+    video.no-controls::-webkit-media-controls-enclosure,
+    video.no-controls::-webkit-media-controls-panel,
+    video.no-controls::-webkit-media-controls-overflow-button,
+    video.no-controls::-webkit-media-controls-download-button,
+    video.no-controls::-webkit-media-controls-mute-button,
+    video.no-controls::-webkit-media-controls-fullscreen-button {
       display: none !important;
     }
     .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
@@ -112,8 +113,8 @@
     </div>
   </section>
   <div id="videoModal">
-    <div id="closeModal" onclick="document.getElementById('videoModal').classList.remove('show')">×</div>
-    <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
+    <div id="closeModal" onclick="closeVideoModal()">×</div>
+    <video id="modalVideo" autoplay class="shadow-2xl"></video>
   </div>
   <script>
     const sb = supabase.createClient(
@@ -216,7 +217,8 @@
         const price = v.price || 0;
         const isPaid = price > 0;
 
-        const controlsAttr = isPaid ? 'controls controlslist="nodownload"' : 'controls';
+        // No native controls on paid videos (hides three dots completely)
+        const controlsAttr = isPaid ? '' : 'controls';
         const noControlsClass = isPaid ? 'no-controls' : '';
 
         const buyButton = isPaid
@@ -235,7 +237,7 @@
                 <source src="${videoUrl}" type="video/mp4">
               </video>
               ${isPaid ? `
-                <div class="video-overlay absolute inset-0 flex items-center justify-center bg-black/60 opacity-100 hover:opacity-90 transition" onclick="document.getElementById('modalVideo').src='${videoUrl}'; document.getElementById('videoModal').classList.add('show')">
+                <div class="video-overlay absolute inset-0 flex items-center justify-center bg-black/60 opacity-100 hover:opacity-90 transition" onclick="openVideoModal('${videoUrl}')">
                   <svg class="w-20 h-20 text-white drop-shadow-2xl" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7L8 5z"/>
                   </svg>
@@ -244,8 +246,6 @@
             </div>
             <div class="p-6">
               <h4 class="font-bold text-xl truncate mb-4">${v.title || 'Untitled'}</h4>
-
-              <!-- Like + Share -->
               <div class="flex justify-between items-center mb-6">
                 <button class="flex items-center gap-3 text-2xl font-bold hover:text-red-600 transition" onclick="likeVideo('${v.id}')">
                   ❤️ ${likes}
@@ -254,8 +254,6 @@
                   Share
                 </button>
               </div>
-
-              <!-- Comments Section -->
               <div class="border-t pt-4 mb-6">
                 <h5 class="font-bold text-lg mb-3">Comments</h5>
                 ${comments.length === 0 ? '<p class="text-gray-500 italic text-sm">No comments yet</p>' : ''}
@@ -266,8 +264,6 @@
                   </div>
                 `).join('')}
               </div>
-
-              <!-- Add Comment Form -->
               <div class="mt-4">
                 <input type="text" id="commentName-${v.id}" placeholder="Your name" class="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <textarea id="commentText-${v.id}" placeholder="Add a comment..." class="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500" rows="2"></textarea>
@@ -275,12 +271,28 @@
                   Post Comment
                 </button>
               </div>
-
-              <!-- Buy Button (only for paid videos) -->
               ${buyButton}
             </div>
           </div>`;
       }
+    }
+
+    function openVideoModal(url) {
+      const modal = document.getElementById('videoModal');
+      const video = document.getElementById('modalVideo');
+      video.src = url;
+      video.load();
+      modal.classList.add('show');
+      video.play().catch(() => {});
+    }
+
+    function closeVideoModal() {
+      const modal = document.getElementById('videoModal');
+      const video = document.getElementById('modalVideo');
+      video.pause();
+      video.currentTime = 0;
+      video.src = '';
+      modal.classList.remove('show');
     }
 
     async function likeVideo(videoId) {
@@ -295,7 +307,6 @@
         .eq('video_id', videoId)
         .eq('user_id', user.id)
         .single();
-
       if (existing) {
         await sb.from('video_likes').delete().eq('id', existing.id);
       } else {
@@ -351,6 +362,11 @@
       if (!document.getElementById('proFeaturesSection').classList.contains('hidden')) {
         document.getElementById('joinLiveBtn').classList.remove('hidden');
       }
+      // Attach modal close handler
+      document.getElementById('closeModal').onclick = closeVideoModal;
+      document.getElementById('videoModal').onclick = (e) => {
+        if (e.target === document.getElementById('videoModal')) closeVideoModal();
+      };
     });
   </script>
 </body>
