@@ -16,7 +16,26 @@
     #videoModal {position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
     #videoModal.show {opacity:1;visibility:visible}
     #modalVideo {max-width:90%;max-height:85vh;border:4px solid #10b981;border-radius:12px;box-shadow:0 0 40px rgba(16,185,129,.5);background:#000;}
-    #closeModal {position:absolute;top:20px;right:20px;background:#10b981;color:white;width:50px;height:50px;border-radius:50%;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(0,0,0,.6);z-index:10}
+    #closeModal {
+      position:absolute;
+      top:20px;
+      right:20px;
+      background:#10b981;
+      color:white;
+      width:70px;
+      height:70px;
+      border-radius:50%;
+      font-size:40px;
+      font-weight:bold;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      box-shadow:0 0 20px rgba(0,0,0,.6);
+      z-index:9999; /* Much higher z-index to ensure visibility */
+      border:3px solid white;
+    }
+    #closeModal:hover {background:#059669;}
     .name-glow { color: #10b981; text-shadow: 0 4px 12px rgba(0,0,0,0.4); }
     video.no-controls::-webkit-media-controls,
     video.no-controls::-webkit-media-controls-enclosure,
@@ -335,7 +354,7 @@
 
     function buyVideo(event, videoId, price, url) {
       event.preventDefault();
-      event.stopPropagation(); // Block any bubbling to overlay or card
+      event.stopPropagation();
       if (confirm(`Pay $${price.toFixed(2)} to download this video? (Test mode)`)) {
         const a = document.createElement('a');
         a.href = url;
@@ -344,6 +363,8 @@
         a.click();
         document.body.removeChild(a);
         alert('Download started! Thank you for supporting the artist ❤️');
+        // Open modal after purchase so you can preview
+        openVideoModal(url);
       }
     }
 
