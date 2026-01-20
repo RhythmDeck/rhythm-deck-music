@@ -217,12 +217,11 @@
         const price = v.price || 0;
         const isPaid = price > 0;
 
-        // No native controls on paid videos (hides three dots completely)
         const controlsAttr = isPaid ? '' : 'controls';
         const noControlsClass = isPaid ? 'no-controls' : '';
 
         const buyButton = isPaid
-          ? `<button onclick="buyVideo('${v.id}', ${price}, '${videoUrl}')" class="buy-btn mt-6 w-full text-lg">
+          ? `<button onclick="buyVideo(event, '${v.id}', ${price}, '${videoUrl}')" class="buy-btn mt-6 w-full text-lg">
                Buy & Download – $${price.toFixed(2)}
              </button>`
           : '';
@@ -334,13 +333,16 @@
       loadVideos();
     }
 
-    function buyVideo(videoId, price, url) {
+    function buyVideo(event, videoId, price, url) {
+      event.stopPropagation(); // Prevent modal from opening when clicking Buy
       if (confirm(`Pay $${price.toFixed(2)} to download this video? (Test mode)`)) {
         const a = document.createElement('a');
         a.href = url;
         a.download = 'video.mp4';
         a.click();
         alert('Download started! Thank you for supporting the artist ❤️');
+        // Optional: open modal after download if you want to preview
+        // openVideoModal(url); // Uncomment only if you want modal after buy
       }
     }
 
@@ -362,7 +364,6 @@
       if (!document.getElementById('proFeaturesSection').classList.contains('hidden')) {
         document.getElementById('joinLiveBtn').classList.remove('hidden');
       }
-      // Attach modal close handler
       document.getElementById('closeModal').onclick = closeVideoModal;
       document.getElementById('videoModal').onclick = (e) => {
         if (e.target === document.getElementById('videoModal')) closeVideoModal();
