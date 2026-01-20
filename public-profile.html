@@ -17,25 +17,26 @@
     #videoModal.show {opacity:1;visibility:visible}
     #modalVideo {max-width:90%;max-height:85vh;border:4px solid #10b981;border-radius:12px;box-shadow:0 0 40px rgba(16,185,129,.5);background:#000;}
     #closeModal {
-      position:absolute;
-      top:20px;
-      right:20px;
+      position:absolute !important;
+      top:30px;
+      right:30px;
       background:#10b981;
       color:white;
-      width:70px;
-      height:70px;
+      width:80px;
+      height:80px;
       border-radius:50%;
-      font-size:40px;
+      font-size:50px;
       font-weight:bold;
-      display:flex;
+      display:flex !important;
       align-items:center;
       justify-content:center;
       cursor:pointer;
-      box-shadow:0 0 20px rgba(0,0,0,.6);
-      z-index:9999; /* Much higher z-index to ensure visibility */
-      border:3px solid white;
+      box-shadow:0 0 30px rgba(0,0,0,.7);
+      z-index:99999 !important;
+      border:4px solid white;
+      pointer-events:auto !important;
     }
-    #closeModal:hover {background:#059669;}
+    #closeModal:hover {background:#059669; transform:scale(1.1);}
     .name-glow { color: #10b981; text-shadow: 0 4px 12px rgba(0,0,0,0.4); }
     video.no-controls::-webkit-media-controls,
     video.no-controls::-webkit-media-controls-enclosure,
@@ -132,7 +133,7 @@
     </div>
   </section>
   <div id="videoModal">
-    <div id="closeModal" onclick="closeVideoModal()">×</div>
+    <div id="closeModal">×</div>
     <video id="modalVideo" autoplay class="shadow-2xl"></video>
   </div>
   <script>
@@ -356,6 +357,7 @@
       event.preventDefault();
       event.stopPropagation();
       if (confirm(`Pay $${price.toFixed(2)} to download this video? (Test mode)`)) {
+        // Trigger download
         const a = document.createElement('a');
         a.href = url;
         a.download = 'video.mp4';
@@ -363,7 +365,7 @@
         a.click();
         document.body.removeChild(a);
         alert('Download started! Thank you for supporting the artist ❤️');
-        // Open modal after purchase so you can preview
+        // Immediately open modal preview after download
         openVideoModal(url);
       }
     }
@@ -386,6 +388,7 @@
       if (!document.getElementById('proFeaturesSection').classList.contains('hidden')) {
         document.getElementById('joinLiveBtn').classList.remove('hidden');
       }
+      // Ensure close button is always clickable
       document.getElementById('closeModal').onclick = closeVideoModal;
       document.getElementById('videoModal').onclick = (e) => {
         if (e.target === document.getElementById('videoModal')) closeVideoModal();
