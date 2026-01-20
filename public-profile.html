@@ -334,15 +334,16 @@
     }
 
     function buyVideo(event, videoId, price, url) {
-      event.stopPropagation(); // Prevent modal from opening when clicking Buy
+      event.preventDefault();
+      event.stopPropagation(); // Block any bubbling to overlay or card
       if (confirm(`Pay $${price.toFixed(2)} to download this video? (Test mode)`)) {
         const a = document.createElement('a');
         a.href = url;
         a.download = 'video.mp4';
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         alert('Download started! Thank you for supporting the artist ❤️');
-        // Optional: open modal after download if you want to preview
-        // openVideoModal(url); // Uncomment only if you want modal after buy
       }
     }
 
