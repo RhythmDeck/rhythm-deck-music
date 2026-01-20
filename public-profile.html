@@ -357,16 +357,16 @@
       event.preventDefault();
       event.stopPropagation();
       if (confirm(`Pay $${price.toFixed(2)} to download this video? (Test mode)`)) {
-        // Trigger download
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'video.mp4';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        // Force download without opening or navigating
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'video-' + videoId + '.mp4'; // Better filename
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         alert('Download started! Thank you for supporting the artist ❤️');
-        // Immediately open modal preview after download
-        openVideoModal(url);
+        // No modal, no playback, no redirect — stay on page
       }
     }
 
@@ -388,7 +388,6 @@
       if (!document.getElementById('proFeaturesSection').classList.contains('hidden')) {
         document.getElementById('joinLiveBtn').classList.remove('hidden');
       }
-      // Ensure close button is always clickable
       document.getElementById('closeModal').onclick = closeVideoModal;
       document.getElementById('videoModal').onclick = (e) => {
         if (e.target === document.getElementById('videoModal')) closeVideoModal();
