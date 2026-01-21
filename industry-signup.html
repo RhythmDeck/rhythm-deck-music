@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
+    .password-toggle { cursor: pointer; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
@@ -38,7 +39,7 @@
     <div class="grid md:grid-cols-2 gap-12 items-center">
       <!-- Left Column - Image -->
       <div class="order-2 md:order-1">
-        <img src="industry-collab.jpg" alt="Music producers, distributors, publishers and supervisors collaborating" class="rounded-xl shadow-2xl w-full object-cover">
+        <img src="industry-collab.jpg" alt="Diverse music industry professionals collaborating in a modern office" class="rounded-xl shadow-2xl w-full object-cover">
       </div>
 
       <!-- Right Column - Sign Up Form -->
@@ -49,18 +50,18 @@
         <p class="text-lg text-gray-300 mb-10 text-center">
           Connect with emerging artists, message them directly, and discover your next big collaboration.
         </p>
-        <form class="space-y-6">
+        <form id="signupForm" class="space-y-6">
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
             <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Doe">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-            <input type="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="you@company.com">
+            <input type="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="yourname@label.com">
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Company (optional)</label>
-            <input type="text" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Your Label / Studio">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Company *</label>
+            <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Your Label / Studio">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Your Role *</label>
@@ -72,22 +73,24 @@
               <option value="supervisor">Music Supervisor</option>
             </select>
           </div>
-          <div>
+          <div class="relative">
             <label class="block text-sm font-medium text-gray-300 mb-2">Password *</label>
-            <input type="password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Create a secure password">
+            <input type="password" id="password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Create a secure password">
+            <span class="password-toggle absolute right-4 top-10 text-gray-400" onclick="togglePassword('password')">👁️</span>
           </div>
-          <div>
+          <div class="relative">
             <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password *</label>
-            <input type="password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Confirm your password">
+            <input type="password" id="confirm_password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Confirm your password">
+            <span class="password-toggle absolute right-4 top-10 text-gray-400" onclick="togglePassword('confirm_password')">👁️</span>
           </div>
           <div class="flex items-center">
             <input type="checkbox" required class="h-5 w-5 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
             <label class="ml-3 text-sm text-gray-300">
-              I agree to the <a href="#" class="text-emerald-400 hover:underline">Terms of Service</a> and <a href="#" class="text-emerald-400 hover:underline">Privacy Policy</a>
+              I have filled out the forms and submitted to Rhythm Deck.
             </label>
           </div>
           <div class="text-center pt-6">
-            <button type="submit" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-5 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <button type="button" onclick="window.location.href='industry-login.html'" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-5 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
               Create Account
             </button>
           </div>
@@ -100,5 +103,19 @@
   <footer class="bg-black text-white mt-16 p-8 text-center text-sm border-t border-gray-800">
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
+
+  <script>
+    function togglePassword(fieldId) {
+      const field = document.getElementById(fieldId);
+      const toggleIcon = field.nextElementSibling;
+      if (field.type === "password") {
+        field.type = "text";
+        toggleIcon.textContent = "🙈";
+      } else {
+        field.type = "password";
+        toggleIcon.textContent = "👁️";
+      }
+    }
+  </script>
 </body>
 </html>
