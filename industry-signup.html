@@ -128,7 +128,8 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
 
-    async function handleSignup() {
+    // Expose handleSignup to global scope so onclick can find it
+    window.handleSignup = async function() {
       const fullName = document.getElementById('full_name').value.trim();
       const email = document.getElementById('email').value.trim();
       const company = document.getElementById('company').value.trim();
@@ -177,7 +178,7 @@
           company,
           role,
           email,
-          plan: role  // Sets plan to 'producer', 'distributor', etc.
+          plan: role // Sets plan to 'producer', 'distributor', etc.
         });
 
       if (profileError) {
@@ -188,7 +189,7 @@
 
       alert('Account created successfully! Please log in.');
       window.location.href = 'industry-login.html';
-    }
+    };
   </script>
 </body>
 </html>
