@@ -133,8 +133,8 @@
       const email = document.getElementById('email').value.trim();
       const company = document.getElementById('company').value.trim();
       const role = document.getElementById('role').value;
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirm_password').value;
+      const password = document.getElementById('password').value.trim();
+      const confirmPassword = document.getElementById('confirm_password').value.trim();
       const terms = document.getElementById('terms').checked;
 
       if (!fullName || !email || !company || !role || !password || !confirmPassword) {
@@ -145,11 +145,15 @@
         return alert('Passwords do not match.');
       }
 
+      if (password.length < 6) { // Supabase minimum is 6, but we enforce 6+ here
+        return alert('Password must be at least 6 characters.');
+      }
+
       if (!terms) {
         return alert('You must agree to the terms.');
       }
 
-      // Supabase Signup – create auth user only
+      // Supabase Signup
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -168,7 +172,7 @@
         return;
       }
 
-      // Insert profile (this works if RLS allows anon insert or policy permits)
+      // Insert profile (should work if email confirmation is off or RLS allows anon insert)
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -177,17 +181,19 @@
           company,
           role,
           email,
-          plan: role
+          plan: role || 'industry' // fallback if role missing
         });
 
       if (profileError) {
-        console.error('Profile insert error:', profileError);
-        alert('Account created, but profile setup failed: ' + (profileError.message || 'Unknown error') + '\n\nPlease contact support.');
+        console.error('Profile insert error details:', profileError);
+        alert('Account created, but profile setup failed.\nError: ' + (profileError.message || 'Unknown') + '\n\nPlease check console and contact support.');
         return;
       }
 
-      // Success – no auto-login, force manual login
-      alert('Account created successfully! Please log in with your new credentials.');
+      // Optional: clear application flag after success
+      localStorage.removeItem('rhythmDeckApplicationSubmitted');
+
+      alert('Account created successfully!\n\nPlease go to the login page and sign in with your new credentials.');
       window.location.href = 'industry-login.html';
     };
   </script>
