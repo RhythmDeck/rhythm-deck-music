@@ -16,7 +16,7 @@
     }
     @keyframes glow {
       from { box-shadow: 0 0 20px #10b981, 0 0 40px #10b981, inset 0 0 20px #10b981; }
-      to   { box-shadow: 0 0 30px #059669, 0 0 60px #059669, inset 0 0 30px #059669; }
+      to { box-shadow: 0 0 30px #059669, 0 0 60px #059669, inset 0 0 30px #059669; }
     }
     /* Popup Modal */
     #signupPopup {
@@ -51,7 +51,7 @@
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-  <!-- Header (unchanged) -->
+  <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
       <div class="flex items-center gap-3 sm:gap-4">
@@ -111,9 +111,9 @@
           Subscribe to access our secure, artist-only messaging & collaboration system. Message verified Pro & Platinum artists directly, share stems/beats, request custom demos, negotiate deals — all in one protected space. No spam, no bots, only serious creators who pay to be discovered.
         </p>
 
-        <!-- Gated Sign Up Button with Popup -->
+        <!-- Gated Sign Up Button -->
         <div id="collabSignupSection" class="mt-10">
-          <button id="collabSignupBtn" 
+          <button id="collabSignupBtn"
                   class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-6 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
             Sign Up to Collab & Message
           </button>
@@ -125,7 +125,7 @@
     </div>
   </section>
 
-  <!-- Popup Modal for pre-submit click -->
+  <!-- Popup Modal -->
   <div id="signupPopup">
     <div id="popupContent" class="relative">
       <button id="closePopup" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
@@ -143,29 +143,27 @@
     </div>
   </div>
 
-  <!-- Main Content -->
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+  <!-- Main Content – forms section (this is where we scroll to) -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-12" id="formsSection">
     <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-emerald-400">
       Producer & Distributor Application
     </h1>
     <p class="text-lg text-gray-300 mb-10 text-center">
-      Please read the full Finder's Fee Agreement and Non-Disclosure Agreement below before completing the forms.  
+      Please read the full Finder's Fee Agreement and Non-Disclosure Agreement below before completing the forms.
       Your typed name in the signature fields constitutes your legally binding electronic signature under the ESIGN Act, UETA, and applicable laws.
     </p>
 
-    <!-- Restored Data Privacy Clause & Consent -->
+    <!-- Data Privacy Clause & Consent -->
     <div class="bg-gray-900/70 rounded-2xl p-8 sm:p-10 border border-emerald-600/50 shadow-2xl mb-12">
       <h2 class="text-2xl font-bold mb-6 text-emerald-400 text-center">Data Privacy Clause & Consent</h2>
-      
+     
       <div class="prose prose-invert max-w-none text-gray-200 text-sm leading-relaxed">
         <p>Rhythm Deck Music ("we", "us", "our") is committed to protecting your personal information in accordance with applicable data protection laws, including the US, Canada, Europian and Mexican Federal Laws on Protection of Personal Data Held by Private Parties (LFPDPPP), GDPR (where applicable), and other relevant regulations.</p>
-
         <h3 class="text-lg font-semibold mt-6 mb-3">What Data We Collect</h3>
         <ul class="list-disc pl-6 space-y-1">
           <li>Full name, email, phone number, company name, physical address, tax/registration ID, website, and music association details (from your application)</li>
           <li>Typed electronic signatures and date</li>
         </ul>
-
         <h3 class="text-lg font-semibold mt-6 mb-3">Purpose of Processing</h3>
         <p>We collect and process your data solely for:</p>
         <ul class="list-disc pl-6 space-y-1">
@@ -174,14 +172,12 @@
           <li>Contacting you regarding your application status and potential approval</li>
           <li>Complying with legal obligations</li>
         </ul>
-
         <h3 class="text-lg font-semibold mt-6 mb-3">Data Sharing & Security</h3>
         <ul class="list-disc pl-6 space-y-1">
           <li>We do <strong>not</strong> sell, rent, or trade your personal information.</li>
           <li>Data may be shared only with trusted service providers (e.g., email service) under strict confidentiality agreements.</li>
           <li>We use reasonable technical and organizational measures to protect your data from unauthorized access, loss, or misuse.</li>
         </ul>
-
         <h3 class="text-lg font-semibold mt-6 mb-3">Retention & Your Rights</h3>
         <p>We retain your application data only as long as necessary for the purposes above or as required by law (typically up to 5 years after final decision). You have the right to:</p>
         <ul class="list-disc pl-6 space-y-1">
@@ -190,12 +186,10 @@
           <li>Withdraw consent (where applicable)</li>
         </ul>
         <p class="mt-4">To exercise these rights or for questions, contact us at: <strong>rhythmdeckmusic@gmail.com</strong>.</p>
-
         <p class="font-medium mt-6 text-center">
           By checking the box below and submitting your application, you consent to the collection, processing, and storage of your personal data as described in this Data Privacy Clause.
         </p>
       </div>
-
       <div class="flex items-center justify-center mt-8">
         <input type="checkbox" name="privacy_consent" id="privacy_consent" required class="h-5 w-5 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
         <label for="privacy_consent" class="ml-3 text-base font-medium text-gray-200">
@@ -240,7 +234,6 @@
           <label class="block text-sm font-medium text-gray-300 mb-2">Music Association Membership (ASCAP, BMI, RIAA, etc.) (optional)</label>
           <input type="text" name="membership_id" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. ASCAP Member ID: 123456789">
         </div>
-
         <div class="flex items-start">
           <input type="checkbox" name="understanding" id="understanding" required class="mt-1 h-5 w-5 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
           <label for="understanding" class="ml-2 text-sm text-gray-300">
@@ -261,11 +254,9 @@
           Print or Save as PDF
         </button>
       </div>
-
       <p class="text-sm text-gray-400 mb-6 text-center no-print">
         Please read the full agreement below before signing. Click the button above to print or save as PDF for your records.
       </p>
-
       <div class="prose prose-invert max-w-none mb-8 text-gray-200 text-sm leading-relaxed">
         <h3 class="text-lg font-semibold mb-4">Finder's Fee Agreement</h3>
         <p><strong>Parties:</strong> This Finder's Fee Agreement ("Agreement") is entered into by and between Rhythm Deck Music, located in Nashville Tennesse, US ("Company"), and the undersigned applicant ("Finder").</p>
@@ -285,7 +276,6 @@
         <p><strong>Entire Agreement:</strong> This Agreement constitutes the entire understanding between the parties and supersedes all prior agreements.</p>
         <p class="font-medium mt-6">By signing below, Finder accepts and agrees to be bound by all terms of this Finder's Fee Agreement.</p>
       </div>
-
       <!-- Signature Block -->
       <div class="space-y-6">
         <div>
@@ -321,11 +311,9 @@
           Print or Save as PDF
         </button>
       </div>
-
       <p class="text-sm text-gray-400 mb-4 text-center no-print">
         Please read the full NDA below before signing. Click the button above to print or save as PDF for your records.
       </p>
-
       <div class="prose prose-invert max-w-none mb-8 text-gray-200 text-sm leading-relaxed">
         <h3 class="text-lg font-semibold mb-4">Non-Disclosure Agreement</h3>
         <p><strong>Parties:</strong> This Mutual Non-Disclosure Agreement ("NDA") is entered into between the undersigned applicant ("Recipient") and Rhythm Deck Music, located in Nashville Tennesse, US ("Disclosing Party").</p>
@@ -344,7 +332,6 @@
         <p><strong>Entire Agreement:</strong> This NDA constitutes the entire understanding between the parties regarding the subject matter herein and supersedes all prior agreements.</p>
         <p class="font-medium mt-6">By signing below, Recipient agrees to be bound by all terms of this Non-Disclosure Agreement.</p>
       </div>
-
       <!-- Signature Block -->
       <div class="space-y-6">
         <div class="border-t border-gray-700 pt-6">
@@ -391,7 +378,7 @@
   </footer>
 
   <script>
-    // Your existing date fill and print functions
+    // Auto-fill today's date
     const today = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -400,6 +387,7 @@
     document.getElementById('contract_date').value = today;
     document.getElementById('nda_date').value = today;
 
+    // Print specific section
     function printSection(sectionId) {
       const section = document.getElementById(sectionId);
       section.classList.add('printing-active');
@@ -431,9 +419,8 @@
                      `Location: ${document.getElementById('nda_location').value || 'Not provided'}`;
         window.location.href = `mailto:rhythmdeckmusic@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-        // Mark as submitted → unlock button permanently
+        // Mark as submitted
         localStorage.setItem('rhythmDeckApplicationSubmitted', 'true');
-        updateSignupButton();
 
         document.getElementById('successMessage').classList.remove('hidden');
         document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
@@ -442,44 +429,43 @@
       }
     });
 
-    // Update button state on load and after submit
-    function updateSignupButton() {
-      const btn = document.getElementById('collabSignupBtn');
-      const isSubmitted = localStorage.getItem('rhythmDeckApplicationSubmitted') === 'true';
-
-      if (isSubmitted) {
-        btn.onclick = null; // Remove popup handler
-        btn.href = "signup-collab.html"; // Change to your real signup URL
-        document.getElementById('unlockMessage').textContent = 'Application submitted! Click to sign up now.';
-      }
+    // Function to close popup and scroll to forms section
+    function closePopupAndScroll() {
+      document.getElementById('signupPopup').classList.remove('show');
+      document.getElementById('formsSection').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
 
-    // Show popup only if not yet submitted
+    // Attach scroll behavior to both close buttons
+    document.getElementById('closePopup').addEventListener('click', closePopupAndScroll);
+    document.getElementById('gotItBtn').addEventListener('click', closePopupAndScroll);
+
+    // Close on outside click + scroll
+    document.getElementById('signupPopup').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('signupPopup')) {
+        closePopupAndScroll();
+      }
+    });
+
+    // Button click handler – show popup only if not submitted
     document.getElementById('collabSignupBtn').addEventListener('click', function(e) {
       const isSubmitted = localStorage.getItem('rhythmDeckApplicationSubmitted') === 'true';
       if (!isSubmitted) {
         e.preventDefault(); // Prevent navigation
         document.getElementById('signupPopup').classList.add('show');
       }
-      // If submitted, normal navigation happens via href
+      // If submitted → normal navigation to href
     });
 
-    // Close popup
-    document.getElementById('closePopup')?.addEventListener('click', () => {
-      document.getElementById('signupPopup').classList.remove('show');
-    });
-    document.getElementById('gotItBtn')?.addEventListener('click', () => {
-      document.getElementById('signupPopup').classList.remove('show');
-    });
-    // Close on outside click
-    document.getElementById('signupPopup')?.addEventListener('click', (e) => {
-      if (e.target === document.getElementById('signupPopup')) {
-        document.getElementById('signupPopup').classList.remove('show');
+    // Check on load if already submitted
+    window.addEventListener('load', () => {
+      const isSubmitted = localStorage.getItem('rhythmDeckApplicationSubmitted') === 'true';
+      if (isSubmitted) {
+        document.getElementById('unlockMessage').textContent = 'Application submitted! Click to sign up now.';
       }
     });
-
-    // Check on load
-    window.addEventListener('load', updateSignupButton);
   </script>
 </body>
 </html>
