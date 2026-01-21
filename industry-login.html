@@ -136,7 +136,7 @@
       if (!email) return alert('Please enter your email.');
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/reset-password.html' // Create this page later if needed
+        redirectTo: 'https://rhythm-deck-music.onrender.com/reset-password.html'
       });
 
       const statusEl = document.getElementById('resetStatus');
@@ -144,11 +144,10 @@
         statusEl.textContent = 'Error: ' + error.message;
         statusEl.className = 'text-center mt-4 text-sm text-red-400';
       } else {
-        statusEl.textContent = 'Reset link sent! Check your email.';
+        statusEl.textContent = 'Reset link sent! Check your email (including spam).';
         statusEl.className = 'text-center mt-4 text-sm text-emerald-400';
       }
     }
-
 
     async function handleLogin() {
       const email = document.getElementById('email').value.trim();
@@ -164,7 +163,6 @@
         email,
         password,
         options: {
-          // "Remember me" → persist session in localStorage (stays logged in after close)
           persistSession: remember
         }
       });
