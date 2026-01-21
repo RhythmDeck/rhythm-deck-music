@@ -62,10 +62,10 @@
           </div>
           <div class="flex items-center justify-between text-sm">
             <label class="flex items-center">
-              <input type="checkbox" class="h-4 w-4 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
+              <input type="checkbox" id="remember" class="h-4 w-4 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
               <span class="ml-2 text-gray-300">Remember me</span>
             </label>
-            <a href="#" class="text-emerald-400 hover:underline">Forgot password?</a>
+            <button type="button" onclick="openForgotPasswordModal()" class="text-emerald-400 hover:underline">Forgot password?</button>
           </div>
           <div class="text-center pt-6">
             <button type="button" onclick="handleLogin()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-5 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
@@ -80,12 +80,33 @@
     </div>
   </main>
 
+  <!-- Forgot Password Modal -->
+  <div id="forgotModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
+    <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-md mx-4 p-8 relative">
+      <button onclick="closeForgotModal()" class="absolute top-4 right-4 text-white text-3xl hover:text-red-500">&times;</button>
+      <h3 class="text-2xl font-bold text-emerald-400 mb-6 text-center">Reset Password</h3>
+      <p class="text-gray-300 mb-6 text-center">Enter your email and we'll send a reset link.</p>
+      <input type="email" id="resetEmail" placeholder="you@company.com" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 mb-6">
+      <button onclick="sendResetEmail()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition">
+        Send Reset Link
+      </button>
+      <p id="resetStatus" class="text-center mt-4 text-sm"></p>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="bg-black text-white mt-16 p-8 text-center text-sm border-t border-gray-800">
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
-  <script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
+
     function togglePassword(fieldId) {
       const field = document.getElementById(fieldId);
       const toggleIcon = field.nextElementSibling;
@@ -98,20 +119,64 @@
       }
     }
 
-    function handleLogin() {
-      // For now just redirect (you can add real auth later)
-      // Example: check if fields are filled (basic client-side)
+    function openForgotPasswordModal() {
+      document.getElementById('forgotModal').classList.remove('invisible', 'opacity-0');
+      document.getElementById('forgotModal').classList.add('opacity-100');
+      document.getElementById('resetStatus').textContent = '';
+      document.getElementById('resetEmail').value = '';
+    }
+
+    function closeForgotModal() {
+      document.getElementById('forgotModal').classList.add('invisible', 'opacity-0');
+      document.getElementById('forgotModal').classList.remove('opacity-100');
+    }
+
+    async function sendResetEmail() {
+      const email = document.getElementById('resetEmail').value.trim();
+      if (!email) return alert('Please enter your email.');
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password.html' // Create this page later if needed
+      });
+
+      const statusEl = document.getElementById('resetStatus');
+      if (error) {
+        statusEl.textContent = 'Error: ' + error.message;
+        statusEl.className = 'text-center mt-4 text-sm text-red-400';
+      } else {
+        statusEl.textContent = 'Reset link sent! Check your email.';
+        statusEl.className = 'text-center mt-4 text-sm text-emerald-400';
+      }
+    }
+
+
+    async function handleLogin() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
+      const remember = document.getElementById('remember').checked;
 
       if (!email || !password) {
         alert('Please enter your email and password.');
         return;
       }
 
-      // Simulate successful login → redirect to collab/messaging dashboard
-      // Replace 'collab-dashboard.html' with your actual dashboard page name later
-      window.location.href = 'collab-dashboard.html';
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: {
+          // "Remember me" → persist session in localStorage (stays logged in after close)
+          persistSession: remember
+        }
+      });
+
+      if (error) {
+        console.error('Login error:', error);
+        alert('Login failed: ' + (error.message || 'Invalid credentials'));
+        return;
+      }
+
+      alert('Logged in successfully!');
+      window.location.href = 'message-dashboard.html';
     }
   </script>
 </body>
