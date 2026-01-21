@@ -18,17 +18,40 @@
       from { box-shadow: 0 0 20px #10b981, 0 0 40px #10b981, inset 0 0 20px #10b981; }
       to   { box-shadow: 0 0 30px #059669, 0 0 60px #059669, inset 0 0 30px #059669; }
     }
-    /* Print styles: only show the relevant section when printing */
+    /* Popup Modal */
+    #signupPopup {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    #signupPopup.show {
+      display: flex;
+    }
+    #popupContent {
+      background: #111827;
+      border: 2px solid #10b981;
+      border-radius: 1rem;
+      max-width: 90%;
+      width: 500px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(16,185,129,0.5);
+    }
+    /* Print styles */
     @media print {
       body * { visibility: hidden; }
       .print-section, .print-section * { visibility: visible; }
       .print-section { position: absolute; left: 0; top: 0; width: 100%; }
-      header, footer, button:not(.print-btn), #successMessage, .no-print { display: none !important; }
+      header, footer, button:not(.print-btn), #successMessage, .no-print, #signupPopup, #collabSignupSection { display: none !important; }
     }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-  <!-- Header -->
+  <!-- Header (unchanged) -->
   <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
       <div class="flex items-center gap-3 sm:gap-4">
@@ -51,7 +74,7 @@
     </div>
   </header>
 
-  <!-- NEW TOP SECTION: Why Producers/Distributors Should Use Rhythm Deck -->
+  <!-- Glowing top section with gated button -->
   <section class="bg-gradient-to-b from-black to-gray-900 py-16 px-6">
     <div class="max-w-5xl mx-auto text-center">
       <div class="glow-border rounded-3xl p-10 sm:p-14 bg-gray-950/70 backdrop-blur-lg border-emerald-600/30">
@@ -85,16 +108,40 @@
           Unlock Our Private Collaboration & Messaging Platform
         </h3>
         <p class="text-lg text-gray-300 mb-8 max-w-3xl mx-auto">
-          Subscribe to access our secure, artist-only messaging & collaboration system. Message verified Pro & Platinum artists directly, share stems/beats, request custom demos, negotiate deals — all in one protected space. No spam, no bots, only serious creators who pay to be discovered. Before Signing up for our Collab and Messaging, be sure to fill out the forms below and send to Rhythm Deck, then Sign up and find your next Super Star.
+          Subscribe to access our secure, artist-only messaging & collaboration system. Message verified Pro & Platinum artists directly, share stems/beats, request custom demos, negotiate deals — all in one protected space. No spam, no bots, only serious creators who pay to be discovered.
         </p>
 
-        <a href="signup-collab.html" 
-           class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-6 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
-          Sign Up to Collab & Message
-        </a>
+        <!-- Gated Sign Up Button with Popup -->
+        <div id="collabSignupSection" class="mt-10">
+          <button id="collabSignupBtn" 
+                  class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-6 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+            Sign Up to Collab & Message
+          </button>
+          <p id="unlockMessage" class="mt-4 text-gray-400 text-sm">
+            Complete and submit the application below to unlock signup.
+          </p>
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- Popup Modal for pre-submit click -->
+  <div id="signupPopup">
+    <div id="popupContent" class="relative">
+      <button id="closePopup" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+      <h3 class="text-2xl font-bold text-emerald-400 mb-6">One More Step!</h3>
+      <p class="text-gray-200 mb-6">
+        To sign up for our Collaboration & Messaging platform, please first complete and submit the application forms below.<br><br>
+        This ensures you're a verified producer or distributor and helps us maintain a high-quality network.
+      </p>
+      <p class="text-gray-300 mb-8">
+        Once submitted, this button will take you straight to the signup page.
+      </p>
+      <button id="gotItBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-10 py-4 rounded-lg transition">
+        Got It – I'll Submit Below
+      </button>
+    </div>
+  </div>
 
   <!-- Main Content -->
   <main class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
@@ -344,16 +391,23 @@
   </footer>
 
   <script>
-    // Your existing JavaScript (auto-date, print, submit handler) remains unchanged
-    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    // Your existing date fill and print functions
+    const today = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
     document.getElementById('contract_date').value = today;
     document.getElementById('nda_date').value = today;
+
     function printSection(sectionId) {
       const section = document.getElementById(sectionId);
       section.classList.add('printing-active');
       window.print();
       setTimeout(() => section.classList.remove('printing-active'), 1000);
     }
+
+    // Submit handler + unlock logic
     document.getElementById('submitBtn').addEventListener('click', function() {
       const appForm = document.getElementById('applicationForm');
       if (appForm.checkValidity()) {
@@ -376,12 +430,56 @@
                      `Signature: ${document.getElementById('nda_signature').value}\n` +
                      `Location: ${document.getElementById('nda_location').value || 'Not provided'}`;
         window.location.href = `mailto:rhythmdeckmusic@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+        // Mark as submitted → unlock button permanently
+        localStorage.setItem('rhythmDeckApplicationSubmitted', 'true');
+        updateSignupButton();
+
         document.getElementById('successMessage').classList.remove('hidden');
         document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
       } else {
         alert('Please fill in all required fields, including the Data Privacy consent checkbox.');
       }
     });
+
+    // Update button state on load and after submit
+    function updateSignupButton() {
+      const btn = document.getElementById('collabSignupBtn');
+      const isSubmitted = localStorage.getItem('rhythmDeckApplicationSubmitted') === 'true';
+
+      if (isSubmitted) {
+        btn.onclick = null; // Remove popup handler
+        btn.href = "signup-collab.html"; // Change to your real signup URL
+        document.getElementById('unlockMessage').textContent = 'Application submitted! Click to sign up now.';
+      }
+    }
+
+    // Show popup only if not yet submitted
+    document.getElementById('collabSignupBtn').addEventListener('click', function(e) {
+      const isSubmitted = localStorage.getItem('rhythmDeckApplicationSubmitted') === 'true';
+      if (!isSubmitted) {
+        e.preventDefault(); // Prevent navigation
+        document.getElementById('signupPopup').classList.add('show');
+      }
+      // If submitted, normal navigation happens via href
+    });
+
+    // Close popup
+    document.getElementById('closePopup')?.addEventListener('click', () => {
+      document.getElementById('signupPopup').classList.remove('show');
+    });
+    document.getElementById('gotItBtn')?.addEventListener('click', () => {
+      document.getElementById('signupPopup').classList.remove('show');
+    });
+    // Close on outside click
+    document.getElementById('signupPopup')?.addEventListener('click', (e) => {
+      if (e.target === document.getElementById('signupPopup')) {
+        document.getElementById('signupPopup').classList.remove('show');
+      }
+    });
+
+    // Check on load
+    window.addEventListener('load', updateSignupButton);
   </script>
 </body>
 </html>
