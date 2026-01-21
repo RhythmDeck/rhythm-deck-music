@@ -76,12 +76,12 @@
           <div class="relative">
             <label class="block text-sm font-medium text-gray-300 mb-2">Password *</label>
             <input type="password" id="password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Create a secure password">
-            <span class="password-toggle absolute right-4 top-10 text-gray-400" onclick="togglePassword('password')">👁️</span>
+            <span class="password-toggle absolute right-4 top-10 text-gray-400 cursor-pointer" onclick="togglePassword('password')">👁️</span>
           </div>
           <div class="relative">
             <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password *</label>
             <input type="password" id="confirm_password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Confirm your password">
-            <span class="password-toggle absolute right-4 top-10 text-gray-400" onclick="togglePassword('confirm_password')">👁️</span>
+            <span class="password-toggle absolute right-4 top-10 text-gray-400 cursor-pointer" onclick="togglePassword('confirm_password')">👁️</span>
           </div>
           <div class="flex items-center">
             <input type="checkbox" id="terms" required class="h-5 w-5 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
@@ -104,14 +104,8 @@
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-    const supabase = createClient(
-      'https://bxoqhmfnseskwqkywppg.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-    );
-
+  <!-- Global toggle function (must be outside module scope) -->
+  <script>
     function togglePassword(fieldId) {
       const field = document.getElementById(fieldId);
       const toggleIcon = field.nextElementSibling;
@@ -123,6 +117,16 @@
         toggleIcon.textContent = "👁️";
       }
     }
+  </script>
+
+  <!-- Supabase signup logic -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
 
     async function handleSignup() {
       const fullName = document.getElementById('full_name').value.trim();
@@ -164,7 +168,7 @@
         return;
       }
 
-      // Insert into profiles table
+      // Insert into profiles table – use the selected role as the plan value
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -173,7 +177,7 @@
           company,
           role,
           email,
-          plan: 'pending' // or whatever default you use
+          plan: role  // ← This sets plan to 'producer', 'distributor', etc.
         });
 
       if (profileError) {
