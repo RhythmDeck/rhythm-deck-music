@@ -58,7 +58,7 @@
           <div class="relative">
             <label class="block text-sm font-medium text-gray-300 mb-2">Password *</label>
             <input type="password" id="password" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Enter your password">
-            <span class="password-toggle absolute right-4 top-10 text-gray-400" onclick="togglePassword('password')">👁️</span>
+            <span class="password-toggle absolute right-4 top-10 text-gray-400 cursor-pointer" onclick="togglePassword('password')">👁️</span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <label class="flex items-center">
@@ -99,15 +99,10 @@
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-    const supabase = createClient(
-      'https://bxoqhmfnseskwqkywppg.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-    );
-
-    function togglePassword(fieldId) {
+  <!-- Global functions (non-module scope) -->
+  <script>
+    // Make these global so onclick can find them
+    window.togglePassword = function(fieldId) {
       const field = document.getElementById(fieldId);
       const toggleIcon = field.nextElementSibling;
       if (field.type === "password") {
@@ -117,21 +112,21 @@
         field.type = "password";
         toggleIcon.textContent = "👁️";
       }
-    }
+    };
 
-    function openForgotPasswordModal() {
+    window.openForgotPasswordModal = function() {
       document.getElementById('forgotModal').classList.remove('invisible', 'opacity-0');
       document.getElementById('forgotModal').classList.add('opacity-100');
       document.getElementById('resetStatus').textContent = '';
       document.getElementById('resetEmail').value = '';
-    }
+    };
 
-    function closeForgotModal() {
+    window.closeForgotModal = function() {
       document.getElementById('forgotModal').classList.add('invisible', 'opacity-0');
       document.getElementById('forgotModal').classList.remove('opacity-100');
-    }
+    };
 
-    async function sendResetEmail() {
+    window.sendResetEmail = async function() {
       const email = document.getElementById('resetEmail').value.trim();
       if (!email) return alert('Please enter your email.');
 
@@ -147,9 +142,9 @@
         statusEl.textContent = 'Reset link sent! Check your email (including spam).';
         statusEl.className = 'text-center mt-4 text-sm text-emerald-400';
       }
-    }
+    };
 
-    async function handleLogin() {
+    window.handleLogin = async function() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const remember = document.getElementById('remember').checked;
@@ -175,7 +170,20 @@
 
       alert('Logged in successfully!');
       window.location.href = 'message-dashboard.html';
-    }
+    };
+  </script>
+
+  <!-- Supabase client (module scope) -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
+
+    // Make supabase available globally so window.sendResetEmail can use it
+    window.supabase = supabase;
   </script>
 </body>
 </html>
