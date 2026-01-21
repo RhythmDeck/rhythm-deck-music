@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up for Collab & Messaging - Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
+    #successMessage { display: none; }
+    /* Glowing border animation */
+    .glow-border {
+      border: 3px solid #10b981;
+      box-shadow: 0 0 20px #10b981, 0 0 40px #10b981, inset 0 0 20px #10b981;
+      animation: glow 3s infinite alternate;
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 20px #10b981, 0 0 40px #10b981, inset 0 0 20px #10b981; }
+      to   { box-shadow: 0 0 30px #059669, 0 0 60px #059669, inset 0 0 30px #059669; }
+    }
+    /* Popup Modal */
+    #signupPopup {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    #signupPopup.show {
+      display: flex;
+    }
+    #popupContent {
+      background: #111827;
+      border: 2px solid #10b981;
+      border-radius: 1rem;
+      max-width: 90%;
+      width: 500px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(16,185,129,0.5);
+    }
+    /* Print styles */
+    @media print {
+      body * { visibility: hidden; }
+      .print-section, .print-section * { visibility: visible; }
+      .print-section { position: absolute; left: 0; top: 0; width: 100%; }
+      header, footer, button:not(.print-btn), #successMessage, .no-print, #signupPopup, #collabSignupSection { display: none !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+  <!-- Header -->
+  <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            Rhythm Deck
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <a href="index.html" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-emerald-400 hover:text-emerald-300 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition shadow-md text-sm sm:text-base">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 sm:h-5 w-4 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+    <h1 class="text-4xl sm:text-5xl font-extrabold text-center mb-12 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+      Collaborate & Connect on Rhythm Deck
+    </h1>
+    <p class="text-xl text-gray-300 mb-16 text-center max-w-3xl mx-auto leading-relaxed">
+      Rhythm Deck's Collaboration & Messaging platform is your gateway to discovering and partnering with emerging talent. Whether you're a music producer, distributor, publisher, or supervisor, our system lets you message Pro & Platinum artists directly, review their work, and build deals — all in one secure space.
+    </p>
+
+    <!-- Music Producers Section -->
+    <section class="mb-16">
+      <div class="glow-border rounded-3xl p-8 sm:p-12 bg-gray-950/70 backdrop-blur-lg">
+        <h2 class="text-3xl font-bold text-emerald-400 mb-6">For Music Producers</h2>
+        <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+          As a music producer, you oversee the creative process, shaping sounds and guiding artists to create hits. Rhythm Deck gives you first access to raw demos and emerging talent before they go mainstream. Use our platform to scout unsigned artists with potential, collaborate on productions, and turn demos into chart-toppers.
+        </p>
+        <p class="text-lg text-gray-300 mb-8 leading-relaxed">
+          Our Collab & Message system lets you: directly message artists, share beats/stems, request custom recordings, and negotiate co-production deals. Subscribe to unlock verified connections and build your next big project.
+        </p>
+        <div class="text-center">
+          <a href="producers-signup.html" class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-10 py-4 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+            Sign Up for Producers Services
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Music Distributors Section -->
+    <section class="mb-16">
+      <div class="glow-border rounded-3xl p-8 sm:p-12 bg-gray-950/70 backdrop-blur-lg">
+        <h2 class="text-3xl font-bold text-emerald-400 mb-6">For Music Distributors</h2>
+        <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+          Music distributors handle getting recordings to platforms and collecting royalties for masters. On Rhythm Deck, discover Pro & Platinum artists ready for distribution deals. Get early access to high-potential tracks and artists building fanbases organically.
+        </p>
+        <p class="text-lg text-gray-300 mb-8 leading-relaxed">
+          Through our Collab & Message system, connect directly: review full catalogs, negotiate distribution terms, and track royalties seamlessly. Subscribe to streamline your artist acquisition and expand your roster with tomorrow's stars.
+        </p>
+        <div class="text-center">
+          <a href="distributors-signup.html" class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-10 py-4 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+            Sign Up for Distributors Services
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Music Publishers Section -->
+    <section class="mb-16">
+      <div class="glow-border rounded-3xl p-8 sm:p-12 bg-gray-950/70 backdrop-blur-lg">
+        <h2 class="text-3xl font-bold text-emerald-400 mb-6">For Music Publishers</h2>
+        <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+          Music publishers manage song copyrights, licensing, and royalties for compositions. Rhythm Deck lets you scout original songs and songwriters in Pro & Platinum tiers, securing publishing rights before they explode.
+        </p>
+        <p class="text-lg text-gray-300 mb-8 leading-relaxed">
+          Use the Collab & Message system to: license compositions early, co-write via direct chat, and place songs in sync opportunities. Subscribe to tap into a pool of fresh, undiscovered hits and maximize royalty streams.
+        </p>
+        <div class="text-center">
+          <a href="publishers-signup.html" class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-10 py-4 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+            Sign Up for Publishers Services
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Music Supervisors Section -->
+    <section class="mb-16">
+      <div class="glow-border rounded-3xl p-8 sm:p-12 bg-gray-950/70 backdrop-blur-lg">
+        <h2 class="text-3xl font-bold text-emerald-400 mb-6">For Music Supervisors</h2>
+        <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+          Music supervisors select and license songs for TV, films, ads, and more. Rhythm Deck provides exclusive access to fresh tracks from Pro & Platinum artists, ideal for sync placements in visual media.
+        </p>
+        <p class="text-lg text-gray-300 mb-8 leading-relaxed">
+          Our Collab & Message system allows you to: search for genre-specific music, request custom edits, negotiate sync licenses directly, and discover hidden gems. Subscribe to source unique music that fits your projects perfectly.
+        </p>
+        <div class="text-center">
+          <a href="supervisors-signup.html" class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-10 py-4 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+            Sign Up for Supervisors Services
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white mt-16 p-8 text-center text-sm border-t border-gray-800">
+    <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
+  </footer>
+</body>
+</html>
