@@ -129,10 +129,10 @@
 
         <!-- Gated Sign Up Button -->
         <div id="collabSignupSection" class="mt-10">
-          <button id="collabSignupBtn"
-                  class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-6 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <a id="collabSignupBtn" href="#"
+             class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-6 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
             Sign Up to Collab & Message
-          </button>
+          </a>
           <p id="unlockMessage" class="mt-4 text-gray-400 text-sm">
             Complete and submit the application below to unlock signup.
           </p>
@@ -445,8 +445,14 @@
                      `Location: ${document.getElementById('nda_location').value || 'Not provided'}`;
         window.location.href = `mailto:rhythmdeckmusic@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-        // Mark as submitted
+        // Mark as submitted → this unlocks the button to point to industry-signup.html
         localStorage.setItem('rhythmDeckApplicationSubmitted', 'true');
+
+        // Update button to become a link to industry-signup.html
+        const btn = document.getElementById('collabSignupBtn');
+        btn.href = "industry-signup.html";
+        btn.textContent = "Sign Up to Collab & Message"; // keep text same
+        document.getElementById('unlockMessage').textContent = 'Application approved! Click to sign up now.';
 
         document.getElementById('successMessage').classList.remove('hidden');
         document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
@@ -482,13 +488,14 @@
         e.preventDefault(); // Prevent navigation
         document.getElementById('signupPopup').classList.add('show');
       }
-      // If submitted → normal navigation to href
+      // If submitted → normal navigation to industry-signup.html (href already set)
     });
 
-    // Check on load if already submitted
+    // Check on load if already submitted → set href if true
     window.addEventListener('load', () => {
       const isSubmitted = localStorage.getItem('rhythmDeckApplicationSubmitted') === 'true';
       if (isSubmitted) {
+        document.getElementById('collabSignupBtn').href = "industry-signup.html";
         document.getElementById('unlockMessage').textContent = 'Application submitted! Click to sign up now.';
       }
     });
