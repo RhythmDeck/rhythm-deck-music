@@ -82,7 +82,7 @@
           Discover the Next #1 Hit Before Anyone Else
         </h2>
         <p class="text-xl sm:text-2xl text-gray-200 mb-10 leading-relaxed max-w-4xl mx-auto">
-          Rhythm Deck is the only platform where <strong>emerging talent</strong> uploads raw demos, full tracks, and live performances — often before they hit SoundCloud, Spotify, or TikTok. Producers and distributors get <strong>first access</strong> to unsigned artists who are ready to blow up.
+          Rhythm Deck is the only platform where <strong>emerging talent</strong> uploads raw demos, full tracks, and live performances — often before they hit SoundCloud, Spotify, or TikTok. Producers, Distributors, Publisher & Supervisors get <strong>first access</strong> to unsigned artists who are ready to blow up.
         </p>
 
         <div class="grid md:grid-cols-2 gap-10 mb-12 text-left">
@@ -248,6 +248,16 @@
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">Music Association Membership (ASCAP, BMI, RIAA, etc.) (optional)</label>
           <input type="text" name="membership_id" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. ASCAP Member ID: 123456789">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Your Primary Role *</label>
+          <select name="primary_role" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500">
+            <option value="" disabled selected>Select your role</option>
+            <option value="producer">Music Producer</option>
+            <option value="distributor">Music Distributor</option>
+            <option value="publisher">Music Publisher</option>
+            <option value="supervisor">Music Supervisor</option>
+          </select>
         </div>
         <div class="flex items-start">
           <input type="checkbox" name="understanding" id="understanding" required class="mt-1 h-5 w-5 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
@@ -424,7 +434,8 @@
                      `Company Address:\n${document.querySelector('[name="company_address"]').value}\n` +
                      `Tax ID: ${document.querySelector('[name="tax_id"]').value || 'N/A'}\n` +
                      `Website: ${document.querySelector('[name="website"]').value}\n` +
-                     `Membership: ${document.querySelector('[name="membership_id"]').value || 'N/A'}\n` +
+                     `Music Association Membership: ${document.querySelector('[name="membership_id"]').value || 'N/A'}\n` +
+                     `Primary Role: ${document.querySelector('[name="primary_role"]').value}\n` +
                      `Understanding: Confirmed\n\n` +
                      `=== FINDER'S FEE AGREEMENT ===\n` +
                      `Company: ${document.getElementById('contract_company').value}\n` +
@@ -440,7 +451,7 @@
         document.getElementById('successMessage').classList.remove('hidden');
         document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
       } else {
-        alert('Please fill in all required fields, including the Data Privacy consent checkbox.');
+        alert('Please fill in all required fields, including the Data Privacy consent checkbox, select your primary role, and complete any other required information.');
       }
     });
 
