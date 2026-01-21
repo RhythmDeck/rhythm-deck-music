@@ -64,6 +64,25 @@
             <input type="text" id="company" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Your Label / Studio / Company">
           </div>
           <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              Choose Your Subdomain * 
+              <span class="text-xs text-gray-400 block mt-1">
+                This creates your personal link, e.g. <strong>your-label-productions.rhythm-deck-music.onrender.com</strong><br>
+                Use lowercase letters, numbers, and hyphens only (no spaces or special characters).
+              </span>
+            </label>
+            <input 
+              type="text" 
+              id="subdomain" 
+              required 
+              pattern="[a-z0-9-]+" 
+              minlength="3" 
+              maxlength="30" 
+              class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" 
+              placeholder="your-label-productions"
+            >
+          </div>
+          <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Your Role *</label>
             <select id="role" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500">
               <option value="" disabled selected>Select your role</option>
@@ -111,7 +130,7 @@
       const toggleIcon = field.nextElementSibling;
       if (field.type === "password") {
         field.type = "text";
-        toggleIcon.textContent = "👁";
+        toggleIcon.textContent = "🙈";
       } else {
         field.type = "password";
         toggleIcon.textContent = "👁️";
@@ -132,12 +151,13 @@
       const fullName = document.getElementById('full_name').value.trim();
       const email = document.getElementById('email').value.trim();
       const company = document.getElementById('company').value.trim();
+      const subdomain = document.getElementById('subdomain').value.trim().toLowerCase();
       const role = document.getElementById('role').value;
       const password = document.getElementById('password').value.trim();
       const confirmPassword = document.getElementById('confirm_password').value.trim();
       const terms = document.getElementById('terms').checked;
 
-      if (!fullName || !email || !company || !role || !password || !confirmPassword) {
+      if (!fullName || !email || !company || !subdomain || !role || !password || !confirmPassword) {
         return alert('Please fill all required fields.');
       }
 
@@ -149,11 +169,16 @@
         return alert('Password must be at least 6 characters.');
       }
 
+      // Subdomain validation
+      if (!/^[a-z0-9-]+$/.test(subdomain) || subdomain.length < 3 || subdomain.length > 30) {
+        return alert('Subdomain must be 3–30 characters, using only lowercase letters, numbers, and hyphens (no spaces or special characters).');
+      }
+
       if (!terms) {
         return alert('You must agree to the terms.');
       }
 
-      // 1. Create auth user
+      // Supabase Signup
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -161,7 +186,8 @@
           data: {
             full_name: fullName,
             company,
-            role
+            role,
+            subdomain
           }
         }
       });
@@ -172,27 +198,30 @@
         return;
       }
 
-      // 2. Insert profile – use new industry columns, leave subdomain null
+      // Insert profile with user-provided subdomain
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
           id: signUpData.user.id,
           name: fullName,
           company,
-          industry_role: role,          // ← new column for role
-          industry_company: company,    // ← new column for company
+          role,
           email,
-          plan: role                    // still set plan to role for filtering
-          // NO subdomain — left null (allowed after you make it nullable)
+          plan: role,
+          subdomain: subdomain
         });
 
       if (profileError) {
         console.error('Profile insert error details:', profileError);
-        alert('Account created, but profile setup failed.\nError: ' + (profileError.message || 'Unknown') + '\n\nCheck console for details.');
+        if (profileError.message.includes('duplicate key')) {
+          alert('That subdomain is already taken. Please choose a different one (e.g. yourlabel-2025 or yourlabel-pro).');
+        } else {
+          alert('Account created, but profile setup failed.\nError: ' + (profileError.message || 'Unknown') + '\n\nCheck console for details.');
+        }
         return;
       }
 
-      alert('Account created successfully! Please log in.');
+      alert('Account created successfully!\n\nYour personal link will be: ' + subdomain + '.rhythm-deck-music.onrender.com\n\nPlease log in.');
       window.location.href = 'industry-login.html';
     };
   </script>
