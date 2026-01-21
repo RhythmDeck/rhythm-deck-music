@@ -128,7 +128,6 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
 
-    // Expose handleSignup to global scope so onclick can find it
     window.handleSignup = async function() {
       const fullName = document.getElementById('full_name').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -150,8 +149,8 @@
         return alert('You must agree to the terms.');
       }
 
-      // Supabase Signup
-      const { data, error } = await supabase.auth.signUp({
+      // Supabase Signup – create auth user only
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -163,31 +162,32 @@
         }
       });
 
-      if (error) {
-        console.error('Signup error:', error);
-        alert('Signup failed: ' + (error.message || 'Unknown error'));
+      if (signUpError) {
+        console.error('Signup error:', signUpError);
+        alert('Signup failed: ' + (signUpError.message || 'Unknown error'));
         return;
       }
 
-      // Insert into profiles table – use the selected role as the plan value
+      // Insert profile (this works if RLS allows anon insert or policy permits)
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
-          id: data.user.id,
+          id: signUpData.user.id,
           name: fullName,
           company,
           role,
           email,
-          plan: role // Sets plan to 'producer', 'distributor', etc.
+          plan: role
         });
 
       if (profileError) {
         console.error('Profile insert error:', profileError);
-        alert('Account created, but profile setup failed. Please contact support.');
+        alert('Account created, but profile setup failed: ' + (profileError.message || 'Unknown error') + '\n\nPlease contact support.');
         return;
       }
 
-      alert('Account created successfully! Please log in.');
+      // Success – no auto-login, force manual login
+      alert('Account created successfully! Please log in with your new credentials.');
       window.location.href = 'industry-login.html';
     };
   </script>
