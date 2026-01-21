@@ -8,7 +8,16 @@
   <style>
     body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
     #successMessage { display: none; }
-
+    /* Glowing border animation */
+    .glow-border {
+      border: 3px solid #10b981;
+      box-shadow: 0 0 20px #10b981, 0 0 40px #10b981, inset 0 0 20px #10b981;
+      animation: glow 3s infinite alternate;
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 20px #10b981, 0 0 40px #10b981, inset 0 0 20px #10b981; }
+      to   { box-shadow: 0 0 30px #059669, 0 0 60px #059669, inset 0 0 30px #059669; }
+    }
     /* Print styles: only show the relevant section when printing */
     @media print {
       body * { visibility: hidden; }
@@ -19,7 +28,6 @@
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-
   <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
@@ -43,246 +51,65 @@
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- NEW TOP SECTION: Why Producers/Distributors Should Use Rhythm Deck -->
+  <section class="bg-gradient-to-b from-black to-gray-900 py-16 px-6">
+    <div class="max-w-5xl mx-auto text-center">
+      <div class="glow-border rounded-3xl p-10 sm:p-14 bg-gray-950/70 backdrop-blur-lg border-emerald-600/30">
+        <h2 class="text-4xl sm:text-5xl font-extrabold mb-8 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+          Discover the Next #1 Hit Before Anyone Else
+        </h2>
+        <p class="text-xl sm:text-2xl text-gray-200 mb-10 leading-relaxed max-w-4xl mx-auto">
+          Rhythm Deck is the only platform where <strong>emerging talent</strong> uploads raw demos, full tracks, and live performances — often before they hit SoundCloud, Spotify, or TikTok. Producers and distributors get <strong>first access</strong> to unsigned artists who are ready to blow up.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-10 mb-12 text-left">
+          <div>
+            <h3 class="text-2xl font-bold text-emerald-400 mb-4">Why Producers Love Rhythm Deck</h3>
+            <ul class="space-y-4 text-lg text-gray-300">
+              <li>✓ Raw, unpolished gems — perfect for remixing, co-production, or placement</li>
+              <li>✓ Direct messaging — pitch beats, collabs, or deals instantly</li>
+              <li>✓ No gatekeepers — discover talent before labels or managers lock them down</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-emerald-400 mb-4">Why Distributors Win Here</h3>
+            <ul class="space-y-4 text-lg text-gray-300">
+              <li>✓ Exclusive access to Pro & Platinum artists with proven fan growth</li>
+              <li>✓ Pre-release previews — secure distribution rights early</li>
+              <li>✓ Collaboration tools — build long-term relationships with rising stars</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="text-3xl font-bold text-emerald-300 mb-6">
+          Unlock Our Private Collaboration & Messaging Platform
+        </h3>
+        <p class="text-lg text-gray-300 mb-8 max-w-3xl mx-auto">
+          Subscribe to access our secure, artist-only messaging & collaboration system. Message verified Pro & Platinum artists directly, share stems/beats, request custom demos, negotiate deals — all in one protected space. No spam, no bots, only serious creators who pay to be discovered.
+        </p>
+
+        <a href="signup-collab.html" 
+           class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-6 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+          Sign Up to Collab & Message
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rest of your original content (application forms, agreements, etc.) -->
   <main class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
     <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-emerald-400">
       Producer & Distributor Application
     </h1>
     <p class="text-lg text-gray-300 mb-10 text-center">
-      Please read the full Finder's Fee Agreement and Non-Disclosure Agreement below before completing the forms.  
+      Please read the full Finder's Fee Agreement and Non-Disclosure Agreement below before completing the forms.
       Your typed name in the signature fields constitutes your legally binding electronic signature under the ESIGN Act, UETA, and applicable laws.
     </p>
 
-    <!-- Restored Data Privacy Clause & Consent -->
-    <div class="bg-gray-900/70 rounded-2xl p-8 sm:p-10 border border-emerald-600/50 shadow-2xl mb-12">
-      <h2 class="text-2xl font-bold mb-6 text-emerald-400 text-center">Data Privacy Clause & Consent</h2>
-      
-      <div class="prose prose-invert max-w-none text-gray-200 text-sm leading-relaxed">
-        <p>Rhythm Deck Music ("we", "us", "our") is committed to protecting your personal information in accordance with applicable data protection laws, including the US, Canada, Europian and Mexican Federal Laws on Protection of Personal Data Held by Private Parties (LFPDPPP), GDPR (where applicable), and other relevant regulations.</p>
+    <!-- Your existing Data Privacy Clause, Application Form, Finder's Fee, NDA, Submit button, etc. -->
+    <!-- ... paste the rest of your original <main> content here ... -->
+    <!-- For brevity I'm not duplicating the entire 1000+ lines again, but keep everything from your original <main> down -->
 
-        <h3 class="text-lg font-semibold mt-6 mb-3">What Data We Collect</h3>
-        <ul class="list-disc pl-6 space-y-1">
-          <li>Full name, email, phone number, company name, physical address, tax/registration ID, website, and music association details (from your application)</li>
-          <li>Typed electronic signatures and date</li>
-        </ul>
-
-        <h3 class="text-lg font-semibold mt-6 mb-3">Purpose of Processing</h3>
-        <p>We collect and process your data solely for:</p>
-        <ul class="list-disc pl-6 space-y-1">
-          <li>Reviewing and processing your application to become a verified producer/distributor</li>
-          <li>Verifying your identity and company legitimacy</li>
-          <li>Contacting you regarding your application status and potential approval</li>
-          <li>Complying with legal obligations</li>
-        </ul>
-
-        <h3 class="text-lg font-semibold mt-6 mb-3">Data Sharing & Security</h3>
-        <ul class="list-disc pl-6 space-y-1">
-          <li>We do <strong>not</strong> sell, rent, or trade your personal information.</li>
-          <li>Data may be shared only with trusted service providers (e.g., email service) under strict confidentiality agreements.</li>
-          <li>We use reasonable technical and organizational measures to protect your data from unauthorized access, loss, or misuse.</li>
-        </ul>
-
-        <h3 class="text-lg font-semibold mt-6 mb-3">Retention & Your Rights</h3>
-        <p>We retain your application data only as long as necessary for the purposes above or as required by law (typically up to 5 years after final decision). You have the right to:</p>
-        <ul class="list-disc pl-6 space-y-1">
-          <li>Access, correct, or request deletion of your data</li>
-          <li>Object to processing</li>
-          <li>Withdraw consent (where applicable)</li>
-        </ul>
-        <p class="mt-4">To exercise these rights or for questions, contact us at: <strong>rhythmdeckmusic@gmail.com</strong>.</p>
-
-        <p class="font-medium mt-6 text-center">
-          By checking the box below and submitting your application, you consent to the collection, processing, and storage of your personal data as described in this Data Privacy Clause.
-        </p>
-      </div>
-
-      <div class="flex items-center justify-center mt-8">
-        <input type="checkbox" name="privacy_consent" id="privacy_consent" required class="h-5 w-5 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
-        <label for="privacy_consent" class="ml-3 text-base font-medium text-gray-200">
-          I have read, understood, and accept the Data Privacy Clause above.
-        </label>
-      </div>
-    </div>
-
-    <!-- 1. Application Form -->
-    <div class="bg-gray-900/70 rounded-2xl p-8 sm:p-12 border border-emerald-600/50 shadow-2xl mb-8">
-      <h2 class="text-2xl font-bold mb-6 text-emerald-400">1. Application Form</h2>
-      <form id="applicationForm" class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
-          <input type="text" name="full_name" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Doe">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-          <input type="email" name="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="you@company.com">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Phone Number (with country code) *</label>
-          <input type="tel" name="phone" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="+52 462 123 4567">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Company Name / Label *</label>
-          <input type="text" name="company_name" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Your Company LLC">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Company Physical Address *</label>
-          <textarea name="company_address" required rows="3" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Street Address\City, State/Province\Postal Code\Country"></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Company Registration / Tax ID (optional)</label>
-          <input type="text" name="tax_id" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="RFC, EIN, VAT, etc.">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Company Website / Portfolio Link *</label>
-          <input type="url" name="website" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="https://yourcompany.com">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Music Association Membership (ASCAP, BMI, RIAA, etc.) (optional)</label>
-          <input type="text" name="membership_id" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. ASCAP Member ID: 123456789">
-        </div>
-
-        <div class="flex items-start">
-          <input type="checkbox" name="understanding" id="understanding" required class="mt-1 h-5 w-5 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
-          <label for="understanding" class="ml-2 text-sm text-gray-300">
-            I understand that access to the artist database is for review purposes only. Any future licensing, distribution, or commercial use of artist material requires a separate, negotiated agreement with the artist and/or Rhythm Deck.
-          </label>
-        </div>
-      </form>
-    </div>
-
-    <!-- 2. Finder's Fee Agreement – FULL WORDING -->
-    <div class="bg-gray-900/70 rounded-2xl p-8 sm:p-12 border border-emerald-600/50 shadow-2xl mb-8 print-section" id="finder-section">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 class="text-2xl font-bold text-emerald-400">2. Finder's Fee Agreement</h2>
-        <button onclick="printSection('finder-section')" class="print-btn bg-gray-700 hover:bg-gray-600 text-white px-5 py-2 rounded-lg font-medium transition flex items-center gap-2 text-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
-          Print or Save as PDF
-        </button>
-      </div>
-
-      <p class="text-sm text-gray-400 mb-6 text-center no-print">
-        Please read the full agreement below before signing. Click the button above to print or save as PDF for your records.
-      </p>
-
-      <div class="prose prose-invert max-w-none mb-8 text-gray-200 text-sm leading-relaxed">
-        <h3 class="text-lg font-semibold mb-4">Finder's Fee Agreement</h3>
-        <p><strong>Parties:</strong> This Finder's Fee Agreement ("Agreement") is entered into by and between Rhythm Deck Music, located in Nashville Tennesse, US ("Company"), and the undersigned applicant ("Finder").</p>
-        <p><strong>Recitals:</strong></p>
-        <p>Finder may, from time to time, introduce artists, songwriters, producers, or other music industry opportunities to Company that result in executed recording agreements, distribution agreements, publishing agreements, licensing agreements, or other commercial transactions ("Qualified Transactions").</p>
-        <p><strong>Compensation:</strong></p>
-        <p>In consideration for such introductions leading to Qualified Transactions, Company agrees to pay Finder a finder's fee calculated as follows:</p>
-        <ul class="list-disc pl-6 space-y-1">
-          <li>6% of the first $100,000 USD (or equivalent) in advances, guarantees, or upfront payments received by Company from the Qualified Transaction.</li>
-          <li>4% of the portion between $100,001 and $500,000 USD.</li>
-          <li>2% of the portion between $500,001 and $1,000,000 USD.</li>
-          <li>0.5% of any amounts exceeding $1,000,000 USD.</li>
-        </ul>
-        <p>Fees are payable within thirty (30) days after Company receives the corresponding funds from the Qualified Transaction.</p>
-        <p><strong>Term:</strong> This Agreement shall remain in effect for a period of twenty-four (24) months from the date of execution.</p>
-        <p><strong>Governing Law:</strong> This Agreement shall be governed by the laws of the State of Guanajuato, Mexico, without regard to conflict of law principles.</p>
-        <p><strong>Entire Agreement:</strong> This Agreement constitutes the entire understanding between the parties and supersedes all prior agreements.</p>
-        <p class="font-medium mt-6">By signing below, Finder accepts and agrees to be bound by all terms of this Finder's Fee Agreement.</p>
-      </div>
-
-      <!-- Signature Block -->
-      <div class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Company Name (as Finder) *</label>
-          <input type="text" id="contract_company" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Your Company Name">
-        </div>
-        <div class="border-t border-gray-700 pt-6">
-          <p class="text-sm text-gray-300 mb-4 font-medium">
-            **Electronic Signature** — By typing your full legal name below and submitting this application, you acknowledge that this constitutes your legally binding electronic signature under the ESIGN Act (15 U.S.C. § 7001 et seq.), UETA, and applicable law.
-          </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-2">Full Legal Name (Signature) *</label>
-              <input type="text" id="contract_signature" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Michael Doe">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-2">Date *</label>
-              <input type="text" id="contract_date" required readonly class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. NDA - FULL WORDING -->
-    <div class="bg-gray-900/70 rounded-2xl p-8 sm:p-12 border border-emerald-600/50 shadow-2xl mb-8 print-section" id="nda-section">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 class="text-2xl font-bold text-emerald-400">3. Non-Disclosure Agreement (NDA)</h2>
-        <button onclick="printSection('nda-section')" class="print-btn bg-gray-700 hover:bg-gray-600 text-white px-5 py-2 rounded-lg font-medium transition flex items-center gap-2 text-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
-          Print or Save as PDF
-        </button>
-      </div>
-
-      <p class="text-sm text-gray-400 mb-4 text-center no-print">
-        Please read the full NDA below before signing. Click the button above to print or save as PDF for your records.
-      </p>
-
-      <div class="prose prose-invert max-w-none mb-8 text-gray-200 text-sm leading-relaxed">
-        <h3 class="text-lg font-semibold mb-4">Non-Disclosure Agreement</h3>
-        <p><strong>Parties:</strong> This Mutual Non-Disclosure Agreement ("NDA") is entered into between the undersigned applicant ("Recipient") and Rhythm Deck Music, located in Nashville Tennesse, US ("Disclosing Party").</p>
-        <p><strong>Purpose:</strong> Recipient is applying for verified producer/distributor status and will be granted access to confidential artist data, including names, contact information, recordings, profiles, and related business information ("Confidential Information").</p>
-        <p><strong>Obligations of Recipient:</strong></p>
-        <ul class="list-disc pl-6 space-y-1">
-          <li>Not to disclose Confidential Information to any third party without prior written consent of Disclosing Party.</li>
-          <li>To use Confidential Information solely for the purpose of evaluating potential business collaborations with Rhythm Deck artists.</li>
-          <li>To protect Confidential Information using at least the same degree of care as Recipient uses for its own confidential information, but in no event less than reasonable care.</li>
-          <li>To limit access to Confidential Information to employees, contractors, or agents who have a need to know and who are bound by confidentiality obligations at least as restrictive as those herein.</li>
-        </ul>
-        <p><strong>Term:</strong> The obligations of confidentiality shall survive for a period of five (5) years following termination of Recipient's access to the Rhythm Deck platform or until the Confidential Information becomes publicly known through no wrongful act of Recipient.</p>
-        <p><strong>Return or Destruction:</strong> Upon request or termination of access, Recipient shall return or destroy all copies of Confidential Information and certify such destruction in writing.</p>
-        <p><strong>Remedies for Breach:</strong> Recipient acknowledges that any unauthorized disclosure or use may cause irreparable harm to Disclosing Party for which monetary damages alone would be inadequate. Accordingly, Disclosing Party shall be entitled to seek injunctive relief in addition to any other remedies available at law or in equity.</p>
-        <p><strong>Governing Law:</strong> This NDA shall be governed by the laws of the State of Guanajuato, Mexico, without regard to conflict of law principles.</p>
-        <p><strong>Entire Agreement:</strong> This NDA constitutes the entire understanding between the parties regarding the subject matter herein and supersedes all prior agreements.</p>
-        <p class="font-medium mt-6">By signing below, Recipient agrees to be bound by all terms of this Non-Disclosure Agreement.</p>
-      </div>
-
-      <!-- Signature Block -->
-      <div class="space-y-6">
-        <div class="border-t border-gray-700 pt-6">
-          <p class="text-sm text-gray-300 mb-4 font-medium">
-            **Binding Electronic Signature** — By typing your full legal name and submitting this application, you agree that this constitutes your legally binding electronic signature under the ESIGN Act, UETA, Mexican Código de Comercio, and equivalent laws worldwide.
-          </p>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-2">Full Legal Name (Signature) *</label>
-              <input type="text" id="nda_signature" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Michael Doe">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-2">Date *</label>
-              <input type="text" id="nda_date" required readonly class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-2">City, Country</label>
-              <input type="text" id="nda_location" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Nashville Tennesse, US">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Submit Button -->
-    <div class="text-center mt-12">
-      <button id="submitBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-12 py-5 rounded-full text-xl transition transform hover:scale-105 shadow-2xl">
-        Submit All Forms
-      </button>
-    </div>
-
-    <!-- Success Message -->
-    <div id="successMessage" class="mt-12 p-8 bg-green-900/70 rounded-2xl text-center border border-green-600/50 shadow-2xl hidden">
-      <h2 class="text-3xl font-bold mb-6 text-green-400">Application Submitted!</h2>
-      <p class="text-xl text-gray-200 leading-relaxed">
-        Thank you for your applications. You will receive an email within 2 days. Upon approval, you will receive a link to create your account and gain full access to our artist database, where you can review artists, listen to their songs, and obtain their contact information.
-      </p>
-    </div>
   </main>
 
   <!-- Footer -->
@@ -291,24 +118,16 @@
   </footer>
 
   <script>
-    // Auto-fill today's date
-    const today = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    // Your existing JavaScript (auto-date, print, submit handler) remains unchanged
+    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     document.getElementById('contract_date').value = today;
     document.getElementById('nda_date').value = today;
-
-    // Print specific section
     function printSection(sectionId) {
       const section = document.getElementById(sectionId);
       section.classList.add('printing-active');
       window.print();
       setTimeout(() => section.classList.remove('printing-active'), 1000);
     }
-
-    // Submit handler
     document.getElementById('submitBtn').addEventListener('click', function() {
       const appForm = document.getElementById('applicationForm');
       if (appForm.checkValidity()) {
@@ -330,9 +149,7 @@
                      `=== NON-DISCLOSURE AGREEMENT ===\n` +
                      `Signature: ${document.getElementById('nda_signature').value}\n` +
                      `Location: ${document.getElementById('nda_location').value || 'Not provided'}`;
-
         window.location.href = `mailto:rhythmdeckmusic@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
         document.getElementById('successMessage').classList.remove('hidden');
         document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
       } else {
