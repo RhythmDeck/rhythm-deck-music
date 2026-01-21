@@ -53,19 +53,19 @@
         <form id="signupForm" class="space-y-6">
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
-            <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Smith">
+            <input type="text" id="full_name" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Smith">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-            <input type="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="youremail@company.com">
+            <input type="email" id="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="you@company.com">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Company *</label>
-            <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Your Company Name">
+            <input type="text" id="company" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Your Label / Studio / Company">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Your Role *</label>
-            <select required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500">
+            <select id="role" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500">
               <option value="" disabled selected>Select your role</option>
               <option value="producer">Music Producer</option>
               <option value="distributor">Music Distributor</option>
@@ -84,13 +84,13 @@
             <span class="password-toggle absolute right-4 top-10 text-gray-400" onclick="togglePassword('confirm_password')">👁️</span>
           </div>
           <div class="flex items-center">
-            <input type="checkbox" required class="h-5 w-5 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
-            <label class="ml-3 text-sm text-gray-300">
+            <input type="checkbox" id="terms" required class="h-5 w-5 text-emerald-500 focus:ring-emerald-400 border-gray-600 rounded">
+            <label for="terms" class="ml-3 text-sm text-gray-300">
               I have filled out the forms and submitted to Rhythm Deck.
             </label>
           </div>
           <div class="text-center pt-6">
-            <button type="button" onclick="window.location.href='industry-login.html'" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-5 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <button type="button" onclick="handleSignup()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xl px-12 py-5 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300">
               Create Account
             </button>
           </div>
@@ -104,28 +104,87 @@
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
-  <script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
+
     function togglePassword(fieldId) {
       const field = document.getElementById(fieldId);
       const toggleIcon = field.nextElementSibling;
       if (field.type === "password") {
         field.type = "text";
-        toggleIcon.textContent = "👁️";
+        toggleIcon.textContent = "🙈";
       } else {
         field.type = "password";
         toggleIcon.textContent = "👁️";
       }
     }
+
+    async function handleSignup() {
+      const fullName = document.getElementById('full_name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const company = document.getElementById('company').value.trim();
+      const role = document.getElementById('role').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
+      const terms = document.getElementById('terms').checked;
+
+      if (!fullName || !email || !company || !role || !password || !confirmPassword) {
+        return alert('Please fill all required fields.');
+      }
+
+      if (password !== confirmPassword) {
+        return alert('Passwords do not match.');
+      }
+
+      if (!terms) {
+        return alert('You must agree to the terms.');
+      }
+
+      // Supabase Signup
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            company,
+            role
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Signup error:', error);
+        alert('Signup failed: ' + (error.message || 'Unknown error'));
+        return;
+      }
+
+      // Insert into profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          name: fullName,
+          company,
+          role,
+          email,
+          plan: 'pending' // or whatever default you use
+        });
+
+      if (profileError) {
+        console.error('Profile insert error:', profileError);
+        alert('Account created, but profile setup failed. Please contact support.');
+        return;
+      }
+
+      alert('Account created successfully! Please log in.');
+      window.location.href = 'industry-login.html';
+    }
   </script>
-  
-  <script>
-  // Force-clear autofill on load (helps stubborn browsers)
-  window.addEventListener('load', () => {
-    document.querySelectorAll('input[type="email"], input[type="password"]').forEach(input => {
-      input.value = '';           // wipe any injected value
-      input.autocomplete = 'off'; // tell browser not to suggest old stuff
-    });
-  });
-</script>
 </body>
 </html>
