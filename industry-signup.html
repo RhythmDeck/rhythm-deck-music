@@ -67,8 +67,8 @@
             <label class="block text-sm font-medium text-gray-300 mb-2">
               Choose Your Subdomain * 
               <span class="text-xs text-gray-400 block mt-1">
-                This creates your personal link, e.g. <strong>your-label-productions.rhythm-deck-music.onrender.com</strong><br>
-                Use lowercase letters, numbers, and hyphens only (no spaces or special characters).
+                This creates your personal link, for example: <strong>your-label-productions.rhythm-deck-music.onrender.com</strong><br>
+                Use lowercase letters, numbers, and hyphens only (no spaces or special characters). Minimum 3 characters.
               </span>
             </label>
             <input 
@@ -169,13 +169,30 @@
         return alert('Password must be at least 6 characters.');
       }
 
-      // Subdomain validation
       if (!/^[a-z0-9-]+$/.test(subdomain) || subdomain.length < 3 || subdomain.length > 30) {
-        return alert('Subdomain must be 3–30 characters, using only lowercase letters, numbers, and hyphens (no spaces or special characters).');
+        return alert('Subdomain must be 3–30 characters, using only lowercase letters, numbers, and hyphens (no spaces or special characters). Example: your-label-productions');
       }
 
       if (!terms) {
         return alert('You must agree to the terms.');
+      }
+
+      // Check if subdomain is already taken
+      const { data: existing, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('subdomain', subdomain)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Subdomain check error:', checkError);
+        alert('Could not check subdomain availability. Please try again.');
+        return;
+      }
+
+      if (existing) {
+        alert('That subdomain is already taken. Please choose a different one (e.g. your-label-2025, your-label-pro, yourlabelteam).');
+        return;
       }
 
       // Supabase Signup
@@ -198,7 +215,7 @@
         return;
       }
 
-      // Insert profile with user-provided subdomain
+      // Insert profile
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -213,11 +230,7 @@
 
       if (profileError) {
         console.error('Profile insert error details:', profileError);
-        if (profileError.message.includes('duplicate key')) {
-          alert('That subdomain is already taken. Please choose a different one (e.g. yourlabel-2025 or yourlabel-pro).');
-        } else {
-          alert('Account created, but profile setup failed.\nError: ' + (profileError.message || 'Unknown') + '\n\nCheck console for details.');
-        }
+        alert('Account created, but profile setup failed.\nError: ' + (profileError.message || 'Unknown') + '\n\nCheck console for details.');
         return;
       }
 
