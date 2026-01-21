@@ -53,11 +53,11 @@
         <form id="signupForm" class="space-y-6">
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
-            <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Doe">
+            <input type="text" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="John Smith">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-            <input type="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="you@company.com">
+            <input type="email" required class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="youremail@company.com">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Company *</label>
@@ -117,5 +117,15 @@
       }
     }
   </script>
+  
+  <script>
+  // Force-clear autofill on load (helps stubborn browsers)
+  window.addEventListener('load', () => {
+    document.querySelectorAll('input[type="email"], input[type="password"]').forEach(input => {
+      input.value = '';           // wipe any injected value
+      input.autocomplete = 'off'; // tell browser not to suggest old stuff
+    });
+  });
+</script>
 </body>
 </html>
