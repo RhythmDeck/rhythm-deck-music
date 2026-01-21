@@ -16,7 +16,7 @@
     .btn-dashboard {
       background: linear-gradient(to right, #d4af37, #b8860b);
       color: #1a0f2e;
-      padding: 0.5rem 1.5rem;
+      padding: 0.75rem 1.75rem;
       border-radius: 0.75rem;
       font-weight: bold;
       transition: all 0.3s;
@@ -36,7 +36,7 @@
       <h1 class="text-4xl font-black tracking-wider">RHYTHM DECK</h1>
     </div>
     <nav class="space-x-8 flex items-center">
-      <button onclick="goToDashboard()" class="btn-dashboard">
+      <button onClick="goToDashboard()" class="btn-dashboard">
         Dashboard
       </button>
       <a href="message-dashboard.html" id="messagesBtn" class="relative bg-emerald-600 hover:bg-emerald-700 px-6 py-2 rounded-lg font-black flex items-center gap-2 transition">
@@ -52,19 +52,16 @@
     </nav>
   </div>
 </header>
-
 <section class="text-center py-20 px-6">
   <h2 class="text-6xl font-black mb-6 bg-gradient-to-r from-green-400 to-purple-500 bg-clip-text text-transparent">
     Collaboration Network
   </h2>
   <p class="text-xl max-w-3xl mx-auto opacity-90">Discover Pro artists open to collaboration</p>
 </section>
-
 <section class="max-w-7xl mx-auto px-6 pb-20">
   <div id="artistsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
   <p id="noArtists" class="text-center text-2xl py-20 text-gray-500 hidden">No artists available for collaboration yet.</p>
 </section>
-
 <!-- VIDEO MODAL -->
 <div id="videoModal" class="modal">
   <div class="relative max-w-5xl w-full p-8">
@@ -72,7 +69,6 @@
     <video id="modalVideo" controls autoplay class="w-full rounded-2xl shadow-2xl border-4 border-purple-600" style="max-height:85vh;"></video>
   </div>
 </div>
-
 <!-- MESSAGE MODAL -->
 <div id="collabModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
   <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative max-h-screen overflow-y-auto">
@@ -104,20 +100,16 @@
     </div>
   </div>
 </div>
-
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
-
   const getMediaUrl = (path) => `https://bxoqhmfnseskwqkywppg.supabase.co/storage/v1/object/public/media/${path?.replace(/^\/+/g, '') || ''}`;
-
   let currentUser = null;
   let targetArtistId = null;
   let targetArtistName = null;
-
   // Smart Dashboard redirect: Platinum → platinum-pro-admin, others → profile-admin-pro
   window.goToDashboard = async function() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -125,20 +117,17 @@
       alert("Please log in first");
       return;
     }
-
     const { data: profile } = await supabase
       .from('profiles')
       .select('plan')
       .eq('id', user.id)
       .single();
-
     if (profile?.plan === 'platinum') {
       window.location.href = 'platinum-pro-admin.html';
     } else {
       window.location.href = 'profile-admin-pro.html';
     }
   };
-
   window.openCollabModal = function(artistId, artistName) {
     targetArtistId = artistId;
     targetArtistName = artistName;
@@ -146,7 +135,6 @@
     document.getElementById('collabModal').classList.remove('invisible', 'opacity-0');
     document.getElementById('collabModal').classList.add('opacity-100');
   };
-
   window.closeCollabModal = function() {
     document.getElementById('collabModal').classList.add('invisible', 'opacity-0');
     document.getElementById('collabModal').classList.remove('opacity-100');
@@ -154,7 +142,6 @@
     document.getElementById('collabEmail').value = '';
     document.getElementById('collabMessage').value = '';
   };
-
   window.sendCollabMessage = async function() {
     if (!targetArtistId) return alert('Error: No artist selected');
     const name = document.getElementById('collabName').value.trim();
@@ -180,55 +167,44 @@
       closeCollabModal();
     }
   };
-
   window.playVideo = function(url) {
     document.getElementById('modalVideo').src = url;
     document.getElementById('videoModal').classList.add('active');
     document.getElementById('modalVideo').play();
   };
-
   window.closeModal = function() {
     document.getElementById('modalVideo').pause();
     document.getElementById('modalVideo').src = '';
     document.getElementById('videoModal').classList.remove('active');
   };
-
   document.getElementById('videoModal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeModal();
   });
-
   window.logout = async function() {
     await supabase.auth.signOut();
     location.href = 'login.html';
   };
-
   async function loadArtists() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return location.href = 'login.html';
     currentUser = user;
-
     const { data: artists } = await supabase
       .from('profiles')
       .select('id, name, logo_url, subdomain')
       .eq('collaboration_opt_in', true)
       .neq('id', currentUser.id);
-
     const grid = document.getElementById('artistsGrid');
     grid.innerHTML = '';
-
     if (!artists || artists.length === 0) {
       document.getElementById('noArtists').classList.remove('hidden');
       return;
     }
-
     for (const artist of artists) {
       const logo = artist.logo_url ? getMediaUrl(artist.logo_url) : 'https://placehold.co/200x200/emerald/white?text=Artist';
-
       const { data: videos } = await supabase
         .from('user_videos')
         .select('id, title, video_url')
         .eq('user_id', artist.id);
-
       let totalHearts = 0;
       let totalComments = 0;
       if (videos) {
@@ -239,14 +215,11 @@
           totalComments += comments || 0;
         }
       }
-
       const videoList = videos?.length > 0
         ? videos.map(v => `<div class="video-item" onclick="playVideo('${getMediaUrl(v.video_url)}')">${v.title || 'Untitled Video'}</div>`).join('')
         : '<p class="text-gray-500 text-sm">No videos yet</p>';
-
       const profileId = artist.subdomain?.trim() || artist.id;
       const publicLink = `public-profile.html?id=${profileId}`;
-
       grid.innerHTML += `
         <div class="artist-card bg-gradient-to-br from-purple-900/50 to-black rounded-2xl overflow-hidden shadow-2xl border border-purple-600">
           <div class="p-6 text-center">
@@ -271,8 +244,7 @@
                   View Public Profile
                 </button>
               </a>
-
-              <button onclick="openCollabModal('${artist.id}', '${(artist.name || 'Artist').replace(/'/g, "\\'")}')"
+              <button onclick="window.location.href='message-dashboard.html?initiate=${artist.id}&name=${encodeURIComponent(artist.name || 'Artist')}'"
                 class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-4 rounded-xl shadow-xl transition transform hover:scale-105">
                 Message for Collab
               </button>
@@ -281,7 +253,6 @@
         </div>`;
     }
   }
-
   loadArtists();
 </script>
 </body>
