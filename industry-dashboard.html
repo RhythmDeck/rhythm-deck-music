@@ -85,10 +85,77 @@
       <input id="searchSong" type="text" placeholder="Search by song title" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
       <select id="filterGenre" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
         <option value="">Filter by genre</option>
-        <option value="hiphop">Hip Hop</option>
-        <option value="rock">Rock</option>
-        <option value="pop">Pop</option>
+        <!-- Major genres and common subgenres -->
+        <option value="acoustic">Acoustic</option>
+        <option value="afrobeat">Afrobeat</option>
+        <option value="alternative">Alternative</option>
+        <option value="ambient">Ambient</option>
+        <option value="blues">Blues</option>
+        <option value="classical">Classical</option>
+        <option value="country">Country</option>
+        <option value="dance">Dance</option>
+        <option value="disco">Disco</option>
+        <option value="drum and bass">Drum and Bass</option>
+        <option value="dubstep">Dubstep</option>
         <option value="electronic">Electronic</option>
+        <option value="emo">Emo</option>
+        <option value="folk">Folk</option>
+        <option value="funk">Funk</option>
+        <option value="garage">Garage</option>
+        <option value="grunge">Grunge</option>
+        <option value="hard rock">Hard Rock</option>
+        <option value="heavy metal">Heavy Metal</option>
+        <option value="hip hop">Hip Hop</option>
+        <option value="house">House</option>
+        <option value="indie">Indie</option>
+        <option value="jazz">Jazz</option>
+        <option value="latin">Latin</option>
+        <option value="metal">Metal</option>
+        <option value="new age">New Age</option>
+        <option value="opera">Opera</option>
+        <option value="pop">Pop</option>
+        <option value="progressive rock">Progressive Rock</option>
+        <option value="punk">Punk</option>
+        <option value="r&b">R&B</option>
+        <option value="rap">Rap</option>
+        <option value="reggae">Reggae</option>
+        <option value="rock">Rock</option>
+        <option value="soul">Soul</option>
+        <option value="techno">Techno</option>
+        <option value="trance">Trance</option>
+        <option value="world">World</option>
+        <!-- More subgenres for variety -->
+        <option value="alternative rock">Alternative Rock</option>
+        <option value="bluegrass">Bluegrass</option>
+        <option value="britpop">Britpop</option>
+        <option value="chillout">Chillout</option>
+        <option value="christian">Christian</option>
+        <option value="classical crossover">Classical Crossover</option>
+        <option value="contemporary r&b">Contemporary R&B</option>
+        <option value="death metal">Death Metal</option>
+        <option value="deep house">Deep House</option>
+        <option value="drumstep">Drumstep</option>
+        <option value="edm">EDM</option>
+        <option value="electropop">Electropop</option>
+        <option value="experimental">Experimental</option>
+        <option value="folk rock">Folk Rock</option>
+        <option value="glam rock">Glam Rock</option>
+        <option value="gospel">Gospel</option>
+        <option value="grime">Grime</option>
+        <option value="hardcore">Hardcore</option>
+        <option value="indie pop">Indie Pop</option>
+        <option value="indie rock">Indie Rock</option>
+        <option value="k-pop">K-Pop</option>
+        <option value="lo-fi">Lo-Fi</option>
+        <option value="nu metal">Nu Metal</option>
+        <option value="orchestral">Orchestral</option>
+        <option value="post-rock">Post-Rock</option>
+        <option value="psychedelic rock">Psychedelic Rock</option>
+        <option value="reggaeton">Reggaeton</option>
+        <option value="shoegaze">Shoegaze</option>
+        <option value="synthpop">Synthpop</option>
+        <option value="trap">Trap</option>
+        <option value="trip hop">Trip Hop</option>
       </select>
     </div>
 
@@ -157,7 +224,6 @@
     }
 
     async function loadArtists() {
-      // Fetch Pro/Platinum artists
       const { data: fetchedArtists, error: artistError } = await supabase
         .from('profiles')
         .select('*')
@@ -172,7 +238,6 @@
 
       const artistIds = fetchedArtists.map(a => a.id);
 
-      // Fetch all media from user_videos
       const { data: media, error: mediaError } = await supabase
         .from('user_videos')
         .select('id, user_id, title, video_url, thumbnail_url, type')
@@ -180,10 +245,28 @@
 
       if (mediaError) console.error('Media load error:', mediaError);
 
-      // Fetch total likes per artist
+      const processedMedia = media?.map(item => {
+        const { data: publicData } = supabase.storage.from('media').getPublicUrl(item.video_url);
+        return {
+          ...item,
+          public_url: publicData.publicUrl
+        };
+      }) || [];
+
+      const mediaByArtist = {};
+      processedMedia.forEach(item => {
+        if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
+        mediaByArtist[item.user_id].push(item);
+      });
+
+      // Likes and comments totals per artist
       let totalLikesByArtist = {};
+      let totalCommentsByArtist = {};
+
       if (media && media.length > 0) {
         const videoIds = media.map(v => v.id);
+
+        // Likes count
         const { data: likes } = await supabase
           .from('video_likes')
           .select('video_id')
@@ -191,16 +274,10 @@
 
         likes?.forEach(l => {
           const artistId = media.find(v => v.id === l.video_id)?.user_id;
-          if (artistId) {
-            totalLikesByArtist[artistId] = (totalLikesByArtist[artistId] || 0) + 1;
-          }
+          if (artistId) totalLikesByArtist[artistId] = (totalLikesByArtist[artistId] || 0) + 1;
         });
-      }
 
-      // Fetch total comments per artist
-      let totalCommentsByArtist = {};
-      if (media && media.length > 0) {
-        const videoIds = media.map(v => v.id);
+        // Comments count
         const { data: comments } = await supabase
           .from('video_comments')
           .select('video_id')
@@ -208,29 +285,10 @@
 
         comments?.forEach(c => {
           const artistId = media.find(v => v.id === c.video_id)?.user_id;
-          if (artistId) {
-            totalCommentsByArtist[artistId] = (totalCommentsByArtist[artistId] || 0) + 1;
-          }
+          if (artistId) totalCommentsByArtist[artistId] = (totalCommentsByArtist[artistId] || 0) + 1;
         });
       }
 
-      // Fetch public URLs for media
-      const processedMedia = media?.map(item => {
-        const { data: publicUrl } = supabase.storage.from('media').getPublicUrl(item.video_url);
-        return {
-          ...item,
-          public_url: publicUrl.publicUrl
-        };
-      }) || [];
-
-      // Group media by user_id with public URLs
-      const mediaByArtist = {};
-      processedMedia.forEach(item => {
-        if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
-        mediaByArtist[item.user_id].push(item);
-      });
-
-      // Attach everything to artists
       artists = fetchedArtists.map(artist => ({
         ...artist,
         videos: mediaByArtist[artist.id] || [],
@@ -310,7 +368,7 @@
       modal.classList.remove('hidden');
       video.play().catch(e => {
         console.error('Video play failed:', e);
-        alert('Could not play video. Check if the URL is valid.');
+        alert('Could not play video — URL may be invalid or private.');
       });
     };
 
@@ -326,7 +384,7 @@
       const audio = new Audio(url);
       audio.play().catch(e => {
         console.error('MP3 play failed:', e);
-        alert('Could not play MP3. Check if the URL is valid.');
+        alert('Could not play MP3 — URL may be invalid or private.');
       });
       alert('Playing MP3... (close alert to stop)');
     };
