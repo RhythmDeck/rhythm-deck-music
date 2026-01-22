@@ -151,31 +151,59 @@
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in to access the dashboard.');
-        window.location.href = 'industry-login.html';
+        window.location.href = 'login.html'; // or industry-login if still using it
         return;
       }
       currentUserId = user.id;
       loadArtists();
     }
 
-    // Load all Pro and Platinum artists with their videos
+    // Load artists and videos separately (only from user_videos table)
     async function loadArtists() {
-      const { data: fetchedArtists, error } = await supabase
+      // 1. Fetch Pro/Platinum artists from profiles
+      const { data: fetchedArtists, error: artistError } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          videos:user_videos (title, url, type)
-        `)
+        .select('*')
         .in('plan', ['pro', 'platinum'])
         .order('name', { ascending: true });
 
-      if (error) {
-        console.error('Error loading artists:', error);
-        alert('Failed to load artists: ' + error.message);
+      if (artistError) {
+        console.error('Error loading artists:', artistError);
+        alert('Failed to load artists: ' + artistError.message);
         return;
       }
 
-      artists = fetchedArtists;
+      if (!fetchedArtists || fetchedArtists.length === 0) {
+        document.getElementById('artistGrid').innerHTML = '<p class="text-center text-gray-400 col-span-full py-10">No Pro or Platinum artists found yet.</p>';
+        return;
+      }
+
+      // 2. Get all artist IDs to fetch their videos
+      const artistIds = fetchedArtists.map(a => a.id);
+
+      // 3. Fetch videos/MP3s ONLY from user_videos table
+      const { data: videosData, error: videoError } = await supabase
+        .from('user_videos')
+        .select('user_id, title, url, type')
+        .in('user_id', artistIds);
+
+      if (videoError) {
+        console.error('Error loading videos/MP3s:', videoError);
+      }
+
+      // 4. Group media by user_id
+      const mediaByArtist = {};
+      videosData?.forEach(item => {
+        if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
+        mediaByArtist[item.user_id].push(item);
+      });
+
+      // 5. Attach media to each artist
+      artists = fetchedArtists.map(artist => ({
+        ...artist,
+        videos: mediaByArtist[artist.id] || [] // only videos/MP3s from user_videos
+      }));
+
       renderArtists(artists);
     }
 
@@ -183,10 +211,10 @@
     function renderArtists(filteredArtists) {
       const artistGrid = document.getElementById('artistGrid');
       artistGrid.innerHTML = filteredArtists.map(artist => {
-        const videos = artist.videos || [];
-        const videoList = videos.map(v => `
-          <div class="media-item" onclick="${v.type === 'video' ? `openVideoModal('${v.url}')` : `playMP3('${v.url}')`}">
-            ${v.title || 'Untitled'} (${v.type.toUpperCase()})
+        const media = artist.videos || [];
+        const mediaList = media.map(item => `
+          <div class="media-item" onclick="${item.type === 'video' ? `openVideoModal('${item.url}')` : `playMP3('${item.url}')`}">
+            ${item.title || 'Untitled'} (${item.type.toUpperCase()})
           </div>
         `).join('');
 
@@ -205,8 +233,8 @@
               <span class="stat-badge">💬 ${artist.comments || 0}</span>
             </div>
             <div class="media-list">
-              <h4 class="text-xs font-medium text-gray-400 mb-1">Media</h4>
-              ${videoList || '<p class="text-gray-500 text-xs">No media</p>'}
+              <h4 class="text-xs font-medium text-gray-400 mb-1">Videos / MP3s</h4>
+              ${mediaList || '<p class="text-gray-500 text-xs">No media uploaded</p>'}
             </div>
             <div class="flex gap-2 mt-3">
               <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
@@ -250,7 +278,7 @@
       source.src = url;
       video.load();
       modal.classList.remove('hidden');
-      video.play();
+      video.play().catch(e => console.error('Video play failed:', e));
     };
 
     // Close video modal
@@ -265,10 +293,9 @@
     // Play MP3
     window.playMP3 = function(url) {
       const audio = new Audio(url);
-      audio.play();
-
-      alert('Playing MP3... (close this alert to stop)');
-      audio.onended = () => alert('MP3 finished.');
+      audio.play().catch(e => console.error('MP3 play failed:', e));
+      alert('Playing MP3... (close this to stop)');
+      audio.onended = () => alert('MP3 finished playing.');
     };
 
     // Open message modal
