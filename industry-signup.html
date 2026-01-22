@@ -177,25 +177,7 @@
         return alert('You must agree to the terms.');
       }
 
-      // Check if subdomain is already taken
-      const { data: existing, error: checkError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('subdomain', subdomain)
-        .maybeSingle();
-
-      if (checkError) {
-        console.error('Subdomain check error:', checkError);
-        alert('Could not check subdomain availability. Please try again.');
-        return;
-      }
-
-      if (existing) {
-        alert('That subdomain is already taken. Please choose a different one (e.g. your-label-2025, your-label-pro, yourlabelteam).');
-        return;
-      }
-
-      // Supabase Signup
+      // Step 1: Attempt signup (creates user or returns existing one)
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -215,7 +197,27 @@
         return;
       }
 
-      // Insert profile
+      // Step 2: Check if a profile row already exists for this user ID
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', signUpData.user.id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Profile check error:', checkError);
+        alert('Could not verify profile status. Please try again or contact support.');
+        return;
+      }
+
+      if (existingProfile) {
+        // Profile already exists — no need to insert again
+        alert('Account already exists! Please log in with your existing credentials.');
+        window.location.href = 'industry-login.html';
+        return;
+      }
+
+      // Step 3: Insert new profile (only if no existing profile)
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
