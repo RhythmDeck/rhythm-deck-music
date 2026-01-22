@@ -34,7 +34,7 @@
       <h1 class="text-5xl font-black bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
         Collab Messages
       </h1>
-      <button onClick="goToDashboard()" class="btn-dashboard">
+      <button onclick="goToDashboard()" class="btn-dashboard">
         ← Back to Dashboard
       </button>
     </div>
@@ -56,7 +56,7 @@
   </div>
 
   <!-- Reply Modal -->
-  <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible">
+  <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
     <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
       <button onclick="closeReplyModal()" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
         ×
@@ -82,7 +82,6 @@
     );
 
     let currentUserId = null;
-
     let currentUserName = null;
     let currentUserRole = null;
     let currentConversationId = null;
@@ -99,7 +98,7 @@
     };
 
     function openReplyModal(targetId, name) {
-      currentConversationId = targetId; // For parent_id
+      currentConversationId = targetId;
       document.getElementById('replyTargetName').textContent = name;
       document.getElementById('replyModal').classList.remove('invisible', 'opacity-0');
       document.getElementById('replyModal').classList.add('opacity-100');
@@ -120,11 +119,11 @@
       const senderName = profile?.name || 'Industry Professional';
 
       const { error } = await supabase.from('collab_requests').insert({
-        artist_id: currentUserId, // artist receiving reply
+        artist_id: currentUserId,
         sender_name: senderName,
         message: message,
         sender_social: null,
-        parent_id: currentConversationId, // ← threads the reply
+        parent_id: currentConversationId,
         created_at: new Date().toISOString()
       });
 
@@ -156,7 +155,6 @@
 
       let html = `
         <div class="flex-1 overflow-y-auto pr-4 space-y-6">
-          <!-- Original message -->
           <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
             <div class="flex justify-between items-start mb-4">
               <div>
@@ -218,7 +216,6 @@
       list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
 
       if (currentUserRole !== 'artist') {
-        // Industry view placeholder
         list.innerHTML = '<p class="text-gray-400 text-center py-10">Artist view only for now</p>';
         return;
       }
@@ -240,7 +237,6 @@
         return;
       }
 
-      // Show only top-level (no parent)
       const topLevel = messages.filter(m => !m.parent_id);
 
       list.innerHTML = topLevel.map(msg => `
