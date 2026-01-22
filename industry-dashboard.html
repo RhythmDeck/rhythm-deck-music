@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Industry Dashboard - Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
+    .artist-box { background: linear-gradient(to bottom right, #1f2937, #111827); border-radius: 1rem; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 4px 0 0 #10b981; transition: transform 0.3s; position: relative; }
+    .artist-box::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #10b981; opacity: 0.5; }
+    .artist-box:hover { transform: translateY(-3px); }
+    .logo-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #10b981; }
+    .media-item { padding: 0.4rem; background: #374151; border-radius: 0.5rem; margin-bottom: 0.3rem; cursor: pointer; transition: background 0.3s; font-size: 0.8rem; }
+    .media-item:hover { background: #4b5563; }
+    .stat { font-size: 0.8rem; margin-bottom: 0.5rem; }
+    .bio { font-size: 0.8rem; max-height: 60px; overflow-y: auto; }
+    .instructions { font-size: 0.9rem; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+  <!-- Header -->
+  <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            Rhythm Deck
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <a href="index.html" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-emerald-400 hover:text-emerald-300 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition shadow-md text-sm sm:text-base">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 sm:h-5 w-4 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+    <h2 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-emerald-400">
+      Industry Dashboard
+    </h2>
+    <p class="text-lg text-gray-300 mb-6 text-center instructions">
+      Browse all Pro and Platinum artists with active accounts. Use the filters to search by genre, song title, or artist's name. Click on videos or MP3s to play them. Use the Contact Artist button to send a message through Rhythm Deck (no direct contact info allowed). Refresh the page to see new artists who have signed up for Pro or Platinum plans.
+    </p>
+    <!-- Filters -->
+    <div class="flex flex-col md:flex-row gap-4 mb-8">
+      <input id="searchName" type="text" placeholder="Search by artist's name" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
+      <input id="searchSong" type="text" placeholder="Search by song title" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
+      <select id="filterGenre" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
+        <option value="">Filter by genre</option>
+        <option value="hiphop">Hip Hop</option>
+        <option value="rock">Rock</option>
+        <option value="pop">Pop</option>
+        <option value="electronic">Electronic</option>
+        <!-- Add more genres as needed -->
+      </select>
+    </div>
+    <div id="artistGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Artists will be loaded here -->
+    </div>
+  </main>
+
+  <!-- Video Play Modal -->
+  <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
+    <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-2xl mx-4">
+      <video controls class="w-full h-auto rounded-lg">
+        <source src="" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <div class="text-center pt-4">
+        <button onclick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Modal -->
+  <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
+    <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
+      <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
+        Message <span id="messageArtistName"></span>
+      </h3>
+      <textarea id="messageContent" rows="5" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Type your message here... (no email, phone, or external links allowed)"></textarea>
+      <div class="text-center pt-6">
+        <button onclick="sendMessage()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full">
+          Send Message
+        </button>
+        <button onclick="closeMessageModal()" class="mt-4 text-gray-400 hover:underline">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white mt-16 p-8 text-center text-sm border-t border-gray-800">
+    <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
+  </footer>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
+
+    let currentUserId = null;
+    let messageArtistId = null;
+    let artists = [];
+
+    // Check if logged in and get user ID
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('Please log in to access the dashboard.');
+        window.location.href = 'industry-login.html';
+        return;
+      }
+      currentUserId = user.id;
+      loadArtists();
+    }
+
+    // Load all Pro and Platinum artists
+    async function loadArtists() {
+      const { data: fetchedArtists, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('plan', ['pro', 'platinum'])
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error loading artists:', error);
+        alert('Failed to load artists: ' + error.message);
+        return;
+      }
+
+      artists = fetchedArtists;
+      renderArtists(artists);
+    }
+
+    // Render artists in grid
+    function renderArtists(filteredArtists) {
+      const artistGrid = document.getElementById('artistGrid');
+      artistGrid.innerHTML = filteredArtists.map(artist => `
+        <div class="artist-box flex flex-col gap-2">
+          <div class="flex items-center gap-3">
+            <img src="${artist.logo_url || 'logo-placeholder.jpg'}" alt="${artist.name}" class="logo-img">
+            <div>
+              <h3 class="text-lg font-bold">${artist.name}</h3>
+              <p class="text-sm text-gray-400">${artist.plan.toUpperCase()} Artist</p>
+            </div>
+          </div>
+          <p class="bio text-sm text-gray-300">${artist.bio || 'No bio available'}</p>
+          <div class="stat flex gap-2">
+            <span class="stat-badge">❤️ ${artist.hearts || 0}</span>
+            <span class="stat-badge">💬 ${artist.comments || 0}</span>
+          </div>
+          <div class="media-list">
+            <h4 class="text-sm font-medium text-gray-400 mb-1">Videos/MP3s</h4>
+            ${artist.videos ? artist.videos.map(video => `
+              <div class="media-item" onclick="${video.type === 'video' ? `openVideoModal('${video.url}')` : `playMP3('${video.url}')`} ">
+                ${video.title || 'Untitled'} (${video.type})
+              </div>
+            `).join('') : '<p class="text-gray-500 text-sm">No media uploaded</p>'}
+          </div>
+          <div class="flex gap-2 mt-2">
+            <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-sm">
+              View Full Profile
+            </a>
+            <button onclick="openMessageModal('${artist.id}', '${artist.name}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-sm">
+              Contact Artist
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Filter artists
+    function filterArtists() {
+      const searchName = document.getElementById('searchName').value.toLowerCase();
+      const searchSong = document.getElementById('searchSong').value.toLowerCase();
+      const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
+
+      const filtered = artists.filter(artist => {
+        const nameMatch = artist.name.toLowerCase().includes(searchName);
+        const genreMatch = !filterGenre || artist.genre?.toLowerCase() === filterGenre;
+        const songMatch = !searchSong || artist.videos?.some(v => v.title.toLowerCase().includes(searchSong));
+        return nameMatch && genreMatch && songMatch;
+      });
+
+      renderArtists(filtered);
+    }
+
+    // Attach filter listeners
+    document.getElementById('searchName').addEventListener('input', filterArtists);
+    document.getElementById('searchSong').addEventListener('input', filterArtists);
+    document.getElementById('filterGenre').addEventListener('change', filterArtists);
+
+    // Open video modal
+    window.openVideoModal = function(url) {
+      const modal = document.getElementById('videoModal');
+      modal.querySelector('source').src = url;
+      modal.querySelector('video').load();
+      modal.classList.remove('hidden');
+    };
+
+    // Close video modal
+    window.closeVideoModal = function() {
+      const modal = document.getElementById('videoModal');
+      modal.querySelector('video').pause();
+      modal.classList.add('hidden');
+    };
+
+    // Play MP3 (simple audio play)
+    window.playMP3 = function(url) {
+      const audio = new Audio(url);
+      audio.play();
+      alert('Playing MP3: ' + url); // Optional: show notification
+    };
+
+    // Open message modal
+    window.openMessageModal = function(artistId, artistName) {
+      messageArtistId = artistId;
+      document.getElementById('messageArtistName').textContent = artistName;
+      document.getElementById('messageModal').classList.remove('hidden');
+    };
+
+    // Close message modal
+    window.closeMessageModal = function() {
+      document.getElementById('messageModal').classList.add('hidden');
+      document.getElementById('messageContent').value = '';
+    };
+
+    // Send message
+    window.sendMessage = async function() {
+      const message = document.getElementById('messageContent').value.trim();
+      if (!message) return alert('Please type a message.');
+
+      const { error } = await supabase
+        .from('collab_requests')
+        .insert({
+          artist_id: messageArtistId,
+          sender_id: currentUserId,
+          message: message,
+          created_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Send message error:', error);
+        alert('Failed to send message: ' + error.message);
+      } else {
+        alert('Message sent successfully!');
+        closeMessageModal();
+      }
+    };
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>
