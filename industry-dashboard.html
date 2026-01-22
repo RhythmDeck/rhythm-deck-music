@@ -151,16 +151,16 @@
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in to access the dashboard.');
-        window.location.href = 'login.html'; // or industry-login if still using it
+        window.location.href = 'industry-login.html';
         return;
       }
       currentUserId = user.id;
       loadArtists();
     }
 
-    // Load artists and videos separately (only from user_videos table)
+    // Load artists and media from user_videos
     async function loadArtists() {
-      // 1. Fetch Pro/Platinum artists from profiles
+      // Fetch Pro/Platinum artists from profiles
       const { data: fetchedArtists, error: artistError } = await supabase
         .from('profiles')
         .select('*')
@@ -173,35 +173,30 @@
         return;
       }
 
-      if (!fetchedArtists || fetchedArtists.length === 0) {
-        document.getElementById('artistGrid').innerHTML = '<p class="text-center text-gray-400 col-span-full py-10">No Pro or Platinum artists found yet.</p>';
-        return;
-      }
-
-      // 2. Get all artist IDs to fetch their videos
+      // Get all artist IDs
       const artistIds = fetchedArtists.map(a => a.id);
 
-      // 3. Fetch videos/MP3s ONLY from user_videos table
-      const { data: videosData, error: videoError } = await supabase
+      // Fetch media from user_videos table only
+      const { data: media, error: mediaError } = await supabase
         .from('user_videos')
-        .select('user_id, title, url, type')
+        .select('user_id, title, video_url, thumbnail_url, type')
         .in('user_id', artistIds);
 
-      if (videoError) {
-        console.error('Error loading videos/MP3s:', videoError);
+      if (mediaError) {
+        console.error('Error loading media:', mediaError);
       }
 
-      // 4. Group media by user_id
+      // Group media by user_id
       const mediaByArtist = {};
-      videosData?.forEach(item => {
+      media?.forEach(item => {
         if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
         mediaByArtist[item.user_id].push(item);
       });
 
-      // 5. Attach media to each artist
+      // Attach media to each artist
       artists = fetchedArtists.map(artist => ({
         ...artist,
-        videos: mediaByArtist[artist.id] || [] // only videos/MP3s from user_videos
+        videos: mediaByArtist[artist.id] || []  // Only from user_videos
       }));
 
       renderArtists(artists);
@@ -213,7 +208,7 @@
       artistGrid.innerHTML = filteredArtists.map(artist => {
         const media = artist.videos || [];
         const mediaList = media.map(item => `
-          <div class="media-item" onclick="${item.type === 'video' ? `openVideoModal('${item.url}')` : `playMP3('${item.url}')`}">
+          <div class="media-item" onclick="${item.type === 'video' ? `openVideoModal('${item.video_url}')` : `playMP3('${item.video_url}')`}">
             ${item.title || 'Untitled'} (${item.type.toUpperCase()})
           </div>
         `).join('');
@@ -295,7 +290,6 @@
       const audio = new Audio(url);
       audio.play().catch(e => console.error('MP3 play failed:', e));
       alert('Playing MP3... (close this to stop)');
-      audio.onended = () => alert('MP3 finished playing.');
     };
 
     // Open message modal
