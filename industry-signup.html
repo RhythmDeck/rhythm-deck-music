@@ -65,20 +65,20 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">
-              Choose Your Subdomain * 
+              Choose Your Subdomain *
               <span class="text-xs text-gray-400 block mt-1">
                 This creates your personal link, for example: <strong>your-label-productions.rhythm-deck-music.onrender.com</strong><br>
                 Use lowercase letters, numbers, and hyphens only (no spaces or special characters). Minimum 3 characters.
               </span>
             </label>
-            <input 
-              type="text" 
-              id="subdomain" 
-              required 
-              pattern="[a-z0-9-]+" 
-              minlength="3" 
-              maxlength="30" 
-              class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" 
+            <input
+              type="text"
+              id="subdomain"
+              required
+              pattern="[a-z0-9-]+"
+              minlength="3"
+              maxlength="30"
+              class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
               placeholder="your-label-productions"
             >
           </div>
@@ -210,34 +210,30 @@
         return;
       }
 
-      if (existingProfile) {
-        // Profile already exists — no need to insert again
-        alert('Account already exists! Please log in with your existing credentials.');
-        window.location.href = 'industry-login.html';
-        return;
-      }
-
-      // Step 3: Insert new profile (only if no existing profile)
+      // Step 3: Upsert (update if exists, insert if not) with correct industry data
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert({
+        .upsert({
           id: signUpData.user.id,
           name: fullName,
-          company,
-          role,
+          company: company,
+          industry_company: company,
+          role: 'industry',
+          industry_role: role,
           email,
           plan: role,
-          subdomain: subdomain
-        });
+          subdomain: subdomain,
+          open_to_collab: false
+        }, { onConflict: 'id' });
 
       if (profileError) {
-        console.error('Profile insert error details:', profileError);
+        console.error('Profile upsert error details:', profileError);
         alert('Account created, but profile setup failed.\nError: ' + (profileError.message || 'Unknown') + '\n\nCheck console for details.');
         return;
       }
 
       alert('Account created successfully!\n\nYour personal link will be: ' + subdomain + '.rhythm-deck-music.onrender.com\n\nPlease log in.');
-      window.location.href = 'industry-login.html';
+      window.location.href = 'login.html'; // Redirect to unified login
     };
   </script>
 </body>
