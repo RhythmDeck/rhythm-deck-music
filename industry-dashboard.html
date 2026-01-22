@@ -89,7 +89,6 @@
         <option value="rock">Rock</option>
         <option value="pop">Pop</option>
         <option value="electronic">Electronic</option>
-        <!-- Add more genres as needed -->
       </select>
     </div>
 
@@ -146,21 +145,19 @@
     let messageArtistId = null;
     let artists = [];
 
-    // Initialize on load
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Please log in to access the dashboard.');
-        window.location.href = 'industry-login.html';
+        window.location.href = 'login.html';
         return;
       }
       currentUserId = user.id;
       loadArtists();
     }
 
-    // Load artists and media from user_videos
     async function loadArtists() {
-      // Fetch Pro/Platinum artists from profiles
+      // Fetch Pro/Platinum artists
       const { data: fetchedArtists, error: artistError } = await supabase
         .from('profiles')
         .select('*')
@@ -173,42 +170,83 @@
         return;
       }
 
-      // Get all artist IDs
       const artistIds = fetchedArtists.map(a => a.id);
 
-      // Fetch media from user_videos table only
+      // Fetch all media from user_videos
       const { data: media, error: mediaError } = await supabase
         .from('user_videos')
-        .select('user_id, title, video_url, thumbnail_url, type')
+        .select('id, user_id, title, video_url, thumbnail_url, type')
         .in('user_id', artistIds);
 
-      if (mediaError) {
-        console.error('Error loading media:', mediaError);
+      if (mediaError) console.error('Media load error:', mediaError);
+
+      // Fetch total likes per artist
+      let totalLikesByArtist = {};
+      if (media && media.length > 0) {
+        const videoIds = media.map(v => v.id);
+        const { data: likes } = await supabase
+          .from('video_likes')
+          .select('video_id')
+          .in('video_id', videoIds);
+
+        likes?.forEach(l => {
+          const artistId = media.find(v => v.id === l.video_id)?.user_id;
+          if (artistId) {
+            totalLikesByArtist[artistId] = (totalLikesByArtist[artistId] || 0) + 1;
+          }
+        });
       }
 
-      // Group media by user_id
+      // Fetch total comments per artist
+      let totalCommentsByArtist = {};
+      if (media && media.length > 0) {
+        const videoIds = media.map(v => v.id);
+        const { data: comments } = await supabase
+          .from('video_comments')
+          .select('video_id')
+          .in('video_id', videoIds);
+
+        comments?.forEach(c => {
+          const artistId = media.find(v => v.id === c.video_id)?.user_id;
+          if (artistId) {
+            totalCommentsByArtist[artistId] = (totalCommentsByArtist[artistId] || 0) + 1;
+          }
+        });
+      }
+
+      // Fetch public URLs for media
+      const processedMedia = media?.map(item => {
+        const { data: publicUrl } = supabase.storage.from('media').getPublicUrl(item.video_url);
+        return {
+          ...item,
+          public_url: publicUrl.publicUrl
+        };
+      }) || [];
+
+      // Group media by user_id with public URLs
       const mediaByArtist = {};
-      media?.forEach(item => {
+      processedMedia.forEach(item => {
         if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
         mediaByArtist[item.user_id].push(item);
       });
 
-      // Attach media to each artist
+      // Attach everything to artists
       artists = fetchedArtists.map(artist => ({
         ...artist,
-        videos: mediaByArtist[artist.id] || []  // Only from user_videos
+        videos: mediaByArtist[artist.id] || [],
+        totalHearts: totalLikesByArtist[artist.id] || 0,
+        totalComments: totalCommentsByArtist[artist.id] || 0
       }));
 
       renderArtists(artists);
     }
 
-    // Render artists in compact grid
     function renderArtists(filteredArtists) {
       const artistGrid = document.getElementById('artistGrid');
       artistGrid.innerHTML = filteredArtists.map(artist => {
         const media = artist.videos || [];
         const mediaList = media.map(item => `
-          <div class="media-item" onclick="${item.type === 'video' ? `openVideoModal('${item.video_url}')` : `playMP3('${item.video_url}')`}">
+          <div class="media-item" onclick="${item.type === 'video' ? `openVideoModal('${item.public_url}')` : `playMP3('${item.public_url}')`}">
             ${item.title || 'Untitled'} (${item.type.toUpperCase()})
           </div>
         `).join('');
@@ -224,8 +262,8 @@
             </div>
             <p class="bio text-xs text-gray-300 mb-2">${artist.bio || 'No bio available'}</p>
             <div class="stat flex gap-2 mb-2">
-              <span class="stat-badge">❤️ ${artist.hearts || 0}</span>
-              <span class="stat-badge">💬 ${artist.comments || 0}</span>
+              <span class="stat-badge">❤️ ${artist.totalHearts}</span>
+              <span class="stat-badge">💬 ${artist.totalComments}</span>
             </div>
             <div class="media-list">
               <h4 class="text-xs font-medium text-gray-400 mb-1">Videos / MP3s</h4>
@@ -244,7 +282,6 @@
       }).join('');
     }
 
-    // Filter function
     function filterArtists() {
       const searchName = document.getElementById('searchName').value.toLowerCase();
       const searchSong = document.getElementById('searchSong').value.toLowerCase();
@@ -260,12 +297,10 @@
       renderArtists(filtered);
     }
 
-    // Attach filter events
     document.getElementById('searchName').addEventListener('input', filterArtists);
     document.getElementById('searchSong').addEventListener('input', filterArtists);
     document.getElementById('filterGenre').addEventListener('change', filterArtists);
 
-    // Open video modal
     window.openVideoModal = function(url) {
       const modal = document.getElementById('videoModal');
       const video = modal.querySelector('video');
@@ -273,10 +308,12 @@
       source.src = url;
       video.load();
       modal.classList.remove('hidden');
-      video.play().catch(e => console.error('Video play failed:', e));
+      video.play().catch(e => {
+        console.error('Video play failed:', e);
+        alert('Could not play video. Check if the URL is valid.');
+      });
     };
 
-    // Close video modal
     window.closeVideoModal = function() {
       const modal = document.getElementById('videoModal');
       const video = modal.querySelector('video');
@@ -285,27 +322,26 @@
       modal.classList.add('hidden');
     };
 
-    // Play MP3
     window.playMP3 = function(url) {
       const audio = new Audio(url);
-      audio.play().catch(e => console.error('MP3 play failed:', e));
-      alert('Playing MP3... (close this to stop)');
+      audio.play().catch(e => {
+        console.error('MP3 play failed:', e);
+        alert('Could not play MP3. Check if the URL is valid.');
+      });
+      alert('Playing MP3... (close alert to stop)');
     };
 
-    // Open message modal
     window.openMessageModal = function(artistId, artistName) {
       messageArtistId = artistId;
       document.getElementById('messageArtistName').textContent = artistName;
       document.getElementById('messageModal').classList.remove('hidden');
     };
 
-    // Close message modal
     window.closeMessageModal = function() {
       document.getElementById('messageModal').classList.add('hidden');
       document.getElementById('messageContent').value = '';
     };
 
-    // Send message
     window.sendMessage = async function() {
       const message = document.getElementById('messageContent').value.trim();
       if (!message) return alert('Please type a message.');
@@ -328,7 +364,6 @@
       }
     };
 
-    // Initialize
     init();
   </script>
 </body>
