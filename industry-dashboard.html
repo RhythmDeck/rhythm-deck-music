@@ -7,15 +7,43 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
-    .artist-box { background: linear-gradient(to bottom right, #1f2937, #111827); border-radius: 1rem; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 4px 0 0 #10b981; transition: transform 0.3s; position: relative; }
-    .artist-box::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #10b981; opacity: 0.5; }
+    .artist-box { 
+      background: linear-gradient(to bottom right, #1f2937, #111827); 
+      border-radius: 1rem; 
+      padding: 1rem; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 4px 0 0 #10b981; 
+      transition: transform 0.3s; 
+      position: relative; 
+      height: 100%; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    .artist-box::after { 
+      content: ''; 
+      position: absolute; 
+      bottom: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 2px; 
+      background: #10b981; 
+      opacity: 0.5; 
+    }
     .artist-box:hover { transform: translateY(-3px); }
     .logo-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #10b981; }
-    .media-item { padding: 0.4rem; background: #374151; border-radius: 0.5rem; margin-bottom: 0.3rem; cursor: pointer; transition: background 0.3s; font-size: 0.8rem; }
+    .media-list { max-height: 120px; overflow-y: auto; font-size: 0.85rem; }
+    .media-item { 
+      padding: 0.4rem; 
+      background: #374151; 
+      border-radius: 0.5rem; 
+      margin-bottom: 0.3rem; 
+      cursor: pointer; 
+      transition: background 0.3s; 
+    }
     .media-item:hover { background: #4b5563; }
     .stat { font-size: 0.8rem; margin-bottom: 0.5rem; }
-    .bio { font-size: 0.8rem; max-height: 60px; overflow-y: auto; }
+    .bio { font-size: 0.8rem; max-height: 50px; overflow-y: auto; }
     .instructions { font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .grid-container { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
@@ -50,6 +78,7 @@
     <p class="text-lg text-gray-300 mb-6 text-center instructions">
       Browse all Pro and Platinum artists with active accounts. Use the filters to search by genre, song title, or artist's name. Click on videos or MP3s to play them. Use the Contact Artist button to send a message through Rhythm Deck (no direct contact info allowed). Refresh the page to see new artists who have signed up for Pro or Platinum plans.
     </p>
+
     <!-- Filters -->
     <div class="flex flex-col md:flex-row gap-4 mb-8">
       <input id="searchName" type="text" placeholder="Search by artist's name" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
@@ -63,20 +92,21 @@
         <!-- Add more genres as needed -->
       </select>
     </div>
-    <div id="artistGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- Artists will be loaded here -->
+
+    <div id="artistGrid" class="grid grid-container gap-6">
+      <!-- Artists loaded here -->
     </div>
   </main>
 
   <!-- Video Play Modal -->
   <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
-    <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-2xl mx-4">
-      <video controls class="w-full h-auto rounded-lg">
+    <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-4xl mx-4">
+      <video id="videoPlayer" controls class="w-full h-auto rounded-lg">
         <source src="" type="video/mp4">
         Your browser does not support the video tag.
       </video>
       <div class="text-center pt-4">
-        <button onclick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+        <button onclick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">
           Close
         </button>
       </div>
@@ -116,7 +146,7 @@
     let messageArtistId = null;
     let artists = [];
 
-    // Check if logged in and get user ID
+    // Initialize on load
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -128,11 +158,14 @@
       loadArtists();
     }
 
-    // Load all Pro and Platinum artists
+    // Load all Pro and Platinum artists with their videos
     async function loadArtists() {
       const { data: fetchedArtists, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          videos:user_videos (title, url, type)
+        `)
         .in('plan', ['pro', 'platinum'])
         .order('name', { ascending: true });
 
@@ -146,44 +179,49 @@
       renderArtists(artists);
     }
 
-    // Render artists in grid
+    // Render artists in compact grid
     function renderArtists(filteredArtists) {
       const artistGrid = document.getElementById('artistGrid');
-      artistGrid.innerHTML = filteredArtists.map(artist => `
-        <div class="artist-box flex flex-col gap-2">
-          <div class="flex items-center gap-3">
-            <img src="${artist.logo_url || 'logo-placeholder.jpg'}" alt="${artist.name}" class="logo-img">
-            <div>
-              <h3 class="text-lg font-bold">${artist.name}</h3>
-              <p class="text-sm text-gray-400">${artist.plan.toUpperCase()} Artist</p>
+      artistGrid.innerHTML = filteredArtists.map(artist => {
+        const videos = artist.videos || [];
+        const videoList = videos.map(v => `
+          <div class="media-item" onclick="${v.type === 'video' ? `openVideoModal('${v.url}')` : `playMP3('${v.url}')`}">
+            ${v.title || 'Untitled'} (${v.type.toUpperCase()})
+          </div>
+        `).join('');
+
+        return `
+          <div class="artist-box">
+            <div class="flex items-start gap-3 mb-2">
+              <img src="${artist.logo_url || 'logo-placeholder.jpg'}" alt="${artist.name}" class="logo-img">
+              <div class="flex-1">
+                <h3 class="text-base font-bold">${artist.name}</h3>
+                <p class="text-xs text-gray-400">${artist.plan.toUpperCase()} Artist</p>
+              </div>
+            </div>
+            <p class="bio text-xs text-gray-300 mb-2">${artist.bio || 'No bio available'}</p>
+            <div class="stat flex gap-2 mb-2">
+              <span class="stat-badge">❤️ ${artist.hearts || 0}</span>
+              <span class="stat-badge">💬 ${artist.comments || 0}</span>
+            </div>
+            <div class="media-list">
+              <h4 class="text-xs font-medium text-gray-400 mb-1">Media</h4>
+              ${videoList || '<p class="text-gray-500 text-xs">No media</p>'}
+            </div>
+            <div class="flex gap-2 mt-3">
+              <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
+                View Profile
+              </a>
+              <button onclick="openMessageModal('${artist.id}', '${artist.name.replace(/'/g, "\\'")}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs">
+                Contact
+              </button>
             </div>
           </div>
-          <p class="bio text-sm text-gray-300">${artist.bio || 'No bio available'}</p>
-          <div class="stat flex gap-2">
-            <span class="stat-badge">❤️ ${artist.hearts || 0}</span>
-            <span class="stat-badge">💬 ${artist.comments || 0}</span>
-          </div>
-          <div class="media-list">
-            <h4 class="text-sm font-medium text-gray-400 mb-1">Videos/MP3s</h4>
-            ${artist.videos ? artist.videos.map(video => `
-              <div class="media-item" onclick="${video.type === 'video' ? `openVideoModal('${video.url}')` : `playMP3('${video.url}')`} ">
-                ${video.title || 'Untitled'} (${video.type})
-              </div>
-            `).join('') : '<p class="text-gray-500 text-sm">No media uploaded</p>'}
-          </div>
-          <div class="flex gap-2 mt-2">
-            <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-sm">
-              View Full Profile
-            </a>
-            <button onclick="openMessageModal('${artist.id}', '${artist.name}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-sm">
-              Contact Artist
-            </button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    // Filter artists
+    // Filter function
     function filterArtists() {
       const searchName = document.getElementById('searchName').value.toLowerCase();
       const searchSong = document.getElementById('searchSong').value.toLowerCase();
@@ -191,15 +229,15 @@
 
       const filtered = artists.filter(artist => {
         const nameMatch = artist.name.toLowerCase().includes(searchName);
-        const genreMatch = !filterGenre || artist.genre?.toLowerCase() === filterGenre;
-        const songMatch = !searchSong || artist.videos?.some(v => v.title.toLowerCase().includes(searchSong));
+        const genreMatch = !filterGenre || artist.genre?.toLowerCase().includes(filterGenre);
+        const songMatch = !searchSong || artist.videos?.some(v => v.title?.toLowerCase().includes(searchSong));
         return nameMatch && genreMatch && songMatch;
       });
 
       renderArtists(filtered);
     }
 
-    // Attach filter listeners
+    // Attach filter events
     document.getElementById('searchName').addEventListener('input', filterArtists);
     document.getElementById('searchSong').addEventListener('input', filterArtists);
     document.getElementById('filterGenre').addEventListener('change', filterArtists);
@@ -207,23 +245,30 @@
     // Open video modal
     window.openVideoModal = function(url) {
       const modal = document.getElementById('videoModal');
-      modal.querySelector('source').src = url;
-      modal.querySelector('video').load();
+      const video = modal.querySelector('video');
+      const source = video.querySelector('source');
+      source.src = url;
+      video.load();
       modal.classList.remove('hidden');
+      video.play();
     };
 
     // Close video modal
     window.closeVideoModal = function() {
       const modal = document.getElementById('videoModal');
-      modal.querySelector('video').pause();
+      const video = modal.querySelector('video');
+      video.pause();
+      video.currentTime = 0;
       modal.classList.add('hidden');
     };
 
-    // Play MP3 (simple audio play)
+    // Play MP3
     window.playMP3 = function(url) {
       const audio = new Audio(url);
       audio.play();
-      alert('Playing MP3: ' + url); // Optional: show notification
+
+      alert('Playing MP3... (close this alert to stop)');
+      audio.onended = () => alert('MP3 finished.');
     };
 
     // Open message modal
