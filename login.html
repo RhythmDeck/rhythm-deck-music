@@ -8,7 +8,7 @@
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- ✅ CORRECT Supabase JS v2 UMD BUILD -->
+  <!-- ✅ Supabase JS v2 UMD (GLOBAL = window.Supabase) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
   <style>
@@ -72,28 +72,39 @@
 
       <form id="loginForm" novalidate>
         <div class="input-group">
-          <input type="email" id="loginEmail" placeholder="Email" required
+          <input
+            type="email"
+            id="loginEmail"
+            placeholder="Email"
+            required
             class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl text-lg">
         </div>
 
         <div class="input-group">
-          <input type="password" id="loginPassword" placeholder="Password" required
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="Password"
+            required
             class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl text-lg pr-14">
           <span class="eye" id="toggleEye">Show</span>
         </div>
 
         <p id="errorMessage" class="text-red-400 text-center mb-4 hidden"></p>
 
-        <button type="submit"
+        <button
+          type="submit"
           class="w-full py-5 bg-green-600 hover:bg-green-700 text-white font-black text-xl rounded-xl">
           LOGIN
         </button>
       </form>
+
     </div>
   </div>
 
   <script>
-    const supabase = window.supabase.createClient(
+    // ✅ CORRECT GLOBAL
+    const supabase = window.Supabase.createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
@@ -101,21 +112,26 @@
     const passwordInput = document.getElementById("loginPassword");
     const toggleEye = document.getElementById("toggleEye");
 
-    toggleEye.onclick = () => {
-      passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-      toggleEye.textContent = passwordInput.type === "password" ? "Show" : "Hide";
-    };
+    toggleEye.addEventListener("click", () => {
+      passwordInput.type =
+        passwordInput.type === "password" ? "text" : "password";
+      toggleEye.textContent =
+        passwordInput.type === "password" ? "Show" : "Hide";
+    });
 
-    document.getElementById("loginForm").onsubmit = async (e) => {
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const email = loginEmail.value.trim();
-      const password = loginPassword.value;
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
       const errorMessage = document.getElementById("errorMessage");
 
       errorMessage.classList.add("hidden");
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
       if (error) {
         errorMessage.textContent = error.message;
@@ -123,10 +139,10 @@
         return;
       }
 
+      // ✅ SUCCESS
       window.location.href = "platinum-pro-admin.html";
-    };
+    });
   </script>
 
 </body>
 </html>
-
