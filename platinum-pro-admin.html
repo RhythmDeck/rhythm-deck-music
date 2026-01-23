@@ -47,7 +47,7 @@
   </div>
   <nav class="flex flex-wrap items-center justify-center gap-4 text-lg">
     <a href="index.html" class="hover:text-emerald-400 transition">Home</a>
-    <button onclick="openPlatinumVision()" class="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
+    <button onClick="openPlatinumVision()" class="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
       Rhythm Vision Platinum
     </button>
     <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold transition">
@@ -207,7 +207,157 @@
     </div>
   </section>
 
-  <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platinum Pro Admin | Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.livepeer.studio/player"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .video-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
+    .video-card:hover .video-overlay{opacity:1}
+    #videoModal{position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
+    #videoModal.show{opacity:1;visibility:visible}
+    #modalVideo{max-width:90%;max-height:90%;border:8px solid #10b981;border-radius:16px}
+    #closeModal{position:absolute;top:20px;right:20px;background:white;color:black;width:60px;height:60px;border-radius:50%;font-size:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;font-weight:bold}
+    .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem;position:relative;padding-right:2.5rem;}
+    .comment-name{font-weight:700;color:#10b981}
+    .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
+    .like-display{display:flex;align-items:center;gap:8px;font-weight:bold;color:#ef4444;}
+    .like-display svg{width:28px;height:28px;stroke:#ef4444;fill:none}
+    #badge-container {position: absolute;top: 16px;right: 16px;z-index: 30;}
+    #badge-container img {width: 144px;height: 144px;filter: drop-shadow(0 0 30px rgba(255,215,0,0.8));transition: all 0.4s ease;}
+    #badge-container img:hover {transform: scale(1.2) rotate(10deg);}
+    .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+    .social-btn {transition:all .3s;transform:scale(1);}
+    .social-btn:hover {transform:scale(1.05);}
+    #socialShareModal {position:fixed;inset-0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;visibility:hidden;transition:all .3s;}
+    #socialShareModal.show {opacity:1;visibility:visible;}
+    .delete-comment-btn {position: absolute;top: 4px;right: 6px;background: #ef4444;color: white;border: none;border-radius: 50%;width: 22px;height: 22px;font-size: 14px;line-height: 20px;text-align: center;cursor: pointer;font-weight: bold;box-shadow: 0 1px 3px rgba(0,0,0,0.3);}
+    .delete-comment-btn:hover {background: #dc2626;}
+    .ai-btn {transition: all 0.2s;}
+    .ai-btn:hover {transform: scale(1.05);}
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+<header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg gap-4">
+  <div class="flex items-center space-x-3">
+    <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
+    <div>
+      <h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+      <p class="text-sm text-gray-300">Platinum Pro Plan</p>
+    </div>
+  </div>
+  <nav class="flex flex-wrap items-center justify-center gap-4 text-lg">
+    <a href="index.html" class="hover:text-emerald-400 transition">Home</a>
+    <button onClick="openPlatinumVision()" class="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
+      Rhythm Vision Platinum
+    </button>
+    <a href="collaborate.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold transition">
+      Collaboration Network
+    </a>
+    <a href="radio-stations.html" class="bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
+      Radio Stations
+    </a>
+    <a href="merch-admin.html" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white px-6 py-2 rounded-lg font-bold transition shadow-lg">
+      Merch
+    </a>
+    <a href="message-dashboard.html" id="messagesBtn" class="relative bg-emerald-600 hover:bg-emerald-700 px-6 py-2 rounded-lg font-black flex items-center gap-2 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-16"/>
+      </svg>
+      Messages
+      <span id="messageBadge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center animate-pulse hidden font-bold">
+        0
+      </span>
+    </a>
+    <button onClick="logout()" class="bg-white text-black px-6 py-2 rounded-lg hover:bg-gray-200 font-bold transition">
+      Logout
+    </button>
+  </nav>
+</header>
+<main class="flex-grow">
+  <!-- Your existing sections (banner, live, uploads, etc.) remain unchanged -->
+  <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
+    <!-- ... banner code unchanged ... -->
+  </section>
+  <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-br from-purple-800 to-pink-800 rounded-xl shadow-2xl text-white">
+    <h3 class="text-4xl font-black mb-6 text-center">Share Your Content to Social Media</h3>
+    <p class="text-center mb-8 opacity-90 text-lg">Connect your accounts and post videos, updates, and music with one click</p>
+    <div class="grid grid-cols-3 md:grid-cols-6 gap-6">
+      <!-- Your existing platform checkboxes remain unchanged -->
+      <!-- ... all labels with checkboxes ... -->
+    </div>
+    <div class="text-center mt-10">
+      <button id="openSocialShareBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-5 px-16 rounded-xl text-2xl shadow-2xl transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+        Send to Social Media
+      </button>
+    </div>
+    <div id="socialShareModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[9999] opacity-0 visibility-hidden transition-all duration-300">
+      <div class="bg-gray-900 rounded-2xl p-10 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto relative border-4 border-emerald-600 shadow-2xl">
+        <button id="closeSocialModal" class="absolute top-6 right-8 text-white text-6xl font-bold hover:text-emerald-400 transition">×</button>
+        <h2 class="text-4xl font-black mb-6 text-center text-emerald-400">Share Your Content</h2>
+
+        <!-- NEW: AI-Assisted Comment Section -->
+        <div class="mb-10 bg-gray-800 p-8 rounded-2xl border border-emerald-700 shadow-inner">
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4 text-center">Write Your Base Message</h3>
+          <p class="text-center text-gray-300 mb-6">Type one main message below. Then choose an AI to rewrite it perfectly for each platform (e.g. longer for Facebook, shorter for Instagram).</p>
+          <textarea id="baseComment" rows="5" placeholder="Write your main message here (will be adapted by AI for each platform)..." 
+                    class="w-full p-4 bg-gray-900 border border-emerald-600 rounded-xl text-white placeholder-gray-500 focus:border-emerald-400 focus:outline-none resize-none"></textarea>
+
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button onclick="useAI('grok')" class="ai-btn bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 shadow-lg transform hover:scale-105">
+              <span>Grok</span>
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+            </button>
+            <button onclick="useAI('gemini')" class="ai-btn bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 shadow-lg transform hover:scale-105">
+              <span>Gemini</span>
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+            </button>
+            <button onclick="useAI('chatgpt')" class="ai-btn bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 shadow-lg transform hover:scale-105">
+              <span>ChatGPT</span>
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+            </button>
+          </div>
+
+          <div id="aiInstructions" class="mt-6 text-center text-gray-300 text-sm hidden">
+            <p class="mb-2">✅ Comment + platforms copied to clipboard!</p>
+            <p>Paste it into your chosen AI and say:</p>
+            <p class="font-medium bg-gray-800 p-3 rounded-lg mt-2">"Rewrite this comment for each social media platform below, making it perfect for their style and length: [pasted content]"</p>
+          </div>
+        </div>
+
+        <!-- Existing platforms list, media upload, etc. -->
+        <div id="selectedPlatformsList" class="flex flex-wrap gap-4 mb-10 justify-center"></div>
+        <div id="perPlatformComments" class="space-y-10 mb-12"></div>
+        <div class="mb-10">
+          <label class="block text-2xl font-bold mb-6 text-center text-white">Attach Media (optional - shared to all selected platforms)</label>
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <label class="block text-xl mb-3 text-gray-300">Video File (.mp4)</label>
+              <input type="file" id="socialVideoInput" accept="video/mp4" class="w-full p-5 bg-gray-800 border-2 border-gray-700 rounded-xl text-white file:bg-emerald-600 file:text-white file:border-0 file:py-4 file:px-8 file:rounded-lg file:text-lg cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-xl mb-3 text-gray-300">Audio File (.mp3)</label>
+              <input type="file" id="socialAudioInput" accept="audio/mp3" class="w-full p-5 bg-gray-800 border-2 border-gray-700 rounded-xl text-white file:bg-emerald-600 file:text-white file:border-0 file:py-4 file:px-8 file:rounded-lg file:text-lg cursor-pointer">
+            </div>
+          </div>
+          <p class="text-center text-base text-gray-400 mt-6 italic">Attach video, audio, or both. The same media will be posted to every platform you selected.</p>
+        </div>
+        <button id="sendSocialPostBtn" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-6 rounded-xl text-3xl shadow-2xl transition transform hover:scale-105">
+          Send Now
+        </button>
+      </div>
+    </div>
+  </section>
+ <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
     <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
     <div class="grid lg:grid-cols-3 gap-8 mb-8">
       <div class="lg:col-span-2">
@@ -754,6 +904,28 @@
       alert("Sending to social media is not active yet.\nThis feature will be enabled once you go live.");
     });
   }
+  
+  // New AI copy helper
+function useAI(aiName) {
+  const base = document.getElementById('baseComment').value.trim();
+  if (!base) return alert('Please write a base comment first!');
+
+  const checked = Array.from(document.querySelectorAll('input[name="social"]:checked'))
+    .map(box => box.value.charAt(0).toUpperCase() + box.value.slice(1));
+
+  if (checked.length === 0) return alert('Please select at least one platform!');
+
+  const platformsList = checked.join(', ');
+  const toCopy = `Base comment: ${base}\n\nPlatforms to post to: ${platformsList}\n\nPlease rewrite this comment separately for each platform above, making it perfect for their style, length, tone, and character limits (e.g. shorter for Instagram/TikTok, longer/more detailed for Facebook/Reddit). Output each rewritten version clearly labeled by platform.`;
+
+  navigator.clipboard.writeText(toCopy).then(() => {
+    document.getElementById('aiInstructions').classList.remove('hidden');
+    alert(`Copied to clipboard! Now paste into ${aiName} and ask it to rewrite for each platform.`);
+  }).catch(err => {
+    console.error('Clipboard copy failed:', err);
+    alert('Could not copy — please copy manually.');
+  });
+}
 
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await window.supabase.auth.getUser();
