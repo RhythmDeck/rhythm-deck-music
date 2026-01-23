@@ -65,20 +65,53 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'YOUR_ANON_KEY'
+  'YOUR_REAL_ANON_KEY'
 );
 
-/* AUTH */
-const { data: { user } } = await supabase.auth.getUser();
-if (!user) {
-  alert('You must be logged in');
-  throw new Error('Not authenticated');
-}
-
+let user = null;
 let messages = [];
 let activeThread = null;
 
-/* LOAD ALL USER MESSAGES */
+/* ---------------- AUTH BOOTSTRAP ---------------- */
+
+async function initAuth() {
+  // 1️⃣ Try restoring existing session
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (session?.user) {
+    user = session.user;
+    startApp();
+    return;
+  }
+
+  // 2️⃣ Wait for auth event (page refresh-safe)
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+      user = session.user;
+      startApp();
+    } else {
+      alert('You must be logged in');
+      window.location.href = '/login.html'; // or wherever
+    }
+  });
+}
+
+/* ---------------- START APP ---------------- */
+
+function startApp() {
+  loadMessages();
+
+  supabase.channel('collab-live')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'collab_requests' },
+      loadMessages
+    )
+    .subscribe();
+}
+
+/* ---------------- LOAD MESSAGES ---------------- */
+
 async function loadMessages() {
   const { data, error } = await supabase
     .from('collab_requests')
@@ -103,30 +136,28 @@ async function loadMessages() {
   messages = data || [];
   renderConversationList();
 
-  if (activeThread) {
-    openThread(activeThread, false);
-  }
+  if (activeThread) openThread(activeThread, false);
 }
 
-/* LEFT CONVERSATION LIST */
+/* ---------------- CONVERSATION LIST ---------------- */
+
 function renderConversationList() {
   const list = document.getElementById('conversationList');
-
   const roots = messages.filter(m => m.parent_id === null);
 
   list.innerHTML = roots.map(root => {
-    const unreadCount = messages.filter(m =>
+    const unread = messages.filter(m =>
       m.parent_id === root.id &&
       m.receiver_id === user.id &&
       m.read_at === null
     ).length;
 
     return `
-      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unreadCount ? 'unread' : ''}"
+      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unread ? 'unread' : ''}"
            data-id="${root.id}">
         <div class="flex justify-between items-center">
           <span>${root.sender_name}</span>
-          ${unreadCount ? `<span class="unread-badge">${unreadCount}</span>` : ''}
+          ${unread ? `<span class="unread-badge">${unread}</span>` : ''}
         </div>
         <p class="msg-preview text-gray-300">${root.message}</p>
       </div>
@@ -138,7 +169,8 @@ function renderConversationList() {
   });
 }
 
-/* OPEN THREAD */
+/* ---------------- THREAD VIEW ---------------- */
+
 async function openThread(rootId, markRead = true) {
   activeThread = rootId;
 
@@ -158,7 +190,7 @@ async function openThread(rootId, markRead = true) {
   const root = messages.find(m => m.id === rootId);
   const replies = messages
     .filter(m => m.parent_id === rootId)
-    .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
   document.getElementById('messageView').innerHTML = `
     <div class="flex-1 overflow-y-auto space-y-6">
@@ -191,7 +223,8 @@ async function openThread(rootId, markRead = true) {
   document.getElementById('sendBtn').onclick = sendReply;
 }
 
-/* SEND REPLY */
+/* ---------------- SEND REPLY ---------------- */
+
 async function sendReply() {
   const input = document.getElementById('replyInput');
   const text = input.value.trim();
@@ -213,16 +246,11 @@ async function sendReply() {
   loadMessages();
 }
 
-/* REALTIME REFRESH */
-supabase.channel('collab-live')
-  .on('postgres_changes',
-    { event: '*', schema: 'public', table: 'collab_requests' },
-    loadMessages
-  )
-  .subscribe();
+/* ---------------- BOOT ---------------- */
 
-loadMessages();
+initAuth();
 </script>
+
 </body>
 </html>
 
