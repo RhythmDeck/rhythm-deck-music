@@ -4,14 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Collab Messages | Rhythm Deck</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
 .msg-item:hover { background: rgba(255,255,255,0.08); }
-.msg-item.unread { font-weight: bold; border-left: 4px solid #10b981; background: rgba(16,185,129,0.05); }
-.msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
-.selected { background: rgba(255,255,255,0.1) !important; }
-.reply-indent { margin-left: 2rem; border-left: 3px solid #10b981; padding-left: 1rem; }
+.msg-item.unread {
+  font-weight: bold;
+  border-left: 4px solid #10b981;
+  background: rgba(16,185,129,0.05);
+}
+.msg-preview {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+.selected { background: rgba(255,255,255,0.12) !important; }
+.reply-indent {
+  margin-left: 2rem;
+  border-left: 3px solid #10b981;
+  padding-left: 1rem;
+}
 .unread-badge {
   background:#10b981;
   color:#000;
@@ -24,8 +38,8 @@
 </head>
 
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-<div class="max-w-7xl mx-auto p-6">
 
+<div class="max-w-7xl mx-auto p-6">
 <h1 class="text-5xl font-black mb-8 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
 Collab Messages
 </h1>
@@ -51,23 +65,20 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  'YOUR_ANON_KEY'
 );
 
 /* AUTH */
-const {
-  data: { user }
-} = await supabase.auth.getUser();
-
+const { data: { user } } = await supabase.auth.getUser();
 if (!user) {
-  alert("You must be logged in");
-  throw new Error("Not authenticated");
+  alert('You must be logged in');
+  throw new Error('Not authenticated');
 }
 
 let messages = [];
 let activeThread = null;
 
-/* LOAD */
+/* LOAD ALL USER MESSAGES */
 async function loadMessages() {
   const { data, error } = await supabase
     .from('collab_requests')
@@ -92,30 +103,32 @@ async function loadMessages() {
   messages = data || [];
   renderConversationList();
 
-  if (activeThread) openThread(activeThread, false);
+  if (activeThread) {
+    openThread(activeThread, false);
+  }
 }
 
-/* LEFT LIST */
+/* LEFT CONVERSATION LIST */
 function renderConversationList() {
-  const roots = messages.filter(m => !m.parent_id);
   const list = document.getElementById('conversationList');
 
-  list.innerHTML = roots.map(r => {
-    const unread = messages.filter(
-      m =>
-        m.parent_id === r.id &&
-        m.receiver_id === user.id &&
-        m.read_at === null
+  const roots = messages.filter(m => m.parent_id === null);
+
+  list.innerHTML = roots.map(root => {
+    const unreadCount = messages.filter(m =>
+      m.parent_id === root.id &&
+      m.receiver_id === user.id &&
+      m.read_at === null
     ).length;
 
     return `
-      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unread ? 'unread' : ''}"
-           data-id="${r.id}">
-        <div class="flex justify-between">
-          <span>${r.sender_name}</span>
-          ${unread ? `<span class="unread-badge">${unread}</span>` : ''}
+      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unreadCount ? 'unread' : ''}"
+           data-id="${root.id}">
+        <div class="flex justify-between items-center">
+          <span>${root.sender_name}</span>
+          ${unreadCount ? `<span class="unread-badge">${unreadCount}</span>` : ''}
         </div>
-        <p class="msg-preview text-gray-300">${r.message}</p>
+        <p class="msg-preview text-gray-300">${root.message}</p>
       </div>
     `;
   }).join('');
@@ -125,9 +138,13 @@ function renderConversationList() {
   });
 }
 
-/* THREAD */
+/* OPEN THREAD */
 async function openThread(rootId, markRead = true) {
   activeThread = rootId;
+
+  document.querySelectorAll('.msg-item').forEach(el =>
+    el.classList.toggle('selected', el.dataset.id === rootId)
+  );
 
   if (markRead) {
     await supabase
@@ -163,43 +180,50 @@ async function openThread(rootId, markRead = true) {
         class="w-full p-4 rounded-lg bg-white/10 text-white resize-none"
         rows="3"
         placeholder="Write a reply..."></textarea>
-      <button onclick="sendReply()"
-        class="mt-4 bg-emerald-600 px-8 py-3 rounded-xl font-bold">
+
+      <button id="sendBtn"
+        class="mt-4 bg-emerald-600 hover:bg-emerald-500 px-8 py-3 rounded-xl font-bold">
         Send Reply
       </button>
     </div>
   `;
+
+  document.getElementById('sendBtn').onclick = sendReply;
 }
 
-/* SEND */
-window.sendReply = async () => {
+/* SEND REPLY */
+async function sendReply() {
   const input = document.getElementById('replyInput');
-  const message = input.value.trim();
-  if (!message) return;
+  const text = input.value.trim();
+  if (!text) return;
 
   const root = messages.find(m => m.id === activeThread);
-  const otherUserId =
+  const receiverId =
     root.sender_id === user.id ? root.receiver_id : root.sender_id;
 
   await supabase.from('collab_requests').insert({
     parent_id: activeThread,
     sender_id: user.id,
-    receiver_id: otherUserId,
+    receiver_id: receiverId,
     sender_name: 'You',
-    message
+    message: text
   });
 
   input.value = '';
   loadMessages();
-};
+}
 
-/* REALTIME */
+/* REALTIME REFRESH */
 supabase.channel('collab-live')
-  .on('postgres_changes',{event:'*',schema:'public',table:'collab_requests'},loadMessages)
+  .on('postgres_changes',
+    { event: '*', schema: 'public', table: 'collab_requests' },
+    loadMessages
+  )
   .subscribe();
 
 loadMessages();
 </script>
 </body>
 </html>
+
 
