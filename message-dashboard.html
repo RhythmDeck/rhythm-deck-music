@@ -8,23 +8,10 @@
 
 <style>
 .msg-item:hover { background: rgba(255,255,255,0.08); }
-.msg-item.unread {
-  font-weight: bold;
-  border-left: 4px solid #10b981;
-  background: rgba(16,185,129,0.05);
-}
-.msg-preview {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-}
-.selected { background: rgba(255,255,255,0.12) !important; }
-.reply-indent {
-  margin-left: 2rem;
-  border-left: 3px solid #10b981;
-  padding-left: 1rem;
-}
+.msg-item.unread { font-weight: bold; border-left: 4px solid #10b981; background: rgba(16,185,129,0.05); }
+.msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+.selected { background: rgba(255,255,255,0.1) !important; }
+.reply-indent { margin-left: 2rem; border-left: 3px solid #10b981; padding-left: 1rem; }
 .unread-badge {
   background:#10b981;
   color:#000;
@@ -37,21 +24,23 @@
 </head>
 
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-
 <div class="max-w-7xl mx-auto p-6">
+
 <h1 class="text-5xl font-black mb-8 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
 Collab Messages
 </h1>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
 
+<!-- LEFT -->
 <div class="bg-black/40 rounded-2xl flex flex-col">
-  <div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
-  <div id="conversationList" class="flex-1 overflow-y-auto"></div>
+<div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
+<div id="conversationList" class="flex-1 overflow-y-auto"></div>
 </div>
 
+<!-- RIGHT -->
 <div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 flex flex-col">
-  <p class="text-gray-400 text-center mt-20">Select a conversation</p>
+<p class="text-gray-400 text-center mt-20">Select a conversation</p>
 </div>
 
 </div>
@@ -70,15 +59,10 @@ let activeThread = null;
 
 /* LOAD */
 async function loadMessages() {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('collab_requests')
     .select('*')
     .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error(error);
-    return;
-  }
 
   messages = data || [];
   renderConversationList();
@@ -86,24 +70,24 @@ async function loadMessages() {
   if (activeThread) openThread(activeThread, false);
 }
 
-/* LIST */
+/* LEFT LIST */
 function renderConversationList() {
+  const roots = messages.filter(m => !m.parent_id);
   const list = document.getElementById('conversationList');
-  const roots = messages.filter(m => m.parent_id === null);
 
-  list.innerHTML = roots.map(root => {
-    const unread = messages.filter(m =>
-      m.parent_id === root.id && m.read_at === null
+  list.innerHTML = roots.map(r => {
+    const unread = messages.filter(
+      m => m.parent_id === r.id && m.status !== 'read'
     ).length;
 
     return `
       <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unread ? 'unread' : ''}"
-           data-id="${root.id}">
+           data-id="${r.id}">
         <div class="flex justify-between">
-          <span>${root.sender_name}</span>
+          <span>${r.sender_name}</span>
           ${unread ? `<span class="unread-badge">${unread}</span>` : ''}
         </div>
-        <p class="msg-preview text-gray-300">${root.message}</p>
+        <p class="msg-preview text-gray-300">${r.message}</p>
       </div>
     `;
   }).join('');
@@ -120,15 +104,24 @@ async function openThread(rootId, markRead = true) {
   if (markRead) {
     await supabase
       .from('collab_requests')
-      .update({ read_at: new Date().toISOString() })
-      .eq('parent_id', rootId)
-      .is('read_at', null);
+      .update({ status: 'read' })
+      .eq('parent_id', rootId);
   }
 
   const root = messages.find(m => m.id === rootId);
   const replies = messages
     .filter(m => m.parent_id === rootId)
     .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+
+  let grouped = [];
+  replies.forEach(m => {
+    const last = grouped[grouped.length - 1];
+    if (last && last.sender === m.sender_name) {
+      last.items.push(m);
+    } else {
+      grouped.push({ sender: m.sender_name, items: [m] });
+    }
+  });
 
   document.getElementById('messageView').innerHTML = `
     <div class="flex-1 overflow-y-auto space-y-6">
@@ -137,10 +130,10 @@ async function openThread(rootId, markRead = true) {
         <p>${root.message}</p>
       </div>
 
-      ${replies.map(r => `
+      ${grouped.map(g => `
         <div class="reply-indent">
-          <p class="font-semibold">${r.sender_name}</p>
-          <p>${r.message}</p>
+          <p class="font-semibold">${g.sender}</p>
+          ${g.items.map(i => `<p>${i.message}</p>`).join('')}
         </div>
       `).join('')}
     </div>
@@ -150,31 +143,31 @@ async function openThread(rootId, markRead = true) {
         class="w-full p-4 rounded-lg bg-white/10 text-white resize-none"
         rows="3"
         placeholder="Write a reply..."></textarea>
-      <button id="sendBtn"
+      <button onclick="sendReply()"
         class="mt-4 bg-emerald-600 px-8 py-3 rounded-xl font-bold">
         Send Reply
       </button>
     </div>
   `;
-
-  document.getElementById('sendBtn').onclick = sendReply;
 }
 
 /* SEND */
-async function sendReply() {
+window.sendReply = async () => {
   const input = document.getElementById('replyInput');
-  const text = input.value.trim();
-  if (!text) return;
+  const message = input.value.trim();
+  if (!message) return;
 
   await supabase.from('collab_requests').insert({
     parent_id: activeThread,
     sender_name: 'You',
-    message: text
+    message,
+    status: 'unread',
+    created_at: new Date().toISOString()
   });
 
   input.value = '';
   loadMessages();
-}
+};
 
 /* REALTIME */
 supabase.channel('collab-live')
