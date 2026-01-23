@@ -164,38 +164,45 @@
         <button id="closeSocialModal" class="absolute top-6 right-8 text-white text-6xl font-bold hover:text-emerald-400 transition">×</button>
         <h2 class="text-4xl font-black mb-10 text-center text-emerald-400">Share Your Content</h2>
 
-        <!-- AI-Assisted Comment Section -->
-        <div class="mb-10 bg-gray-800 p-8 rounded-2xl border border-emerald-700 shadow-inner">
-          <h3 class="text-2xl font-bold text-emerald-400 mb-4 text-center">AI-Powered Comment Helper</h3>
+        <!-- === NEW AI HELPER SECTION ADDED HERE === -->
+        <div class="mb-12 bg-gray-800 p-8 rounded-2xl border border-emerald-700 shadow-inner">
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4 text-center">AI Comment Rewriter Helper</h3>
           <p class="text-center text-gray-300 mb-6">
-            Write one main message below. Then select your platforms. Click an AI button to copy the comment + platforms list to your clipboard. Paste it into Grok, Gemini, or ChatGPT and ask it to rewrite for each platform (e.g., shorter for Instagram, longer for Facebook).
+            Write your main message once. Select platforms below. Click an AI button → your message + platforms + rewrite + hashtags request will be copied. Paste into the AI.
           </p>
-          <textarea id="baseComment" rows="5" placeholder="Write your main message here (will be adapted by AI for each platform)..." 
-                    class="w-full p-4 bg-gray-900 border border-emerald-600 rounded-xl text-white placeholder-gray-500 focus:border-emerald-400 focus:outline-none resize-none"></textarea>
+          <textarea id="baseComment" rows="5" 
+                    class="w-full p-5 bg-gray-900 border-2 border-emerald-600 rounded-xl text-white placeholder-gray-400 focus:border-emerald-400 focus:outline-none resize-none font-medium text-lg"
+                    placeholder="Write your main message here (one version) — AI will adapt it for each platform with hashtags..."></textarea>
 
-          <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <button onclick="useAI('Grok')" class="ai-btn bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 shadow-lg transform hover:scale-105">
+          <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <button onclick="useAI('Grok')" 
+                    class="ai-btn bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
               Use Grok
             </button>
-            <button onclick="useAI('Gemini')" class="ai-btn bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 shadow-lg transform hover:scale-105">
+            <button onclick="useAI('Gemini')" 
+                    class="ai-btn bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
               Use Gemini
             </button>
-            <button onclick="useAI('ChatGPT')" class="ai-btn bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 shadow-lg transform hover:scale-105">
+            <button onclick="useAI('ChatGPT')" 
+                    class="ai-btn bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
               Use ChatGPT
             </button>
           </div>
 
-          <div id="aiInstructions" class="mt-6 text-center text-gray-300 text-sm hidden">
-            <p class="mb-2 font-bold text-lg text-emerald-400">✅ Copied to clipboard!</p>
-            <p>Paste into your chosen AI and say something like:</p>
-            <div class="bg-gray-800 p-4 rounded-lg mt-3 font-medium">
-              "Here is my base comment and the platforms I want to post to. Rewrite the comment separately for each platform, making it perfect for their style, tone, length, and character limits:<br><br>[pasted content]"
-            </div>
-            <p class="mt-4">Then copy each rewritten version and paste into the matching platform below.</p>
+          <div id="aiInstructions" class="mt-8 text-center text-gray-300 text-base hidden leading-relaxed">
+            <p class="mb-4 font-bold text-xl text-emerald-400">Copied to clipboard successfully!</p>
+            <p class="mb-3">Next steps:</p>
+            <ol class="list-decimal list-inside space-y-2 mb-6 text-left max-w-2xl mx-auto">
+              <li>Open your chosen AI (Grok, Gemini or ChatGPT)</li>
+              <li>Paste the copied text into the chat</li>
+              <li>Send it (you can add: "Make them more engaging" if you want)</li>
+              <li>Copy each rewritten comment + hashtags from the AI response</li>
+              <li>Paste them into the correct platform textarea below</li>
+            </ol>
           </div>
         </div>
+        <!-- === END OF NEW AI SECTION === -->
 
-        <!-- Existing content below remains unchanged -->
         <div id="selectedPlatformsList" class="flex flex-wrap gap-4 mb-10 justify-center"></div>
         <div id="perPlatformComments" class="space-y-10 mb-12"></div>
         <div class="mb-10">
@@ -218,12 +225,148 @@
       </div>
     </div>
   </section>
-  <!-- All other sections (live, uploads, danger zone) remain exactly as in your original code -->
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
-    <!-- ... live stream section unchanged ... -->
+    <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
+    <div class="grid lg:grid-cols-3 gap-8 mb-8">
+      <div class="lg:col-span-2">
+        <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
+          <div id="offlineMessage" class="text-center">You are not live right now</div>
+          <div id="livepeer-player" class="hidden w-full h-full"></div>
+          <div id="liveIndicator" class="live-badge hidden">LIVE NOW</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-xl p-6 flex flex-col h-full">
+        <h4 class="font-black text-xl text-purple-700 mb-4">Live Chat</h4>
+        <div id="liveChatMessages" class="flex-1 overflow-y-auto bg-gray-50 p-4 rounded-lg min-h-0 max-h-96 space-y-3">
+          <p class="text-gray-500 text-center italic">Chat appears when you go live</p>
+        </div>
+        <div class="mt-4">
+          <p class="text-sm text-gray-600 mb-2">Start a live stream to enable chat</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-8 text-center flex flex-col sm:flex-row gap-6 justify-center items-center">
+      <button id="goLiveBtn" class="bg-red-600 hover:bg-red-700 text-white font-black text-xl px-10 py-5 rounded-xl shadow-lg transform hover:scale-105 transition">
+        Go Live Now
+      </button>
+      <button id="endLiveBtn" class="ml-4 bg-gray-600 hover:bg-gray-700 text-white font-black text-xl px-10 py-5 rounded-xl shadow-lg hidden">
+        End Stream
+      </button>
+      <div class="w-full sm:w-auto">
+        <div class="bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-xl shadow-xl border-4 border-emerald-400 text-center">
+          <h4 class="text-2xl font-black text-emerald-800 mb-3">Enable Fan Tips</h4>
+          <p class="text-sm text-gray-700 mb-4">Let fans support you directly during streams and on your profile</p>
+          <div id="stripeStatus" class="mb-4 text-lg font-bold"></div>
+          <button id="connectStripeBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-lg shadow-lg text-xl transition transform hover:scale-105">
+            Enable Tip Bucket – Connect Stripe
+          </button>
+          <p class="text-xs text-gray-500 mt-3">Test mode only • Powered by Stripe</p>
+        </div>
+      </div>
+    </div>
   </section>
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
-    <!-- ... upload sections, profile fields, danger zone unchanged ... -->
+    <div class="grid md:grid-cols-4 gap-8">
+      <div class="md:col-span-1 space-y-6">
+        <div class="bg-gray-50 p-5 rounded-xl shadow">
+          <h3 class="text-xl font-bold text-gray-800 mb-3">Artist / Band Name</h3>
+          <input type="text" id="artistNameInput" class="w-full border border-gray-300 p-3 rounded-lg mb-3" placeholder="Enter your name">
+          <button onClick="saveArtistName()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold">Save Name</button>
+        </div>
+        <div class="bg-gray-50 p-5 rounded-xl shadow">
+          <label class="block text-sm font-bold text-gray-700 mb-2">Bio</label>
+          <textarea id="bioInput" placeholder="Tell your story..." class="w-full border border-gray-300 p-3 rounded-lg h-40 resize-none"></textarea>
+          <button onClick="saveBio()" class="mt-3 w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold">Save Bio</button>
+        </div>
+        <div class="bg-green-50 p-5 rounded-xl shadow text-center">
+          <p class="text-sm text-gray-600">Your Public Page:</p>
+          <p id="publicUrl" class="font-bold text-green-700 text-lg break-all mt-2">Loading...</p>
+          <a id="publicLink" target="_blank" class="block mt-2 text-sm text-blue-600 underline">Open in new tab</a>
+        </div>
+        <div class="bg-gradient-to-br from-indigo-600 to-purple-700 p-6 rounded-xl shadow-2xl text-white">
+          <h3 class="text-2xl font-bold mb-4">Collaboration Network</h3>
+          <p class="text-sm opacity-90 mb-5">Let other Pro artists discover you</p>
+          <label class="flex items-center space-x-4 cursor-pointer text-lg">
+            <input type="checkbox" id="collaborationOptIn" class="w-7 h-7 rounded accent-white">
+            <span>Show my profile to other Pro artists, Producers & Distributors</span>
+          </label>
+          <button onClick="saveCollaborationOptIn()" class="mt-5 w-full bg-white text-purple-700 font-black py-3 rounded-lg hover:bg-gray-100 transition">
+            Save & Join Network
+          </button>
+        </div>
+      </div>
+      <div class="md:col-span-3 space-y-8">
+        <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
+          <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Audio Track (MP3)</h3>
+          <p class="mb-4 text-sm text-gray-600">(Refresh page to view new likes and comments)</p>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
+              <input type="file" accept="image/*" id="audioThumbnailInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
+            </div>
+            <div>
+              <label class="block font-bold mb-3 text-gray-700">Audio File (.mp3)</label>
+              <input type="file" accept="audio/mp3" id="audioInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
+            </div>
+          </div>
+          <div class="mt-6">
+            <label class="block font-bold mb-3 text-gray-700">Price for Fans to Buy & Download (USD)</label>
+            <input type="number" id="audioPrice" min="0" step="0.01" value="0.00" placeholder="e.g. 4.99 or 0 for free" class="w-full border border-gray-300 p-4 rounded-lg text-xl font-semibold text-center bg-white">
+            <p class="text-sm text-gray-600 mt-2">Enter 0.00 for free play/download. Any price above $0 means fans must pay to download.</p>
+          </div>
+          <button id="uploadAudio" class="mt-6 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg flex items-center justify-center shadow-lg w-full">
+            <span>Upload & Publish Audio Track</span>
+            <div id="audioSpinner" class="spinner hidden ml-3"></div>
+          </button>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
+          <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Video</h3>
+          <p class="mb-4 text-sm text-gray-600">(Refresh page to view new likes and comments)</p>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
+              <input type="file" accept="image/*" id="thumbnailInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
+            </div>
+            <div>
+              <label class="block font-bold mb-3 text-gray-700">Video File (.mp4)</label>
+              <input type="file" accept="video/mp4" id="videoInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
+            </div>
+          </div>
+          <div class="mt-6">
+            <label class="block font-bold mb-3 text-gray-700">Price for Fans to Buy & Download (USD)</label>
+            <input type="number" id="mediaPrice" min="0" step="0.01" value="0.00" placeholder="e.g. 4.99 or 0 for free" class="w-full border border-gray-300 p-4 rounded-lg text-xl font-semibold text-center bg-white">
+            <p class="text-sm text-gray-600 mt-2">Enter 0.00 for free. Any price above $0 means fans must pay to download.</p>
+          </div>
+          <div class="mt-6">
+            <button id="uploadVideo" class="w-full bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg shadow-lg flex items-center justify-center">
+              <span>Upload & Publish Video</span>
+              <div id="uploadSpinner" class="spinner hidden ml-3"></div>
+            </button>
+          </div>
+        </div>
+        <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </div>
+    </div>
+    <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
+      <details class="group">
+        <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
+          <span class="flex items-center gap-4">
+            <span class="inline-block w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center text-2xl group-open:rotate-45 transition">X</span>
+            Danger Zone: Delete Account
+          </span>
+          <svg class="w-8 h-8 group-open:rotate-180 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </summary>
+        <div class="mt-8">
+          <p class="text-red-900 font-bold mb-4">Type "Delete My Account" to confirm:</p>
+          <input type="text" id="deleteConfirmInput" class="w-full p-4 border-2 border-red-300 rounded-xl" placeholder="Delete My Account">
+          <button id="deleteAccountBtn" disabled class="w-full mt-4 bg-gray-400 text-white font-black py-4 rounded-xl cursor-not-allowed">
+            Yes, Delete Everything
+          </button>
+        </div>
+      </details>
+    </div>
   </section>
 </main>
 <div id="videoModal">
@@ -274,9 +417,6 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
   let currentUser = null;
-
-  // Your existing functions (saveArtistName, saveBio, etc.) remain unchanged
-
   window.saveArtistName = async function() {
     const name = document.getElementById('artistNameInput').value.trim();
     if (!name) return alert("Enter a name");
@@ -284,40 +424,33 @@
     if (error) alert("Save failed: " + error.message);
     else alert("Name saved!");
   };
-
   window.saveBio = async function() {
     const bio = document.getElementById('bioInput').value.trim();
     const { error } = await window.supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert("Bio saved!");
   };
-
   window.saveCollaborationOptIn = async function() {
     const checked = document.getElementById('collaborationOptIn').checked;
     const { error } = await window.supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
   };
-
   window.logout = async function() {
     await window.supabase.auth.signOut();
     window.location.href = 'login.html';
   };
-
   window.closeModal = function() {
     document.getElementById('videoModal').classList.remove('show');
     document.getElementById('modalVideo').src = '';
   };
-
   window.openVideoPopup = function(url) {
     document.getElementById('modalVideo').src = url;
     document.getElementById('videoModal').classList.add('show');
   };
-
   window.openSocialModal = function(videoUrl) {
     alert("Social sharing for: " + videoUrl);
   };
-
   window.displayProBadge = async function() {
     if (!currentUser) return;
     const { count } = await window.supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
@@ -327,7 +460,6 @@
       badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
     }
   };
-
   window.loadProfileData = async function() {
     const { data: profile } = await window.supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
     document.getElementById('artistNameInput').value = profile.name || '';
@@ -346,7 +478,6 @@
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
   };
-
   window.loadVideos = async function() {
     const { data: videos, error } = await window.supabase
       .from('user_videos')
@@ -422,7 +553,6 @@
         </div>`;
     }
   };
-
   window.uploadAudio = async function() {
     const thumbFile = document.getElementById('audioThumbnailInput')?.files[0];
     const audioFile = document.getElementById('audioInput')?.files[0];
@@ -457,7 +587,6 @@
       spinner.classList.add('hidden');
     }
   };
-
   window.uploadAndPublish = async function() {
     const videoFile = document.getElementById('videoInput')?.files[0];
     const thumbFile = document.getElementById('thumbnailInput')?.files[0];
@@ -492,7 +621,6 @@
       spinner.classList.add('hidden');
     }
   };
-
   window.uploadBanner = async function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -501,7 +629,6 @@
     await window.supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
     window.loadProfileData();
   };
-
   window.uploadLogo = async function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -510,7 +637,6 @@
     await window.supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
     window.loadProfileData();
   };
-
   window.deleteAccount = async function() {
     if (confirm('Delete EVERYTHING forever?')) {
       await window.supabase.from('profiles').delete().eq('id', currentUser.id);
@@ -518,7 +644,6 @@
       window.location.href = 'index.html';
     }
   };
-
   window.checkStripeConnection = async function() {
     const { data: profile } = await window.supabase.from('profiles').select('stripe_account_id').eq('id', currentUser.id).single();
     const statusDiv = document.getElementById('stripeStatus');
@@ -534,7 +659,6 @@
       btn.textContent = 'Enable Tip Bucket – Connect Stripe';
     }
   };
-
   window.openPlatinumVision = async function() {
     if (!currentUser) {
       alert("Please log in first");
@@ -557,7 +681,7 @@
     }
   };
 
-  // Social modal logic (updated with AI helper)
+  // === SOCIAL MODAL LOGIC (YOUR ORIGINAL + NEW AI HELPER) ===
   const openSocialShareBtn = document.getElementById('openSocialShareBtn');
   const socialShareModal = document.getElementById('socialShareModal');
   const closeSocialModal = document.getElementById('closeSocialModal');
@@ -606,25 +730,47 @@
     });
   }
 
-  // NEW: AI copy helper
+  // === NEW AI HELPER FUNCTION ===
   function useAI(aiName) {
     const base = document.getElementById('baseComment').value.trim();
-    if (!base) return alert('Please write a base comment first!');
+    if (!base) {
+      alert('Please write your main message first!');
+      return;
+    }
 
     const checked = Array.from(document.querySelectorAll('input[name="social"]:checked'))
       .map(box => box.value.charAt(0).toUpperCase() + box.value.slice(1));
 
-    if (checked.length === 0) return alert('Please select at least one platform!');
+    if (checked.length === 0) {
+      alert('Please select at least one social platform first!');
+      return;
+    }
 
     const platformsList = checked.join(', ');
-    const toCopy = `Base comment: ${base}\n\nPlatforms to post to: ${platformsList}\n\nPlease rewrite this comment separately for each platform above, making it perfect for their style, tone, length, and character limits (e.g. shorter for Instagram/TikTok, longer/more detailed for Facebook/Reddit). Output each rewritten version clearly labeled by platform.`;
+    const toCopy = `Base comment: ${base}
+
+Platforms to post to: ${platformsList}
+
+Please rewrite this comment separately for each platform above. Make each version suitable for the platform's style, tone, character limit, and audience (e.g. short & visual for Instagram/TikTok, longer & conversational for Facebook, professional for LinkedIn if added later, etc.).
+
+Also add 4–8 relevant hashtags at the end of each rewritten comment.
+
+Output format: clearly label each one like:
+
+Facebook: [full rewritten comment + hashtags]
+
+Instagram: [full rewritten comment + hashtags]
+
+... and so on for every platform.
+
+Thank you!`;
 
     navigator.clipboard.writeText(toCopy).then(() => {
       document.getElementById('aiInstructions').classList.remove('hidden');
-      alert(`Copied to clipboard! Now paste into ${aiName} and ask it to rewrite for each platform.`);
+      alert(`Success! Copied to clipboard.\n\nNow paste into ${aiName} and send. It will give you ready-to-use comments + hashtags for each platform.`);
     }).catch(err => {
-      console.error('Clipboard copy failed:', err);
-      alert('Could not copy — please copy manually.');
+      console.error('Copy failed:', err);
+      alert('Could not copy automatically — please copy the text manually from the prompt.');
     });
   }
 
