@@ -24,46 +24,25 @@
 </head>
 
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-
 <div class="max-w-7xl mx-auto p-6">
 
-<div class="flex justify-between items-center mb-8">
-<h1 class="text-5xl font-black bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
+<h1 class="text-5xl font-black mb-8 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
 Collab Messages
 </h1>
-</div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
 
-<!-- LEFT: Conversations -->
-<div class="bg-black/40 rounded-2xl overflow-hidden flex flex-col">
-<div class="p-4 border-b border-purple-600">
-<h2 class="text-xl font-bold">Conversations</h2>
-</div>
+<!-- Conversations -->
+<div class="bg-black/40 rounded-2xl flex flex-col">
+<div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
 <div id="conversationList" class="flex-1 overflow-y-auto"></div>
 </div>
 
-<!-- RIGHT: Thread -->
+<!-- Thread -->
 <div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 overflow-y-auto">
-<p class="text-gray-400 text-center mt-20">Select a conversation to view messages</p>
+<p class="text-gray-400 text-center mt-20">Select a conversation</p>
 </div>
 
-</div>
-</div>
-
-<!-- Reply Modal -->
-<div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible">
-<div class="bg-gray-900 rounded-3xl w-full max-w-lg mx-4 relative">
-<button onclick="closeReplyModal()" class="absolute top-4 right-4 w-12 h-12 bg-red-600 rounded-full text-3xl">×</button>
-<div class="p-8 pt-16">
-<h2 class="text-4xl font-black text-emerald-400 mb-6 text-center">
-Reply to <span id="replyTargetName">Artist</span>
-</h2>
-<textarea id="replyMessage" rows="6" class="w-full p-4 rounded-lg bg-white/10 text-white"></textarea>
-<button onclick="sendReply()" class="w-full mt-6 bg-emerald-600 py-4 rounded-xl font-bold text-xl">
-Send Reply
-</button>
-</div>
 </div>
 </div>
 
@@ -75,137 +54,90 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
-let currentUserId = null;
-let currentConversationId = null;
-let cachedMessages = [];
+let messages = [];
 
-/* ================= GLOBAL ================= */
+async function loadMessages() {
+  const { data, error } = await supabase
+    .from('collab_requests')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-window.openReplyModal = (id,name)=>{
-  currentConversationId=id;
-  document.getElementById('replyTargetName').textContent=name;
-  document.getElementById('replyModal').classList.remove('opacity-0','invisible');
-};
+  if (error) return console.error(error);
 
-window.closeReplyModal = ()=>{
-  document.getElementById('replyModal').classList.add('opacity-0','invisible');
-  document.getElementById('replyMessage').value='';
-};
+  messages = data;
+  renderConversationList();
+}
 
-window.sendReply = async ()=>{
-  const message=document.getElementById('replyMessage').value.trim();
-  if(!message)return;
+function renderConversationList() {
+  const roots = messages.filter(m => !m.parent_id);
+  const list = document.getElementById('conversationList');
 
-  await supabase.from('collab_requests').insert({
-    artist_id:currentUserId,
-    parent_id:currentConversationId,
-    sender_name:'You',
-    message,
-    status:'read',
-    created_at:new Date().toISOString()
+  list.innerHTML = roots.map(r => {
+    const unread = messages.filter(
+      m => m.parent_id === r.id && m.status !== 'read'
+    ).length;
+
+    return `
+      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unread ? 'unread' : ''}"
+           data-id="${r.id}">
+        <div class="flex justify-between">
+          <span>${r.sender_name}</span>
+          ${unread ? `<span class="unread-badge">${unread}</span>` : ''}
+        </div>
+        <p class="msg-preview text-gray-300">${r.message}</p>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.msg-item').forEach(el => {
+    el.onclick = () => openThread(el.dataset.id);
   });
+}
 
-  closeReplyModal();
-  loadMessages();
-};
-
-/* ============ THREAD VIEW (GROUPED) ============ */
-
-window.showThread = async (root,all)=>{
-  currentConversationId=root.id;
-
-  await supabase.from('collab_requests')
-    .update({status:'read'})
-    .eq('parent_id',root.id);
-
-  const replies = all
-    .filter(m=>m.parent_id===root.id)
+async function openThread(rootId) {
+  const root = messages.find(m => m.id === rootId);
+  const replies = messages
+    .filter(m => m.parent_id === rootId)
     .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
 
-  let grouped=[];
-  replies.forEach(msg=>{
-    const last=grouped[grouped.length-1];
-    if(last &&
-       last.sender_name===msg.sender_name &&
-       (new Date(msg.created_at)-new Date(last.lastTime))<600000){
-      last.messages.push(msg);
-      last.lastTime=msg.created_at;
+  await supabase
+    .from('collab_requests')
+    .update({ status: 'read' })
+    .eq('parent_id', rootId);
+
+  let grouped = [];
+  replies.forEach(m => {
+    const last = grouped[grouped.length - 1];
+    if (last && last.sender === m.sender_name) {
+      last.items.push(m);
     } else {
-      grouped.push({
-        sender_name:msg.sender_name,
-        lastTime:msg.created_at,
-        messages:[msg]
-      });
+      grouped.push({ sender: m.sender_name, items: [m] });
     }
   });
 
-  document.getElementById('messageView').innerHTML=`
-  <div class="space-y-6">
-    <div class="bg-black/40 p-6 rounded-2xl border-l-4 border-emerald-500">
-      <h2 class="text-2xl font-black text-emerald-400">${root.sender_name}</h2>
-      <p class="text-sm text-gray-400">${new Date(root.created_at).toLocaleString()}</p>
-      <p class="mt-4">${root.message}</p>
-    </div>
-
-    ${grouped.map(g=>`
-      <div class="reply-indent bg-black/30 p-4 rounded-xl">
-        <p class="font-semibold text-emerald-300">${g.sender_name}</p>
-        ${g.messages.map(m=>`<p class="mt-1">${m.message}</p>`).join('')}
+  document.getElementById('messageView').innerHTML = `
+    <div class="space-y-6">
+      <div class="border-l-4 border-emerald-500 pl-4">
+        <h2 class="text-xl font-bold">${root.sender_name}</h2>
+        <p>${root.message}</p>
       </div>
-    `).join('')}
-
-    <div class="flex justify-end">
-      <button onclick="openReplyModal('${root.id}','${root.sender_name}')"
-      class="bg-emerald-600 px-10 py-4 rounded-xl font-bold text-xl">
-      Reply to this thread
-      </button>
-    </div>
-  </div>`;
-
-  document.querySelectorAll('.msg-item').forEach(el=>el.classList.remove('selected'));
-  document.querySelector(`[data-id="${root.id}"]`)?.classList.add('selected');
-};
-
-/* ============ LOAD + UNREAD COUNTERS ============ */
-
-async function loadMessages(){
-  const {data:{user}}=await supabase.auth.getUser();
-  if(!user)return;
-  currentUserId=user.id;
-
-  const {data}=await supabase
-    .from('collab_requests')
-    .select('*')
-    .eq('artist_id',user.id)
-    .order('created_at',{ascending:false});
-
-  cachedMessages=data;
-
-  const roots=data.filter(m=>!m.parent_id);
-
-  document.getElementById('conversationList').innerHTML=
-    roots.map(r=>{
-      const unreadCount=data.filter(m=>m.parent_id===r.id && m.status==='pending').length;
-      return `
-      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unreadCount?'unread':''}"
-        data-id="${r.id}"
-        onclick='showThread(${JSON.stringify(r)},${JSON.stringify(data)})'>
-        <div class="flex justify-between">
-          <p class="font-bold">${r.sender_name}</p>
-          ${unreadCount?`<span class="unread-badge">${unreadCount}</span>`:''}
+      ${grouped.map(g => `
+        <div class="reply-indent">
+          <p class="font-semibold">${g.sender}</p>
+          ${g.items.map(i => `<p>${i.message}</p>`).join('')}
         </div>
-        <p class="msg-preview text-gray-300">${r.message}</p>
-      </div>`;
-    }).join('');
+      `).join('')}
+    </div>
+  `;
+
+  loadMessages();
 }
 
-/* REALTIME */
 supabase.channel('collab-live')
   .on('postgres_changes',{event:'*',schema:'public',table:'collab_requests'},loadMessages)
   .subscribe();
 
 loadMessages();
 </script>
-
 </body>
 </html>
