@@ -24,13 +24,12 @@
   border-left: 3px solid #10b981;
   padding-left: 1rem;
 }
-.unread-badge {
-  background:#10b981;
-  color:#000;
-  font-weight:700;
-  border-radius:9999px;
-  padding:0.15rem 0.5rem;
-  font-size:0.75rem;
+.unread-text {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 </style>
 </head>
@@ -69,7 +68,7 @@ const supabase = createClient(
 let messages = [];
 let activeThread = null;
 
-/* LOAD */
+/* LOAD ALL MESSAGES */
 async function loadMessages() {
   const { data } = await supabase
     .from('collab_requests')
@@ -82,23 +81,22 @@ async function loadMessages() {
   if (activeThread) openThread(activeThread, false);
 }
 
-/* LEFT LIST */
+/* LEFT COLUMN */
 function renderConversationList() {
   const roots = messages.filter(m => m.parent_id === null);
   const list = document.getElementById('conversationList');
 
   list.innerHTML = roots.map(root => {
-
-    const unreadCount = messages.filter(
+    const hasUnread = messages.some(
       m => m.parent_id === root.id && m.status === 'unread'
-    ).length;
+    );
 
     return `
-      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unreadCount ? 'unread' : ''}"
+      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${hasUnread ? 'unread' : ''}"
            data-id="${root.id}">
-        <div class="flex justify-between">
+        <div class="flex justify-between items-center">
           <span>${root.sender_name}</span>
-          ${unreadCount ? `<span class="unread-badge">${unreadCount}</span>` : ''}
+          ${hasUnread ? `<span class="unread-text">Unread</span>` : ``}
         </div>
         <p class="msg-preview text-gray-300">${root.message}</p>
       </div>
@@ -110,7 +108,7 @@ function renderConversationList() {
   });
 }
 
-/* THREAD */
+/* OPEN THREAD */
 async function openThread(rootId, markRead = true) {
   activeThread = rootId;
 
@@ -118,8 +116,14 @@ async function openThread(rootId, markRead = true) {
     await supabase
       .from('collab_requests')
       .update({ status: 'read' })
-      .eq('parent_id', rootId)
-      .eq('status', 'unread');
+      .eq('parent_id', rootId);
+
+    // update local cache so UI changes immediately
+    messages = messages.map(m =>
+      m.parent_id === rootId ? { ...m, status: 'read' } : m
+    );
+
+    renderConversationList();
   }
 
   const root = messages.find(m => m.id === rootId);
@@ -155,7 +159,7 @@ async function openThread(rootId, markRead = true) {
   `;
 }
 
-/* SEND */
+/* SEND REPLY */
 window.sendReply = async () => {
   const input = document.getElementById('replyInput');
   const message = input.value.trim();
@@ -175,7 +179,7 @@ window.sendReply = async () => {
 
 /* REALTIME */
 supabase.channel('collab-live')
-  .on('postgres_changes', { event:'*', schema:'public', table:'collab_requests' }, loadMessages)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'collab_requests' }, loadMessages)
   .subscribe();
 
 loadMessages();
