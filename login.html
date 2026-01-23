@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | Rhythm Deck</title>
 
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Supabase JS (NON-MODULE, STABLE VERSION) -->
+  <!-- Supabase JS v2 (NON-MODULE, STABLE) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -76,7 +77,7 @@
         <p class="text-gray-400 mt-2">Log in to access your dashboard</p>
       </div>
 
-      <form id="loginForm">
+      <form id="loginForm" novalidate>
         <div class="input-group">
           <input
             type="email"
@@ -100,7 +101,6 @@
 
         <button
           type="submit"
-          id="loginBtn"
           class="w-full py-5 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-black text-xl rounded-xl mt-4">
           LOGIN
         </button>
@@ -112,27 +112,27 @@
   <script>
     const supabase = window.supabase.createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
-      "YOUR_ANON_KEY"
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
 
-    const passwordInput = document.getElementById('loginPassword');
-    const toggleEye = document.getElementById('toggleEye');
+    const passwordInput = document.getElementById("loginPassword");
+    const toggleEye = document.getElementById("toggleEye");
 
-    toggleEye.addEventListener('click', () => {
+    toggleEye.addEventListener("click", () => {
       passwordInput.type =
-        passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type === "password" ? "text" : "password";
       toggleEye.textContent =
-        passwordInput.type === 'password' ? 'Show' : 'Hide';
+        passwordInput.type === "password" ? "Show" : "Hide";
     });
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      const errorMessage = document.getElementById('errorMessage');
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      const errorMessage = document.getElementById("errorMessage");
 
-      errorMessage.classList.add('hidden');
+      errorMessage.classList.add("hidden");
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -141,15 +141,14 @@
 
       if (error) {
         errorMessage.textContent = error.message;
-        errorMessage.classList.remove('hidden');
+        errorMessage.classList.remove("hidden");
         return;
       }
 
-      // ✅ Artist (your test user is platinum)
+      // ✅ SUCCESS
       window.location.href = "platinum-pro-admin.html";
     });
   </script>
 
 </body>
 </html>
-
