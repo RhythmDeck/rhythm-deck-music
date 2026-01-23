@@ -32,14 +32,14 @@ Collab Messages
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
 
-<!-- Conversations -->
+<!-- LEFT -->
 <div class="bg-black/40 rounded-2xl flex flex-col">
 <div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
 <div id="conversationList" class="flex-1 overflow-y-auto"></div>
 </div>
 
-<!-- Thread -->
-<div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 overflow-y-auto">
+<!-- RIGHT -->
+<div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 flex flex-col">
 <p class="text-gray-400 text-center mt-20">Select a conversation</p>
 </div>
 
@@ -55,26 +55,29 @@ const supabase = createClient(
 );
 
 let messages = [];
+let activeThread = null;
 
+/* LOAD */
 async function loadMessages() {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('collab_requests')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) return console.error(error);
-
-  messages = data;
+  messages = data || [];
   renderConversationList();
+
+  if (activeThread) openThread(activeThread, false);
 }
 
+/* LEFT LIST */
 function renderConversationList() {
   const roots = messages.filter(m => !m.parent_id);
   const list = document.getElementById('conversationList');
 
   list.innerHTML = roots.map(r => {
     const unread = messages.filter(
-      m => m.parent_id === r.id && m.status !== 'read'
+      m => m.parent_id === r.id && m.status === 'unread'
     ).length;
 
     return `
@@ -90,20 +93,25 @@ function renderConversationList() {
   }).join('');
 
   document.querySelectorAll('.msg-item').forEach(el => {
-    el.onclick = () => openThread(el.dataset.id);
+    el.onclick = () => openThread(el.dataset.id, true);
   });
 }
 
-async function openThread(rootId) {
+/* THREAD */
+async function openThread(rootId, markRead = true) {
+  activeThread = rootId;
+
+  if (markRead) {
+    await supabase
+      .from('collab_requests')
+      .update({ status: 'read' })
+      .eq('parent_id', rootId);
+  }
+
   const root = messages.find(m => m.id === rootId);
   const replies = messages
     .filter(m => m.parent_id === rootId)
     .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-
-  await supabase
-    .from('collab_requests')
-    .update({ status: 'read' })
-    .eq('parent_id', rootId);
 
   let grouped = [];
   replies.forEach(m => {
@@ -116,11 +124,13 @@ async function openThread(rootId) {
   });
 
   document.getElementById('messageView').innerHTML = `
-    <div class="space-y-6">
+    <div class="flex-1 overflow-y-auto space-y-6">
       <div class="border-l-4 border-emerald-500 pl-4">
+
         <h2 class="text-xl font-bold">${root.sender_name}</h2>
         <p>${root.message}</p>
       </div>
+
       ${grouped.map(g => `
         <div class="reply-indent">
           <p class="font-semibold">${g.sender}</p>
@@ -128,11 +138,39 @@ async function openThread(rootId) {
         </div>
       `).join('')}
     </div>
-  `;
 
-  loadMessages();
+    <div class="mt-6 border-t border-gray-700 pt-4">
+      <textarea id="replyInput"
+        class="w-full p-4 rounded-lg bg-white/10 text-white resize-none"
+        rows="3"
+        placeholder="Write a reply..."></textarea>
+      <button onclick="sendReply()"
+        class="mt-4 bg-emerald-600 px-8 py-3 rounded-xl font-bold">
+        Send Reply
+      </button>
+    </div>
+  `;
 }
 
+/* SEND */
+window.sendReply = async () => {
+  const input = document.getElementById('replyInput');
+  const message = input.value.trim();
+  if (!message) return;
+
+  await supabase.from('collab_requests').insert({
+    parent_id: activeThread,
+    sender_name: 'You',
+    message,
+    status: 'unread',
+    created_at: new Date().toISOString()
+  });
+
+  input.value = '';
+  loadMessages();
+};
+
+/* REALTIME */
 supabase.channel('collab-live')
   .on('postgres_changes',{event:'*',schema:'public',table:'collab_requests'},loadMessages)
   .subscribe();
@@ -141,3 +179,4 @@ loadMessages();
 </script>
 </body>
 </html>
+
