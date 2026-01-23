@@ -8,10 +8,22 @@
 
 <style>
 .msg-item:hover { background: rgba(255,255,255,0.08); }
-.msg-item.unread { font-weight: bold; border-left: 4px solid #10b981; background: rgba(16,185,129,0.05); }
-.msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
-.selected { background: rgba(255,255,255,0.1) !important; }
-.reply-indent { margin-left: 2rem; border-left: 3px solid #10b981; padding-left: 1rem; }
+.msg-item.unread {
+  font-weight: bold;
+  border-left: 4px solid #10b981;
+  background: rgba(16,185,129,0.05);
+}
+.msg-preview {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+.reply-indent {
+  margin-left: 2rem;
+  border-left: 3px solid #10b981;
+  padding-left: 1rem;
+}
 .unread-badge {
   background:#10b981;
   color:#000;
@@ -34,13 +46,13 @@ Collab Messages
 
 <!-- LEFT -->
 <div class="bg-black/40 rounded-2xl flex flex-col">
-<div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
-<div id="conversationList" class="flex-1 overflow-y-auto"></div>
+  <div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
+  <div id="conversationList" class="flex-1 overflow-y-auto"></div>
 </div>
 
 <!-- RIGHT -->
 <div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 flex flex-col">
-<p class="text-gray-400 text-center mt-20">Select a conversation</p>
+  <p class="text-gray-400 text-center mt-20">Select a conversation</p>
 </div>
 
 </div>
@@ -72,22 +84,23 @@ async function loadMessages() {
 
 /* LEFT LIST */
 function renderConversationList() {
-  const roots = messages.filter(m => !m.parent_id);
+  const roots = messages.filter(m => m.parent_id === null);
   const list = document.getElementById('conversationList');
 
-  list.innerHTML = roots.map(r => {
-    const unread = messages.filter(
-      m => m.parent_id === r.id && m.status !== 'read'
+  list.innerHTML = roots.map(root => {
+
+    const unreadCount = messages.filter(
+      m => m.parent_id === root.id && m.status === 'unread'
     ).length;
 
     return `
-      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unread ? 'unread' : ''}"
-           data-id="${r.id}">
+      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unreadCount ? 'unread' : ''}"
+           data-id="${root.id}">
         <div class="flex justify-between">
-          <span>${r.sender_name}</span>
-          ${unread ? `<span class="unread-badge">${unread}</span>` : ''}
+          <span>${root.sender_name}</span>
+          ${unreadCount ? `<span class="unread-badge">${unreadCount}</span>` : ''}
         </div>
-        <p class="msg-preview text-gray-300">${r.message}</p>
+        <p class="msg-preview text-gray-300">${root.message}</p>
       </div>
     `;
   }).join('');
@@ -105,23 +118,14 @@ async function openThread(rootId, markRead = true) {
     await supabase
       .from('collab_requests')
       .update({ status: 'read' })
-      .eq('parent_id', rootId);
+      .eq('parent_id', rootId)
+      .eq('status', 'unread');
   }
 
   const root = messages.find(m => m.id === rootId);
   const replies = messages
     .filter(m => m.parent_id === rootId)
     .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-
-  let grouped = [];
-  replies.forEach(m => {
-    const last = grouped[grouped.length - 1];
-    if (last && last.sender === m.sender_name) {
-      last.items.push(m);
-    } else {
-      grouped.push({ sender: m.sender_name, items: [m] });
-    }
-  });
 
   document.getElementById('messageView').innerHTML = `
     <div class="flex-1 overflow-y-auto space-y-6">
@@ -130,10 +134,10 @@ async function openThread(rootId, markRead = true) {
         <p>${root.message}</p>
       </div>
 
-      ${grouped.map(g => `
+      ${replies.map(r => `
         <div class="reply-indent">
-          <p class="font-semibold">${g.sender}</p>
-          ${g.items.map(i => `<p>${i.message}</p>`).join('')}
+          <p class="font-semibold">${r.sender_name}</p>
+          <p>${r.message}</p>
         </div>
       `).join('')}
     </div>
@@ -171,7 +175,7 @@ window.sendReply = async () => {
 
 /* REALTIME */
 supabase.channel('collab-live')
-  .on('postgres_changes',{event:'*',schema:'public',table:'collab_requests'},loadMessages)
+  .on('postgres_changes', { event:'*', schema:'public', table:'collab_requests' }, loadMessages)
   .subscribe();
 
 loadMessages();
