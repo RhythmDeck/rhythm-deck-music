@@ -34,13 +34,13 @@ Collab Messages
 
 <!-- LEFT -->
 <div class="bg-black/40 rounded-2xl flex flex-col">
-<div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
-<div id="conversationList" class="flex-1 overflow-y-auto"></div>
+  <div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
+  <div id="conversationList" class="flex-1 overflow-y-auto"></div>
 </div>
 
 <!-- RIGHT -->
 <div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 flex flex-col">
-<p class="text-gray-400 text-center mt-20">Select a conversation</p>
+  <p class="text-gray-400 text-center mt-20">Select a conversation</p>
 </div>
 
 </div>
@@ -54,15 +54,40 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
+/* AUTH */
+const {
+  data: { user }
+} = await supabase.auth.getUser();
+
+if (!user) {
+  alert("You must be logged in");
+  throw new Error("Not authenticated");
+}
+
 let messages = [];
 let activeThread = null;
 
 /* LOAD */
 async function loadMessages() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('collab_requests')
-    .select('*')
+    .select(`
+      id,
+      parent_id,
+      sender_id,
+      receiver_id,
+      sender_name,
+      message,
+      read_at,
+      created_at
+    `)
+    .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
     .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   messages = data || [];
   renderConversationList();
@@ -77,7 +102,10 @@ function renderConversationList() {
 
   list.innerHTML = roots.map(r => {
     const unread = messages.filter(
-      m => m.parent_id === r.id && m.status !== 'read'
+      m =>
+        m.parent_id === r.id &&
+        m.receiver_id === user.id &&
+        m.read_at === null
     ).length;
 
     return `
@@ -104,24 +132,16 @@ async function openThread(rootId, markRead = true) {
   if (markRead) {
     await supabase
       .from('collab_requests')
-      .update({ status: 'read' })
-      .eq('parent_id', rootId);
+      .update({ read_at: new Date().toISOString() })
+      .eq('parent_id', rootId)
+      .eq('receiver_id', user.id)
+      .is('read_at', null);
   }
 
   const root = messages.find(m => m.id === rootId);
   const replies = messages
     .filter(m => m.parent_id === rootId)
     .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-
-  let grouped = [];
-  replies.forEach(m => {
-    const last = grouped[grouped.length - 1];
-    if (last && last.sender === m.sender_name) {
-      last.items.push(m);
-    } else {
-      grouped.push({ sender: m.sender_name, items: [m] });
-    }
-  });
 
   document.getElementById('messageView').innerHTML = `
     <div class="flex-1 overflow-y-auto space-y-6">
@@ -130,10 +150,10 @@ async function openThread(rootId, markRead = true) {
         <p>${root.message}</p>
       </div>
 
-      ${grouped.map(g => `
+      ${replies.map(r => `
         <div class="reply-indent">
-          <p class="font-semibold">${g.sender}</p>
-          ${g.items.map(i => `<p>${i.message}</p>`).join('')}
+          <p class="font-semibold">${r.sender_name}</p>
+          <p>${r.message}</p>
         </div>
       `).join('')}
     </div>
@@ -157,12 +177,16 @@ window.sendReply = async () => {
   const message = input.value.trim();
   if (!message) return;
 
+  const root = messages.find(m => m.id === activeThread);
+  const otherUserId =
+    root.sender_id === user.id ? root.receiver_id : root.sender_id;
+
   await supabase.from('collab_requests').insert({
     parent_id: activeThread,
+    sender_id: user.id,
+    receiver_id: otherUserId,
     sender_name: 'You',
-    message,
-    status: 'unread',
-    created_at: new Date().toISOString()
+    message
   });
 
   input.value = '';
