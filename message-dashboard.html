@@ -80,6 +80,7 @@
 
     let currentUserId = null;
     let currentConversationId = null;
+    let currentMessages = []; // Store messages globally for thread display
 
     window.goToDashboard = async function() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -130,15 +131,12 @@
       }
     }
 
-    function showThread(originalMsg, allMessages) {
+    function showThread(originalMsg) {
       currentConversationId = originalMsg.id;
 
-      const replies = allMessages
+      const replies = currentMessages
         .filter(m => m.parent_id === originalMsg.id)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-      // Safely escape sender_name for JavaScript string
-      const escapedName = originalMsg.sender_name.replace(/'/g, "\\'").replace(/"/g, '\\"');
 
       let html = `
         <div class="flex-1 overflow-y-auto pr-4 space-y-6">
@@ -171,7 +169,7 @@
       html += `
         </div>
         <div class="mt-8 flex justify-end">
-          <button onclick="openReplyModal('${originalMsg.id}', '${escapedName}')"
+          <button id="replyThreadBtn" data-target-id="${originalMsg.id}" data-target-name="${originalMsg.sender_name.replace(/"/g, '&quot;').replace(/'/g, "&#39;")}"
                   class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-10 py-4 rounded-xl text-xl transition transform hover:scale-105 shadow-xl">
             Reply to this thread
           </button>
@@ -179,6 +177,14 @@
       `;
 
       document.getElementById('messageView').innerHTML = html;
+
+      // Add click listener to the reply button
+      document.getElementById('replyThreadBtn').addEventListener('click', function() {
+        const targetId = this.dataset.targetId;
+        const targetName = this.dataset.targetName;
+        openReplyModal(targetId, targetName);
+      });
+
       document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('selected'));
       document.querySelector(`[data-id="${originalMsg.id}"]`)?.classList.add('selected');
     }
@@ -207,27 +213,36 @@
         return;
       }
 
-      if (!messages || messages.length === 0) {
+      currentMessages = messages || [];
+
+      if (!currentMessages.length) {
         list.innerHTML = '<p class="text-gray-400 text-center py-10">No messages yet</p>';
         document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
         return;
       }
 
-      const topLevel = messages.filter(m => !m.parent_id);
+      const topLevel = currentMessages.filter(m => !m.parent_id);
 
       list.innerHTML = topLevel.map(msg => `
-        <div data-id="${msg.id}"
-             onclick="showThread(${JSON.stringify(msg)}, ${JSON.stringify(messages)})"
-             class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
+        <div data-id="${msg.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
           <p class="font-bold">${msg.sender_name}</p>
           <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
           <p class="msg-preview text-gray-300">${msg.message}</p>
         </div>
       `).join('');
 
+      // Add click listeners to conversation items
+      document.querySelectorAll('.msg-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const msgId = item.dataset.id;
+          const msg = currentMessages.find(m => m.id === msgId);
+          if (msg) showThread(msg);
+        });
+      });
+
       // Auto-open first conversation
       if (topLevel.length > 0) {
-        showThread(topLevel[0], messages);
+        showThread(topLevel[0]);
       }
     }
 
