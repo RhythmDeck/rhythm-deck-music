@@ -143,6 +143,7 @@
         parent_id: currentConversationId,
         sender_id: currentUserId,
         receiver_id: receiverId,
+        sender_name: senderName,
         message: message,
         created_at: new Date().toISOString(),
         status: 'pending'
@@ -200,7 +201,7 @@
           <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
             <div class="flex justify-between items-center mb-4">
               <div>
-                <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender?.name || 'User'}</h2>
+                <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender_name || 'User'}</h2>
                 <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
               </div>
               ${statusHtml}
@@ -214,7 +215,7 @@
         replies.forEach(reply => {
           html += `
             <div class="reply-indent bg-black/30 rounded-xl p-5">
-              <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
+              <p class="font-semibold text-emerald-300">${reply.sender_name || 'User'}</p>
               <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
               <p class="mt-2">${reply.message}</p>
             </div>
@@ -227,7 +228,7 @@
       html += `
         </div>
         <div class="mt-8 flex justify-end">
-          <button id="replyThreadBtn" data-target-id="${originalMsg.id}" data-target-name="${(originalMsg.sender?.name || 'User').replace(/"/g, '&quot;').replace(/'/g, "&#39;")}"
+          <button id="replyThreadBtn" data-target-id="${originalMsg.id}" data-target-name="${(originalMsg.sender_name || 'User').replace(/"/g, '&quot;').replace(/'/g, "&#39;")}"
                   class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-10 py-4 rounded-xl text-xl transition transform hover:scale-105 shadow-xl">
             Reply to this thread
           </button>
@@ -263,18 +264,18 @@
           parent_id,
           sender_id,
           receiver_id,
+          sender_name,
           message,
           created_at,
           read_at,
-          status,
-          sender:sender_id (name)
+          status
         `)
         .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Load messages error:', error);
-        list.innerHTML = '<p class="text-red-400 text-center py-10">Error loading messages</p>';
+        list.innerHTML = `<p class="text-red-400 text-center py-10">Error: ${error.message || 'Failed to load messages'}</p>`;
         document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
         return;
       }
@@ -303,7 +304,7 @@
         return `
           <div data-id="${msg.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
             <div class="flex justify-between items-center">
-              <p class="font-bold">${msg.sender?.name || 'Unknown'}</p>
+              <p class="font-bold">${msg.sender_name || 'Unknown'}</p>
               ${statusBadge}
             </div>
             <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
