@@ -7,43 +7,51 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
-    .artist-box { 
-      background: linear-gradient(to bottom right, #1f2937, #111827); 
-      border-radius: 1rem; 
-      padding: 1rem; 
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 4px 0 0 #10b981; 
-      transition: transform 0.3s; 
-      position: relative; 
-      height: 100%; 
-      display: flex; 
-      flex-direction: column; 
+    .artist-box {
+      background: linear-gradient(to bottom right, #1f2937, #111827);
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 4px 0 0 #10b981;
+      transition: transform 0.3s;
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
-    .artist-box::after { 
-      content: ''; 
-      position: absolute; 
-      bottom: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 2px; 
-      background: #10b981; 
-      opacity: 0.5; 
+    .artist-box::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #10b981;
+      opacity: 0.5;
     }
     .artist-box:hover { transform: translateY(-3px); }
     .logo-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #10b981; }
     .media-list { max-height: 120px; overflow-y: auto; font-size: 0.85rem; }
-    .media-item { 
-      padding: 0.4rem; 
-      background: #374151; 
-      border-radius: 0.5rem; 
-      margin-bottom: 0.3rem; 
-      cursor: pointer; 
-      transition: background 0.3s; 
+    .media-item {
+      padding: 0.4rem;
+      background: #374151;
+      border-radius: 0.5rem;
+      margin-bottom: 0.3rem;
+      cursor: pointer;
+      transition: background 0.3s;
     }
     .media-item:hover { background: #4b5563; }
     .stat { font-size: 0.8rem; margin-bottom: 0.5rem; }
     .bio { font-size: 0.8rem; max-height: 50px; overflow-y: auto; }
     .instructions { font-size: 0.9rem; margin-bottom: 1.5rem; }
     .grid-container { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .msg-item:hover { background: rgba(255,255,255,0.08); }
+    .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .selected { background: rgba(255,255,255,0.1) !important; }
+    .reply-indent { margin-left: 2.5rem; border-left: 3px solid #10b981; padding-left: 1.25rem; opacity: 0.9; }
+    #replyModal.hidden { display: none; }
+    .status-pending { background: #f59e0b; color: white; }
+    .status-accepted { background: #10b981; color: white; }
+    .status-declined { background: #ef4444; color: white; }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
@@ -85,7 +93,6 @@
       <input id="searchSong" type="text" placeholder="Search by song title" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
       <select id="filterGenre" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
         <option value="">Filter by genre</option>
-        <!-- Major genres and common subgenres -->
         <option value="acoustic">Acoustic</option>
         <option value="afrobeat">Afrobeat</option>
         <option value="alternative">Alternative</option>
@@ -124,7 +131,6 @@
         <option value="techno">Techno</option>
         <option value="trance">Trance</option>
         <option value="world">World</option>
-        <!-- More subgenres for variety -->
         <option value="alternative rock">Alternative Rock</option>
         <option value="bluegrass">Bluegrass</option>
         <option value="britpop">Britpop</option>
@@ -162,9 +168,25 @@
     <div id="artistGrid" class="grid grid-container gap-6">
       <!-- Artists loaded here -->
     </div>
+
+    <!-- New Messages Section (identical to artist message dashboard) -->
+    <section class="mt-16 bg-black/40 rounded-2xl p-8">
+      <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
+        <div class="bg-black/30 rounded-2xl overflow-hidden flex flex-col">
+          <div class="p-4 border-b border-purple-600">
+            <h3 class="text-xl font-bold">Conversations</h3>
+          </div>
+          <div id="conversationList" class="flex-1 overflow-y-auto"></div>
+        </div>
+        <div id="messageView" class="lg:col-span-2 bg-black/30 rounded-2xl p-8 flex flex-col overflow-y-auto">
+          <p class="text-gray-400 text-center mt-20">Select a conversation to view messages</p>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <!-- Video Play Modal -->
+  <!-- Video Play Modal (unchanged) -->
   <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-4xl mx-4">
       <video id="videoPlayer" controls class="w-full h-auto rounded-lg">
@@ -172,14 +194,14 @@
         Your browser does not support the video tag.
       </video>
       <div class="text-center pt-4">
-        <button onclick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">
+        <button onClick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">
           Close
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Message Modal -->
+  <!-- Original Contact Modal (unchanged) -->
   <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
       <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
@@ -187,22 +209,38 @@
       </h3>
       <textarea id="messageContent" rows="5" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Type your message here... (no email, phone, or external links allowed)"></textarea>
       <div class="text-center pt-6">
-        <button onclick="sendMessage()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full">
+        <button onClick="sendMessage()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full">
           Send Message
         </button>
-        <button onclick="closeMessageModal()" class="mt-4 text-gray-400 hover:underline">Cancel</button>
+        <button onClick="closeMessageModal()" class="mt-4 text-gray-400 hover:underline">Cancel</button>
       </div>
     </div>
   </div>
 
-  <!-- Footer -->
+  <!-- New Reply Modal (same as artist message dashboard) -->
+  <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
+    <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
+      <button id="closeReplyBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
+        ×
+      </button>
+      <div class="p-8 pt-16">
+        <h2 class="text-4xl font-black text-emerald-400 mb-6 text-center">
+          Reply to <span id="replyTargetName"></span>
+        </h2>
+        <textarea id="replyMessage" rows="6" placeholder="Write your reply..." class="w-full p-4 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
+        <button id="sendReplyBtn" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition shadow-xl transform hover:scale-105">
+          Send Reply
+        </button>
+      </div>
+    </div>
+  </div>
+
   <footer class="bg-black text-white mt-16 p-8 text-center text-sm border-t border-gray-800">
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
     const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
@@ -211,6 +249,8 @@
     let currentUserId = null;
     let messageArtistId = null;
     let artists = [];
+    let currentConversationId = null;
+    let currentMessages = [];
 
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -221,30 +261,29 @@
       }
       currentUserId = user.id;
       loadArtists();
+      loadMessages(); // load messages for industry user
     }
 
+    // ────────────────────────────────────────────────
+    // Artist Directory (unchanged)
+    // ────────────────────────────────────────────────
     async function loadArtists() {
       const { data: fetchedArtists, error: artistError } = await supabase
         .from('profiles')
         .select('*')
         .in('plan', ['pro', 'platinum'])
         .order('name', { ascending: true });
-
       if (artistError) {
         console.error('Error loading artists:', artistError);
         alert('Failed to load artists: ' + artistError.message);
         return;
       }
-
       const artistIds = fetchedArtists.map(a => a.id);
-
       const { data: media, error: mediaError } = await supabase
         .from('user_videos')
         .select('id, user_id, title, video_url, thumbnail_url, type')
         .in('user_id', artistIds);
-
       if (mediaError) console.error('Media load error:', mediaError);
-
       const processedMedia = media?.map(item => {
         const { data: publicData } = supabase.storage.from('media').getPublicUrl(item.video_url);
         return {
@@ -252,50 +291,38 @@
           public_url: publicData.publicUrl
         };
       }) || [];
-
       const mediaByArtist = {};
       processedMedia.forEach(item => {
         if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
         mediaByArtist[item.user_id].push(item);
       });
-
-      // Likes and comments totals per artist
       let totalLikesByArtist = {};
       let totalCommentsByArtist = {};
-
       if (media && media.length > 0) {
         const videoIds = media.map(v => v.id);
-
-        // Likes count
         const { data: likes } = await supabase
           .from('video_likes')
           .select('video_id')
           .in('video_id', videoIds);
-
         likes?.forEach(l => {
           const artistId = media.find(v => v.id === l.video_id)?.user_id;
           if (artistId) totalLikesByArtist[artistId] = (totalLikesByArtist[artistId] || 0) + 1;
         });
-
-        // Comments count
         const { data: comments } = await supabase
           .from('video_comments')
           .select('video_id')
           .in('video_id', videoIds);
-
         comments?.forEach(c => {
           const artistId = media.find(v => v.id === c.video_id)?.user_id;
           if (artistId) totalCommentsByArtist[artistId] = (totalCommentsByArtist[artistId] || 0) + 1;
         });
       }
-
       artists = fetchedArtists.map(artist => ({
         ...artist,
         videos: mediaByArtist[artist.id] || [],
         totalHearts: totalLikesByArtist[artist.id] || 0,
         totalComments: totalCommentsByArtist[artist.id] || 0
       }));
-
       renderArtists(artists);
     }
 
@@ -308,7 +335,6 @@
             ${item.title || 'Untitled'} (${item.type.toUpperCase()})
           </div>
         `).join('');
-
         return `
           <div class="artist-box">
             <div class="flex items-start gap-3 mb-2">
@@ -344,14 +370,12 @@
       const searchName = document.getElementById('searchName').value.toLowerCase();
       const searchSong = document.getElementById('searchSong').value.toLowerCase();
       const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
-
       const filtered = artists.filter(artist => {
         const nameMatch = artist.name.toLowerCase().includes(searchName);
         const genreMatch = !filterGenre || artist.genre?.toLowerCase().includes(filterGenre);
         const songMatch = !searchSong || artist.videos?.some(v => v.title?.toLowerCase().includes(searchSong));
         return nameMatch && genreMatch && songMatch;
       });
-
       renderArtists(filtered);
     }
 
@@ -403,16 +427,15 @@
     window.sendMessage = async function() {
       const message = document.getElementById('messageContent').value.trim();
       if (!message) return alert('Please type a message.');
-
       const { error } = await supabase
         .from('collab_requests')
         .insert({
-          artist_id: messageArtistId,
           sender_id: currentUserId,
+          receiver_id: messageArtistId,
           message: message,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          status: 'pending'
         });
-
       if (error) {
         console.error('Send message error:', error);
         alert('Failed to send message: ' + error.message);
@@ -422,7 +445,217 @@
       }
     };
 
+    // ────────────────────────────────────────────────
+    // Messages Section (identical to artist message dashboard)
+    // ────────────────────────────────────────────────
+
+    function openReplyModal(targetId, name) {
+      currentConversationId = targetId;
+      document.getElementById('replyTargetName').textContent = name || 'User';
+      document.getElementById('replyModal').classList.remove('hidden');
+      document.getElementById('replyMessage').focus();
+    }
+
+    function closeReplyModal() {
+      document.getElementById('replyModal').classList.add('hidden');
+      document.getElementById('replyMessage').value = '';
+    }
+
+    async function sendReply() {
+      const message = document.getElementById('replyMessage').value.trim();
+      if (!message) return alert('Please write a reply!');
+
+      const { data: profile } = await supabase.from('profiles').select('name').eq('id', currentUserId).single();
+      const senderName = profile?.name || 'You';
+
+      const original = currentMessages.find(m => m.id === currentConversationId);
+      const receiverId = original?.sender_id || currentUserId;
+
+      const { error } = await supabase.from('collab_requests').insert({
+        parent_id: currentConversationId,
+        sender_id: currentUserId,
+        receiver_id: receiverId,
+        message: message,
+        created_at: new Date().toISOString(),
+        status: 'pending'
+      });
+
+      if (error) {
+        console.error('Send reply error:', error);
+        alert('Failed to send reply: ' + (error.message || 'Unknown error'));
+      } else {
+        alert('Reply sent!');
+        closeReplyModal();
+        loadMessages();
+      }
+    }
+
+    async function updateStatus(messageId, newStatus) {
+      const { error } = await supabase.from('collab_requests').update({ status: newStatus }).eq('id', messageId).eq('receiver_id', currentUserId);
+      if (error) {
+        alert('Failed to update status: ' + error.message);
+      } else {
+        loadMessages();
+      }
+    }
+
+    function showThread(originalMsg) {
+      currentConversationId = originalMsg.id;
+
+      const replies = currentMessages
+        .filter(m => m.parent_id === originalMsg.id)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+      let statusHtml = '';
+      if (originalMsg.status === 'pending' && originalMsg.receiver_id === currentUserId) {
+        statusHtml = `
+          <div class="flex space-x-4 mt-4">
+            <button onclick="updateStatus('${originalMsg.id}', 'accepted')" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-bold text-white">
+              Accept
+            </button>
+            <button onclick="updateStatus('${originalMsg.id}', 'declined')" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-bold text-white">
+              Decline
+            </button>
+          </div>
+        `;
+      } else if (originalMsg.status) {
+        const statusClass = originalMsg.status === 'pending' ? 'status-pending' :
+                           originalMsg.status === 'accepted' ? 'status-accepted' :
+                           'status-declined';
+        statusHtml = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
+          ${originalMsg.status.charAt(0).toUpperCase() + originalMsg.status.slice(1)}
+        </span>`;
+      }
+
+      let html = `
+        <div class="flex-1 overflow-y-auto pr-4 space-y-6">
+          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender?.name || 'User'}</h2>
+                <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
+              </div>
+              ${statusHtml}
+            </div>
+            <p class="text-lg whitespace-pre-line">${originalMsg.message}</p>
+          </div>
+      `;
+
+      if (replies.length > 0) {
+        html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
+        replies.forEach(reply => {
+          html += `
+            <div class="reply-indent bg-black/30 rounded-xl p-5">
+              <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
+              <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
+              <p class="mt-2">${reply.message}</p>
+            </div>
+          `;
+        });
+      } else {
+        html += `<p class="text-gray-400 italic mt-6">No replies yet</p>`;
+      }
+
+      html += `
+        </div>
+        <div class="mt-8 flex justify-end">
+          <button id="replyThreadBtn" data-target-id="${originalMsg.id}" data-target-name="${(originalMsg.sender?.name || 'User').replace(/"/g, '&quot;').replace(/'/g, "&#39;")}"
+                  class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-10 py-4 rounded-xl text-xl transition transform hover:scale-105 shadow-xl">
+            Reply to this thread
+          </button>
+        </div>
+      `;
+
+      document.getElementById('messageView').innerHTML = html;
+
+      document.getElementById('replyThreadBtn')?.addEventListener('click', function() {
+        openReplyModal(this.dataset.targetId, this.dataset.targetName);
+      });
+    }
+
+    async function loadMessages() {
+      const list = document.getElementById('conversationList');
+      if (!list) return; // only run if messages section exists
+
+      list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
+
+      const { data: messages, error } = await supabase
+        .from('collab_requests')
+        .select(`
+          id,
+          parent_id,
+          sender_id,
+          receiver_id,
+          message,
+          created_at,
+          read_at,
+          status,
+          sender:sender_id (name)
+        `)
+        .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Load error:', error);
+        list.innerHTML = '<p class="text-red-400 text-center py-10">Error loading messages</p>';
+        return;
+      }
+
+      currentMessages = messages || [];
+
+      if (!currentMessages.length) {
+        list.innerHTML = '<p class="text-gray-400 text-center py-10">No messages yet</p>';
+        document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
+        return;
+      }
+
+      const topLevel = currentMessages.filter(m => !m.parent_id);
+
+      list.innerHTML = topLevel.map(msg => {
+        let statusBadge = '';
+        if (msg.status) {
+          const statusClass = msg.status === 'pending' ? 'status-pending' :
+                             msg.status === 'accepted' ? 'status-accepted' :
+                             'status-declined';
+          statusBadge = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
+            ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
+          </span>`;
+        }
+
+        return `
+          <div data-id="${msg.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
+            <div class="flex justify-between items-center">
+              <p class="font-bold">${msg.sender?.name || 'Unknown'}</p>
+              ${statusBadge}
+            </div>
+            <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
+            <p class="msg-preview text-gray-300">${msg.message.substring(0, 80)}${msg.message.length > 80 ? '...' : ''}</p>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.msg-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const msgId = item.dataset.id;
+          const msg = currentMessages.find(m => m.id === msgId);
+          if (msg) showThread(msg);
+        });
+      });
+
+      if (topLevel.length > 0) {
+        showThread(topLevel[0]);
+      }
+    }
+
+    // Initialize everything
     init();
+    loadMessages();
+
+    // Modal button listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
+      document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
+    });
   </script>
 </body>
 </html>
