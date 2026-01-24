@@ -14,7 +14,6 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
   <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
-
   <!-- Header & Hero -->
   <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3">
@@ -34,7 +33,6 @@
       <a href="signup.html" class="bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-400 transition shadow-md">Sign Up</a>
     </nav>
   </header>
-
   <section class="relative h-[350px] md:h-[450px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
            style="background-image: url('banner-cropped.jpg');">
     <div class="bg-black bg-opacity-60 p-8 md:p-10 rounded-xl text-center shadow-2xl">
@@ -47,7 +45,6 @@
       </a>
     </div>
   </section>
-
   <main class="flex-grow flex items-center justify-center py-12 md:py-16 px-4">
     <div class="container mx-auto">
       <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
@@ -56,23 +53,19 @@
         </div>
         <div class="w-full md:w-1/2 p-6 md:p-10">
           <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Create Your Rhythm Deck Account</h2>
-
           <form id="signupForm" class="space-y-4">
             <div><label class="block text-gray-700 font-semibold mb-1">Name / Band Name</label>
               <input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
             </div>
-
             <div><label class="block text-gray-700 font-semibold mb-1">Email</label>
               <input type="email" id="email" required autocomplete="new-email" class="w-full border border-gray-300 rounded-lg p-3 input-focus">
             </div>
-
             <div><label class="block text-gray-700 font-semibold mb-1">Password</label>
               <div class="relative">
                 <input type="password" id="password" required minlength="6" autocomplete="new-password" class="w-full border border-gray-300 rounded-lg p-3 pr-12 input-focus">
                 <span id="togglePassword" class="absolute right-3 top-3.5 cursor-pointer text-gray-500 text-sm select-none hover:text-gray-800">Show</span>
               </div>
             </div>
-
             <div>
               <label class="block text-gray-700 font-semibold mb-1">Choose Your Subdomain <br><small class="text-gray-500">(Example: no spaces: retro-rock-band)</small></label>
               <div class="flex">
@@ -81,7 +74,6 @@
               </div>
               <div id="subdomainStatus" class="mt-2 text-sm h-5 font-medium"></div>
             </div>
-
             <div>
               <label class="block text-gray-700 font-semibold mb-1">Select Plan</label>
               <select id="planType" required class="w-full border border-gray-300 rounded-lg p-3">
@@ -93,7 +85,6 @@
                 <option value="platinum">Platinum Pro Plan (Pro + Radio & Merch Tools)</option>
               </select>
             </div>
-
             <!-- Rhythm Vision Pro Options -->
             <div id="visionOptions" class="hidden space-y-4">
               <div>
@@ -105,8 +96,7 @@
                 </select>
               </div>
             </div>
-
-            <!-- Rhythm Vision Platinum Options (NEW) -->
+            <!-- Rhythm Vision Platinum Options -->
             <div id="visionPlatinumOptions" class="hidden space-y-4 platinum-highlight p-4 rounded-lg">
               <div>
                 <label class="block text-gray-700 font-semibold mb-1 text-amber-700">Rhythm Vision Platinum Duration</label>
@@ -120,7 +110,6 @@
                 Unlimited scenes • Up to 30 images/scene • Full commercial rights • Priority generation
               </p>
             </div>
-
             <!-- Pro Plan Options -->
             <div id="proOptions" class="hidden space-y-4">
               <div>
@@ -134,7 +123,6 @@
                 </select>
               </div>
             </div>
-
             <!-- Platinum Pro Options -->
             <div id="platinumOptions" class="hidden space-y-4">
               <div>
@@ -145,12 +133,10 @@
                 </select>
               </div>
             </div>
-
             <div class="flex items-center space-x-2">
               <input type="checkbox" id="terms" required class="rounded text-green-500 h-4 w-4">
               <label for="terms" class="text-gray-700 text-sm">I agree to the <a href="terms.html" class="text-green-500 hover:underline">Terms</a> and <a href="privacy.html" class="text-green-500 hover:underline">Privacy Policy</a>.</label>
             </div>
-
             <button type="submit" id="submitButton" class="w-full bg-green-500 text-white font-bold py-4 rounded-lg hover:bg-green-600 transition text-lg">
               Create Account
             </button>
@@ -159,7 +145,6 @@
       </div>
     </div>
   </main>
-
   <footer class="bg-black text-white mt-10 p-5 text-center text-sm">
     <nav class="mb-2 space-x-4">
       <a href="contact.html" class="hover:text-green-400">Contact Us</a>
@@ -168,17 +153,13 @@
     </nav>
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
     const supabase = createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
-
     const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
-
     function showMessage(title, message, color = 'bg-green-600') {
       const id = 'toast-' + Date.now();
       document.getElementById('toastContainer').insertAdjacentHTML('beforeend', `
@@ -191,49 +172,44 @@
       setTimeout(() => document.getElementById(id)?.classList.add('opacity-100', 'scale-100'), 50);
       setTimeout(() => document.getElementById(id)?.remove(), 10000);
     }
-
     document.addEventListener('DOMContentLoaded', () => {
       const planType = document.getElementById('planType');
       const visionOptions = document.getElementById('visionOptions');
-      const visionDuration = document.getElementById('visionDuration');
       const visionPlatinumOptions = document.getElementById('visionPlatinumOptions');
-      const visionPlatinumDuration = document.getElementById('visionPlatinumDuration');
       const proOptions = document.getElementById('proOptions');
-      const planDuration = document.getElementById('planDuration');
       const platinumOptions = document.getElementById('platinumOptions');
-      const platinumDuration = document.getElementById('platinumDuration');
-      const subdomainInput = document.getElementById('subdomain');
-      const subdomainStatus = document.getElementById('subdomainStatus');
-      const submitButton = document.getElementById('submitButton');
-      const togglePassword = document.getElementById('togglePassword');
-      const passwordField = document.getElementById('password');
 
-      // Toggle password visibility
-      togglePassword.addEventListener('click', () => {
-        if (passwordField.type === 'password') {
-          passwordField.type = 'text';
-          togglePassword.textContent = 'Hide';
-        } else {
-          passwordField.type = 'password';
-          togglePassword.textContent = 'Show';
-        }
-      });
+      // Reset all options on load
+      visionOptions.style.display = 'none';
+      visionPlatinumOptions.style.display = 'none';
+      proOptions.style.display = 'none';
+      platinumOptions.style.display = 'none';
 
       // Show/hide plan duration options
       planType.addEventListener('change', () => {
         const val = planType.value;
-        visionOptions.classList.add('hidden');
-        visionPlatinumOptions.classList.add('hidden');
-        proOptions.classList.add('hidden');
-        platinumOptions.classList.add('hidden');
 
-        if (val === 'vision') visionOptions.classList.remove('hidden');
-        else if (val === 'vision-platinum') visionPlatinumOptions.classList.remove('hidden');
-        else if (val === 'pro') proOptions.classList.remove('hidden');
-        else if (val === 'platinum') platinumOptions.classList.remove('hidden');
+        // Hide all first
+        visionOptions.style.display = 'none';
+        visionPlatinumOptions.style.display = 'none';
+        proOptions.style.display = 'none';
+        platinumOptions.style.display = 'none';
+
+        // Show selected
+        if (val === 'vision') {
+          visionOptions.style.display = 'block';
+        } else if (val === 'vision-platinum') {
+          visionPlatinumOptions.style.display = 'block';
+        } else if (val === 'pro') {
+          proOptions.style.display = 'block';
+        } else if (val === 'platinum') {
+          platinumOptions.style.display = 'block';
+        }
       });
 
       // Subdomain availability check
+      const subdomainInput = document.getElementById('subdomain');
+      const subdomainStatus = document.getElementById('subdomainStatus');
       subdomainInput.addEventListener('input', () => {
         clearTimeout(window.subdomainTimeout);
         window.subdomainTimeout = setTimeout(async () => {
@@ -257,8 +233,10 @@
         }, 600);
       });
 
+      // Form submission
       document.getElementById('signupForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitButton = document.getElementById('submitButton');
         submitButton.disabled = true;
         submitButton.innerHTML = 'Creating account...';
 
@@ -286,7 +264,6 @@
               }
             }
           });
-
           if (authError) throw new Error(authError.message || 'Signup failed');
 
           // Create/update profile
@@ -318,7 +295,6 @@
 
           showMessage('Success', 'Account created!');
 
-          // Free plan → direct to admin
           if (plan === 'free') {
             setTimeout(() => location.href = 'https://rhythm-deck-music.onrender.com/profile-admin.html', 1500);
             return;
@@ -337,7 +313,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              planType: plan,           // 'vision-platinum' is now supported
+              planType: plan,
               duration,
               userId: user.id,
               email
@@ -350,9 +326,6 @@
           }
 
           const { sessionId } = await response.json();
-
-          // After success, Stripe will redirect back with ?session_id=...&redirect_status=succeeded
-          // We handle that below
 
           const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
           if (stripeError) throw stripeError;
@@ -368,11 +341,7 @@
       // Handle successful Stripe redirect back
       const params = new URLSearchParams(window.location.search);
       if (params.get('redirect_status') === 'succeeded') {
-        showMessage('Payment Success', 'Welcome to Rhythm Vision Platinum! Redirecting to your dashboard...', 'bg-green-600');
-
-        // Detect which plan was just purchased (from query param or profile)
-        // For simplicity, we assume vision-platinum → go directly to rhythm-vision-platinum.html
-        // You can enhance this by checking the profile after login
+        showMessage('Payment Success', 'Welcome! Redirecting to your dashboard...', 'bg-green-600');
         setTimeout(() => {
           location.href = 'https://rhythm-deck-music.onrender.com/rhythm-vision-platinum.html';
         }, 2500);
