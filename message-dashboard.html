@@ -1,68 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Collab Messages | Rhythm Deck</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .msg-item:hover {
-      background: rgba(255,255,255,0.06);
-    }
-    .msg-item.unread {
-      font-weight: 600;
-      border-left: 4px solid #10b981;
-      background: rgba(16,185,129,0.08);
-    }
-    .msg-preview {
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-    .reply-indent {
-      margin-left: 2.5rem;
-      border-left: 3px solid #10b981;
-      padding-left: 1.25rem;
-    }
-    .unread-badge {
-      background: #10b981;
-      color: #000;
-      font-weight: 700;
-      border-radius: 9999px;
-      padding: 0.2rem 0.65rem;
-      font-size: 0.8rem;
-    }
-    .unread-label {
-      color: #10b981;
-      font-weight: 600;
-      font-size: 0.875rem;
-      margin-top: 0.4rem;
-      display: inline-block;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collab Messages | Rhythm Deck</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+.msg-item:hover { background: rgba(255,255,255,0.08); }
+.msg-item.unread {
+  font-weight: bold;
+  border-left: 4px solid #10b981;
+  background: rgba(16,185,129,0.05);
+}
+.msg-preview {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+.reply-indent {
+  margin-left: 2rem;
+  border-left: 3px solid #10b981;
+  padding-left: 1rem;
+}
+.unread-badge {
+  background:#10b981;
+  color:#000;
+  font-weight:700;
+  border-radius:9999px;
+  padding:0.15rem 0.5rem;
+  font-size:0.75rem;
+}
+</style>
 </head>
+
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-
 <div class="max-w-7xl mx-auto p-6">
-  <h1 class="text-5xl font-black mb-8 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
-    Collab Messages
-  </h1>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
-    <!-- Conversations list -->
-    <div class="bg-black/40 rounded-2xl flex flex-col overflow-hidden">
-      <div class="p-5 border-b border-purple-700 font-bold text-lg tracking-wide">Conversations</div>
-      <div id="conversationList" class="flex-1 overflow-y-auto"></div>
-    </div>
+<h1 class="text-5xl font-black mb-8 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
+Collab Messages
+</h1>
 
-    <!-- Message view -->
-    <div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-6 flex flex-col">
-      <div class="flex-1 flex items-center justify-center text-gray-400">
-        Select a conversation to view messages
-      </div>
-    </div>
-  </div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
+
+<!-- LEFT -->
+<div class="bg-black/40 rounded-2xl flex flex-col">
+  <div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
+  <div id="conversationList" class="flex-1 overflow-y-auto"></div>
+</div>
+
+<!-- RIGHT -->
+<div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 flex flex-col">
+  <p class="text-gray-400 text-center mt-20">Select a conversation</p>
+</div>
+
+</div>
 </div>
 
 <script type="module">
@@ -73,207 +66,119 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
-let currentUserId = null;
 let messages = [];
-let activeThreadId = null;
+let activeThread = null;
 
-async function init() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    document.getElementById('messageView').innerHTML = `
-      <div class="flex-1 flex items-center justify-center text-red-300 text-lg">
-        Please sign in to view messages
-      </div>`;
-    return;
-  }
-
-  currentUserId = user.id;
-  loadMessages();
-
-  // Real-time updates
-  supabase
-    .channel('collab-requests-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'collab_requests' }, loadMessages)
-    .subscribe();
-}
-
+/* LOAD */
 async function loadMessages() {
-  if (!currentUserId) return;
-
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('collab_requests')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Load error:', error);
-    return;
-  }
-
   messages = data || [];
   renderConversationList();
 
-  if (activeThreadId) {
-    openThread(activeThreadId);
-  }
+  if (activeThread) openThread(activeThread, false);
 }
 
+/* LEFT LIST */
 function renderConversationList() {
   const roots = messages.filter(m => m.parent_id === null);
+  const list = document.getElementById('conversationList');
 
-  const html = roots.map(root => {
-    // Count unread messages where current user is the receiver
-    const unreadCount = messages.filter(m =>
-      (m.id === root.id || m.parent_id === root.id) &&
-      m.receiver_id === currentUserId &&
-      m.read_at === null
+  list.innerHTML = roots.map(root => {
+
+    const unreadCount = messages.filter(
+      m => m.parent_id === root.id && m.status === 'unread'
     ).length;
 
-    const hasUnread = unreadCount > 0;
-
     return `
-      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer transition ${hasUnread ? 'unread' : ''}"
+      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unreadCount ? 'unread' : ''}"
            data-id="${root.id}">
-        <div class="flex justify-between items-center mb-1">
-          <span class="font-semibold text-base">${root.sender_name || 'Unknown'}</span>
-          ${hasUnread ? `<span class="unread-badge">${unreadCount}</span>` : ''}
+        <div class="flex justify-between">
+          <span>${root.sender_name}</span>
+          ${unreadCount ? `<span class="unread-badge">${unreadCount}</span>` : ''}
         </div>
-        <p class="msg-preview text-gray-300 text-sm line-clamp-2">${root.message || ''}</p>
-        <div class="text-xs text-gray-500 mt-2">
-          ${new Date(root.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
-        </div>
+        <p class="msg-preview text-gray-300">${root.message}</p>
       </div>
     `;
   }).join('');
 
-  document.getElementById('conversationList').innerHTML =
-    html || '<div class="p-6 text-center text-gray-400">No conversations yet</div>';
-
   document.querySelectorAll('.msg-item').forEach(el => {
-    el.addEventListener('click', () => openThread(el.dataset.id));
+    el.onclick = () => openThread(el.dataset.id, true);
   });
 }
 
-async function openThread(threadRootId) {
-  activeThreadId = threadRootId;
+/* THREAD */
+async function openThread(rootId, markRead = true) {
+  activeThread = rootId;
 
-  const threadMessages = messages
-    .filter(m => m.id === threadRootId || m.parent_id === threadRootId)
-    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-  const root = threadMessages.find(m => m.id === threadRootId);
-  if (!root) return;
-
-  // Mark all unread messages in this thread (where current user is receiver)
-  const unreadIds = threadMessages
-    .filter(m => m.receiver_id === currentUserId && m.read_at === null)
-    .map(m => m.id);
-
-  if (unreadIds.length > 0) {
-    const { error } = await supabase
+  if (markRead) {
+    await supabase
       .from('collab_requests')
-      .update({ read_at: new Date().toISOString() })
-      .in('id', unreadIds);
-
-    if (error) {
-      console.error('Mark read error:', error);
-    } else {
-      // Optimistic update in local state
-      messages = messages.map(m =>
-        unreadIds.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m
-      );
-    }
+      .update({ status: 'read' })
+      .eq('parent_id', rootId)
+      .eq('status', 'unread');
   }
 
-  // Build thread HTML
-  let content = `
-    <div class="flex-1 overflow-y-auto space-y-6 pr-2">
-      <!-- Root message -->
-      <div class="border-l-4 border-emerald-500 pl-5 py-2">
-        <div class="flex justify-between items-baseline mb-1">
-          <span class="font-bold text-lg">${root.sender_name || 'Unknown'}</span>
-          <span class="text-xs text-gray-400">
-            ${new Date(root.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
-          </span>
-        </div>
-        <p class="text-gray-100 whitespace-pre-wrap">${root.message || ''}</p>
+  const root = messages.find(m => m.id === rootId);
+  const replies = messages
+    .filter(m => m.parent_id === rootId)
+    .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+
+  document.getElementById('messageView').innerHTML = `
+    <div class="flex-1 overflow-y-auto space-y-6">
+      <div class="border-l-4 border-emerald-500 pl-4">
+        <h2 class="text-xl font-bold">${root.sender_name}</h2>
+        <p>${root.message}</p>
       </div>
-  `;
 
-  // Replies
-  threadMessages.filter(m => m.id !== threadRootId).forEach(msg => {
-    const isFromMe = msg.sender_id === currentUserId;
-    const isUnread = msg.receiver_id === currentUserId && msg.read_at === null;
-
-    content += `
-      <div class="reply-indent">
-        <div class="flex justify-between items-baseline mb-1">
-          <span class="font-semibold ${isFromMe ? 'text-emerald-400' : 'text-white'}">
-            ${msg.sender_name || (isFromMe ? 'You' : 'Unknown')}
-          </span>
-          <span class="text-xs text-gray-400">
-            ${new Date(msg.created_at).toLocaleTimeString([], { timeStyle: 'short' })}
-          </span>
+      ${replies.map(r => `
+        <div class="reply-indent">
+          <p class="font-semibold">${r.sender_name}</p>
+          <p>${r.message}</p>
         </div>
-        <p class="text-gray-200 whitespace-pre-wrap">${msg.message || ''}</p>
-        ${isUnread ? '<span class="unread-label">Unread</span>' : ''}
-      </div>
-    `;
-  });
-
-  content += `
+      `).join('')}
     </div>
 
-    <!-- Reply area -->
-    <div class="mt-6 border-t border-gray-700 pt-5">
-      <textarea id="reply-text" 
-                class="w-full p-4 bg-gray-900/60 rounded-lg text-white border border-gray-600 focus:border-emerald-500 focus:outline-none resize-none" 
-                rows="3" 
-                placeholder="Write your reply..."></textarea>
-      <button onclick="sendReply()" 
-              class="mt-4 bg-emerald-600 hover:bg-emerald-700 px-8 py-3 rounded-xl font-semibold transition">
+    <div class="mt-6 border-t border-gray-700 pt-4">
+      <textarea id="replyInput"
+        class="w-full p-4 rounded-lg bg-white/10 text-white resize-none"
+        rows="3"
+        placeholder="Write a reply..."></textarea>
+      <button onclick="sendReply()"
+        class="mt-4 bg-emerald-600 px-8 py-3 rounded-xl font-bold">
         Send Reply
       </button>
     </div>
   `;
-
-  document.getElementById('messageView').innerHTML = content;
 }
 
+/* SEND */
 window.sendReply = async () => {
-  const textarea = document.getElementById('reply-text');
-  const text = textarea.value.trim();
-  if (!text || !activeThreadId || !currentUserId) return;
+  const input = document.getElementById('replyInput');
+  const message = input.value.trim();
+  if (!message) return;
 
-  const root = messages.find(m => m.id === activeThreadId);
-  if (!root) return;
+  await supabase.from('collab_requests').insert({
+    parent_id: activeThread,
+    sender_name: 'You',
+    message,
+    status: 'unread',
+    created_at: new Date().toISOString()
+  });
 
-  // Reply usually goes to the original sender
-  const receiverId = root.sender_id;
-
-  const { error } = await supabase
-    .from('collab_requests')
-    .insert({
-      parent_id:    activeThreadId,
-      sender_id:    currentUserId,
-      receiver_id:  receiverId,
-      sender_name:  'You',                    // ← improve later with real profile name
-      message:      text,
-      created_at:   new Date().toISOString(),
-      read_at:      null
-    });
-
-  if (error) {
-    console.error('Send error:', error);
-    alert('Could not send reply – check console');
-  } else {
-    textarea.value = '';
-    await loadMessages();
-  }
+  input.value = '';
+  loadMessages();
 };
 
-// ────────────────────────────────────────────────
-init();
+/* REALTIME */
+supabase.channel('collab-live')
+  .on('postgres_changes', { event:'*', schema:'public', table:'collab_requests' }, loadMessages)
+  .subscribe();
+
+loadMessages();
 </script>
 </body>
 </html>
