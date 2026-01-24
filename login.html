@@ -6,7 +6,6 @@
   <title>Login | Rhythm Deck</title>
   <base href="/" />
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
     body {
       background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
@@ -46,9 +45,7 @@
     }
   </style>
 </head>
-
 <body class="flex flex-col min-h-screen">
-
 <header class="bg-black text-white p-5 flex justify-between items-center shadow-lg">
   <div class="flex items-center space-x-4">
     <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-green-500">
@@ -58,7 +55,6 @@
     </div>
   </div>
 </header>
-
 <div class="flex-1 flex items-center justify-center p-6">
   <div class="card">
     <div class="text-center mb-8">
@@ -66,37 +62,30 @@
       <h1 class="text-4xl font-black text-emerald-400">Welcome Back</h1>
       <p class="text-gray-400 mt-2">Log in to your dashboard</p>
     </div>
-
     <form id="loginForm">
       <div class="input-group">
         <input type="email" id="loginEmail" placeholder="Email address" required
           class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl text-lg">
       </div>
-
       <div class="input-group">
         <input type="password" id="loginPassword" placeholder="Password" required
           class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl pr-14 text-lg">
         <span class="eye" id="toggleEye">Show</span>
       </div>
-
       <button type="submit"
         class="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-xl font-black rounded-xl mt-6">
         LOGIN
       </button>
     </form>
-
     <p id="errorMessage" class="text-red-400 text-center mt-4 hidden"></p>
   </div>
 </div>
-
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
-
   // Show / hide password
   const passwordInput = document.getElementById('loginPassword');
   const toggleEye = document.getElementById('toggleEye');
@@ -104,44 +93,34 @@
     passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
     toggleEye.textContent = passwordInput.type === 'password' ? 'Show' : 'Hide';
   };
-
   document.getElementById('loginForm').onsubmit = async (e) => {
     e.preventDefault();
-
     const email = loginEmail.value.trim();
     const password = loginPassword.value;
     const error = document.getElementById('errorMessage');
-
     error.classList.add('hidden');
-
     const { data, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password
     });
-
     if (authError) {
       error.textContent = authError.message;
       error.classList.remove('hidden');
       return;
     }
-
     // Fetch profile safely
     const { data: profile } = await supabase
       .from('profiles')
       .select('plan, role, industry_role')
       .eq('id', data.user.id)
       .maybeSingle();
-
     // Redirect logic
     let redirect = 'profile-admin.html';
-
     if (profile?.industry_role) redirect = 'industry-dashboard.html';
     else if (profile?.plan === 'platinum') redirect = 'platinum-pro-admin.html';
     else if (profile?.plan === 'pro') redirect = 'profile-admin-pro.html';
-
     window.location.href = redirect;
   };
 </script>
-
 </body>
 </html>
