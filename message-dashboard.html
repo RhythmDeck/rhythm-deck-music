@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .msg-item:hover { background: rgba(255,255,255,0.08); }
-    .msg-item.unread { font-weight: bold; border-left: 4px solid #10b981; background: rgba(16,185,129,0.05); }
     .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
     .selected { background: rgba(255,255,255,0.1) !important; }
     .btn-dashboard {
@@ -38,7 +37,6 @@
         ← Back to Dashboard
       </button>
     </div>
-
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
       <!-- Conversations List -->
       <div class="bg-black/40 rounded-2xl overflow-hidden flex flex-col">
@@ -47,7 +45,6 @@
         </div>
         <div id="conversationList" class="flex-1 overflow-y-auto"></div>
       </div>
-
       <!-- Thread View -->
       <div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 flex flex-col overflow-y-auto">
         <p class="text-gray-400 text-center mt-20">Select a conversation to view messages</p>
@@ -75,15 +72,13 @@
   </div>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
     const supabase = createClient(
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
 
     let currentUserId = null;
-    let currentUserName = null;
-    let currentUserRole = null;
     let currentConversationId = null;
 
     window.goToDashboard = async function() {
@@ -101,13 +96,13 @@
       currentConversationId = targetId;
       document.getElementById('replyTargetName').textContent = name;
       document.getElementById('replyModal').classList.remove('invisible', 'opacity-0');
-      document.getElementById('replyModal').classList.add('opacity-100');
+      document.getElementById('replyModal').classList.add('opacity-100', 'show');
       document.getElementById('replyMessage').focus();
     }
 
     function closeReplyModal() {
       document.getElementById('replyModal').classList.add('invisible', 'opacity-0');
-      document.getElementById('replyModal').classList.remove('opacity-100');
+      document.getElementById('replyModal').classList.remove('opacity-100', 'show');
       document.getElementById('replyMessage').value = '';
     }
 
@@ -116,14 +111,12 @@
       if (!message) return alert('Please write a reply!');
 
       const { data: profile } = await supabase.from('profiles').select('name').eq('id', currentUserId).single();
-      const senderName = profile?.name || 'Industry Professional';
+      const senderName = profile?.name || 'You';
 
       const { error } = await supabase.from('collab_requests').insert({
-        artist_id: currentUserId,
+        parent_id: currentConversationId,
         sender_name: senderName,
         message: message,
-        sender_social: null,
-        parent_id: currentConversationId,
         created_at: new Date().toISOString()
       });
 
@@ -137,20 +130,11 @@
       }
     }
 
-    async function deleteMessage(id) {
-      if (!confirm('Delete this message permanently?')) return;
-      const { error } = await supabase.from('collab_requests').delete().eq('id', id).eq('artist_id', currentUserId);
-      if (error) {
-        alert('Failed to delete: ' + error.message);
-      } else {
-        loadMessages();
-      }
-    }
-
     function showThread(originalMsg, allMessages) {
       currentConversationId = originalMsg.id;
 
-      const replies = allMessages.filter(m => m.parent_id === originalMsg.id)
+      const replies = allMessages
+        .filter(m => m.parent_id === originalMsg.id)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
       let html = `
@@ -161,9 +145,6 @@
                 <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender_name}</h2>
                 <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
               </div>
-              <button onclick="deleteMessage('${originalMsg.id}')" class="bg-red-600 hover:bg-red-700 px-5 py-2 rounded-lg font-bold">
-                Delete
-              </button>
             </div>
             <p class="text-lg whitespace-pre-line">${originalMsg.message}</p>
           </div>
@@ -195,7 +176,6 @@
       `;
 
       document.getElementById('messageView').innerHTML = html;
-
       document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('selected'));
       document.querySelector(`[data-id="${originalMsg.id}"]`)?.classList.add('selected');
     }
@@ -208,17 +188,9 @@
       }
 
       currentUserId = user.id;
-      const { data: profile } = await supabase.from('profiles').select('name, role').eq('id', user.id).single();
-      currentUserName = profile?.name || 'You';
-      currentUserRole = profile?.role || 'artist';
 
       const list = document.getElementById('conversationList');
       list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
-
-      if (currentUserRole !== 'artist') {
-        list.innerHTML = '<p class="text-gray-400 text-center py-10">Artist view only for now</p>';
-        return;
-      }
 
       const { data: messages, error } = await supabase
         .from('collab_requests')
@@ -234,18 +206,26 @@
 
       if (!messages || messages.length === 0) {
         list.innerHTML = '<p class="text-gray-400 text-center py-10">No messages yet</p>';
+        document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
         return;
       }
 
       const topLevel = messages.filter(m => !m.parent_id);
 
       list.innerHTML = topLevel.map(msg => `
-        <div data-id="${msg.id}" onclick="showThread(${JSON.stringify(msg)}, ${JSON.stringify(messages)})" class="msg-item ${msg.status === 'pending' ? 'unread' : ''} p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
+        <div data-id="${msg.id}" 
+             onclick="showThread(${JSON.stringify(msg)}, ${JSON.stringify(messages)})" 
+             class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
           <p class="font-bold">${msg.sender_name}</p>
           <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
           <p class="msg-preview text-gray-300">${msg.message}</p>
         </div>
       `).join('');
+
+      // Auto-open first conversation
+      if (topLevel.length > 0) {
+        showThread(topLevel[0], messages);
+      }
     }
 
     loadMessages();
