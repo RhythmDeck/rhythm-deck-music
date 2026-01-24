@@ -1,180 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Collab Messages | Rhythm Deck</title>
-<script src="https://cdn.tailwindcss.com"></script>
-
-<style>
-.msg-item:hover { background: rgba(255,255,255,0.08); }
-.msg-item.unread { font-weight: bold; border-left: 4px solid #10b981; background: rgba(16,185,129,0.05); }
-.msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
-.selected { background: rgba(255,255,255,0.1) !important; }
-.reply-indent { margin-left: 2rem; border-left: 3px solid #10b981; padding-left: 1rem; }
-.unread-badge {
-  background:#10b981;
-  color:#000;
-  font-weight:700;
-  border-radius:9999px;
-  padding:0.15rem 0.5rem;
-  font-size:0.75rem;
-}
-</style>
-</head>
-
-<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-<div class="max-w-7xl mx-auto p-6">
-
-<h1 class="text-5xl font-black mb-8 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
-Collab Messages
-</h1>
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
-
-<!-- LEFT -->
-<div class="bg-black/40 rounded-2xl flex flex-col">
-<div class="p-4 border-b border-purple-600 font-bold">Conversations</div>
-<div id="conversationList" class="flex-1 overflow-y-auto"></div>
-</div>
-
-<!-- RIGHT -->
-<div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 flex flex-col">
-<p class="text-gray-400 text-center mt-20">Select a conversation</p>
-</div>
-
-</div>
-</div>
-
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-const supabase = createClient(
-  'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-);
-
-let messages = [];
-let activeThread = null;
-
-/* LOAD */
-async function loadMessages() {
-  const { data } = await supabase
-    .from('collab_requests')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  messages = data || [];
-  renderConversationList();
-
-  if (activeThread) openThread(activeThread, false);
-}
-
-/* LEFT LIST */
-function renderConversationList() {
-  const roots = messages.filter(m => !m.parent_id);
-  const list = document.getElementById('conversationList');
-
-  list.innerHTML = roots.map(r => {
-    const unread = messages.filter(
-      m => m.parent_id === r.id && m.status !== 'read'
-    ).length;
-
-    return `
-      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer ${unread ? 'unread' : ''}"
-           data-id="${r.id}">
-        <div class="flex justify-between">
-          <span>${r.sender_name}</span>
-          ${unread ? `<span class="unread-badge">${unread}</span>` : ''}
-        </div>
-        <p class="msg-preview text-gray-300">${r.message}</p>
-      </div>
-    `;
-  }).join('');
-
-  document.querySelectorAll('.msg-item').forEach(el => {
-    el.onclick = () => openThread(el.dataset.id, true);
-  });
-}
-
-/* THREAD */
-async function openThread(rootId, markRead = true) {
-  activeThread = rootId;
-
-  if (markRead) {
-    await supabase
-      .from('collab_requests')
-      .update({ status: 'read' })
-      .eq('parent_id', rootId);
-  }
-
-  const root = messages.find(m => m.id === rootId);
-  const replies = messages
-    .filter(m => m.parent_id === rootId)
-    .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-
-  let grouped = [];
-  replies.forEach(m => {
-    const last = grouped[grouped.length - 1];
-    if (last && last.sender === m.sender_name) {
-      last.items.push(m);
-    } else {
-      grouped.push({ sender: m.sender_name, items: [m] });
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collab Messages | Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .msg-item:hover { background: rgba(255,255,255,0.08); }
+    .msg-item.unread { font-weight: bold; border-left: 4px solid #10b981; background: rgba(16,185,129,0.05); }
+    .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+    .selected { background: rgba(255,255,255,0.1) !important; }
+    .btn-dashboard {
+      background: linear-gradient(to right, #d4af37, #b8860b);
+      color: #1a0f2e;
+      padding: 0.75rem 1.75rem;
+      border-radius: 0.75rem;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(212,175,55,0.4);
     }
-  });
-
-  document.getElementById('messageView').innerHTML = `
-    <div class="flex-1 overflow-y-auto space-y-6">
-      <div class="border-l-4 border-emerald-500 pl-4">
-        <h2 class="text-xl font-bold">${root.sender_name}</h2>
-        <p>${root.message}</p>
-      </div>
-
-      ${grouped.map(g => `
-        <div class="reply-indent">
-          <p class="font-semibold">${g.sender}</p>
-          ${g.items.map(i => `<p>${i.message}</p>`).join('')}
-        </div>
-      `).join('')}
-    </div>
-
-    <div class="mt-6 border-t border-gray-700 pt-4">
-      <textarea id="replyInput"
-        class="w-full p-4 rounded-lg bg-white/10 text-white resize-none"
-        rows="3"
-        placeholder="Write a reply..."></textarea>
-      <button onclick="sendReply()"
-        class="mt-4 bg-emerald-600 px-8 py-3 rounded-xl font-bold">
-        Send Reply
+    .btn-dashboard:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212,175,55,0.6);
+    }
+    .reply-indent { margin-left: 2rem; border-left: 3px solid #10b981; padding-left: 1rem; opacity: 0.9; }
+    #replyModal { transition: all 0.3s; }
+    #replyModal.show { opacity: 1; visibility: visible; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
+  <div class="max-w-7xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-5xl font-black bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
+        Collab Messages
+      </h1>
+      <button onClick="goToDashboard()" class="btn-dashboard">
+        ← Back to Dashboard
       </button>
     </div>
-  `;
-}
 
-/* SEND */
-window.sendReply = async () => {
-  const input = document.getElementById('replyInput');
-  const message = input.value.trim();
-  if (!message) return;
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
+      <!-- Conversations List -->
+      <div class="bg-black/40 rounded-2xl overflow-hidden flex flex-col">
+        <div class="p-4 border-b border-purple-600">
+          <h2 class="text-xl font-bold">Conversations</h2>
+        </div>
+        <div id="conversationList" class="flex-1 overflow-y-auto"></div>
+      </div>
 
-  await supabase.from('collab_requests').insert({
-    parent_id: activeThread,
-    sender_name: 'You',
-    message,
-    status: 'unread',
-    created_at: new Date().toISOString()
-  });
+      <!-- Thread View -->
+      <div id="messageView" class="lg:col-span-2 bg-black/40 rounded-2xl p-8 flex flex-col overflow-y-auto">
+        <p class="text-gray-400 text-center mt-20">Select a conversation to view messages</p>
+      </div>
+    </div>
+  </div>
 
-  input.value = '';
-  loadMessages();
-};
+  <!-- Reply Modal -->
+  <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible transition-all duration-300">
+    <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
+      <button onClick="closeReplyModal()" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
+        ×
+      </button>
+      <div class="p-8 pt-16">
+        <h2 class="text-4xl font-black text-emerald-400 mb-6 text-center">
+          Reply to <span id="replyTargetName">Artist</span>
+        </h2>
+        <textarea id="replyMessage" rows="6" placeholder="Write your reply..." required
+                  class="w-full p-4 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
+        <button onClick="sendReply()" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition shadow-xl transform hover:scale-105">
+          Send Reply
+        </button>
+      </div>
+    </div>
+  </div>
 
-/* REALTIME */
-supabase.channel('collab-live')
-  .on('postgres_changes',{event:'*',schema:'public',table:'collab_requests'},loadMessages)
-  .subscribe();
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
 
-loadMessages();
-</script>
+    let currentUserId = null;
+    let currentUserName = null;
+    let currentUserRole = null;
+    let currentConversationId = null;
+
+    window.goToDashboard = async function() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return alert("Please log in first");
+      const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+      if (profile?.plan === 'platinum') {
+        window.location.href = 'platinum-pro-admin.html';
+      } else {
+        window.location.href = 'profile-admin-pro.html';
+      }
+    };
+
+    function openReplyModal(targetId, name) {
+      currentConversationId = targetId;
+      document.getElementById('replyTargetName').textContent = name;
+      document.getElementById('replyModal').classList.remove('invisible', 'opacity-0');
+      document.getElementById('replyModal').classList.add('opacity-100');
+      document.getElementById('replyMessage').focus();
+    }
+
+    function closeReplyModal() {
+      document.getElementById('replyModal').classList.add('invisible', 'opacity-0');
+      document.getElementById('replyModal').classList.remove('opacity-100');
+      document.getElementById('replyMessage').value = '';
+    }
+
+    async function sendReply() {
+      const message = document.getElementById('replyMessage').value.trim();
+      if (!message) return alert('Please write a reply!');
+
+      const { data: profile } = await supabase.from('profiles').select('name').eq('id', currentUserId).single();
+      const senderName = profile?.name || 'Industry Professional';
+
+      const { error } = await supabase.from('collab_requests').insert({
+        artist_id: currentUserId,
+        sender_name: senderName,
+        message: message,
+        sender_social: null,
+        parent_id: currentConversationId,
+        created_at: new Date().toISOString()
+      });
+
+      if (error) {
+        console.error('Send reply error:', error);
+        alert('Failed to send reply: ' + error.message);
+      } else {
+        alert('Reply sent!');
+        closeReplyModal();
+        loadMessages();
+      }
+    }
+
+    async function deleteMessage(id) {
+      if (!confirm('Delete this message permanently?')) return;
+      const { error } = await supabase.from('collab_requests').delete().eq('id', id).eq('artist_id', currentUserId);
+      if (error) {
+        alert('Failed to delete: ' + error.message);
+      } else {
+        loadMessages();
+      }
+    }
+
+    function showThread(originalMsg, allMessages) {
+      currentConversationId = originalMsg.id;
+
+      const replies = allMessages.filter(m => m.parent_id === originalMsg.id)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+      let html = `
+        <div class="flex-1 overflow-y-auto pr-4 space-y-6">
+          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender_name}</h2>
+                <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
+              </div>
+              <button onclick="deleteMessage('${originalMsg.id}')" class="bg-red-600 hover:bg-red-700 px-5 py-2 rounded-lg font-bold">
+                Delete
+              </button>
+            </div>
+            <p class="text-lg whitespace-pre-line">${originalMsg.message}</p>
+          </div>
+      `;
+
+      if (replies.length > 0) {
+        html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
+        replies.forEach(reply => {
+          html += `
+            <div class="reply-indent bg-black/30 rounded-xl p-5">
+              <p class="font-semibold text-emerald-300">${reply.sender_name}</p>
+              <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
+              <p class="mt-2">${reply.message}</p>
+            </div>
+          `;
+        });
+      } else {
+        html += `<p class="text-gray-400 italic mt-6">No replies yet</p>`;
+      }
+
+      html += `
+        </div>
+        <div class="mt-8 flex justify-end">
+          <button onclick="openReplyModal('${originalMsg.id}', '${originalMsg.sender_name.replace(/'/g, "\\'")}')"
+                  class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-10 py-4 rounded-xl text-xl transition transform hover:scale-105 shadow-xl">
+            Reply to this thread
+          </button>
+        </div>
+      `;
+
+      document.getElementById('messageView').innerHTML = html;
+
+      document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('selected'));
+      document.querySelector(`[data-id="${originalMsg.id}"]`)?.classList.add('selected');
+    }
+
+    async function loadMessages() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        location.href = 'login.html';
+        return;
+      }
+
+      currentUserId = user.id;
+      const { data: profile } = await supabase.from('profiles').select('name, role').eq('id', user.id).single();
+      currentUserName = profile?.name || 'You';
+      currentUserRole = profile?.role || 'artist';
+
+      const list = document.getElementById('conversationList');
+      list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
+
+      if (currentUserRole !== 'artist') {
+        list.innerHTML = '<p class="text-gray-400 text-center py-10">Artist view only for now</p>';
+        return;
+      }
+
+      const { data: messages, error } = await supabase
+        .from('collab_requests')
+        .select('*')
+        .eq('artist_id', currentUserId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Load error:', error);
+        list.innerHTML = '<p class="text-red-400 text-center py-10">Error loading messages</p>';
+        return;
+      }
+
+      if (!messages || messages.length === 0) {
+        list.innerHTML = '<p class="text-gray-400 text-center py-10">No messages yet</p>';
+        return;
+      }
+
+      const topLevel = messages.filter(m => !m.parent_id);
+
+      list.innerHTML = topLevel.map(msg => `
+        <div data-id="${msg.id}" onclick="showThread(${JSON.stringify(msg)}, ${JSON.stringify(messages)})" class="msg-item ${msg.status === 'pending' ? 'unread' : ''} p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
+          <p class="font-bold">${msg.sender_name}</p>
+          <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
+          <p class="msg-preview text-gray-300">${msg.message}</p>
+        </div>
+      `).join('');
+    }
+
+    loadMessages();
+  </script>
 </body>
 </html>
