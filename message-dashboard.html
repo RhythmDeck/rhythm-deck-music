@@ -23,9 +23,17 @@
       box-shadow: 0 6px 20px rgba(212,175,55,0.6);
     }
     .reply-indent { margin-left: 2rem; border-left: 3px solid #10b981; padding-left: 1rem; opacity: 0.9; }
-    #replyModal { transition: opacity 0.3s ease; }
-    #replyModal.show { opacity: 1; visibility: visible; pointer-events: auto; }
-    #replyModal:not(.show) { opacity: 0; visibility: hidden; pointer-events: none; }
+    #replyModal {
+      transition: opacity 0.3s ease;
+    }
+    #replyModal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #replyModal:not(.open) {
+      opacity: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -51,7 +59,7 @@
     </div>
   </div>
 
-  <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 invisible pointer-events-none">
+  <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] opacity-0 pointer-events-none">
     <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
       <button onClick="closeReplyModal()" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
         ×
@@ -95,17 +103,18 @@
       currentConversationId = targetId;
       document.getElementById('replyTargetName').textContent = name;
       const modal = document.getElementById('replyModal');
-      modal.classList.remove('invisible', 'pointer-events-none');
-      modal.classList.add('opacity-100', 'show');
+      modal.classList.add('opacity-100');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
       document.getElementById('replyMessage').focus();
     }
 
     function closeReplyModal() {
       const modal = document.getElementById('replyModal');
-      modal.classList.remove('opacity-100', 'show');
+      modal.classList.remove('opacity-100');
       modal.classList.add('pointer-events-none');
+      // After fade-out finishes, reset everything
       setTimeout(() => {
-        modal.classList.add('invisible');
+        modal.classList.add('opacity-0');
         document.getElementById('replyMessage').value = '';
       }, 350);
     }
