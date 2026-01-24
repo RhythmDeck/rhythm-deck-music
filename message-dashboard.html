@@ -137,6 +137,9 @@
         .filter(m => m.parent_id === originalMsg.id)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
+      // Safely escape sender_name for JavaScript string
+      const escapedName = originalMsg.sender_name.replace(/'/g, "\\'").replace(/"/g, '\\"');
+
       let html = `
         <div class="flex-1 overflow-y-auto pr-4 space-y-6">
           <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
@@ -168,7 +171,7 @@
       html += `
         </div>
         <div class="mt-8 flex justify-end">
-          <button onclick="openReplyModal('${originalMsg.id}', '${originalMsg.sender_name.replace(/'/g, "\\'")}')"
+          <button onclick="openReplyModal('${originalMsg.id}', '${escapedName}')"
                   class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-10 py-4 rounded-xl text-xl transition transform hover:scale-105 shadow-xl">
             Reply to this thread
           </button>
@@ -213,8 +216,8 @@
       const topLevel = messages.filter(m => !m.parent_id);
 
       list.innerHTML = topLevel.map(msg => `
-        <div data-id="${msg.id}" 
-             onclick="showThread(${JSON.stringify(msg)}, ${JSON.stringify(messages)})" 
+        <div data-id="${msg.id}"
+             onclick="showThread(${JSON.stringify(msg)}, ${JSON.stringify(messages)})"
              class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
           <p class="font-bold">${msg.sender_name}</p>
           <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
