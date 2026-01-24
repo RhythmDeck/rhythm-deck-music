@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Platinum Pro Admin | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.livepeer.studio/player"></script>
   <script src="https://js.stripe.com/v3/"></script>
   <style>
@@ -33,10 +32,11 @@
     #socialShareModal.show {opacity:1;visibility:visible;}
     .delete-comment-btn {position: absolute;top: 4px;right: 6px;background: #ef4444;color: white;border: none;border-radius: 50%;width: 22px;height: 22px;font-size: 14px;line-height: 20px;text-align: center;cursor: pointer;font-weight: bold;box-shadow: 0 1px 3px rgba(0,0,0,0.3);}
     .delete-comment-btn:hover {background: #dc2626;}
+    .ai-btn {transition: all 0.2s;}
+    .ai-btn:hover {transform: scale(1.05);}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
-
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg gap-4">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -73,9 +73,7 @@
     </button>
   </nav>
 </header>
-
 <main class="flex-grow">
-
   <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
     <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center">
@@ -90,101 +88,117 @@
     <input type="file" id="logoInput" accept="image/*" class="hidden">
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
-
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-br from-purple-800 to-pink-800 rounded-xl shadow-2xl text-white">
     <h3 class="text-4xl font-black mb-6 text-center">Share Your Content to Social Media</h3>
     <p class="text-center mb-8 opacity-90 text-lg">Connect your accounts and post videos, updates, and music with one click</p>
-
     <div class="grid grid-cols-3 md:grid-cols-6 gap-6">
       <label class="social-btn bg-gradient-to-br from-pink-500 to-purple-500 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="instagram" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.694.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg>
         <span class="font-bold text-lg">Instagram</span>
       </label>
-
       <label class="social-btn bg-black p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="tiktok" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12.53.02C13.84 0 15.14.01 16.44.02c.08 1.53.63 3.09 1.81 4.13 1.09 1 2.5.83 3.75.83v4.03c-1.44 0-2.89-.19-4.2-.89-1.29-.67-2.3-1.83-3.03-3.13v7.96c0 3.84-3.12 6.96-6.96 6.96-1.92 0-3.67-.78-4.94-2.04-1.27-1.26-2.05-3.01-2.05-4.93 0-3.84 3.12-6.96 6.96-6.96.76 0 1.5.13 2.2.37v4.18c-.66-.25-1.38-.38-2.12-.38-2.34 0-4.24 1.9-4.24 4.24s1.9 4.24 4.24 4.24c2.34 0 4.24-1.9 4.24-4.24V.02z"/></svg>
         <span class="font-bold text-lg">TikTok</span>
       </label>
-
       <label class="social-btn bg-red-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="youtube" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M21.543 6.498C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.925 1.763-1.84 2.027C18.72 20 12 20 12 20s-6.72 0-8.703-.471c-.915-.264-1.586-1.042-1.84-2.027C1 15.72 1 12 1 12s0-3.72.457-5.502c.254-.985.925-1.763 1.84-2.027C5.28 4 12 4 12 4s6.72 0 8.703.471c.915.264 1.586 1.042 1.84 2.027zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
         <span class="font-bold text-lg">YouTube</span>
       </label>
-
       <label class="social-btn bg-blue-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="facebook" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.49 0-1.955.925-1.955 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 22.954 24 17.99 24 12z"/></svg>
         <span class="font-bold text-lg">Facebook</span>
       </label>
-
       <label class="social-btn bg-black p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="x" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         <span class="font-bold text-lg">X (Twitter)</span>
       </label>
-
       <label class="social-btn bg-green-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="spotify" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm5.5 17.3c-.2.1-.4.1-.6 0-2.1-1.3-4.7-1.6-7.8-.9-.3 0-.6-.2-.6-.5s.2-.6.5-.6c3.5-.8 6.4-.5 8.8.9.3.2.4.5.2.8zm.8-3.2c-.2.1-.5.1-.7 0-2.4-1.5-6.1-1.9-9-1.1-.4 0-.7-.3-.7-.7s.3-.7.7-.7c3.4-.9 7.6-.5 10.4 1.2.4.2.5.6.3 1zm1-5.8c-.3.2-.6.2-.9 0-2.8-1.8-7.1-2.3-10.4-1.3-.4.1-.8-.2-.9-.6-.1-.4.2-.8.6-.9 4-1.1 8.9-.5 12.3 1.6.4.3.5.8.3 1.2z"/></svg>
         <span class="font-bold text-lg">Spotify</span>
       </label>
-
       <label class="social-btn bg-black p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="applemusic" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M17.9 10.9c-3.6 0-6.5 2.9-6.5 6.5s2.9 6.5 6.5 6.5 6.5-2.9 6.5-6.5-2.9-6.5-6.5-6.5zm0 10.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm-9.4-6.5c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4.5 0c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM22 12.5c0-2.485-2.015-4.5-4.5-4.5-.345 0-.68.04-1 .115v9.77c.32.075.655.115 1 .115 2.485 0 4.5-2.015 4.5-4.5z"/></svg>
         <span class="font-bold text-lg">Apple Music</span>
       </label>
-
       <label class="social-btn bg-orange-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="soundcloud" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.5 17.5c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zm-13 0c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zm6.5-4c-2.8 0-5.1 1.7-5.1 3.8v.2h10.2v-.2c0-2.1-2.3-3.8-5.1-3.8z"/></svg>
         <span class="font-bold text-lg">SoundCloud</span>
       </label>
-
       <label class="social-btn bg-blue-900 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="bandcamp" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M0 0v24h24V0H0zm12 12.5l8-5-8-5v10z"/></svg>
         <span class="font-bold text-lg">Bandcamp</span>
       </label>
-
       <label class="social-btn bg-orange-500 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="reddit" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.5 17.5c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zm-13 0c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zm6.5-4c-2.8 0-5.1 1.7-5.1 3.8v.2h10.2v-.2c0-2.1-2.3-3.8-5.1-3.8z"/></svg>
         <span class="font-bold text-lg">Reddit</span>
       </label>
-
       <label class="social-btn bg-indigo-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="discord" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.683 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.366 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
         <span class="font-bold text-lg">Discord</span>
       </label>
-
       <label class="social-btn bg-red-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="pinterest" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.03-.655 2.569-.994 3.995-.283 1.193.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.099.119.112.223.083.343-.029.119-.096.362-.109.413-.017.07-.055.085-.113.052-1.013-.548-1.647-2.266-1.647-3.647 0-2.969 2.156-5.694 6.218-5.694 3.267 0 5.807 2.329 5.807 5.434 0 3.24-2.046 5.852-4.884 5.852-1.002 0-1.945-.523-2.266-1.139 0 0-.497 1.89-.617 2.353-.222.857-.821 1.93-1.223 2.582.918.284 1.89.436 2.9.436 6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
         <span class="font-bold text-lg">Pinterest</span>
       </label>
     </div>
-
     <div class="text-center mt-10">
       <button id="openSocialShareBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-5 px-16 rounded-xl text-2xl shadow-2xl transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
         Send to Social Media
       </button>
     </div>
-
-    <div id="socialShareModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[9999] opacity-0 visibility-hidden">
+    <div id="socialShareModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[9999] opacity-0 visibility-hidden transition-all duration-300">
       <div class="bg-gray-900 rounded-2xl p-10 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto relative border-4 border-emerald-600 shadow-2xl">
         <button id="closeSocialModal" class="absolute top-6 right-8 text-white text-6xl font-bold hover:text-emerald-400 transition">×</button>
-
         <h2 class="text-4xl font-black mb-10 text-center text-emerald-400">Share Your Content</h2>
-
+        <!-- AI helper section -->
+        <div class="mb-12 bg-gray-800 p-8 rounded-2xl border border-emerald-700 shadow-inner">
+          <h3 class="text-2xl font-bold text-emerald-400 mb-4 text-center">AI Comment Rewriter Helper</h3>
+          <p class="text-center text-gray-300 mb-6">
+            Write your main message once. Select platforms below. Click an AI button → prompt copied to clipboard + chosen AI opens in new tab.
+          </p>
+          <textarea id="baseComment" rows="5"
+                    class="w-full p-5 bg-gray-900 border-2 border-emerald-600 rounded-xl text-white placeholder-gray-400 focus:border-emerald-400 focus:outline-none resize-none font-medium text-lg"
+                    placeholder="Write your main message here (one version) — AI will adapt it for each platform with hashtags..."></textarea>
+          <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <button onclick="useAI('Grok', 'https://grok.x.ai/')"
+                    class="ai-btn bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
+              Use Grok
+            </button>
+            <button onclick="useAI('Gemini', 'https://gemini.google.com/')"
+                    class="ai-btn bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
+              Use Gemini
+            </button>
+            <button onclick="useAI('ChatGPT', 'https://chat.openai.com/')"
+                    class="ai-btn bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
+              Use ChatGPT
+            </button>
+          </div>
+          <div id="aiInstructions" class="mt-8 text-center text-gray-300 text-base hidden leading-relaxed">
+            <p class="mb-4 font-bold text-xl text-emerald-400">Success! Prompt copied & AI opened.</p>
+            <p class="mb-3">Next steps:</p>
+            <ol class="list-decimal list-inside space-y-2 mb-6 text-left max-w-2xl mx-auto">
+              <li>The AI site should now be open in a new tab</li>
+              <li>Paste the copied text into the chat input</li>
+              <li>Send it (you can add "make them more engaging" if desired)</li>
+              <li>Copy each rewritten version + hashtags from the response</li>
+              <li>Paste into the matching platform textarea below</li>
+            </ol>
+          </div>
+        </div>
         <div id="selectedPlatformsList" class="flex flex-wrap gap-4 mb-10 justify-center"></div>
-
         <div id="perPlatformComments" class="space-y-10 mb-12"></div>
-
         <div class="mb-10">
           <label class="block text-2xl font-bold mb-6 text-center text-white">Attach Media (optional - shared to all selected platforms)</label>
           <div class="grid md:grid-cols-2 gap-8">
@@ -199,14 +213,12 @@
           </div>
           <p class="text-center text-base text-gray-400 mt-6 italic">Attach video, audio, or both. The same media will be posted to every platform you selected.</p>
         </div>
-
         <button id="sendSocialPostBtn" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-6 rounded-xl text-3xl shadow-2xl transition transform hover:scale-105">
           Send Now
         </button>
       </div>
     </div>
   </section>
-
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
     <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
     <div class="grid lg:grid-cols-3 gap-8 mb-8">
@@ -247,7 +259,6 @@
       </div>
     </div>
   </section>
-
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
       <div class="md:col-span-1 space-y-6">
@@ -330,7 +341,6 @@
         <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
     </div>
-
     <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
       <details class="group">
         <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
@@ -352,18 +362,14 @@
       </details>
     </div>
   </section>
-
 </main>
-
 <div id="videoModal">
   <div id="closeModal" onClick="closeModal()">X</div>
   <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
 </div>
-
 <footer class="bg-black text-white mt-auto p-6 text-center">
   <p class="text-sm">© 2026 Rhythm Deck Music. All rights reserved.</p>
 </footer>
-
 <script>
   window.deleteVideo = async function(id, videoPath, thumbPath) {
     if (!confirm('Are you sure you want to permanently delete this? This cannot be undone.')) return;
@@ -385,7 +391,6 @@
       alert('Delete failed: ' + (err.message || 'Unknown error'));
     }
   };
-
   window.deleteComment = async function(commentId) {
     if (!confirm('Delete this comment permanently?')) return;
     try {
@@ -399,17 +404,48 @@
     }
   };
 </script>
-
+<!-- Global AI helper script -->
+<script>
+  function useAI(aiName, aiUrl) {
+    const base = document.getElementById('baseComment').value.trim();
+    if (!base) {
+      alert('Please write your main message first!');
+      return;
+    }
+    const checked = Array.from(document.querySelectorAll('input[name="social"]:checked'))
+      .map(box => box.value.charAt(0).toUpperCase() + box.value.slice(1));
+    if (checked.length === 0) {
+      alert('Please select at least one social platform first!');
+      return;
+    }
+    const platformsList = checked.join(', ');
+    const toCopy = `Base comment: ${base}
+Platforms to post to: ${platformsList}
+Please rewrite this comment separately for each platform above. Make each version suitable for the platform's style, tone, character limit, and audience (e.g. short & visual for Instagram/TikTok, longer & conversational for Facebook, etc.).
+Also add 4–8 relevant hashtags at the end of each rewritten comment.
+Output format example:
+Facebook: [your rewritten text here #hashtag1 #hashtag2 ...]
+Instagram: [your rewritten text here #hashtag1 #hashtag3 ...]
+Do one block per platform. Thank you!`;
+    navigator.clipboard.writeText(toCopy).then(() => {
+      const instructions = document.getElementById('aiInstructions');
+      if (instructions) instructions.classList.remove('hidden');
+      window.open(aiUrl, '_blank');
+      alert(`Success!\n\nPrompt copied to clipboard.\n${aiName} is opening in a new tab.\n\nPaste the text there and send.`);
+    }).catch(err => {
+      console.error('Clipboard error:', err);
+      window.open(aiUrl, '_blank');
+      alert(`Clipboard copy failed, but ${aiName} is opening anyway.\nPlease copy the prompt manually if needed.`);
+    });
+  }
+</script>
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
   window.supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
-
   let currentUser = null;
-
   window.saveArtistName = async function() {
     const name = document.getElementById('artistNameInput').value.trim();
     if (!name) return alert("Enter a name");
@@ -417,40 +453,33 @@
     if (error) alert("Save failed: " + error.message);
     else alert("Name saved!");
   };
-
   window.saveBio = async function() {
     const bio = document.getElementById('bioInput').value.trim();
     const { error } = await window.supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert("Bio saved!");
   };
-
   window.saveCollaborationOptIn = async function() {
     const checked = document.getElementById('collaborationOptIn').checked;
     const { error } = await window.supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
   };
-
   window.logout = async function() {
     await window.supabase.auth.signOut();
     window.location.href = 'login.html';
   };
-
   window.closeModal = function() {
     document.getElementById('videoModal').classList.remove('show');
     document.getElementById('modalVideo').src = '';
   };
-
   window.openVideoPopup = function(url) {
     document.getElementById('modalVideo').src = url;
     document.getElementById('videoModal').classList.add('show');
   };
-
   window.openSocialModal = function(videoUrl) {
     alert("Social sharing for: " + videoUrl);
   };
-
   window.displayProBadge = async function() {
     if (!currentUser) return;
     const { count } = await window.supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
@@ -460,7 +489,6 @@
       badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
     }
   };
-
   window.loadProfileData = async function() {
     const { data: profile } = await window.supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
     document.getElementById('artistNameInput').value = profile.name || '';
@@ -479,44 +507,35 @@
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
   };
-
   window.loadVideos = async function() {
     const { data: videos, error } = await window.supabase
       .from('user_videos')
       .select('id, video_url, thumbnail_url, title, price, type')
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false });
-
     if (error) {
       console.error('Error loading media:', error);
       return;
     }
-
     const container = document.getElementById('videoList');
     container.innerHTML = '';
-
     if (!videos || videos.length === 0) {
       container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No media uploaded yet.</p>';
       return;
     }
-
     for (const item of videos) {
       const mediaUrl = window.supabase.storage.from('media').getPublicUrl(item.video_url).data.publicUrl;
       const thumbUrl = item.thumbnail_url
         ? window.supabase.storage.from('media').getPublicUrl(item.thumbnail_url).data.publicUrl + '?t=' + Date.now()
         : `https://via.placeholder.com/400x225/111/fff?text=${item.type || 'Media'}`;
-
       const { count: likes = 0 } = await window.supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', item.id);
-
       const { data: comments = [] } = await window.supabase
         .from('video_comments')
         .select('id, name, comment')
         .eq('video_id', item.id)
         .order('created_at', { ascending: false });
-
       const typeLabel = item.type === 'audio' ? 'Audio Track' : 'Video';
       const typeColor = item.type === 'audio' ? 'bg-indigo-600' : 'bg-emerald-600';
-
       let commentsHTML = comments.length === 0
         ? '<p class="text-gray-500 italic">No comments yet</p>'
         : comments.map(c => `
@@ -526,9 +545,7 @@
               <button class="delete-comment-btn" onclick="deleteComment('${c.id}')">×</button>
             </div>
           `).join('');
-
       const thumbParam = item.thumbnail_url ? `'${item.thumbnail_url}'` : 'null';
-
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
           <div class="relative">
@@ -565,7 +582,6 @@
         </div>`;
     }
   };
-
   window.uploadAudio = async function() {
     const thumbFile = document.getElementById('audioThumbnailInput')?.files[0];
     const audioFile = document.getElementById('audioInput')?.files[0];
@@ -600,7 +616,6 @@
       spinner.classList.add('hidden');
     }
   };
-
   window.uploadAndPublish = async function() {
     const videoFile = document.getElementById('videoInput')?.files[0];
     const thumbFile = document.getElementById('thumbnailInput')?.files[0];
@@ -635,7 +650,6 @@
       spinner.classList.add('hidden');
     }
   };
-
   window.uploadBanner = async function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -644,7 +658,6 @@
     await window.supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
     window.loadProfileData();
   };
-
   window.uploadLogo = async function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -653,7 +666,6 @@
     await window.supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
     window.loadProfileData();
   };
-
   window.deleteAccount = async function() {
     if (confirm('Delete EVERYTHING forever?')) {
       await window.supabase.from('profiles').delete().eq('id', currentUser.id);
@@ -661,7 +673,6 @@
       window.location.href = 'index.html';
     }
   };
-
   window.checkStripeConnection = async function() {
     const { data: profile } = await window.supabase.from('profiles').select('stripe_account_id').eq('id', currentUser.id).single();
     const statusDiv = document.getElementById('stripeStatus');
@@ -677,7 +688,6 @@
       btn.textContent = 'Enable Tip Bucket – Connect Stripe';
     }
   };
-
   window.openPlatinumVision = async function() {
     if (!currentUser) {
       alert("Please log in first");
@@ -699,15 +709,13 @@
       window.location.href = 'pricing.html';
     }
   };
-
-  // Social modal
+  // Social modal logic
   const openSocialShareBtn = document.getElementById('openSocialShareBtn');
   const socialShareModal = document.getElementById('socialShareModal');
   const closeSocialModal = document.getElementById('closeSocialModal');
   const selectedPlatformsList = document.getElementById('selectedPlatformsList');
   const perPlatformComments = document.getElementById('perPlatformComments');
   const sendSocialPostBtn = document.getElementById('sendSocialPostBtn');
-
   if (openSocialShareBtn) {
     openSocialShareBtn.addEventListener('click', () => {
       const checked = document.querySelectorAll('input[name="social"]:checked');
@@ -734,13 +742,11 @@
       socialShareModal.classList.add('show');
     });
   }
-
   if (closeSocialModal) {
     closeSocialModal.addEventListener('click', () => {
       socialShareModal.classList.remove('show');
     });
   }
-
   if (socialShareModal) {
     socialShareModal.addEventListener('click', e => {
       if (e.target === socialShareModal) {
@@ -748,13 +754,11 @@
       }
     });
   }
-
   if (sendSocialPostBtn) {
     sendSocialPostBtn.addEventListener('click', () => {
       alert("Sending to social media is not active yet.\nThis feature will be enabled once you go live.");
     });
   }
-
   document.addEventListener('DOMContentLoaded', async () => {
     const { data: { user } } = await window.supabase.auth.getUser();
     if (!user) {
@@ -763,14 +767,12 @@
       return;
     }
     currentUser = user;
-
     await Promise.all([
       window.loadProfileData(),
       window.loadVideos(),
       window.displayProBadge(),
       window.checkStripeConnection()
     ]);
-
     document.getElementById('bannerInput').addEventListener('change', window.uploadBanner);
     document.getElementById('logoInput').addEventListener('change', window.uploadLogo);
     document.getElementById('uploadAudio').addEventListener('click', window.uploadAudio);
@@ -804,6 +806,5 @@
     document.getElementById('deleteAccountBtn').addEventListener('click', window.deleteAccount);
   });
 </script>
-
 </body>
 </html>
