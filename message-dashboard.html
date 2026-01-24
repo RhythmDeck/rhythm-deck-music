@@ -22,6 +22,20 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(212,175,55,0.6);
     }
+    .btn-industry {
+      background: linear-gradient(to right, #8b5cf6, #a78bfa);
+      color: white;
+      padding: 0.75rem 1.75rem;
+      border-radius: 0.75rem;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+    .btn-industry:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+      background: linear-gradient(to right, #7c3aed, #9f7aea);
+    }
     .reply-indent { margin-left: 2.5rem; border-left: 3px solid #10b981; padding-left: 1.25rem; opacity: 0.9; }
     #replyModal.hidden { display: none; }
     .status-pending { background: #f59e0b; color: white; }
@@ -31,14 +45,20 @@
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
   <div class="max-w-7xl mx-auto p-6">
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
       <h1 class="text-5xl font-black bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
         Collab Messages
       </h1>
-      <button onClick="goToDashboard()" class="btn-dashboard">
-        ← Back to Dashboard
-      </button>
+      <div class="flex flex-wrap gap-4 justify-center sm:justify-end">
+        <button onClick="goToDashboard()" class="btn-dashboard">
+          ← Back to Dashboard
+        </button>
+        <a href="industry-directory.html" target="_blank" class="btn-industry">
+          Contact Industry Pros →
+        </a>
+      </div>
     </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
       <div class="bg-black/40 rounded-2xl overflow-hidden flex flex-col">
         <div class="p-4 border-b border-purple-600">
@@ -87,9 +107,9 @@
       const { data: profile } = await supabase.from('profiles').select('plan, role').eq('id', user.id).single();
       if (profile?.plan === 'platinum') {
         window.location.href = 'platinum-pro-admin.html';
-      } else if (profile?.role?.toLowerCase().includes('producer') || 
-                 profile?.role?.toLowerCase().includes('distributor') || 
-                 profile?.role?.toLowerCase().includes('publisher') || 
+      } else if (profile?.role?.toLowerCase().includes('producer') ||
+                 profile?.role?.toLowerCase().includes('distributor') ||
+                 profile?.role?.toLowerCase().includes('publisher') ||
                  profile?.role?.toLowerCase().includes('supervisor')) {
         window.location.href = 'industry-dashboard.html';
       } else {
@@ -219,6 +239,9 @@
       document.getElementById('replyThreadBtn')?.addEventListener('click', function() {
         openReplyModal(this.dataset.targetId, this.dataset.targetName);
       });
+
+      document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('selected'));
+      document.querySelector(`[data-id="${originalMsg.id}"]`)?.classList.add('selected');
     }
 
     async function loadMessages() {
