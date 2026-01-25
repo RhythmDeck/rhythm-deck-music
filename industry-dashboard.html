@@ -169,7 +169,7 @@
       <!-- Artists loaded here -->
     </div>
 
-    <!-- New Messages Section (identical to artist message dashboard) -->
+    <!-- Messages Section -->
     <section class="mt-16 bg-black/40 rounded-2xl p-8">
       <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
@@ -186,7 +186,7 @@
     </section>
   </main>
 
-  <!-- Video Play Modal (unchanged) -->
+  <!-- Video Play Modal -->
   <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-4xl mx-4">
       <video id="videoPlayer" controls class="w-full h-auto rounded-lg">
@@ -201,7 +201,7 @@
     </div>
   </div>
 
-  <!-- Original Contact Modal (unchanged) -->
+  <!-- Contact Modal -->
   <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
       <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
@@ -217,7 +217,7 @@
     </div>
   </div>
 
-  <!-- New Reply Modal (same as artist message dashboard) -->
+  <!-- Reply Modal -->
   <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
     <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
       <button id="closeReplyBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
@@ -261,12 +261,9 @@
       }
       currentUserId = user.id;
       loadArtists();
-      loadMessages(); // load messages for industry user
+      loadMessages();
     }
 
-    // ────────────────────────────────────────────────
-    // Artist Directory (unchanged)
-    // ────────────────────────────────────────────────
     async function loadArtists() {
       const { data: fetchedArtists, error: artistError } = await supabase
         .from('profiles')
@@ -427,15 +424,15 @@
     window.sendMessage = async function() {
       const message = document.getElementById('messageContent').value.trim();
       if (!message) return alert('Please type a message.');
-      const { error } = await supabase
-        .from('collab_requests')
-        .insert({
-          sender_id: currentUserId,
-          receiver_id: messageArtistId,
-          message: message,
-          created_at: new Date().toISOString(),
-          status: 'pending'
-        });
+
+      const { error } = await supabase.from('collab_requests').insert({
+        sender_id: currentUserId,
+        receiver_id: messageArtistId,
+        message: message,
+        created_at: new Date().toISOString(),
+        status: 'pending'
+      });
+
       if (error) {
         console.error('Send message error:', error);
         alert('Failed to send message: ' + error.message);
@@ -445,10 +442,7 @@
       }
     };
 
-    // ────────────────────────────────────────────────
-    // Messages Section (identical to artist message dashboard)
-    // ────────────────────────────────────────────────
-
+    // Messages logic
     function openReplyModal(targetId, name) {
       currentConversationId = targetId;
       document.getElementById('replyTargetName').textContent = name || 'User';
@@ -464,9 +458,6 @@
     async function sendReply() {
       const message = document.getElementById('replyMessage').value.trim();
       if (!message) return alert('Please write a reply!');
-
-      const { data: profile } = await supabase.from('profiles').select('name').eq('id', currentUserId).single();
-      const senderName = profile?.name || 'You';
 
       const original = currentMessages.find(m => m.id === currentConversationId);
       const receiverId = original?.sender_id || currentUserId;
@@ -575,7 +566,7 @@
 
     async function loadMessages() {
       const list = document.getElementById('conversationList');
-      if (!list) return; // only run if messages section exists
+      if (!list) return;
 
       list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
 
@@ -590,14 +581,15 @@
           created_at,
           read_at,
           status,
-          sender:sender_id (name)
+          sender:fk_collab_sender (name)
         `)
         .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Load error:', error);
-        list.innerHTML = '<p class="text-red-400 text-center py-10">Error loading messages</p>';
+        console.error('Load messages error:', error);
+        list.innerHTML = `<p class="text-red-400 text-center py-10">Error loading messages: ${error.message || 'Unknown error'}</p>`;
+        document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
         return;
       }
 
@@ -647,11 +639,8 @@
       }
     }
 
-    // Initialize everything
     init();
-    loadMessages();
 
-    // Modal button listeners
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
       document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
