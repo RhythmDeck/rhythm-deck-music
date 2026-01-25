@@ -57,7 +57,6 @@
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-  <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
       <div class="flex items-center gap-3 sm:gap-4">
@@ -80,7 +79,6 @@
     </div>
   </header>
 
-  <!-- Main Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
     <h2 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-emerald-400">
       Industry Dashboard
@@ -89,7 +87,6 @@
       Browse all Pro and Platinum artists with active accounts. Use the filters to search by genre, song title, or artist's name. Click on videos or MP3s to play them. Use the Contact Artist button to send a message through Rhythm Deck (no direct contact info allowed). Refresh the page to see new artists who have signed up for Pro or Platinum plans.
     </p>
 
-    <!-- Filters -->
     <div class="flex flex-col md:flex-row gap-4 mb-8">
       <input id="searchName" type="text" placeholder="Search by artist's name" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
       <input id="searchSong" type="text" placeholder="Search by song title" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
@@ -167,11 +164,8 @@
       </select>
     </div>
 
-    <div id="artistGrid" class="grid grid-container gap-6">
-      <!-- Artists loaded here -->
-    </div>
+    <div id="artistGrid" class="grid grid-container gap-6"></div>
 
-    <!-- Messages Section -->
     <section class="mt-16 bg-black/40 rounded-2xl p-8">
       <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
@@ -188,7 +182,6 @@
     </section>
   </main>
 
-  <!-- Video Play Modal -->
   <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-4xl mx-4">
       <video id="videoPlayer" controls class="w-full h-auto rounded-lg">
@@ -203,13 +196,12 @@
     </div>
   </div>
 
-  <!-- Contact Modal -->
   <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
       <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
         Message <span id="messageArtistName"></span>
       </h3>
-      <textarea id="messageContent" rows="5" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Type your message here... (no email, phone, or external links allowed)"></textarea>
+      <textarea id="messageContent" rows="5" placeholder="Type your message here... (no email, phone, or external links allowed)" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"></textarea>
       <div class="text-center pt-6">
         <button onClick="sendMessage()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full">
           Send Message
@@ -219,7 +211,6 @@
     </div>
   </div>
 
-  <!-- Reply Modal -->
   <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
     <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
       <button id="closeReplyBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
@@ -442,10 +433,6 @@
       }
     };
 
-    // ────────────────────────────────────────────────
-    // Messages logic ──────────────────────────────────
-    // ────────────────────────────────────────────────
-
     function openReplyModal(targetId, name) {
       currentConversationId = targetId;
       document.getElementById('replyTargetName').textContent = name || 'User';
@@ -485,6 +472,22 @@
       loadMessages();
     }
 
+    async function deleteMessage(messageId) {
+      if (!confirm('Delete this message? This cannot be undone.')) return;
+
+      const { error } = await supabase
+        .from('collab_requests')
+        .delete()
+        .eq('id', messageId);
+
+      if (error) {
+        console.error('Delete error:', error);
+        alert('Failed to delete: ' + error.message);
+      } else {
+        loadMessages();
+      }
+    }
+
     async function updateStatus(messageId, newStatus) {
       const { error } = await supabase.from('collab_requests').update({ status: newStatus }).eq('id', messageId).eq('receiver_id', currentUserId);
       if (error) {
@@ -520,6 +523,7 @@
               Decline
             </button>
           </div>
+
         `;
       } else if (originalMsg.status) {
         const statusClass = originalMsg.status === 'pending' ? 'status-pending' :
@@ -533,13 +537,20 @@
 
       let html = `
         <div class="flex-1 overflow-y-auto pr-4 space-y-6">
-          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
-            <div class="flex justify-between items-center mb-4">
+          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500 relative">
+            <div class="flex justify-between items-start mb-4">
               <div>
                 <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender?.name || 'User'}</h2>
                 <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
               </div>
-              ${statusHtml}
+              <div class="flex items-center gap-3">
+                ${statusHtml}
+                ${originalMsg.sender_id === currentUserId ? `
+                  <button onclick="deleteMessage('${originalMsg.id}')" class="text-red-400 hover:text-red-300 text-xl" title="Delete message">
+                    🗑️
+                  </button>
+                ` : ''}
+              </div>
             </div>
             <p class="text-lg whitespace-pre-line">${originalMsg.message}</p>
           </div>
@@ -549,9 +560,18 @@
         html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
         replies.forEach(reply => {
           html += `
-            <div class="reply-indent bg-black/30 rounded-xl p-5">
-              <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
-              <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
+            <div class="reply-indent bg-black/30 rounded-xl p-5 relative">
+              <div class="flex justify-between items-start">
+                <div>
+                  <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
+                  <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
+                </div>
+                ${reply.sender_id === currentUserId ? `
+                  <button onclick="deleteMessage('${reply.id}')" class="text-red-400 hover:text-red-300 text-xl" title="Delete message">
+                    🗑️
+                  </button>
+                ` : ''}
+              </div>
               <p class="mt-2">${reply.message}</p>
             </div>
           `;
@@ -571,13 +591,11 @@
       `;
 
       document.getElementById('messageView').innerHTML = html;
+      document.getElementById('messageView').scrollTop = 0;
 
       document.getElementById('replyThreadBtn')?.addEventListener('click', function() {
         openReplyModal(this.dataset.targetId, this.dataset.targetName);
       });
-
-      document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('selected'));
-      document.querySelector(`[data-id="${originalMsg.id}"]`)?.classList.add('selected');
     }
 
     async function loadMessages() {
@@ -617,7 +635,7 @@
         return;
       }
 
-      // Group by root message (only root messages have parent_id === null)
+      // Group by root message
       const conversations = {};
       currentMessages.forEach(msg => {
         const rootId = msg.parent_id || msg.id;
@@ -631,13 +649,11 @@
         conversations[rootId].messages.push(msg);
         if (!msg.parent_id) conversations[rootId].root = msg;
 
-        // Update latest message in this conversation
         if (!conversations[rootId].latest || new Date(msg.created_at) > new Date(conversations[rootId].latest.created_at)) {
           conversations[rootId].latest = msg;
         }
       });
 
-      // Only keep conversations with a valid root
       const validConversations = Object.values(conversations)
         .filter(conv => conv.root)
         .sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at));
@@ -649,7 +665,6 @@
         let badgeText = root.status === 'pending' ? 'Pending' : 'Read';
         let badgeClass = root.status === 'pending' ? 'status-pending' : 'status-read';
 
-        // If latest message is from someone else → show "New Reply"
         if (latest.sender_id !== currentUserId) {
           badgeText = 'New Reply';
           badgeClass = 'status-new-reply';
@@ -677,7 +692,6 @@
         });
       });
 
-      // Auto-open the most recent conversation
       if (validConversations.length > 0) {
         showThread(validConversations[0].root);
       }
