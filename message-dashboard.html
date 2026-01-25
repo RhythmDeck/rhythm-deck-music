@@ -73,7 +73,6 @@
     </div>
   </div>
 
-  <!-- Reply Modal -->
   <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
     <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
       <button id="closeModalBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
@@ -157,6 +156,22 @@
       loadMessages();
     }
 
+    async function deleteMessage(messageId) {
+      if (!confirm('Delete this message? This cannot be undone.')) return;
+
+      const { error } = await supabase
+        .from('collab_requests')
+        .delete()
+        .eq('id', messageId);
+
+      if (error) {
+        console.error('Delete error:', error);
+        alert('Failed to delete: ' + error.message);
+      } else {
+        loadMessages();
+      }
+    }
+
     async function updateStatus(messageId, newStatus) {
       const { error } = await supabase.from('collab_requests').update({ status: newStatus }).eq('id', messageId).eq('receiver_id', currentUserId);
       if (error) {
@@ -205,13 +220,20 @@
 
       let html = `
         <div class="flex-1 overflow-y-auto pr-4 space-y-6">
-          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
-            <div class="flex justify-between items-center mb-4">
+          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500 relative">
+            <div class="flex justify-between items-start mb-4">
               <div>
                 <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender?.name || 'User'}</h2>
                 <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
               </div>
-              ${statusHtml}
+              <div class="flex items-center gap-3">
+                ${statusHtml}
+                ${originalMsg.sender_id === currentUserId ? `
+                  <button onclick="deleteMessage('${originalMsg.id}')" class="text-red-400 hover:text-red-300 text-xl" title="Delete message">
+                    🗑️
+                  </button>
+                ` : ''}
+              </div>
             </div>
             <p class="text-lg whitespace-pre-line">${originalMsg.message}</p>
           </div>
@@ -221,9 +243,18 @@
         html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
         replies.forEach(reply => {
           html += `
-            <div class="reply-indent bg-black/30 rounded-xl p-5">
-              <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
-              <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
+            <div class="reply-indent bg-black/30 rounded-xl p-5 relative">
+              <div class="flex justify-between items-start">
+                <div>
+                  <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
+                  <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
+                </div>
+                ${reply.sender_id === currentUserId ? `
+                  <button onclick="deleteMessage('${reply.id}')" class="text-red-400 hover:text-red-300 text-xl" title="Delete message">
+                    🗑️
+                  </button>
+                ` : ''}
+              </div>
               <p class="mt-2">${reply.message}</p>
             </div>
           `;
@@ -243,7 +274,7 @@
       `;
 
       document.getElementById('messageView').innerHTML = html;
-      document.getElementById('messageView').scrollTop = 0; // Ensure scroll starts at top
+      document.getElementById('messageView').scrollTop = 0;
 
       document.getElementById('replyThreadBtn')?.addEventListener('click', function() {
         openReplyModal(this.dataset.targetId, this.dataset.targetName);
@@ -296,7 +327,7 @@
         return;
       }
 
-      // Group by root message (only root messages have parent_id === null)
+      // Group by root message
       const conversations = {};
       currentMessages.forEach(msg => {
         const rootId = msg.parent_id || msg.id;
@@ -310,13 +341,11 @@
         conversations[rootId].messages.push(msg);
         if (!msg.parent_id) conversations[rootId].root = msg;
 
-        // Update latest message in this conversation
         if (!conversations[rootId].latest || new Date(msg.created_at) > new Date(conversations[rootId].latest.created_at)) {
           conversations[rootId].latest = msg;
         }
       });
 
-      // Only keep conversations with a valid root
       const validConversations = Object.values(conversations)
         .filter(conv => conv.root)
         .sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at));
@@ -328,7 +357,6 @@
         let badgeText = root.status === 'pending' ? 'Pending' : 'Read';
         let badgeClass = root.status === 'pending' ? 'status-pending' : 'status-read';
 
-        // If latest message is from someone else → show "New Reply"
         if (latest.sender_id !== currentUserId) {
           badgeText = 'New Reply';
           badgeClass = 'status-new-reply';
@@ -356,7 +384,6 @@
         });
       });
 
-      // Auto-open the most recent conversation
       if (validConversations.length > 0) {
         showThread(validConversations[0].root);
       }
