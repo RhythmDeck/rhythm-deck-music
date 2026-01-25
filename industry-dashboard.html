@@ -52,6 +52,8 @@
     .status-pending { background: #f59e0b; color: white; }
     .status-accepted { background: #10b981; color: white; }
     .status-declined { background: #ef4444; color: white; }
+    .status-read { background: #6b7280; color: white; }
+    .status-new-reply { background: #8b5cf6; color: white; font-weight: bold; }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
@@ -283,10 +285,7 @@
       if (mediaError) console.error('Media load error:', mediaError);
       const processedMedia = media?.map(item => {
         const { data: publicData } = supabase.storage.from('media').getPublicUrl(item.video_url);
-        return {
-          ...item,
-          public_url: publicData.publicUrl
-        };
+        return { ...item, public_url: publicData.publicUrl };
       }) || [];
       const mediaByArtist = {};
       processedMedia.forEach(item => {
@@ -439,10 +438,14 @@
       } else {
         alert('Message sent successfully!');
         closeMessageModal();
+        loadMessages();
       }
     };
 
-    // Messages logic
+    // ────────────────────────────────────────────────
+    // Messages logic ──────────────────────────────────
+    // ────────────────────────────────────────────────
+
     function openReplyModal(targetId, name) {
       currentConversationId = targetId;
       document.getElementById('replyTargetName').textContent = name || 'User';
@@ -474,11 +477,12 @@
       if (error) {
         console.error('Send reply error:', error);
         alert('Failed to send reply: ' + (error.message || 'Unknown error'));
-      } else {
-        alert('Reply sent!');
-        closeReplyModal();
-        loadMessages();
+        return;
       }
+
+      alert('Reply sent!');
+      closeReplyModal();
+      loadMessages();
     }
 
     async function updateStatus(messageId, newStatus) {
@@ -492,6 +496,14 @@
 
     function showThread(originalMsg) {
       currentConversationId = originalMsg.id;
+
+      // Mark root as read when opened
+      if (originalMsg.receiver_id === currentUserId && originalMsg.status !== 'read') {
+        supabase.from('collab_requests').update({
+          status: 'read',
+          read_at: new Date().toISOString()
+        }).eq('id', originalMsg.id);
+      }
 
       const replies = currentMessages
         .filter(m => m.parent_id === originalMsg.id)
@@ -512,7 +524,8 @@
       } else if (originalMsg.status) {
         const statusClass = originalMsg.status === 'pending' ? 'status-pending' :
                            originalMsg.status === 'accepted' ? 'status-accepted' :
-                           'status-declined';
+                           originalMsg.status === 'declined' ? 'status-declined' :
+                           originalMsg.status === 'read' ? 'status-read' : '';
         statusHtml = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
           ${originalMsg.status.charAt(0).toUpperCase() + originalMsg.status.slice(1)}
         </span>`;
@@ -562,6 +575,9 @@
       document.getElementById('replyThreadBtn')?.addEventListener('click', function() {
         openReplyModal(this.dataset.targetId, this.dataset.targetName);
       });
+
+      document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('selected'));
+      document.querySelector(`[data-id="${originalMsg.id}"]`)?.classList.add('selected');
     }
 
     async function loadMessages() {
@@ -601,41 +617,69 @@
         return;
       }
 
-      const topLevel = currentMessages.filter(m => !m.parent_id);
+      // Group by root message (only root messages have parent_id === null)
+      const conversations = {};
+      currentMessages.forEach(msg => {
+        const rootId = msg.parent_id || msg.id;
+        if (!conversations[rootId]) {
+          conversations[rootId] = {
+            root: null,
+            messages: [],
+            latest: null
+          };
+        }
+        conversations[rootId].messages.push(msg);
+        if (!msg.parent_id) conversations[rootId].root = msg;
 
-      list.innerHTML = topLevel.map(msg => {
-        let statusBadge = '';
-        if (msg.status) {
-          const statusClass = msg.status === 'pending' ? 'status-pending' :
-                             msg.status === 'accepted' ? 'status-accepted' :
-                             'status-declined';
-          statusBadge = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
-            ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
-          </span>`;
+        // Update latest message in this conversation
+        if (!conversations[rootId].latest || new Date(msg.created_at) > new Date(conversations[rootId].latest.created_at)) {
+          conversations[rootId].latest = msg;
+        }
+      });
+
+      // Only keep conversations with a valid root
+      const validConversations = Object.values(conversations)
+        .filter(conv => conv.root)
+        .sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at));
+
+      list.innerHTML = validConversations.map(conv => {
+        const root = conv.root;
+        const latest = conv.latest;
+
+        let badgeText = root.status === 'pending' ? 'Pending' : 'Read';
+        let badgeClass = root.status === 'pending' ? 'status-pending' : 'status-read';
+
+        // If latest message is from someone else → show "New Reply"
+        if (latest.sender_id !== currentUserId) {
+          badgeText = 'New Reply';
+          badgeClass = 'status-new-reply';
         }
 
         return `
-          <div data-id="${msg.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
+          <div data-id="${root.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
             <div class="flex justify-between items-center">
-              <p class="font-bold">${msg.sender?.name || 'Unknown'}</p>
-              ${statusBadge}
+              <p class="font-bold">${root.sender?.name || 'Unknown'}</p>
+              <span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${badgeClass}">
+                ${badgeText}
+              </span>
             </div>
-            <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
-            <p class="msg-preview text-gray-300">${msg.message.substring(0, 80)}${msg.message.length > 80 ? '...' : ''}</p>
+            <p class="text-sm text-gray-400">${new Date(latest.created_at).toLocaleString()}</p>
+            <p class="msg-preview text-gray-300">${latest.message.substring(0, 80)}${latest.message.length > 80 ? '...' : ''}</p>
           </div>
         `;
       }).join('');
 
       document.querySelectorAll('.msg-item').forEach(item => {
         item.addEventListener('click', () => {
-          const msgId = item.dataset.id;
-          const msg = currentMessages.find(m => m.id === msgId);
-          if (msg) showThread(msg);
+          const rootId = item.dataset.id;
+          const rootMsg = currentMessages.find(m => m.id === rootId);
+          if (rootMsg) showThread(rootMsg);
         });
       });
 
-      if (topLevel.length > 0) {
-        showThread(topLevel[0]);
+      // Auto-open the most recent conversation
+      if (validConversations.length > 0) {
+        showThread(validConversations[0].root);
       }
     }
 
