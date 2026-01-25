@@ -52,6 +52,8 @@
     .status-pending { background: #f59e0b; color: white; }
     .status-accepted { background: #10b981; color: white; }
     .status-declined { background: #ef4444; color: white; }
+    .status-read { background: #3b82f6; color: white; }
+    .status-replied { background: #a855f7; color: white; }
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
@@ -162,11 +164,8 @@
       </select>
     </div>
 
-    <div id="artistGrid" class="grid grid-container gap-6">
-      <!-- Artists loaded here -->
-    </div>
+    <div id="artistGrid" class="grid grid-container gap-6"></div>
 
-    <!-- Messages Section -->
     <section class="mt-16 bg-black/40 rounded-2xl p-8">
       <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
@@ -183,8 +182,7 @@
     </section>
   </main>
 
-  <!-- Video Play Modal -->
-  <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
+  <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
     <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-4xl mx-4">
       <video id="videoPlayer" controls class="w-full h-auto rounded-lg">
         <source src="" type="video/mp4">
@@ -198,8 +196,7 @@
     </div>
   </div>
 
-  <!-- Contact Modal -->
-  <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
+  <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
     <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
       <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
         Message <span id="messageArtistName"></span>
@@ -214,7 +211,6 @@
     </div>
   </div>
 
-  <!-- Reply Modal -->
   <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
     <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
       <button id="closeReplyBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
@@ -436,10 +432,10 @@
       } else {
         alert('Message sent successfully!');
         closeMessageModal();
+        loadMessages();
       }
     };
 
-    // Messages logic
     function openReplyModal(targetId, name) {
       currentConversationId = targetId;
       document.getElementById('replyTargetName').textContent = name || 'User';
@@ -472,6 +468,8 @@
         console.error('Send reply error:', error);
         alert('Failed to send reply: ' + (error.message || 'Unknown error'));
       } else {
+        // Mark original as replied
+        await supabase.from('collab_requests').update({ status: 'replied' }).eq('id', currentConversationId);
         alert('Reply sent!');
         closeReplyModal();
         loadMessages();
@@ -483,6 +481,7 @@
       if (error) {
         alert('Failed to update status: ' + error.message);
       } else {
+        alert(`Status updated to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}!`);
         loadMessages();
       }
     }
@@ -493,6 +492,14 @@
       const replies = currentMessages
         .filter(m => m.parent_id === originalMsg.id)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+      // Mark as read if receiver and not already read
+      if (originalMsg.receiver_id === currentUserId && !originalMsg.read_at) {
+        supabase.from('collab_requests').update({
+          read_at: new Date().toISOString(),
+          status: 'read'
+        }).eq('id', originalMsg.id).then(() => loadMessages());
+      }
 
       let statusHtml = '';
       if (originalMsg.status === 'pending' && originalMsg.receiver_id === currentUserId) {
@@ -509,7 +516,9 @@
       } else if (originalMsg.status) {
         const statusClass = originalMsg.status === 'pending' ? 'status-pending' :
                            originalMsg.status === 'accepted' ? 'status-accepted' :
-                           'status-declined';
+                           originalMsg.status === 'declined' ? 'status-declined' :
+                           originalMsg.status === 'read' ? 'status-read' :
+                           'status-replied';
         statusHtml = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
           ${originalMsg.status.charAt(0).toUpperCase() + originalMsg.status.slice(1)}
         </span>`;
@@ -532,11 +541,20 @@
       if (replies.length > 0) {
         html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
         replies.forEach(reply => {
+          const replyClass = reply.status === 'pending' ? 'status-pending' :
+                            reply.status === 'accepted' ? 'status-accepted' :
+                            reply.status === 'declined' ? 'status-declined' :
+                            reply.status === 'read' ? 'status-read' :
+                            'status-replied';
+
           html += `
             <div class="reply-indent bg-black/30 rounded-xl p-5">
               <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
               <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
               <p class="mt-2">${reply.message}</p>
+              ${reply.status ? `<span class="inline-block px-3 py-1 text-xs font-bold rounded-full ${replyClass} mt-2">
+                ${reply.status.charAt(0).toUpperCase() + reply.status.slice(1)}
+              </span>` : ''}
             </div>
           `;
         });
@@ -605,7 +623,9 @@
         if (msg.status) {
           const statusClass = msg.status === 'pending' ? 'status-pending' :
                              msg.status === 'accepted' ? 'status-accepted' :
-                             'status-declined';
+                             msg.status === 'declined' ? 'status-declined' :
+                             msg.status === 'read' ? 'status-read' :
+                             'status-replied';
           statusBadge = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
             ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
           </span>`;
