@@ -40,6 +40,8 @@
     .status-pending { background: #f59e0b; color: white; }
     .status-accepted { background: #10b981; color: white; }
     .status-declined { background: #ef4444; color: white; }
+    .status-read { background: #3b82f6; color: white; }
+    .status-replied { background: #a855f7; color: white; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -71,7 +73,6 @@
     </div>
   </div>
 
-  <!-- Reply Modal -->
   <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
     <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
       <button id="closeModalBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
@@ -83,7 +84,6 @@
         </h2>
         <textarea id="replyMessage" rows="6" placeholder="Write your reply..." class="w-full p-4 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
         <button id="sendReplyBtn" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition shadow-xl transform hover:scale-105">
-
           Send Reply
         </button>
       </div>
@@ -136,30 +136,36 @@
       const original = currentMessages.find(m => m.id === currentConversationId);
       const receiverId = original?.sender_id || currentUserId;
 
-      const { error } = await supabase.from('collab_requests').insert({
+      const { data, error } = await supabase.from('collab_requests').insert({
         parent_id: currentConversationId,
         sender_id: currentUserId,
         receiver_id: receiverId,
         message: message,
         created_at: new Date().toISOString(),
         status: 'pending'
-      });
+      }).select().single();
 
       if (error) {
         console.error('Send reply error:', error);
         alert('Failed to send reply: ' + (error.message || 'Unknown error'));
-      } else {
-        alert('Reply sent!');
-        closeReplyModal();
-        loadMessages();
+        return;
       }
+
+      // Mark original as replied
+      await supabase.from('collab_requests').update({ status: 'replied' }).eq('id', currentConversationId);
+
+      alert('Reply sent!');
+      closeReplyModal();
+      loadMessages();
     }
 
     async function updateStatus(messageId, newStatus) {
       const { error } = await supabase.from('collab_requests').update({ status: newStatus }).eq('id', messageId).eq('receiver_id', currentUserId);
       if (error) {
+        console.error('Update status error:', error);
         alert('Failed to update status: ' + error.message);
       } else {
+        alert(`Status updated to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}!`);
         loadMessages();
       }
     }
@@ -170,6 +176,14 @@
       const replies = currentMessages
         .filter(m => m.parent_id === originalMsg.id)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+      // Mark as read if receiver and not already read
+      if (originalMsg.receiver_id === currentUserId && !originalMsg.read_at) {
+        supabase.from('collab_requests').update({
+          read_at: new Date().toISOString(),
+          status: 'read'
+        }).eq('id', originalMsg.id).then(() => loadMessages());
+      }
 
       let statusHtml = '';
       if (originalMsg.status === 'pending' && originalMsg.receiver_id === currentUserId) {
@@ -184,9 +198,14 @@
           </div>
         `;
       } else if (originalMsg.status) {
-        const statusClass = originalMsg.status === 'pending' ? 'status-pending' :
-                           originalMsg.status === 'accepted' ? 'status-accepted' :
-                           'status-declined';
+        const statusClass = {
+          pending: 'status-pending',
+          accepted: 'status-accepted',
+          declined: 'status-declined',
+          read: 'status-read',
+          replied: 'status-replied'
+        }[originalMsg.status] || 'bg-gray-500 text-white';
+
         statusHtml = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
           ${originalMsg.status.charAt(0).toUpperCase() + originalMsg.status.slice(1)}
         </span>`;
@@ -209,11 +228,20 @@
       if (replies.length > 0) {
         html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
         replies.forEach(reply => {
+          const replyClass = reply.status === 'pending' ? 'status-pending' :
+                            reply.status === 'accepted' ? 'status-accepted' :
+                            reply.status === 'declined' ? 'status-declined' :
+                            reply.status === 'read' ? 'status-read' :
+                            'status-replied';
+
           html += `
             <div class="reply-indent bg-black/30 rounded-xl p-5">
               <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
               <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
               <p class="mt-2">${reply.message}</p>
+              ${reply.status ? `<span class="inline-block px-3 py-1 text-xs font-bold rounded-full ${replyClass} mt-2">
+                ${reply.status.charAt(0).toUpperCase() + reply.status.slice(1)}
+              </span>` : ''}
             </div>
           `;
         });
@@ -291,7 +319,9 @@
         if (msg.status) {
           const statusClass = msg.status === 'pending' ? 'status-pending' :
                              msg.status === 'accepted' ? 'status-accepted' :
-                             'status-declined';
+                             msg.status === 'declined' ? 'status-declined' :
+                             msg.status === 'read' ? 'status-read' :
+                             'status-replied';
           statusBadge = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
             ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
           </span>`;
