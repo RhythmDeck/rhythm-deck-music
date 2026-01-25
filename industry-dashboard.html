@@ -57,6 +57,7 @@
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
+  <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
       <div class="flex items-center gap-3 sm:gap-4">
@@ -87,6 +88,7 @@
       Browse all Pro and Platinum artists with active accounts. Use the filters to search by genre, song title, or artist's name. Click on videos or MP3s to play them. Use the Contact Artist button to send a message through Rhythm Deck (no direct contact info allowed). Refresh the page to see new artists who have signed up for Pro or Platinum plans.
     </p>
 
+    <!-- Filters -->
     <div class="flex flex-col md:flex-row gap-4 mb-8">
       <input id="searchName" type="text" placeholder="Search by artist's name" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
       <input id="searchSong" type="text" placeholder="Search by song title" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
@@ -182,6 +184,7 @@
     </section>
   </main>
 
+  <!-- Video Play Modal -->
   <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-4xl mx-4">
       <video id="videoPlayer" controls class="w-full h-auto rounded-lg">
@@ -196,6 +199,7 @@
     </div>
   </div>
 
+  <!-- Contact Modal -->
   <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
       <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
@@ -211,6 +215,7 @@
     </div>
   </div>
 
+  <!-- Reply Modal -->
   <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
     <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
       <button id="closeReplyBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
@@ -244,6 +249,27 @@
     let artists = [];
     let currentConversationId = null;
     let currentMessages = [];
+
+    // ────────────────────────────────────────────────
+    // Delete entire conversation (moved up)
+    // ────────────────────────────────────────────────
+    async function deleteConversation(rootId) {
+      if (!confirm('Delete this entire conversation? All messages and replies will be permanently removed.')) return;
+
+      const threadMessages = currentMessages.filter(m => m.id === rootId || m.parent_id === rootId);
+
+      for (const msg of threadMessages) {
+        const { error } = await supabase.from('collab_requests').delete().eq('id', msg.id);
+        if (error) {
+          console.error('Delete error for message', msg.id, error);
+          alert('Failed to delete some messages: ' + error.message);
+          return;
+        }
+      }
+
+      alert('Conversation deleted');
+      loadMessages();
+    }
 
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -472,24 +498,6 @@
       loadMessages();
     }
 
-    async function deleteConversation(rootId) {
-      if (!confirm('Delete this entire conversation? All messages and replies will be permanently removed.')) return;
-
-      const threadMessages = currentMessages.filter(m => m.id === rootId || m.parent_id === rootId);
-
-      for (const msg of threadMessages) {
-        const { error } = await supabase.from('collab_requests').delete().eq('id', msg.id);
-        if (error) {
-          console.error('Delete error for message', msg.id, error);
-          alert('Failed to delete some messages: ' + error.message);
-          return;
-        }
-      }
-
-      alert('Conversation deleted');
-      loadMessages();
-    }
-
     async function updateStatus(messageId, newStatus) {
       const { error } = await supabase.from('collab_requests').update({ status: newStatus }).eq('id', messageId).eq('receiver_id', currentUserId);
       if (error) {
@@ -502,7 +510,6 @@
     function showThread(originalMsg) {
       currentConversationId = originalMsg.id;
 
-      // Mark root as read when opened
       if (originalMsg.receiver_id === currentUserId && originalMsg.status !== 'read') {
         supabase.from('collab_requests').update({
           status: 'read',
@@ -652,18 +659,18 @@
         }
 
         return `
-          <div data-id="${root.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 relative">
+          <div data-id="${root.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
             <div class="flex justify-between items-center">
               <div>
                 <p class="font-bold">${root.sender?.name || 'Unknown'}</p>
                 <p class="text-sm text-gray-400">${new Date(latest.created_at).toLocaleString()}</p>
                 <p class="msg-preview text-gray-300">${latest.message.substring(0, 80)}${latest.message.length > 80 ? '...' : ''}</p>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-4">
                 <span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${badgeClass}">
                   ${badgeText}
                 </span>
-                <button onclick="deleteConversation('${root.id}')" class="text-red-400 hover:text-red-300 text-xl" title="Delete entire conversation">
+                <button class="delete-conv-btn text-red-400 hover:text-red-300 text-xl" title="Delete entire conversation" data-root-id="${root.id}">
                   🗑️
                 </button>
               </div>
@@ -672,13 +679,18 @@
         `;
       }).join('');
 
+      // Add click listeners after rendering
       document.querySelectorAll('.msg-item').forEach(item => {
         item.addEventListener('click', e => {
-          // Prevent delete button click from selecting the conversation
-          if (e.target.tagName === 'BUTTON') return;
-          const rootId = item.dataset.id;
-          const rootMsg = currentMessages.find(m => m.id === rootId);
-          if (rootMsg) showThread(rootMsg);
+          if (e.target.classList.contains('delete-conv-btn')) {
+            e.stopPropagation();
+            const rootId = e.target.dataset.rootId;
+            deleteConversation(rootId);
+          } else {
+            const rootId = item.dataset.id;
+            const rootMsg = currentMessages.find(m => m.id === rootId);
+            if (rootMsg) showThread(rootMsg);
+          }
         });
       });
 
