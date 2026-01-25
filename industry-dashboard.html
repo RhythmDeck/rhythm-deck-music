@@ -244,6 +244,7 @@
     let artists = [];
     let currentConversationId = null;
     let currentMessages = [];
+    let isLoading = false;
 
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -432,7 +433,7 @@
       } else {
         alert('Message sent successfully!');
         closeMessageModal();
-        loadMessages();
+        await loadMessages();
       }
     };
 
@@ -467,22 +468,25 @@
       if (error) {
         console.error('Send reply error:', error);
         alert('Failed to send reply: ' + (error.message || 'Unknown error'));
-      } else {
-        // Mark original as replied
-        await supabase.from('collab_requests').update({ status: 'replied' }).eq('id', currentConversationId);
-        alert('Reply sent!');
-        closeReplyModal();
-        loadMessages();
+        return;
       }
+
+      // Mark original as replied
+      await supabase.from('collab_requests').update({ status: 'replied' }).eq('id', currentConversationId);
+
+      alert('Reply sent!');
+      closeReplyModal();
+      await loadMessages();
     }
 
     async function updateStatus(messageId, newStatus) {
       const { error } = await supabase.from('collab_requests').update({ status: newStatus }).eq('id', messageId).eq('receiver_id', currentUserId);
       if (error) {
+        console.error('Update status error:', error);
         alert('Failed to update status: ' + error.message);
       } else {
         alert(`Status updated to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}!`);
-        loadMessages();
+        await loadMessages();
       }
     }
 
@@ -498,7 +502,10 @@
         supabase.from('collab_requests').update({
           read_at: new Date().toISOString(),
           status: 'read'
-        }).eq('id', originalMsg.id).then(() => loadMessages());
+        }).eq('id', originalMsg.id).then(() => {
+          // Re-render current thread after update
+          showThread(originalMsg);
+        });
       }
 
       let statusHtml = '';
@@ -580,10 +587,11 @@
     }
 
     async function loadMessages() {
-      const list = document.getElementById('conversationList');
-      if (!list) return;
+      if (isLoading) return;
+      isLoading = true;
 
-      list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
+      const list = document.getElementById('conversationList');
+      if (list) list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
 
       const { data: messages, error } = await supabase
         .from('collab_requests')
@@ -601,9 +609,11 @@
         .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
         .order('created_at', { ascending: false });
 
+      isLoading = false;
+
       if (error) {
         console.error('Load messages error:', error);
-        list.innerHTML = `<p class="text-red-400 text-center py-10">Error loading messages: ${error.message || 'Unknown error'}</p>`;
+        if (list) list.innerHTML = `<p class="text-red-400 text-center py-10">Error loading messages: ${error.message || 'Unknown error'}</p>`;
         document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
         return;
       }
@@ -611,37 +621,39 @@
       currentMessages = messages || [];
 
       if (!currentMessages.length) {
-        list.innerHTML = '<p class="text-gray-400 text-center py-10">No messages yet</p>';
+        if (list) list.innerHTML = '<p class="text-gray-400 text-center py-10">No messages yet</p>';
         document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
         return;
       }
 
       const topLevel = currentMessages.filter(m => !m.parent_id);
 
-      list.innerHTML = topLevel.map(msg => {
-        let statusBadge = '';
-        if (msg.status) {
-          const statusClass = msg.status === 'pending' ? 'status-pending' :
-                             msg.status === 'accepted' ? 'status-accepted' :
-                             msg.status === 'declined' ? 'status-declined' :
-                             msg.status === 'read' ? 'status-read' :
-                             'status-replied';
-          statusBadge = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
-            ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
-          </span>`;
-        }
+      if (list) {
+        list.innerHTML = topLevel.map(msg => {
+          let statusBadge = '';
+          if (msg.status) {
+            const statusClass = msg.status === 'pending' ? 'status-pending' :
+                               msg.status === 'accepted' ? 'status-accepted' :
+                               msg.status === 'declined' ? 'status-declined' :
+                               msg.status === 'read' ? 'status-read' :
+                               'status-replied';
+            statusBadge = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
+              ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
+            </span>`;
+          }
 
-        return `
-          <div data-id="${msg.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
-            <div class="flex justify-between items-center">
-              <p class="font-bold">${msg.sender?.name || 'Unknown'}</p>
-              ${statusBadge}
+          return `
+            <div data-id="${msg.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
+              <div class="flex justify-between items-center">
+                <p class="font-bold">${msg.sender?.name || 'Unknown'}</p>
+                ${statusBadge}
+              </div>
+              <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
+              <p class="msg-preview text-gray-300">${msg.message.substring(0, 80)}${msg.message.length > 80 ? '...' : ''}</p>
             </div>
-            <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
-            <p class="msg-preview text-gray-300">${msg.message.substring(0, 80)}${msg.message.length > 80 ? '...' : ''}</p>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      }
 
       document.querySelectorAll('.msg-item').forEach(item => {
         item.addEventListener('click', () => {
@@ -651,7 +663,10 @@
         });
       });
 
-      if (topLevel.length > 0) {
+      if (currentConversationId) {
+        const currentMsg = currentMessages.find(m => m.id === currentConversationId);
+        if (currentMsg) showThread(currentMsg);
+      } else if (topLevel.length > 0) {
         showThread(topLevel[0]);
       }
     }
