@@ -472,20 +472,22 @@
       loadMessages();
     }
 
-    async function deleteMessage(messageId) {
-      if (!confirm('Delete this message? This cannot be undone.')) return;
+    async function deleteConversation(rootId) {
+      if (!confirm('Delete this entire conversation? All messages and replies will be permanently removed.')) return;
 
-      const { error } = await supabase
-        .from('collab_requests')
-        .delete()
-        .eq('id', messageId);
+      const threadMessages = currentMessages.filter(m => m.id === rootId || m.parent_id === rootId);
 
-      if (error) {
-        console.error('Delete error:', error);
-        alert('Failed to delete: ' + error.message);
-      } else {
-        loadMessages();
+      for (const msg of threadMessages) {
+        const { error } = await supabase.from('collab_requests').delete().eq('id', msg.id);
+        if (error) {
+          console.error('Delete error for message', msg.id, error);
+          alert('Failed to delete some messages: ' + error.message);
+          return;
+        }
       }
+
+      alert('Conversation deleted');
+      loadMessages();
     }
 
     async function updateStatus(messageId, newStatus) {
@@ -523,7 +525,6 @@
               Decline
             </button>
           </div>
-
         `;
       } else if (originalMsg.status) {
         const statusClass = originalMsg.status === 'pending' ? 'status-pending' :
@@ -537,20 +538,13 @@
 
       let html = `
         <div class="flex-1 overflow-y-auto pr-4 space-y-6">
-          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500 relative">
-            <div class="flex justify-between items-start mb-4">
+          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
+            <div class="flex justify-between items-center mb-4">
               <div>
                 <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender?.name || 'User'}</h2>
                 <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
               </div>
-              <div class="flex items-center gap-3">
-                ${statusHtml}
-                ${originalMsg.sender_id === currentUserId ? `
-                  <button onclick="deleteMessage('${originalMsg.id}')" class="text-red-400 hover:text-red-300 text-xl" title="Delete message">
-                    🗑️
-                  </button>
-                ` : ''}
-              </div>
+              ${statusHtml}
             </div>
             <p class="text-lg whitespace-pre-line">${originalMsg.message}</p>
           </div>
@@ -560,18 +554,9 @@
         html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
         replies.forEach(reply => {
           html += `
-            <div class="reply-indent bg-black/30 rounded-xl p-5 relative">
-              <div class="flex justify-between items-start">
-                <div>
-                  <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
-                  <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
-                </div>
-                ${reply.sender_id === currentUserId ? `
-                  <button onclick="deleteMessage('${reply.id}')" class="text-red-400 hover:text-red-300 text-xl" title="Delete message">
-                    🗑️
-                  </button>
-                ` : ''}
-              </div>
+            <div class="reply-indent bg-black/30 rounded-xl p-5">
+              <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
+              <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
               <p class="mt-2">${reply.message}</p>
             </div>
           `;
@@ -592,10 +577,6 @@
 
       document.getElementById('messageView').innerHTML = html;
       document.getElementById('messageView').scrollTop = 0;
-
-      document.getElementById('replyThreadBtn')?.addEventListener('click', function() {
-        openReplyModal(this.dataset.targetId, this.dataset.targetName);
-      });
     }
 
     async function loadMessages() {
@@ -671,21 +652,30 @@
         }
 
         return `
-          <div data-id="${root.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
+          <div data-id="${root.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 relative">
             <div class="flex justify-between items-center">
-              <p class="font-bold">${root.sender?.name || 'Unknown'}</p>
-              <span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${badgeClass}">
-                ${badgeText}
-              </span>
+              <div>
+                <p class="font-bold">${root.sender?.name || 'Unknown'}</p>
+                <p class="text-sm text-gray-400">${new Date(latest.created_at).toLocaleString()}</p>
+                <p class="msg-preview text-gray-300">${latest.message.substring(0, 80)}${latest.message.length > 80 ? '...' : ''}</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${badgeClass}">
+                  ${badgeText}
+                </span>
+                <button onclick="deleteConversation('${root.id}')" class="text-red-400 hover:text-red-300 text-xl" title="Delete entire conversation">
+                  🗑️
+                </button>
+              </div>
             </div>
-            <p class="text-sm text-gray-400">${new Date(latest.created_at).toLocaleString()}</p>
-            <p class="msg-preview text-gray-300">${latest.message.substring(0, 80)}${latest.message.length > 80 ? '...' : ''}</p>
           </div>
         `;
       }).join('');
 
       document.querySelectorAll('.msg-item').forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', e => {
+          // Prevent delete button click from selecting the conversation
+          if (e.target.tagName === 'BUTTON') return;
           const rootId = item.dataset.id;
           const rootMsg = currentMessages.find(m => m.id === rootId);
           if (rootMsg) showThread(rootMsg);
