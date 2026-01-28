@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instruction Manuals | Rhythm Deck Music</title>
+  <base href="/">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .input-focus:focus { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4); }
+    .platinum-highlight { border-color: #d4af37; background: rgba(212,175,55,0.05); }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-content {
+      background: #111;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 960px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+    }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 2.5rem;
+      color: white;
+      cursor: pointer;
+      background: rgba(0,0,0,0.6);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .modal-close:hover { background: rgba(0,0,0,0.8); }
+    
+    @media print {
+      header, footer, .modal, .video-trigger { display: none !important; }
+      body { background: white; color: black; margin: 0; padding: 1cm; font-size: 12pt; }
+      .manual-card { break-inside: avoid; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
+
+  <!-- Header -->
+  <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
+    <div class="flex items-center space-x-3">
+      <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+        <p class="text-xs text-gray-300">Unleash Your Beat</p>
+      </div>
+    </div>
+    <nav class="space-x-3 text-sm md:text-base">
+      <a href="index.html" class="hover:text-green-400 transition">Home</a>
+      <a href="about.html" class="hover:text-green-400 transition">About</a>
+      <a href="benefits.html" class="hover:text-green-400 transition">Benefits</a>
+      <a href="contact.html" class="hover:text-green-400 transition">Contact</a>
+      <a href="pricing.html" class="hover:text-green-400 transition">Pricing</a>
+      <a href="login.html" class="bg-white text-black px-3 py-1 rounded-full hover:bg-gray-300 transition shadow-md">Login</a>
+      <a href="signup.html" class="bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-400 transition shadow-md">Sign Up</a>
+    </nav>
+  </header>
+
+  <!-- Hero / Banner -->
+  <section class="relative h-[300px] md:h-[400px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
+           style="background-image: url('banner-cropped.jpg');">
+    <div class="bg-black bg-opacity-60 p-8 md:p-12 rounded-xl text-center shadow-2xl">
+      <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-4">Instruction Manuals</h2>
+      <p class="text-white text-lg md:text-xl max-w-2xl mx-auto">
+        Step-by-step guides and instructional videos for artists, producers, labels, and creators on Rhythm Deck
+      </p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="flex-grow py-12 md:py-16 px-4">
+    <div class="container mx-auto max-w-5xl">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <!-- Artist Manuals -->
+        <div class="manual-card bg-white shadow-xl rounded-xl p-8">
+          <h3 class="text-2xl font-bold text-green-600 mb-6">For Artists & Performers</h3>
+          <ul class="space-y-4 text-gray-800">
+            <li><a href="artist-signup.html" class="text-green-600 hover:underline font-medium" target="_blank">How to sign up as an Artist</a></li>
+            <li><a href="manual-uploading-tracks.html" class="text-green-600 hover:underline font-medium" target="_blank">Uploading Tracks & Releasing Singles</a></li>
+            <li><a href="manual-profile-customization.html" class="text-green-600 hover:underline font-medium" target="_blank">Customizing Your Artist Profile</a></li>
+            <li><a href="manual-collaboration-tools.html" class="text-green-600 hover:underline font-medium" target="_blank">Collaborating with Producers & Labels</a></li>
+            <li><a href="manual-analytics-artist.html" class="text-green-600 hover:underline font-medium" target="_blank">Understanding Your Analytics Dashboard</a></li>
+          </ul>
+        </div>
+
+        <!-- Producer Manuals -->
+        <div class="manual-card bg-white shadow-xl rounded-xl p-8">
+          <h3 class="text-2xl font-bold text-green-600 mb-6">For Music Producers, Distributors, Publishers and Supervisors</h3>
+          <ul class="space-y-4 text-gray-800">
+            <li><a href="manual-producer-onboarding.html" class="text-green-600 hover:underline font-medium" target="_blank">Producer Onboarding & Setup</a></li>
+            <li><a href="manual-beat-upload-guidelines.html" class="text-green-600 hover:underline font-medium" target="_blank">How to use Your Industry Dashboard</a></li>
+            <li><a href="manual-stem-packs.html" class="text-green-600 hover:underline font-medium" target="_blank">Using your Collaboration Network</a></li>
+            <li><a href="manual-collabs-producer.html" class="text-green-600 hover:underline font-medium" target="_blank">Managing Collaborations & Messaging Artists</a></li>
+            <li><a href="manual-producer-analytics.html" class="text-green-600 hover:underline font-medium" target="_blank">Producer Earnings & Rhythm Deck Split</a></li>
+          </ul>
+        </div>
+
+        <!-- Instructional Videos for Artists -->
+        <div class="manual-card bg-white shadow-xl rounded-xl p-8 col-span-1 md:col-span-2">
+          <h3 class="text-2xl font-bold text-green-600 mb-6">Instructional Videos for Artists</h3>
+          <p class="text-gray-600 mb-6">Watch these short video tutorials to get started and master key features on Rhythm Deck.</p>
+          <ul class="space-y-4">
+            <li>
+              <button class="video-trigger w-full text-left bg-gray-50 hover:bg-green-50 p-5 rounded-lg border border-gray-200 transition flex flex-col"
+          data-video-url="https://rhythm-deck-music.onrender.com/copyright-tutorial.mp4">
+    <span class="text-green-600 font-medium text-lg">Video 1: How to Register a Copyright</span>
+    <p class="text-sm text-gray-600 mt-2">
+      1:45 min • Complete instructions on filling out a copyright form correctly. 
+      <br>
+      Watch the video then go to the official site: 
+      <a href="https://www.loc.gov" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         class="text-green-600 underline hover:text-green-800 font-medium">
+        Library of Congress
+      </a>
+    </p>
+  </button>
+            </li>
+            <li>
+              <button class="video-trigger w-full text-left bg-gray-50 hover:bg-green-50 p-5 rounded-lg border border-gray-200 transition flex flex-col"
+                      data-video-url="https://rhythm-deck.com/video2-uploading-tracks.mp4">
+                <span class="text-green-600 font-medium text-lg">Video 2: Uploading Your First Track & Artwork</span>
+                <p class="text-sm text-gray-600 mt-1">5:20 min • Step-by-step upload process and best practices</p>
+              </button>
+            </li>
+            <li>
+              <button class="video-trigger w-full text-left bg-gray-50 hover:bg-green-50 p-5 rounded-lg border border-gray-200 transition flex flex-col"
+                      data-video-url="https://rhythm-deck.com/video3-profile-setup.mp4">
+                <span class="text-green-600 font-medium text-lg">Video 3: Building a Professional Artist Profile</span>
+                <p class="text-sm text-gray-600 mt-1">4:10 min • Bio, photos, social links, and customization tips</p>
+              </button>
+            </li>
+            <li>
+              <button class="video-trigger w-full text-left bg-gray-50 hover:bg-green-50 p-5 rounded-lg border border-gray-200 transition flex flex-col"
+                      data-video-url="https://rhythm-deck.com/video4-analytics-intro.mp4">
+                <span class="text-green-600 font-medium text-lg">Video 4: Understanding Your Analytics & Growth Tools</span>
+                <p class="text-sm text-gray-600 mt-1">6:00 min • How to read stats and promote your music</p>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- General & Advanced Manuals -->
+        <div class="manual-card bg-white shadow-xl rounded-xl p-8">
+          <h3 class="text-2xl font-bold text-green-600 mb-6">General & Advanced Guides</h3>
+          <ul class="space-y-4 text-gray-800">
+            <li><a href="manual-mobile-app.html" class="text-green-600 hover:underline font-medium" target="_blank">Using the Rhythm Deck Mobile App</a></li>
+            <li><a href="manual-merch-tools.html" class="text-green-600 hover:underline font-medium" target="_blank">Merch & Radio Promotion Tools</a></li>
+            <li><a href="manual-account-security.html" class="text-green-600 hover:underline font-medium" target="_blank">Account Security & 2FA Setup</a></li>
+            <li><a href="manual-troubleshooting.html" class="text-green-600 hover:underline font-medium" target="_blank">Common Issues & Troubleshooting</a></li>
+            <li><a href="manual-contact-support.html" class="text-green-600 hover:underline font-medium" target="_blank">How to Contact Support</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white mt-10 p-5 text-center text-sm">
+    <nav class="mb-2 space-x-4">
+      <a href="contact.html" class="hover:text-green-400">Contact Us</a>
+      <a href="privacy.html" class="hover:text-green-400">Privacy Policy</a>
+      <a href="terms.html" class="hover:text-green-400">Terms & Conditions</a>
+    </nav>
+    <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
+  </footer>
+
+  <!-- Video Modal -->
+  <div id="videoModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <video id="videoPlayer" class="w-full" controls autoplay playsinline>
+        <source id="videoSource" src="" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('videoModal');
+    const videoPlayer = document.getElementById('videoPlayer');
+    const videoSource = document.getElementById('videoSource');
+
+    document.querySelectorAll('.video-trigger').forEach(button => {
+      button.addEventListener('click', () => {
+        const url = button.getAttribute('data-video-url');
+        videoSource.src = url;
+        videoPlayer.load();
+        modal.style.display = 'flex';
+        videoPlayer.play().catch(() => {}); // Autoplay may be blocked
+      });
+    });
+
+    function closeModal() {
+      modal.style.display = 'none';
+      videoPlayer.pause();
+      videoSource.src = ''; // Clear source
+    }
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  </script>
+
+</body>
+</html>
