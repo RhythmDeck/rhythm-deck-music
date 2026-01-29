@@ -5,47 +5,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Video Compressor - Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom dark theme adjustments */
+    body { background-color: #111827; /* gray-900 */ }
+    .container { background-color: #1f2937; /* gray-800 */ }
+    .text-primary { color: #10b981; /* green-500 */ }
+    .border-primary { border-color: #10b981; }
+    .hover:border-primary:hover { border-color: #059669; /* green-600 */ }
+    .slider::-webkit-slider-thumb {
+      background: #10b981;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .slider::-moz-range-thumb {
+      background: #10b981;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-900 min-h-screen flex items-center justify-center p-4 font-sans">
-  <div class="max-w-lg w-full bg-white p-8 rounded-2xl shadow-xl border border-green-200">
-    <h1 class="text-2xl font-bold text-green-600 mb-4 text-center">Video Compressor</h1>
-    <p class="text-gray-600 mb-6 text-center">Drag & drop or click to upload. Choose compression level.</p>
+<body class="min-h-screen flex items-center justify-center p-4 text-gray-200">
+  <div class="container max-w-lg w-full p-8 rounded-2xl shadow-2xl">
+    <h1 class="text-3xl font-bold text-primary mb-6 text-center">Video Compressor</h1>
+    <p class="text-gray-400 mb-8 text-center">Drag & drop or click to upload a video. Adjust the target size and dimensions below.</p>
 
     <!-- Drag & Drop Area -->
-    <div id="dropArea" class="border-2 border-dashed border-green-400 p-6 text-center rounded-lg cursor-pointer hover:border-green-600 transition mb-6">
-      <p class="text-lg text-gray-700 mb-2">Drag video here or click to select</p>
+    <div id="dropArea" class="border-2 border-dashed border-primary p-6 text-center rounded-lg cursor-pointer hover:border-primary transition mb-6">
+      <p class="text-lg text-gray-300 mb-2">Drag your video here or click to select</p>
       <p class="text-sm text-gray-500">MP4, MOV, AVI – up to 500 MB</p>
       <input type="file" id="fileInput" accept="video/*" class="hidden">
     </div>
 
-    <!-- Compression Options (hidden until file uploaded) -->
+    <!-- Options Section (hidden until file uploaded) -->
     <div id="optionsSection" class="hidden mb-6">
-      <p class="text-center mb-4">Original size: <span id="originalSize">0 MB</span></p>
-      <p class="text-center mb-4">Choose compression:</p>
-      <div class="flex justify-center gap-4">
-        <button id="basicBtn" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">Basic (Higher Quality)</button>
-        <button id="strongBtn" class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600">Strong (Smaller Size)</button>
+      <p class="text-center mb-4">Original size: <span id="originalSize" class="font-bold">0 MB</span></p>
+      
+      <!-- Target Size Slider -->
+      <div class="mb-6">
+        <label for="sizeSlider" class="block text-center mb-2">Target Size: <span id="targetSizeValue">0 MB</span></label>
+        <input type="range" id="sizeSlider" class="slider w-full appearance-none bg-gray-700 h-2 rounded-full outline-none" min="1" max="100" value="25">
       </div>
-      <p id="estimateText" class="text-center mt-4 text-sm text-gray-600">Estimated compressed size: ~0 MB</p>
+      
+      <!-- Dimensions Dropdown -->
+      <div class="mb-6">
+        <label for="dimensionsSelect" class="block text-center mb-2">Choose Dimensions</label>
+        <select id="dimensionsSelect" class="w-full bg-gray-700 text-gray-300 p-3 rounded-lg border border-gray-600 focus:border-primary focus:outline-none">
+          <option value="1280x720">720p (HD - Recommended)</option>
+          <option value="854x480">480p (SD - Smaller File)</option>
+          <option value="1920x1080">1080p (Full HD - Higher Quality)</option>
+          <option value="640x360">360p (Low Resolution)</option>
+        </select>
+      </div>
+      
+      <p class="text-center mb-4 text-sm text-gray-400">Estimated compressed size: <span id="estimateText" class="font-bold">~0 MB</span></p>
+      
+      <button id="compressBtn" class="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-green-600 transition">Start Compression</button>
     </div>
 
-    <!-- Progress -->
+    <!-- Progress Section -->
     <div id="progressSection" class="hidden mb-6">
-      <p class="text-center mb-2">Compressing...</p>
-      <div class="w-full bg-gray-200 rounded-full h-2.5">
-        <div id="progressBar" class="bg-green-600 h-2.5 rounded-full w-0"></div>
+      <p class="text-center mb-2">Compressing... Please wait</p>
+      <div class="w-full bg-gray-700 rounded-full h-2.5">
+        <div id="progressBar" class="bg-primary h-2.5 rounded-full w-0 transition-all duration-300"></div>
       </div>
-      <p id="progressText" class="text-center mt-2 text-sm text-gray-600">0%</p>
+      <p id="progressText" class="text-center mt-2 text-sm text-gray-400">0%</p>
     </div>
 
-    <!-- Result -->
+    <!-- Result Section -->
     <div id="resultSection" class="hidden text-center">
-      <p class="text-lg text-green-600 mb-2">Compression complete!</p>
-      <p class="text-sm text-gray-600 mb-4">Compressed size: <span id="compressedSize">0 MB</span> (from <span id="originalSizeResult">0 MB</span>)</p>
-      <a id="downloadLink" class="inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-500">Download</a>
+      <p class="text-lg text-primary mb-2">Compression complete!</p>
+      <p class="text-sm text-gray-400 mb-4">Compressed size: <span id="compressedSize">0 MB</span> (from <span id="originalSizeResult">0 MB</span>)</p>
+      <a id="downloadLink" class="inline-block bg-primary text-white font-bold py-3 px-8 rounded-lg hover:bg-green-600 transition">Download Compressed Video</a>
     </div>
 
-    <!-- Error -->
+    <!-- Error Message -->
     <p id="errorMsg" class="text-red-500 mt-4 text-center hidden"></p>
   </div>
 
@@ -53,9 +90,11 @@
     const dropArea = document.getElementById('dropArea');
     const fileInput = document.getElementById('fileInput');
     const optionsSection = document.getElementById('optionsSection');
-    const basicBtn = document.getElementById('basicBtn');
-    const strongBtn = document.getElementById('strongBtn');
+    const sizeSlider = document.getElementById('sizeSlider');
+    const targetSizeValue = document.getElementById('targetSizeValue');
+    const dimensionsSelect = document.getElementById('dimensionsSelect');
     const estimateText = document.getElementById('estimateText');
+    const compressBtn = document.getElementById('compressBtn');
     const originalSize = document.getElementById('originalSize');
     const originalSizeResult = document.getElementById('originalSizeResult');
     const compressedSize = document.getElementById('compressedSize');
@@ -67,7 +106,9 @@
     const errorMsg = document.getElementById('errorMsg');
 
     let uploadedFile = null;
+    let originalMB = 0;
 
+    // Drag & Drop Setup
     dropArea.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', handleUpload);
@@ -95,17 +136,26 @@
       resultSection.classList.add('hidden');
       optionsSection.classList.remove('hidden');
 
-      const sizeMB = (uploadedFile.size / (1024 * 1024)).toFixed(2);
-      originalSize.textContent = sizeMB + ' MB';
-      originalSizeResult.textContent = sizeMB + ' MB';
+      originalMB = (uploadedFile.size / (1024 * 1024)).toFixed(2);
+      originalSize.textContent = originalMB + ' MB';
+      originalSizeResult.textContent = originalMB + ' MB';
 
-      estimateText.textContent = 'Estimated compressed size: ~' + (sizeMB * 0.7).toFixed(2) + ' MB (Basic) or ~' + (sizeMB * 0.3).toFixed(2) + ' MB (Strong)';
+      sizeSlider.max = originalMB;
+      sizeSlider.value = Math.min(25, originalMB); // Default to 25MB or original if smaller
+      updateTargetValue();
     }
 
-    basicBtn.addEventListener('click', () => compressVideo('basic'));
-    strongBtn.addEventListener('click', () => compressVideo('strong'));
+    // Update slider value display and estimate
+    sizeSlider.addEventListener('input', updateTargetValue);
 
-    function compressVideo(type) {
+    function updateTargetValue() {
+      const targetMB = sizeSlider.value;
+      targetSizeValue.textContent = targetMB + ' MB';
+      estimateText.textContent = '~' + targetMB + ' MB (adjusted for selected dimensions)';
+    }
+
+    // Start compression
+    compressBtn.addEventListener('click', () => {
       if (!uploadedFile) return;
 
       optionsSection.classList.add('hidden');
@@ -115,23 +165,24 @@
 
       const formData = new FormData();
       formData.append('video', uploadedFile);
-      formData.append('type', type);
+      formData.append('targetSize', sizeSlider.value); // Send target MB
+      formData.append('resolution', dimensionsSelect.value); // Send dimensions
 
       fetch('/compress', {
         method: 'POST',
         body: formData
       })
-      .then(res => {
-        if (!res.ok) throw new Error('Server error: ' + res.status);
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
+        if (data.error) throw new Error(data.error);
+
         let percent = 0;
         const interval = setInterval(() => {
           percent += 10;
           progressBar.style.width = `${percent}%`;
           progressText.textContent = `${percent}%`;
           if (percent >= 100) {
+
             clearInterval(interval);
             progressSection.classList.add('hidden');
             compressedSize.textContent = data.compressedSize + ' MB';
@@ -146,7 +197,7 @@
         errorMsg.textContent = 'Error: ' + err.message;
         errorMsg.classList.remove('hidden');
       });
-    }
+    });
   </script>
 </body>
 </html>
