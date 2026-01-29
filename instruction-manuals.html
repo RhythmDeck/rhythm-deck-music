@@ -32,25 +32,26 @@
     }
     .modal-close {
       position: absolute;
-      top: 12px;
-      right: 16px;
-      font-size: 2.5rem;
+      top: 16px;
+      right: 20px;
+      font-size: 3rem;
       font-weight: bold;
-      color: #dc2626;           /* red-600 */
-      background: rgba(0,0,0,0.6);
-      width: 48px;
-      height: 48px;
+      color: #ef4444;           /* red-500 */
+      background: rgba(0,0,0,0.7);
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
+      z-index: 10;
     }
     .modal-close:hover {
-      color: #f87171;           /* red-400 on hover */
-      background: rgba(0,0,0,0.8);
-      transform: scale(1.1);
+      color: #f87171;           /* red-400 */
+      background: rgba(0,0,0,0.9);
+      transform: scale(1.15);
     }
     
     @media print {
@@ -197,7 +198,7 @@
   <!-- Video Modal -->
   <div id="videoModal" class="modal">
     <div class="modal-content relative">
-      <button class="modal-close text-red-600 hover:text-red-400" onclick="closeModal()">×</button>
+      <button class="modal-close" onclick="closeModal()">×</button>
       <video id="videoPlayer" class="w-full bg-black" controls playsinline>
         <source id="videoSource" src="" type="video/mp4">
         <p class="text-white p-4">Your browser does not support the video tag or the file could not be loaded.</p>
@@ -221,25 +222,27 @@
         videoSource.src = url;
         videoPlayer.load();
         modal.style.display = 'flex';
-        // Attempt autoplay (may be blocked by browser policy)
         videoPlayer.play().catch(e => {
           console.warn('Autoplay blocked:', e);
-          // Video will still show — user can click play manually
         });
       });
     });
 
-    // Close modal and stop video
+    // Close modal and fully stop/reset video
     function closeModal() {
       modal.style.display = 'none';
       videoPlayer.pause();
-      videoSource.src = ''; // Clear source to stop loading/buffering
+      videoPlayer.currentTime = 0;  // Reset to beginning
+      videoSource.src = '';         // Clear source to stop loading
     }
 
     // Close on red X click
-    document.querySelector('.modal-close').addEventListener('click', closeModal);
+    document.querySelector('.modal-close').addEventListener('click', (e) => {
+      e.stopPropagation();  // Prevent outside-click from firing
+      closeModal();
+    });
 
-    // Close on outside click (overlay)
+    // Close on outside click (overlay only)
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         closeModal();
