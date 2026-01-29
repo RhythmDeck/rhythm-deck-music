@@ -35,8 +35,8 @@
       top: 12px;
       right: 16px;
       font-size: 2.5rem;
-      color: white;
-      cursor: pointer;
+      font-weight: bold;
+      color: #dc2626;           /* red-600 */
       background: rgba(0,0,0,0.6);
       width: 48px;
       height: 48px;
@@ -44,9 +44,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .modal-close:hover { background: rgba(0,0,0,0.8); }
+    .modal-close:hover {
+      color: #f87171;           /* red-400 on hover */
+      background: rgba(0,0,0,0.8);
+      transform: scale(1.1);
+    }
     
     @media print {
       header, footer, .modal, .video-trigger { display: none !important; }
@@ -124,20 +129,20 @@
           <ul class="space-y-4">
             <li>
               <button class="video-trigger w-full text-left bg-gray-50 hover:bg-green-50 p-5 rounded-lg border border-gray-200 transition flex flex-col"
-          data-video-url="copyright-instructions-compressed.mp4">
-    <span class="text-green-600 font-medium text-lg">Video 1: How to Register a Copyright</span>
-    <p class="text-sm text-gray-600 mt-2">
-      6:52 min • Complete easy to follow instructions on filling out a copyright form correctly. 
-      <br>
-      Watch the video then go to the official site: 
-      <a href="https://www.loc.gov" 
-         target="_blank" 
-         rel="noopener noreferrer" 
-         class="text-green-600 underline hover:text-green-800 font-medium">
-        Library of Congress
-      </a>
-    </p>
-  </button>
+                      data-video-url="https://rhythm-deck-music.onrender.com/copyright-instructions-compressed.mp4">
+                <span class="text-green-600 font-medium text-lg">Video 1: How to Register a Copyright</span>
+                <p class="text-sm text-gray-600 mt-2">
+                  6:52 min • Complete easy to follow instructions on filling out a copyright form correctly.
+                  <br>
+                  Watch the video then go to the official site:
+                  <a href="https://www.loc.gov"
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     class="text-green-600 underline hover:text-green-800 font-medium">
+                    Library of Congress
+                  </a>
+                </p>
+              </button>
             </li>
             <li>
               <button class="video-trigger w-full text-left bg-gray-50 hover:bg-green-50 p-5 rounded-lg border border-gray-200 transition flex flex-col"
@@ -191,11 +196,11 @@
 
   <!-- Video Modal -->
   <div id="videoModal" class="modal">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeModal()">×</button>
-      <video id="videoPlayer" class="w-full" controls autoplay playsinline>
+    <div class="modal-content relative">
+      <button class="modal-close text-red-600 hover:text-red-400" onclick="closeModal()">×</button>
+      <video id="videoPlayer" class="w-full bg-black" controls playsinline>
         <source id="videoSource" src="" type="video/mp4">
-        Your browser does not support the video tag.
+        <p class="text-white p-4">Your browser does not support the video tag or the file could not be loaded.</p>
       </video>
     </div>
   </div>
@@ -205,24 +210,40 @@
     const videoPlayer = document.getElementById('videoPlayer');
     const videoSource = document.getElementById('videoSource');
 
+    // Open modal and load video
     document.querySelectorAll('.video-trigger').forEach(button => {
       button.addEventListener('click', () => {
         const url = button.getAttribute('data-video-url');
+        if (!url) {
+          console.error('No video URL found');
+          return;
+        }
         videoSource.src = url;
         videoPlayer.load();
         modal.style.display = 'flex';
-        videoPlayer.play().catch(() => {}); // Autoplay may be blocked
+        // Attempt autoplay (may be blocked by browser policy)
+        videoPlayer.play().catch(e => {
+          console.warn('Autoplay blocked:', e);
+          // Video will still show — user can click play manually
+        });
       });
     });
 
+    // Close modal and stop video
     function closeModal() {
       modal.style.display = 'none';
       videoPlayer.pause();
-      videoSource.src = ''; // Clear source
+      videoSource.src = ''; // Clear source to stop loading/buffering
     }
 
+    // Close on red X click
+    document.querySelector('.modal-close').addEventListener('click', closeModal);
+
+    // Close on outside click (overlay)
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
+      if (e.target === modal) {
+        closeModal();
+      }
     });
   </script>
 
