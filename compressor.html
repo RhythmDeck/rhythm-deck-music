@@ -6,25 +6,27 @@
   <title>Video Compressor - Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background-color: #111827; }
+    body { background-color: #111827; } /* gray-900 */
     .compressor-box {
-      background-color: #1f2937;
+      background-color: #1f2937; /* gray-800 */
       border: 2px solid #10b981; /* emerald green */
-      box-shadow: -8px 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.15);
+      box-shadow: -10px 10px 20px rgba(0, 0, 0, 0.7), 0 0 25px rgba(16, 185, 129, 0.2);
     }
     .slider::-webkit-slider-thumb {
       background: #10b981;
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       cursor: pointer;
+      border: 2px solid #059669;
     }
     .slider::-moz-range-thumb {
       background: #10b981;
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       cursor: pointer;
+      border: 2px solid #059669;
     }
   </style>
 </head>
@@ -38,11 +40,9 @@
         <p class="text-xs text-gray-300">Unleash Your Beat</p>
       </div>
     </div>
-    <nav class="space-x-4 text-sm md:text-base">
+    <nav class="space-x-6 text-sm md:text-base">
       <a href="/" class="hover:text-green-400 transition">Home</a>
-      <a href="/about" class="hover:text-green-400 transition">About</a>
-      <a href="/pricing" class="hover:text-green-400 transition">Pricing</a>
-      <a href="/login" class="hover:text-green-400 transition">Login</a>
+      <a href="/contact" class="hover:text-green-400 transition">Contact</a>
     </nav>
   </header>
 
@@ -50,69 +50,69 @@
   <main class="flex-grow flex items-center justify-center p-4">
     <div class="compressor-box max-w-lg w-full p-8 rounded-2xl">
       <h1 class="text-3xl font-bold text-green-500 mb-6 text-center">Video Compressor</h1>
-      <p class="text-gray-400 mb-8 text-center">Drag & drop or click to upload. Adjust target size and dimensions.</p>
+      <p class="text-gray-400 mb-8 text-center">Drag & drop or click to upload. Adjust target size and dimensions below.</p>
 
       <!-- Drag & Drop Area -->
-      <div id="dropArea" class="border-2 border-dashed border-green-500 p-6 text-center rounded-lg cursor-pointer hover:border-green-400 transition mb-6">
-        <p class="text-lg text-gray-300 mb-2">Drag your video here or click to select</p>
+      <div id="dropArea" class="border-2 border-dashed border-green-500 p-8 text-center rounded-lg cursor-pointer hover:border-green-400 transition mb-8">
+        <p class="text-xl text-gray-300 mb-3">Drag your video here or click to select</p>
         <p class="text-sm text-gray-500">MP4, MOV, AVI – up to 500 MB</p>
         <input type="file" id="fileInput" accept="video/*" class="hidden">
       </div>
 
       <!-- Options Section -->
-      <div id="optionsSection" class="hidden mb-6">
-        <p class="text-center mb-4">Original size: <span id="originalSize" class="font-bold">0 MB</span></p>
+      <div id="optionsSection" class="hidden mb-8">
+        <p class="text-center mb-4">Original size: <span id="originalSize" class="font-bold text-green-400">0 MB</span></p>
 
         <!-- Target Size Slider -->
-        <div class="mb-6">
-          <label for="sizeSlider" class="block text-center mb-2">Target Size: <span id="targetSizeValue">25 MB</span></label>
-          <input type="range" id="sizeSlider" class="slider w-full appearance-none bg-gray-700 h-2 rounded-full outline-none" min="1" max="100" value="25" step="1">
+        <div class="mb-8">
+          <label for="sizeSlider" class="block text-center mb-3 text-lg">Target Size: <span id="targetSizeValue" class="font-bold text-green-400">25 MB</span></label>
+          <input type="range" id="sizeSlider" class="slider w-full appearance-none bg-gray-700 h-3 rounded-full outline-none" min="1" max="100" value="25" step="1">
         </div>
 
         <!-- Dimensions Dropdown -->
-        <div class="mb-6">
-          <label for="dimensionsSelect" class="block text-center mb-2">Dimensions</label>
-          <select id="dimensionsSelect" class="w-full bg-gray-700 text-gray-300 p-3 rounded-lg border border-gray-600 focus:border-green-500 focus:outline-none">
-            <option value="1920x1080">1080p (Full HD)</option>
+        <div class="mb-8">
+          <label for="dimensionsSelect" class="block text-center mb-3 text-lg">Resolution</label>
+          <select id="dimensionsSelect" class="w-full bg-gray-700 text-gray-300 p-4 rounded-lg border border-gray-600 focus:border-green-500 focus:outline-none text-center">
+            <option value="1920x1080">1080p (Full HD - Higher Quality)</option>
             <option value="1280x720" selected>720p (HD - Recommended)</option>
-            <option value="854x480">480p (SD)</option>
-            <option value="640x360">360p (Low)</option>
+            <option value="854x480">480p (SD - Smaller File)</option>
+            <option value="640x360">360p (Low Resolution)</option>
           </select>
         </div>
 
-        <button id="compressBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition">
+        <button id="compressBtn" class="w-full bg-green-600 text-white font-bold py-4 rounded-lg hover:bg-green-700 transition text-lg">
           Start Compression
         </button>
       </div>
 
       <!-- Progress Section -->
-      <div id="progressSection" class="hidden mb-6">
-        <p class="text-center mb-2">Compressing... Please wait</p>
-        <div class="w-full bg-gray-700 rounded-full h-2.5">
-          <div id="progressBar" class="bg-green-500 h-2.5 rounded-full w-0 transition-all duration-300"></div>
+      <div id="progressSection" class="hidden mb-8">
+        <p class="text-center mb-3 text-lg">Compressing... Please wait</p>
+        <div class="w-full bg-gray-700 rounded-full h-3">
+          <div id="progressBar" class="bg-green-500 h-3 rounded-full w-0 transition-all duration-500"></div>
         </div>
-        <p id="progressText" class="text-center mt-2 text-sm text-gray-400">0%</p>
+        <p id="progressText" class="text-center mt-3 text-sm text-gray-400">0%</p>
       </div>
 
       <!-- Result Section -->
       <div id="resultSection" class="hidden text-center">
-        <p class="text-lg text-green-500 mb-2">Compression complete!</p>
-        <p class="text-sm text-gray-400 mb-4">
-          Compressed size: <span id="compressedSize">0 MB</span> 
-          (from <span id="originalSizeResult">0 MB</span>)
+        <p class="text-2xl text-green-500 mb-4 font-bold">Compression Complete!</p>
+        <p class="text-lg text-gray-300 mb-6">
+          Compressed to: <span id="compressedSize" class="font-bold text-green-400">0 MB</span><br>
+          (Original: <span id="originalSizeResult" class="text-gray-400">0 MB</span>)
         </p>
-        <a id="downloadLink" class="inline-block bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition">
+        <a id="downloadLink" class="inline-block bg-green-600 text-white font-bold py-4 px-10 rounded-lg hover:bg-green-700 transition text-lg">
           Download Compressed Video
         </a>
       </div>
 
       <!-- Error -->
-      <p id="errorMsg" class="text-red-500 mt-4 text-center hidden"></p>
+      <p id="errorMsg" class="text-red-500 mt-6 text-center text-lg font-medium hidden"></p>
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="bg-black text-white p-4 text-center text-sm mt-auto">
+  <footer class="bg-black text-white p-5 text-center text-sm mt-auto">
     © 2026 Rhythm Deck Music. All rights reserved.
   </footer>
 
@@ -137,7 +137,7 @@
     let uploadedFile = null;
     let originalMB = 0;
 
-    // Drag & Drop
+    // Drag & Drop Setup
     dropArea.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleUpload);
 
@@ -178,7 +178,11 @@
     });
 
     compressBtn.addEventListener('click', () => {
-      if (!uploadedFile) return;
+      if (!uploadedFile) {
+        errorMsg.textContent = 'Please upload a video first';
+        errorMsg.classList.remove('hidden');
+        return;
+      }
 
       optionsSection.classList.add('hidden');
       progressSection.classList.remove('hidden');
@@ -193,33 +197,31 @@
 
       fetch('/compress', {
         method: 'POST',
-        body: formData
+        body: formData,
+        timeout: 300000 // 5 min timeout
       })
       .then(res => {
-        if (!res.ok) throw new Error(`Server error ${res.status}`);
+        if (!res.ok) {
+          throw new Error(`Server error ${res.status} - ${res.statusText}`);
+        }
         return res.json();
       })
       .then(data => {
         if (data.error) throw new Error(data.error);
 
-        let percent = 0;
-        const interval = setInterval(() => {
-          percent += 5;
-          progressBar.style.width = `${percent}%`;
-          progressText.textContent = `${percent}%`;
-          if (percent >= 100) {
-            clearInterval(interval);
-            progressSection.classList.add('hidden');
-            compressedSize.textContent = data.compressedSize + ' MB';
-            downloadLink.href = data.downloadUrl;
-            downloadLink.download = uploadedFile.name.replace(/\.[^/.]+$/, "") + "-compressed.mp4";
-            resultSection.classList.remove('hidden');
-          }
-        }, 300);
+        progressBar.style.width = '100%';
+        progressText.textContent = '100%';
+        setTimeout(() => {
+          progressSection.classList.add('hidden');
+          compressedSize.textContent = data.compressedSize + ' MB';
+          downloadLink.href = data.downloadUrl;
+          downloadLink.download = uploadedFile.name.replace(/\.[^/.]+$/, "") + "-compressed.mp4";
+          resultSection.classList.remove('hidden');
+        }, 500);
       })
       .catch(err => {
         progressSection.classList.add('hidden');
-        errorMsg.textContent = 'Error: ' + err.message;
+        errorMsg.textContent = 'Error: ' + err.message + ' (Server may be busy or video too large)';
         errorMsg.classList.remove('hidden');
       });
     });
