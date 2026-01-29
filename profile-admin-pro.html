@@ -35,6 +35,10 @@
     .delete-comment-btn:hover {background: #dc2626;}
     .ai-btn {transition: all 0.2s;}
     .ai-btn:hover {transform: scale(1.05);}
+  .style1 {
+	font-size: 14px;
+	font-weight: bold;
+}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
@@ -299,7 +303,7 @@
       <div class="md:col-span-3 space-y-8">
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Audio Track (MP3)</h3>
-          <p class="mb-4 text-sm text-gray-600">(Refresh page to view new likes and comments)</p>
+          <p class="mb-4 text-sm text-gray-600 style1">Note* - Refresh page to view new likes and comments</p>
           <div class="grid md:grid-cols-2 gap-6">
             <div>
               <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
@@ -564,9 +568,7 @@ Do one block per platform. Thank you!`;
             Share to Social Media
           </button>
           ${isPaid ? `
-            <button onclick="buyMedia('${item.id}', ${price}, '${mediaUrl}', '${item.type}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 mt-2 rounded-b-xl">
-              Buy & Download – $${price.toFixed(2)}
-            </button>
+            
           ` : ''}
           <button onclick="deleteVideo('${item.id}', '${item.video_url}', '${item.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
             Delete ${typeLabel}
