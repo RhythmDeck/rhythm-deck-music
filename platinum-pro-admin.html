@@ -34,14 +34,11 @@
     .delete-comment-btn:hover {background: #dc2626;}
     .ai-btn {transition: all 0.2s;}
     .ai-btn:hover {transform: scale(1.05);}
-  .style1 {
-	font-size: 14px;
-	font-weight: bold;
-	color: #000000;
-}
+    .style1 {font-size: 14px; font-weight: bold; color: #000000;}
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg gap-4">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -78,6 +75,7 @@
     </button>
   </nav>
 </header>
+
 <main class="flex-grow">
   <section class="relative h-[300px] bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
     <img id="bannerPreview" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
@@ -93,6 +91,8 @@
     <input type="file" id="logoInput" accept="image/*" class="hidden">
     <button onClick="document.getElementById('logoInput').click()" class="absolute bottom-4 left-40 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-bold shadow-lg text-sm">Change Logo</button>
   </section>
+  
+    <!-- SOCIAL MEDIA SHARING SECTION -->
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-br from-purple-800 to-pink-800 rounded-xl shadow-2xl text-white">
     <h3 class="text-4xl font-black mb-6 text-center">Share Your Content to Social Media</h3>
     <p class="text-center mb-8 opacity-90 text-lg">Connect your accounts and post videos, updates, and music with one click</p>
@@ -154,7 +154,7 @@
       </label>
       <label class="social-btn bg-red-600 p-4 rounded-xl shadow-lg flex flex-col items-center gap-2 cursor-pointer hover:opacity-90 transition">
         <input type="checkbox" name="social" value="pinterest" class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500">
-        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.03-.655 2.569-.994 3.995-.283 1.193.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.099.119.112.223.083.343-.029.119-.096.362-.109.413-.017.07-.055.085-.113.052-1.013-.548-1.647-2.266-1.647-3.647 0-2.969 2.156-5.694 6.218-5.694 3.267 0 5.807 2.329 5.807 5.434 0 3.24-2.046 5.852-4.884 5.852-1.002 0-1.945-.523-2.266-1.139 0 0-.497 1.89-.617 2.353-.222.857-.821 1.93-1.223 2.582.918.284 1.89.436 2.9.436 6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.5 17.5c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zm-13 0c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zm6.5-4c-2.8 0-5.1 1.7-5.1 3.8v.2h10.2v-.2c0-2.1-2.3-3.8-5.1-3.8z"/></svg>
         <span class="font-bold text-lg">Pinterest</span>
       </label>
     </div>
@@ -163,11 +163,12 @@
         Send to Social Media
       </button>
     </div>
-    <div id="socialShareModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[9999] opacity-0 visibility-hidden transition-all duration-300">
+
+    <div id="socialShareModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[9999] opacity-0 visibility-hidden transition-all">
       <div class="bg-gray-900 rounded-2xl p-10 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto relative border-4 border-emerald-600 shadow-2xl">
         <button id="closeSocialModal" class="absolute top-6 right-8 text-white text-6xl font-bold hover:text-emerald-400 transition">×</button>
         <h2 class="text-4xl font-black mb-10 text-center text-emerald-400">Share Your Content</h2>
-        <!-- AI helper section -->
+
         <div class="mb-12 bg-gray-800 p-8 rounded-2xl border border-emerald-700 shadow-inner">
           <h3 class="text-2xl font-bold text-emerald-400 mb-4 text-center">AI Comment Rewriter Helper</h3>
           <p class="text-center text-gray-300 mb-6">
@@ -177,15 +178,15 @@
                     class="w-full p-5 bg-gray-900 border-2 border-emerald-600 rounded-xl text-white placeholder-gray-400 focus:border-emerald-400 focus:outline-none resize-none font-medium text-lg"
                     placeholder="Write your main message here (one version) — AI will adapt it for each platform with hashtags..."></textarea>
           <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <button onClick="useAI('Grok', 'https://grok.x.ai/')"
+            <button onclick="useAI('Grok', 'https://grok.x.ai/')"
                     class="ai-btn bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
               Use Grok
             </button>
-            <button onClick="useAI('Gemini', 'https://gemini.google.com/')"
+            <button onclick="useAI('Gemini', 'https://gemini.google.com/')"
                     class="ai-btn bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
               Use Gemini
             </button>
-            <button onClick="useAI('ChatGPT', 'https://chat.openai.com/')"
+            <button onclick="useAI('ChatGPT', 'https://chat.openai.com/')"
                     class="ai-btn bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
               Use ChatGPT
             </button>
@@ -202,6 +203,7 @@
             </ol>
           </div>
         </div>
+
         <div id="selectedPlatformsList" class="flex flex-wrap gap-4 mb-10 justify-center"></div>
         <div id="perPlatformComments" class="space-y-10 mb-12"></div>
         <div class="mb-10">
@@ -224,6 +226,8 @@
       </div>
     </div>
   </section>
+  
+    <!-- LIVE STREAM SECTION -->
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
     <h3 class="text-3xl font-black text-purple-800 mb-6">Go Live with Your Fans</h3>
     <div class="grid lg:grid-cols-3 gap-8 mb-8">
@@ -264,6 +268,8 @@
       </div>
     </div>
   </section>
+
+  <!-- PROFILE & UPLOAD SECTION -->
   <section class="max-w-6xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-2xl">
     <div class="grid md:grid-cols-4 gap-8">
       <div class="md:col-span-1 space-y-6">
@@ -294,10 +300,11 @@
           </button>
         </div>
       </div>
+
       <div class="md:col-span-3 space-y-8">
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Audio Track (MP3)</h3>
-          <p class="mb-4 text-[16px] font-bold text-black">Note* - Refresh page to view new likes and comments</p>
+          <p class="mb-4 text-[14px] font-bold text-black style2">Note* - Refresh page to view new likes and comments</p>
           <div class="grid md:grid-cols-2 gap-6">
             <div>
               <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
@@ -318,9 +325,10 @@
             <div id="audioSpinner" class="spinner hidden ml-3"></div>
           </button>
         </div>
+
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
           <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Video</h3>
-          <p class="mb-4 text-[16px] font-bold text-black">Note* - Refresh page to view new likes and comments</p>
+          <p class="mb-4 text-[14px] font-bold text-black style2">Note* - Refresh page to view new likes and comments</p>
           <div class="grid md:grid-cols-2 gap-6">
             <div>
               <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
@@ -333,19 +341,19 @@
           </div>
           <div class="mt-6">
             <label class="block font-bold mb-3 text-gray-700">Price for Fans to Buy & Download (USD)</label>
-            <input type="number" id="mediaPrice" min="0" step="0.01" value="0.00" placeholder="e.g. 4.99 or 0 for free" class="w-full border border-gray-300 p-4 rounded-lg text-xl font-semibold text-center bg-white">
+            <input type="number" id="videoPrice" min="0" step="0.01" value="0.00" placeholder="e.g. 4.99 or 0 for free" class="w-full border border-gray-300 p-4 rounded-lg text-xl font-semibold text-center bg-white">
             <p class="text-sm text-gray-600 mt-2">Enter 0.00 for free. Any price above $0 means fans must pay to download.</p>
           </div>
-          <div class="mt-6">
-            <button id="uploadVideo" class="w-full bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg shadow-lg flex items-center justify-center">
-              <span>Upload & Publish Video</span>
-              <div id="uploadSpinner" class="spinner hidden ml-3"></div>
-            </button>
-          </div>
+          <button id="uploadVideo" class="w-full bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg shadow-lg flex items-center justify-center">
+            <span>Upload & Publish Video</span>
+            <div id="uploadSpinner" class="spinner hidden ml-3"></div>
+          </button>
         </div>
+
         <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
     </div>
+
     <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
       <details class="group">
         <summary class="cursor-pointer list-none flex items-center justify-between text-2xl font-black text-red-700">
@@ -368,48 +376,17 @@
     </div>
   </section>
 </main>
+
 <div id="videoModal">
   <div id="closeModal" onClick="closeModal()">X</div>
   <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
 </div>
+
 <footer class="bg-black text-white mt-auto p-6 text-center">
   <p class="text-sm">© 2026 Rhythm Deck Music. All rights reserved.</p>
 </footer>
-<script>
-  window.deleteVideo = async function(id, videoPath, thumbPath) {
-    if (!confirm('Are you sure you want to permanently delete this? This cannot be undone.')) return;
-    try {
-      const { error: dbError } = await window.supabase.from('user_videos').delete().eq('id', id);
-      if (dbError) throw dbError;
-      const filesToDelete = [];
-      if (videoPath) filesToDelete.push(videoPath);
-      if (thumbPath && thumbPath !== 'null') filesToDelete.push(thumbPath);
-      if (filesToDelete.length > 0) {
-        const { error: storageError } = await window.supabase.storage.from('media').remove(filesToDelete);
-        if (storageError) console.warn('Storage cleanup failed:', storageError);
-      }
-      alert('Deleted successfully.');
-      window.loadVideos();
-      window.displayProBadge();
-    } catch (err) {
-      console.error('Delete failed:', err);
-      alert('Delete failed: ' + (err.message || 'Unknown error'));
-    }
-  };
-  window.deleteComment = async function(commentId) {
-    if (!confirm('Delete this comment permanently?')) return;
-    try {
-      const { error } = await window.supabase.from('video_comments').delete().eq('id', commentId);
-      if (error) throw error;
-      alert('Comment deleted.');
-      window.loadVideos();
-    } catch (err) {
-      console.error('Delete comment error:', err);
-      alert('Failed to delete comment: ' + err.message);
-    }
-  };
-</script>
-<!-- Global AI helper script -->
+
+<!-- AI helper script -->
 <script>
   function useAI(aiName, aiUrl) {
     const base = document.getElementById('baseComment').value.trim();
@@ -444,113 +421,122 @@ Do one block per platform. Thank you!`;
     });
   }
 </script>
+
+<!-- Main application logic -->
 <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-  window.supabase = createClient(
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
+
   let currentUser = null;
+
   window.saveArtistName = async function() {
     const name = document.getElementById('artistNameInput').value.trim();
     if (!name) return alert("Enter a name");
-    const { error } = await window.supabase.from('profiles').update({ name }).eq('id', currentUser.id);
+    const { error } = await supabase.from('profiles').update({ name }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert("Name saved!");
   };
+
   window.saveBio = async function() {
     const bio = document.getElementById('bioInput').value.trim();
-    const { error } = await window.supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
+    const { error } = await supabase.from('profiles').update({ bio }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert("Bio saved!");
   };
+
   window.saveCollaborationOptIn = async function() {
     const checked = document.getElementById('collaborationOptIn').checked;
-    const { error } = await window.supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
+    const { error } = await supabase.from('profiles').update({ collaboration_opt_in: checked }).eq('id', currentUser.id);
     if (error) alert("Save failed: " + error.message);
     else alert(checked ? "You're now in the Collaboration Network!" : "You've left the network");
   };
+
   window.logout = async function() {
-    await window.supabase.auth.signOut();
+    await supabase.auth.signOut();
     window.location.href = 'login.html';
   };
+
   window.closeModal = function() {
     document.getElementById('videoModal').classList.remove('show');
     document.getElementById('modalVideo').src = '';
   };
+
   window.openVideoPopup = function(url) {
     document.getElementById('modalVideo').src = url;
     document.getElementById('videoModal').classList.add('show');
   };
-  window.openSocialModal = function(videoUrl) {
-    alert("Social sharing for: " + videoUrl);
-  };
+
   window.displayProBadge = async function() {
     if (!currentUser) return;
-    const { count } = await window.supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+    const { count } = await supabase.from('user_videos').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id);
     const badgeContainer = document.getElementById('badge-container');
     badgeContainer.innerHTML = '';
     if (count >= 3) {
-      badgeContainer.innerHTML = `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
+      badgeContainer.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`;
     }
   };
+
   window.loadProfileData = async function() {
-    const { data: profile } = await window.supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
+    const { data: profile, error } = await supabase.from('profiles').select('name, bio, banner_url, logo_url, subdomain').eq('id', currentUser.id).single();
+    if (error) {
+      console.error('Profile load error:', error);
+      return;
+    }
     document.getElementById('artistNameInput').value = profile.name || '';
     document.getElementById('bioInput').value = profile.bio || '';
     if (profile.banner_url) {
-      const { data: bannerData } = window.supabase.storage.from('media').getPublicUrl(profile.banner_url);
+      const { data: bannerData } = supabase.storage.from('media').getPublicUrl(profile.banner_url);
       document.getElementById('bannerPreview').src = bannerData.publicUrl + '?t=' + Date.now();
       document.getElementById('bannerPreview').classList.remove('hidden');
       document.getElementById('bannerPlaceholder').classList.add('hidden');
     }
     if (profile.logo_url) {
-      const { data: logoData } = window.supabase.storage.from('media').getPublicUrl(profile.logo_url);
+      const { data: logoData } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
       document.getElementById('logoPreview').src = logoData.publicUrl + '?t=' + Date.now();
     }
     const publicUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${profile.subdomain || currentUser.id}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
   };
+
   window.loadVideos = async function() {
-    const { data: videos, error } = await window.supabase
+    const { data: items, error } = await supabase
       .from('user_videos')
       .select('id, video_url, thumbnail_url, title, price, type')
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false });
+
     if (error) {
       console.error('Error loading media:', error);
       return;
     }
+
     const container = document.getElementById('videoList');
     container.innerHTML = '';
-    if (!videos || videos.length === 0) {
+
+    if (!items || items.length === 0) {
       container.innerHTML = '<p class="col-span-full text-center text-gray-500 italic text-lg py-10">No media uploaded yet.</p>';
       return;
     }
-    for (const item of videos) {
-      const mediaUrl = window.supabase.storage.from('media').getPublicUrl(item.video_url).data.publicUrl;
+
+    for (const item of items) {
+      const mediaUrl = supabase.storage.from('media').getPublicUrl(item.video_url).data.publicUrl;
       const thumbUrl = item.thumbnail_url
-        ? window.supabase.storage.from('media').getPublicUrl(item.thumbnail_url).data.publicUrl + '?t=' + Date.now()
-        : `https://via.placeholder.com/400x225/111/fff?text=${item.type || 'Media'}`;
-      const { count: likes = 0 } = await window.supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', item.id);
-      const { data: comments = [] } = await window.supabase
-        .from('video_comments')
-        .select('id, name, comment')
-        .eq('video_id', item.id)
-        .order('created_at', { ascending: false });
+        ? supabase.storage.from('media').getPublicUrl(item.thumbnail_url).data.publicUrl + '?t=' + Date.now()
+        : `https://via.placeholder.com/400x225/10b981/ffffff?text=${item.type || 'Media'}`;
+
+      const { count: likes = 0 } = await supabase.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', item.id);
+      const { data: comments = [] } = await supabase.from('video_comments').select('name, comment').eq('video_id', item.id).order('created_at', { ascending: false });
+
       const typeLabel = item.type === 'audio' ? 'Audio Track' : 'Video';
       const typeColor = item.type === 'audio' ? 'bg-indigo-600' : 'bg-emerald-600';
-      let commentsHTML = comments.length === 0
-        ? '<p class="text-gray-500 italic">No comments yet</p>'
-        : comments.map(c => `
-            <div class="comment-bubble">
-              <span class="comment-name">${c.name}:</span>
-              <span class="comment-text">${c.comment}</span>
-              <button class="delete-comment-btn" onclick="deleteComment('${c.id}')">×</button>
-            </div>
-          `).join('');
-      const thumbParam = item.thumbnail_url ? `'${item.thumbnail_url}'` : 'null';
+      const price = item.price || 0;
+      const isPaid = price > 0;
+
       container.innerHTML += `
         <div class="video-card bg-gray-900 rounded-xl overflow-hidden shadow-xl flex flex-col">
           <div class="relative">
@@ -564,7 +550,7 @@ Do one block per platform. Thank you!`;
               <h4 class="font-bold text-lg truncate">${item.title || 'Untitled'}</h4>
               <span class="px-3 py-1 rounded-full text-xs font-bold ${typeColor}">${typeLabel}</span>
             </div>
-            <p class="text-emerald-400 font-bold text-xl mt-2">Price: $${(item.price || 0).toFixed(2)}</p>
+            <p class="text-emerald-400 font-bold text-xl mt-2">Price: $${price.toFixed(2)}</p>
             <div class="mt-4 space-y-4">
               <div class="flex justify-between items-center">
                 <div class="like-display">
@@ -574,17 +560,47 @@ Do one block per platform. Thank you!`;
                 <button onclick="navigator.clipboard.writeText('${mediaUrl}'); alert('Link copied!')" class="text-green-400 font-bold hover:text-green-300">Share</button>
               </div>
               <div class="border-t border-gray-700 pt-3 space-y-2 max-h-40 overflow-y-auto text-sm">
-                ${commentsHTML}
+                ${comments.length === 0 ? '<p class="text-gray-500 italic">No comments yet</p>' : ''}
+                ${comments.map(c => `<div class="comment-bubble"><span class="comment-name">${c.name}:</span> <span class="comment-text">${c.comment}</span></div>`).join('')}
               </div>
             </div>
           </div>
-          
-          <button onclick="deleteVideo('${item.id}', '${item.video_url}', ${thumbParam})" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
+          ${isPaid ? `
+            <button onclick="buyMedia('${item.id}', ${price}, '${mediaUrl}', '${item.type}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 mt-2 rounded-b-xl">
+              Buy & Download – $${price.toFixed(2)}
+            </button>
+          ` : ''}
+          <button onclick="deleteVideo('${item.id}', '${item.video_url}', '${item.thumbnail_url || ''}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 mt-auto">
             Delete ${typeLabel}
           </button>
         </div>`;
     }
   };
+
+  window.deleteVideo = async function(id, videoPath, thumbPath) {
+    if (!confirm('Are you sure you want to permanently delete this? This cannot be undone.')) return;
+    try {
+      await supabase.from('user_videos').delete().eq('id', id);
+      const files = [videoPath, thumbPath].filter(Boolean);
+      if (files.length) await supabase.storage.from('media').remove(files);
+      alert('Deleted successfully.');
+      window.loadVideos();
+      window.displayProBadge();
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
+    }
+  };
+
+  window.buyMedia = async function(id, price, url, type) {
+    if (confirm(`Pay $${price.toFixed(2)} to download this ${type === 'video' ? 'video' : 'audio track'}? (Test mode)`)) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = type === 'video' ? 'media.mp4' : 'track.mp3';
+      a.click();
+      alert('Download started! Thank you for supporting the artist ❤️');
+    }
+  };
+
   window.uploadAudio = async function() {
     const thumbFile = document.getElementById('audioThumbnailInput')?.files[0];
     const audioFile = document.getElementById('audioInput')?.files[0];
@@ -597,9 +613,9 @@ Do one block per platform. Thank you!`;
       const timestamp = Date.now();
       const thumbPath = `thumbs/audio/${currentUser.id}/${timestamp}.jpg`;
       const audioPath = `audio/${currentUser.id}/${timestamp}.mp3`;
-      await window.supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true });
-      await window.supabase.storage.from('media').upload(audioPath, audioFile, { upsert: true });
-      await window.supabase.from('user_videos').insert({
+      await supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true });
+      await supabase.storage.from('media').upload(audioPath, audioFile, { upsert: true });
+      await supabase.from('user_videos').insert({
         user_id: currentUser.id,
         video_url: audioPath,
         thumbnail_url: thumbPath,
@@ -619,10 +635,11 @@ Do one block per platform. Thank you!`;
       spinner.classList.add('hidden');
     }
   };
+
   window.uploadAndPublish = async function() {
     const videoFile = document.getElementById('videoInput')?.files[0];
     const thumbFile = document.getElementById('thumbnailInput')?.files[0];
-    const price = parseFloat(document.getElementById('mediaPrice')?.value) || 0;
+    const price = parseFloat(document.getElementById('videoPrice')?.value) || 0;
     if (!videoFile) return alert('Please select a video file (.mp4)');
     if (!thumbFile) return alert('Please select a thumbnail');
     const spinner = document.getElementById('uploadSpinner');
@@ -631,9 +648,9 @@ Do one block per platform. Thank you!`;
       const timestamp = Date.now();
       const videoPath = `videos/${currentUser.id}/${timestamp}.mp4`;
       const thumbPath = `thumbs/${currentUser.id}/${timestamp}.jpg`;
-      await window.supabase.storage.from('media').upload(videoPath, videoFile, { upsert: true });
-      await window.supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true });
-      await window.supabase.from('user_videos').insert({
+      await supabase.storage.from('media').upload(videoPath, videoFile, { upsert: true });
+      await supabase.storage.from('media').upload(thumbPath, thumbFile, { upsert: true });
+      await supabase.from('user_videos').insert({
         user_id: currentUser.id,
         video_url: videoPath,
         thumbnail_url: thumbPath,
@@ -644,7 +661,7 @@ Do one block per platform. Thank you!`;
       alert('Upload Complete!\nVideo uploaded successfully! Price: $' + price.toFixed(2));
       document.getElementById('videoInput').value = '';
       document.getElementById('thumbnailInput').value = '';
-      document.getElementById('mediaPrice').value = '0.00';
+      document.getElementById('videoPrice').value = '0.00';
       window.loadVideos();
       window.displayProBadge();
     } catch (err) {
@@ -653,31 +670,35 @@ Do one block per platform. Thank you!`;
       spinner.classList.add('hidden');
     }
   };
+
   window.uploadBanner = async function(e) {
     const file = e.target.files[0];
     if (!file) return;
     const path = `banners/${currentUser.id}`;
-    await window.supabase.storage.from('media').upload(path, file, { upsert: true });
-    await window.supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
+    await supabase.storage.from('media').upload(path, file, { upsert: true });
+    await supabase.from('profiles').update({ banner_url: path }).eq('id', currentUser.id);
     window.loadProfileData();
   };
+
   window.uploadLogo = async function(e) {
     const file = e.target.files[0];
     if (!file) return;
     const path = `logos/${currentUser.id}`;
-    await window.supabase.storage.from('media').upload(path, file, { upsert: true });
-    await window.supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
+    await supabase.storage.from('media').upload(path, file, { upsert: true });
+    await supabase.from('profiles').update({ logo_url: path }).eq('id', currentUser.id);
     window.loadProfileData();
   };
+
   window.deleteAccount = async function() {
     if (confirm('Delete EVERYTHING forever?')) {
-      await window.supabase.from('profiles').delete().eq('id', currentUser.id);
-      await window.supabase.auth.signOut();
+      await supabase.from('profiles').delete().eq('id', currentUser.id);
+      await supabase.auth.signOut();
       window.location.href = 'index.html';
     }
   };
+
   window.checkStripeConnection = async function() {
-    const { data: profile } = await window.supabase.from('profiles').select('stripe_account_id').eq('id', currentUser.id).single();
+    const { data: profile } = await supabase.from('profiles').select('stripe_account_id').eq('id', currentUser.id).single();
     const statusDiv = document.getElementById('stripeStatus');
     const btn = document.getElementById('connectStripeBtn');
     if (profile?.stripe_account_id) {
@@ -691,34 +712,15 @@ Do one block per platform. Thank you!`;
       btn.textContent = 'Enable Tip Bucket – Connect Stripe';
     }
   };
-  window.openPlatinumVision = async function() {
-    if (!currentUser) {
-      alert("Please log in first");
-      return;
-    }
-    const { data: profile, error } = await window.supabase
-      .from('profiles')
-      .select('plan')
-      .eq('id', currentUser.id)
-      .single();
-    if (error || !profile) {
-      alert("Error checking your plan. Please try again.");
-      return;
-    }
-    if (profile.plan === 'platinum') {
-      window.location.href = 'rhythm-vision-platinum.html';
-    } else {
-      alert("Rhythm Vision Platinum is exclusive to Platinum Pro Plan users.\nYou can upgrade on the pricing page.");
-      window.location.href = 'pricing.html';
-    }
-  };
-  // Social modal logic
+
+  // Social sharing modal logic
   const openSocialShareBtn = document.getElementById('openSocialShareBtn');
   const socialShareModal = document.getElementById('socialShareModal');
   const closeSocialModal = document.getElementById('closeSocialModal');
   const selectedPlatformsList = document.getElementById('selectedPlatformsList');
   const perPlatformComments = document.getElementById('perPlatformComments');
   const sendSocialPostBtn = document.getElementById('sendSocialPostBtn');
+
   if (openSocialShareBtn) {
     openSocialShareBtn.addEventListener('click', () => {
       const checked = document.querySelectorAll('input[name="social"]:checked');
@@ -734,6 +736,7 @@ Do one block per platform. Thank you!`;
         tag.className = 'bg-emerald-700 px-5 py-2 rounded-full text-base font-medium text-white';
         tag.textContent = platform;
         selectedPlatformsList.appendChild(tag);
+
         const commentDiv = document.createElement('div');
         commentDiv.className = 'bg-gray-800 p-6 rounded-xl border border-emerald-700';
         commentDiv.innerHTML = `
@@ -745,11 +748,13 @@ Do one block per platform. Thank you!`;
       socialShareModal.classList.add('show');
     });
   }
+
   if (closeSocialModal) {
     closeSocialModal.addEventListener('click', () => {
       socialShareModal.classList.remove('show');
     });
   }
+
   if (socialShareModal) {
     socialShareModal.addEventListener('click', e => {
       if (e.target === socialShareModal) {
@@ -757,33 +762,52 @@ Do one block per platform. Thank you!`;
       }
     });
   }
+
   if (sendSocialPostBtn) {
     sendSocialPostBtn.addEventListener('click', () => {
       alert("Sending to social media is not active yet.\nThis feature will be enabled once you go live.");
     });
   }
+
   document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { user } } = await window.supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       alert('Login required');
       window.location.href = 'login.html';
       return;
     }
     currentUser = user;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('session_id') && !sessionStorage.getItem('pro_upgraded')) {
+      await supabase.from('profiles').update({ plan: 'pro', paid: true }).eq('id', user.id);
+      sessionStorage.setItem('pro_upgraded', 'true');
+      window.history.replaceState({}, '', 'profile-admin-pro.html');
+    }
+
     await Promise.all([
       window.loadProfileData(),
       window.loadVideos(),
       window.displayProBadge(),
       window.checkStripeConnection()
     ]);
+
     document.getElementById('bannerInput').addEventListener('change', window.uploadBanner);
     document.getElementById('logoInput').addEventListener('change', window.uploadLogo);
     document.getElementById('uploadAudio').addEventListener('click', window.uploadAudio);
     document.getElementById('uploadVideo').addEventListener('click', window.uploadAndPublish);
+
     document.getElementById('connectStripeBtn').addEventListener('click', async () => {
       try {
-        const { data, error } = await window.supabase.functions.invoke('stripe-onboard', {
-          body: { userId: currentUser.id }
+        const returnUrl = window.location.origin + '/profile-admin-pro.html?success=1';
+        const refreshUrl = window.location.origin + '/profile-admin-pro.html?refresh=1';
+
+        const { data, error } = await supabase.functions.invoke('stripe-onboard', {
+          body: { 
+            userId: currentUser.id,
+            returnUrl: returnUrl,
+            refreshUrl: refreshUrl
+          }
         });
         if (error) throw error;
         window.location.href = data.url;
@@ -791,6 +815,7 @@ Do one block per platform. Thank you!`;
         alert('Error starting onboarding: ' + err.message);
       }
     });
+
     document.getElementById('deleteConfirmInput').addEventListener('input', e => {
       const val = e.target.value.trim();
       const btn = document.getElementById('deleteAccountBtn');
@@ -806,6 +831,7 @@ Do one block per platform. Thank you!`;
         btn.textContent = 'Yes, Delete Everything';
       }
     });
+
     document.getElementById('deleteAccountBtn').addEventListener('click', window.deleteAccount);
   });
 </script>
