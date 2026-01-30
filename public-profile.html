@@ -73,7 +73,6 @@
     .style2 {font-size: 14px;font-weight: bold;}
     .buy-btn {background:#10b981 !important;color:white !important;font-weight:bold;padding:1rem 1.5rem;border-radius:999px;box-shadow:0 4px 12px rgba(16,185,129,0.4);transition:all .3s;}
     .buy-btn:hover {background:#059669 !important;transform:scale(1.05);}
-    /* Bright clear thumbnails */
     .video-card img.thumbnail-img {
       width: 100%;
       height: 240px;
@@ -86,9 +85,26 @@
       filter: brightness(1.15) contrast(1.12);
       transition: filter 0.3s ease;
     }
+    #badge-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 30;
+    }
+    #badge-container img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 20px rgba(255,215,0,0.7));
+      transition: all 0.3s;
+    }
+    #badge-container img:hover {
+      transform: scale(1.1);
+    }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900 min-h-screen">
+<body class="bg-gray-50 text-gray-900 min-h-screen relative">
+  <!-- Banner Section with Badge Container -->
   <section class="relative h-[400px] bg-gradient-to-br from-purple-950 to-blue-950 overflow-hidden shadow-2xl">
     <img id="banner" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
     <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-5xl font-bold opacity-50">
@@ -97,6 +113,7 @@
     <div class="absolute bottom-8 left-8 w-40 h-40 rounded-full border-[12px] border-white/90 shadow-2xl overflow-hidden bg-white z-10">
       <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
     </div>
+    <div id="badge-container"></div>
   </section>
 
   <div class="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
@@ -185,14 +202,14 @@
       }
 
       let profile;
-      let { data } = await sb
+      let { data, error } = await sb
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
         .eq('subdomain', id)
         .single();
 
-      if (!data) {
-        ({ data } = await sb
+      if (error || !data) {
+        ({ data, error } = await sb
           .from('profiles')
           .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
           .eq('id', id)
@@ -201,7 +218,7 @@
 
       profile = data;
 
-      if (!profile) {
+      if (error || !profile) {
         document.getElementById('name').textContent = 'Profile not found';
         return;
       }
@@ -227,57 +244,45 @@
           document.getElementById('tipBucketSection').classList.remove('hidden');
         }
       }
+
+      return profile; // Return profile for use in loadVideos
     }
 
     async function loadVideos() {
       const container = document.getElementById('videoList');
       container.innerHTML = '<p class="col-span-full text-center py-20 text-2xl text-gray-600">Loading videos...</p>';
 
-      let profile;
-      let { data } = await sb
-        .from('profiles')
-        .select('id, plan')
-        .eq('subdomain', id)
-        .single();
-
-      if (!data) {
-        ({ data } = await sb.from('profiles').select('id, plan').eq('id', id).single());
-      }
-
-      profile = data;
-
+      const profile = await loadProfile(); // Ensure profile is loaded first
       if (!profile) {
-        container.innerHTML = '<p class="col-span-full text-center text-red-600 text-2xl py-20">No videos available</p>';
+        container.innerHTML = '<p class="col-span-full text-center text-red-600 text-2xl py-20">Profile not found</p>';
         return;
       }
 
-      const { data: videos, error } = await sb
+      const { data: videos, error: videoError } = await sb
         .from('user_videos')
         .select('*')
         .eq('user_id', profile.id)
         .order('created_at', { ascending: false });
 
-      if (error || !videos?.length) {
+      if (videoError || !videos?.length) {
         container.innerHTML = '<p class="col-span-full text-center italic py-20 text-2xl text-gray-600">No videos yet</p>';
         return;
       }
 
       container.innerHTML = '';
 
-      // Fetch video count for badge eligibility
+      // Check video count for badge
       const { count: videoCount } = await sb
         .from('user_videos')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', profile.id);
 
-      // Show correct badge if >= 3 videos
+      // Show badge if >= 3 videos
       if (videoCount >= 3) {
-        const badgeContainer = document.createElement('div');
-        badgeContainer.className = 'absolute top-8 right-8 z-30';
+        const badgeContainer = document.getElementById('badge-container');
         badgeContainer.innerHTML = profile.plan === 'platinum'
-          ? `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge" class="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-2xl">`
-          : `<img src="pro-artist-badge.png" alt="Pro Artist Badge" class="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-2xl">`;
-        document.querySelector('section.relative.h-\\5b400px\\]').appendChild(badgeContainer);
+          ? `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`
+          : `<img src="pro-artist-badge.png" alt="Pro Artist Badge">`;
       }
 
       for (const v of videos) {
