@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rhythm Deck – Video Compressor</title>
+<title>Rhythm Deck – Video Compressor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
@@ -134,7 +134,22 @@
     1. Select your video file<br>
     2. Choose your target file size (MB)<br>
     3. Set video dimensions (auto or manual)<br>
-    4. Choose compression quality<br>
+    4. Choose compression quality - explained simpply<br>
+    <strong>Higher Quality (CRF 18)</strong><br>
+    Best visual quality, larger file size.<br>
+    Use for premium content or archiving.<br><br>
+
+    <strong>Balanced (CRF 23 – Recommended)</strong><br>
+    Best balance of quality and file size.<br>
+    Perfect for web, social, and general use.<br><br>
+
+    <strong>Smaller File (CRF 28)</strong>    <br>
+    Smaller file, more compression artifacts.<br>
+    Use when size matters more than detail.<br><br>
+
+    👉 Lower number = better quality
+    👉 Higher number = smaller file<br>
+
     5. Click <em>Compress & Download</em><br>
     6. Everything runs locally in your browser
   </div>
@@ -193,10 +208,8 @@
 <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/util.min.js"></script>
 
 <script>
-  const { FFmpeg } = FFmpegWASM;
-  const { fetchFile } = FFmpegUtil;
-
   const ffmpeg = new FFmpeg();
+  const { fetchFile } = FFmpegUtil;
   let loaded = false;
 
   const sizeSlider = document.getElementById("sizeSlider");
@@ -204,6 +217,8 @@
   const dimensionMode = document.getElementById("dimensionMode");
   const autoBox = document.getElementById("autoDimensions");
   const manualBox = document.getElementById("manualDimensions");
+  const statusText = document.getElementById("statusText");
+  const progressBar = document.getElementById("progressBar");
 
   sizeSlider.oninput = () => mbLabel.textContent = sizeSlider.value;
 
@@ -214,14 +229,19 @@
 
   async function loadFFmpeg() {
     if (loaded) return;
+    statusText.textContent = "Loading compressor engine…";
+
     await ffmpeg.load({
       coreURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
       wasmURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm"
     });
+
     ffmpeg.on("progress", ({ progress }) => {
-      document.getElementById("progressBar").style.width = Math.round(progress * 100) + "%";
-      document.getElementById("statusText").textContent = "Compressing… " + Math.round(progress * 100) + "%";
+      const pct = Math.round(progress * 100);
+      progressBar.style.width = pct + "%";
+      statusText.textContent = `Compressing… ${pct}%`;
     });
+
     loaded = true;
   }
 
@@ -231,28 +251,31 @@
 
     await loadFFmpeg();
 
-    const duration = await new Promise(res => {
+    const duration = await new Promise(resolve => {
       const v = document.createElement("video");
       v.preload = "metadata";
-      v.onloadedmetadata = () => res(v.duration);
+      v.onloadedmetadata = () => resolve(v.duration);
       v.src = URL.createObjectURL(file);
     });
 
     const targetBits = sizeSlider.value * 8 * 1024 * 1024;
     const bitrate = Math.floor(targetBits / duration);
 
-    let scaleFilter;
+    let scale;
     if (dimensionMode.value === "auto") {
-      scaleFilter = `scale=${document.getElementById("autoWidth").value}:-2`;
+      scale = `scale=${document.getElementById("autoWidth").value}:-2`;
     } else {
-      scaleFilter = `scale=${document.getElementById("manualWidth").value}:${document.getElementById("manualHeight").value}`;
+      const w = document.getElementById("manualWidth").value;
+      const h = document.getElementById("manualHeight").value;
+      if (!w || !h) return alert("Enter both width and height");
+      scale = `scale=${w}:${h}`;
     }
 
     await ffmpeg.writeFile("input.mp4", await fetchFile(file));
 
     await ffmpeg.exec([
       "-i", "input.mp4",
-      "-vf", scaleFilter,
+      "-vf", scale,
       "-b:v", bitrate.toString(),
       "-crf", document.getElementById("crf").value,
       "-preset", "fast",
@@ -267,7 +290,7 @@
     a.download = "rhythm-deck-compressed.mp4";
     a.click();
 
-    document.getElementById("statusText").textContent = "Compression complete.";
+    statusText.textContent = "Compression complete ✔";
   };
 </script>
 
