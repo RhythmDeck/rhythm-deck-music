@@ -1,140 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-<title>Rhythm Deck – Video Compressor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<title>Pro Video Compressor</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #0b0b0b;
-      color: #ffffff;
-      font-family: Arial, Helvetica, sans-serif;
-    }
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
 
-    header {
-      background: #000;
-      padding: 18px 30px;
-      border-bottom: 1px solid #1e1e1e;
-    }
+<style>
+body {
+  background:#050505;
+  font-family: Arial, sans-serif;
+  color:#e5e7eb;
+}
 
-    main {
-      max-width: 780px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
+.container {
+  max-width:860px;
+  margin:40px auto;
+  padding:28px;
+  border:2px solid #10b981;
+  border-radius:18px;
+  box-shadow:
+    0 0 0 2px rgba(16,185,129,0.35),
+    0 18px 45px rgba(0,0,0,0.75);
+  background:linear-gradient(180deg,#0b0b0b,#060606);
+}
 
-    .instructions {
-      margin-bottom: 26px;
-      line-height: 1.6;
-      opacity: 0.9;
-    }
+h1 {
+  margin-top:0;
+  color:#10b981;
+}
 
-    .card {
-      background: #111;
-      border-radius: 16px;
-      padding: 28px;
-      border: 2px solid #10b981;
-      box-shadow:
-        0 0 0 1px rgba(16,185,129,0.25),
-        0 18px 40px rgba(0,0,0,0.85),
-        inset 0 0 30px rgba(16,185,129,0.08);
-    }
+.section {
+  margin-top:26px;
+}
 
-    label {
-      display: block;
-      margin-top: 20px;
-      font-size: 14px;
-      opacity: 0.9;
-    }
+label {
+  display:block;
+  margin-bottom:8px;
+  font-weight:bold;
+}
 
-    input, select, button {
-      width: 100%;
-      margin-top: 8px;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      font-size: 14px;
-    }
+input[type="file"],
+input[type="number"],
+select {
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  margin-bottom:10px;
+}
 
-    input, select {
-      background: #1f2937;
-      color: #fff;
-    }
+button {
+  padding:10px 16px;
+  background:#10b981;
+  border:none;
+  border-radius:10px;
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+  margin-right:8px;
+}
 
-    input[type="range"] {
-      padding: 0;
-    }
+button.secondary {
+  background:#1f2933;
+  color:#e5e7eb;
+}
 
-    .row {
-      display: flex;
-      gap: 12px;
-    }
+button:hover {
+  opacity:0.9;
+}
 
-    .row input {
-      flex: 1;
-    }
+.slider {
+  width:100%;
+}
 
-    button {
-      background: #10b981;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 28px;
-      font-size: 16px;
-    }
+.badge {
+  display:inline-block;
+  padding:4px 10px;
+  font-size:12px;
+  background:#10b981;
+  color:#000;
+  border-radius:999px;
+  font-weight:bold;
+  margin-left:8px;
+}
 
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+.info-box {
+  background:#0b0b0b;
+  border:1px solid rgba(16,185,129,0.35);
+  border-radius:10px;
+  padding:14px;
+  font-size:13px;
+  line-height:1.5;
+}
 
-    .progress {
-      margin-top: 22px;
-      height: 10px;
-      background: #1f2937;
-      border-radius: 6px;
-      overflow: hidden;
-    }
+.progress-bar {
+  height:10px;
+  border-radius:999px;
+  background:#1f2933;
+  overflow:hidden;
+}
 
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: #10b981;
-      transition: width 0.2s linear;
-    }
+.progress-inner {
+  height:100%;
+  background:#10b981;
+  width:50%;
+}
 
-    .status {
-      margin-top: 12px;
-      font-size: 13px;
-      opacity: 0.85;
-      min-height: 18px;
-    }
-
-    footer {
-      text-align: center;
-      opacity: 0.5;
-      font-size: 12px;
-      padding: 40px 20px;
-    }
-  </style>
+.hidden {
+  display:none;
+}
+</style>
 </head>
 
 <body>
+<div class="container">
 
-<header></header>
+<h1>Pro Video Compressor</h1>
 
-<main>
-
-  <h1>Video Compressor</h1>
-
-  <div class="instructions">
+<div class="instructions">
     <strong>How it works:</strong><br>
     1. Select your video file<br>
     2. Choose your target file size (MB)<br>
     3. Set video dimensions (auto or manual)<br>
-    4. Choose compression quality - explained simpply<br>
+    4. Choose compression quality - explained simply<br>
     <strong>Higher Quality (CRF 18)</strong><br>
     Best visual quality, larger file size.<br>
     Use for premium content or archiving.<br><br>
@@ -154,145 +143,171 @@
     6. Everything runs locally in your browser
   </div>
 
-  <div class="card">
+<div class="section">
+<label>Upload Video</label>
+<input type="file" id="videoInput" accept="video/*">
+</div>
 
-    <label>Select Video</label>
-    <input type="file" id="videoInput" accept="video/*">
+<div class="section">
+<label>Preset</label>
+<button onclick="setPreset('album')">Album</button>
+<button onclick="setPreset('single')" class="secondary">Single</button>
+</div>
 
-    <label>Target File Size: <span id="mbLabel">25</span> MB</label>
-    <input type="range" id="sizeSlider" min="5" max="300" value="25">
+<div class="section">
+<label>Target File Size (MB): <span id="mbLabel">800</span> MB</label>
+<input type="range" min="100" max="8000" value="800" class="slider" id="mbSlider">
+</div>
 
-    <label>Dimensions Mode</label>
-    <select id="dimensionMode">
-      <option value="auto">Automatic (Keep Aspect Ratio)</option>
-      <option value="manual">Manual (Exact Size)</option>
-    </select>
+<div class="section">
+<label>Compression Quality</label>
+<select id="crfSelect">
+  <option value="18">Higher Quality (CRF 18)</option>
+  <option value="23" selected>Balanced (CRF 23 – Recommended)</option>
+  <option value="28">Smaller File (CRF 28)</option>
+</select>
 
-    <div id="autoDimensions">
-      <label>Width (height adjusts automatically)</label>
-      <input type="number" id="autoWidth" value="1280">
-    </div>
+<div class="info-box">
+<strong>Higher Quality (CRF 18)</strong><br>
+Best visual quality, larger file size.<br><br>
 
-    <div id="manualDimensions" style="display:none;">
-      <label>Width & Height</label>
-      <div class="row">
-        <input type="number" id="manualWidth" placeholder="Width">
-        <input type="number" id="manualHeight" placeholder="Height">
-      </div>
-    </div>
+<strong>Balanced (CRF 23 – Recommended)</strong><br>
+Best balance of quality and file size.<br><br>
 
-    <label>Compression Quality</label>
-    <select id="crf">
-      <option value="23">Balanced (Recommended)</option>
-      <option value="18">Higher Quality</option>
-      <option value="28">Smaller File</option>
-    </select>
+<strong>Smaller File (CRF 28)</strong><br>
+Smaller file, more compression artifacts.<br><br>
 
-    <button id="compressBtn">Compress & Download</button>
+👉 Lower number = better quality<br>
+👉 Higher number = smaller file
+</div>
+</div>
 
-    <div class="progress">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
+<div class="section">
+<label>Dimensions</label>
+<select id="dimensionMode">
+  <option value="auto">Automatic (maintain aspect ratio)</option>
+  <option value="manual">Manual</option>
+</select>
 
-    <div class="status" id="statusText">Waiting for video…</div>
+<input type="number" id="widthInput" placeholder="Width (px)">
+<input type="number" id="heightInput" placeholder="Height (px)">
+</div>
 
-  </div>
+<div class="section">
+<label>
+<input type="checkbox" id="hevcToggle">
+ Use HEVC (H.265)
+ <span id="albumBadge" class="badge hidden">Recommended for Albums</span>
+</label>
 
-</main>
+<div class="info-box">
+<strong>What is HEVC (H.265)?</strong><br>
+HEVC is a newer video format that creates much smaller files
+with little to no visible quality loss.<br><br>
 
-<footer>
-  © Rhythm Deck • Client-Side Video Compression
-</footer>
+<strong>ON:</strong> Long videos, albums, concerts, archiving<br>
+<strong>OFF:</strong> Short clips, faster exports, older devices<br><br>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/ffmpeg.min.js"></script>
-<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/util.min.js"></script>
+⚠️ HEVC is slower but can reduce size by <strong>30–50%</strong><br>
+🔒 100% local browser processing
+</div>
+</div>
+
+<div class="section">
+<label>Estimated Size Comparison</label>
+<div>Standard Compression</div>
+<div class="progress-bar">
+  <div class="progress-inner" id="stdBar"></div>
+</div>
+
+<div style="margin-top:6px">With HEVC Enabled</div>
+<div class="progress-bar">
+  <div class="progress-inner" id="hevcBar"></div>
+</div>
+</div>
+
+<div class="section">
+<button onclick="compressVideo()">Compress Video</button>
+</div>
+
+<div class="section" id="status"></div>
+
+</div>
 
 <script>
-  const ffmpeg = new FFmpeg();
-  const { fetchFile } = FFmpegUtil;
-  let loaded = false;
+const { FFmpeg } = FFmpegWASM;
+const ffmpeg = new FFmpeg();
 
-  const sizeSlider = document.getElementById("sizeSlider");
-  const mbLabel = document.getElementById("mbLabel");
-  const dimensionMode = document.getElementById("dimensionMode");
-  const autoBox = document.getElementById("autoDimensions");
-  const manualBox = document.getElementById("manualDimensions");
-  const statusText = document.getElementById("statusText");
-  const progressBar = document.getElementById("progressBar");
+const mbSlider = document.getElementById("mbSlider");
+const mbLabel = document.getElementById("mbLabel");
+const hevcToggle = document.getElementById("hevcToggle");
+const albumBadge = document.getElementById("albumBadge");
+const stdBar = document.getElementById("stdBar");
+const hevcBar = document.getElementById("hevcBar");
 
-  sizeSlider.oninput = () => mbLabel.textContent = sizeSlider.value;
+mbSlider.oninput = () => {
+  mbLabel.textContent = mbSlider.value;
+  updateEstimates();
+};
 
-  dimensionMode.onchange = () => {
-    autoBox.style.display = dimensionMode.value === "auto" ? "block" : "none";
-    manualBox.style.display = dimensionMode.value === "manual" ? "block" : "none";
-  };
+hevcToggle.onchange = () => {
+  albumBadge.classList.toggle("hidden", !hevcToggle.checked);
+  updateEstimates();
+};
 
-  async function loadFFmpeg() {
-    if (loaded) return;
-    statusText.textContent = "Loading compressor engine…";
-
-    await ffmpeg.load({
-      coreURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
-      wasmURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm"
-    });
-
-    ffmpeg.on("progress", ({ progress }) => {
-      const pct = Math.round(progress * 100);
-      progressBar.style.width = pct + "%";
-      statusText.textContent = `Compressing… ${pct}%`;
-    });
-
-    loaded = true;
+function setPreset(type) {
+  if (type === "album") {
+    mbSlider.value = 2500;
+    mbLabel.textContent = 2500;
+    hevcToggle.checked = true;
+    albumBadge.classList.remove("hidden");
+  } else {
+    mbSlider.value = 300;
+    mbLabel.textContent = 300;
+    hevcToggle.checked = false;
+    albumBadge.classList.add("hidden");
   }
+  updateEstimates();
+}
 
-  document.getElementById("compressBtn").onclick = async () => {
-    const file = document.getElementById("videoInput").files[0];
-    if (!file) return alert("Select a video first");
+function updateEstimates() {
+  const base = mbSlider.value;
+  stdBar.style.width = "100%";
+  hevcBar.style.width = hevcToggle.checked ? "55%" : "100%";
+}
 
-    await loadFFmpeg();
+async function compressVideo() {
+  const file = document.getElementById("videoInput").files[0];
+  if (!file) return alert("Upload a video first");
 
-    const duration = await new Promise(resolve => {
-      const v = document.createElement("video");
-      v.preload = "metadata";
-      v.onloadedmetadata = () => resolve(v.duration);
-      v.src = URL.createObjectURL(file);
-    });
+  document.getElementById("status").textContent = "Loading compressor…";
 
-    const targetBits = sizeSlider.value * 8 * 1024 * 1024;
-    const bitrate = Math.floor(targetBits / duration);
+  if (!ffmpeg.loaded) await ffmpeg.load();
 
-    let scale;
-    if (dimensionMode.value === "auto") {
-      scale = `scale=${document.getElementById("autoWidth").value}:-2`;
-    } else {
-      const w = document.getElementById("manualWidth").value;
-      const h = document.getElementById("manualHeight").value;
-      if (!w || !h) return alert("Enter both width and height");
-      scale = `scale=${w}:${h}`;
-    }
+  ffmpeg.writeFile("input.mp4", await fetchFile(file));
 
-    await ffmpeg.writeFile("input.mp4", await fetchFile(file));
+  const crf = document.getElementById("crfSelect").value;
+  const codec = hevcToggle.checked ? "libx265" : "libx264";
 
-    await ffmpeg.exec([
-      "-i", "input.mp4",
-      "-vf", scale,
-      "-b:v", bitrate.toString(),
-      "-crf", document.getElementById("crf").value,
-      "-preset", "fast",
-      "output.mp4"
-    ]);
+  document.getElementById("status").textContent = "Compressing…";
 
-    const data = await ffmpeg.readFile("output.mp4");
-    const blob = new Blob([data.buffer], { type: "video/mp4" });
+  await ffmpeg.exec([
+    "-i","input.mp4",
+    "-vcodec",codec,
+    "-crf",crf,
+    "output.mp4"
+  ]);
 
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "rhythm-deck-compressed.mp4";
-    a.click();
+  const data = await ffmpeg.readFile("output.mp4");
+  const url = URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }));
 
-    statusText.textContent = "Compression complete ✔";
-  };
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "compressed.mp4";
+  a.click();
+
+  document.getElementById("status").textContent = "Done ✔";
+}
 </script>
-
 </body>
 </html>
