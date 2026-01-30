@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rhythm Deck – Video Compressor</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
@@ -18,33 +17,29 @@
       background: #000;
       padding: 18px 30px;
       border-bottom: 1px solid #1e1e1e;
-      display: flex;
-      align-items: center;
-    }
-
-    header img {
-      height: 34px;
     }
 
     main {
-      max-width: 720px;
+      max-width: 780px;
       margin: 40px auto;
       padding: 0 20px;
     }
 
-    h1 {
-      margin-bottom: 6px;
-    }
-
-    p.subtitle {
-      opacity: 0.85;
-      margin-bottom: 30px;
+    .instructions {
+      margin-bottom: 26px;
+      line-height: 1.6;
+      opacity: 0.9;
     }
 
     .card {
-      background: #151515;
-      border-radius: 12px;
-      padding: 26px;
+      background: #111;
+      border-radius: 16px;
+      padding: 28px;
+      border: 2px solid #10b981;
+      box-shadow:
+        0 0 0 1px rgba(16,185,129,0.25),
+        0 18px 40px rgba(0,0,0,0.85),
+        inset 0 0 30px rgba(16,185,129,0.08);
     }
 
     label {
@@ -58,22 +53,36 @@
       width: 100%;
       margin-top: 8px;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: none;
       font-size: 14px;
     }
 
     input, select {
-      background: #222;
+      background: #1f2937;
       color: #fff;
     }
 
+    input[type="range"] {
+      padding: 0;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .row input {
+      flex: 1;
+    }
+
     button {
-      background: #ff3b3b;
-      color: #fff;
+      background: #10b981;
+      color: #000;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 26px;
+      margin-top: 28px;
+      font-size: 16px;
     }
 
     button:disabled {
@@ -82,9 +91,9 @@
     }
 
     .progress {
-      margin-top: 20px;
+      margin-top: 22px;
       height: 10px;
-      background: #222;
+      background: #1f2937;
       border-radius: 6px;
       overflow: hidden;
     }
@@ -92,7 +101,7 @@
     .progress-bar {
       height: 100%;
       width: 0%;
-      background: #ff3b3b;
+      background: #10b981;
       transition: width 0.2s linear;
     }
 
@@ -114,35 +123,54 @@
 
 <body>
 
-<header>
-  <!-- Replace with your actual logo path -->
-  <img src="/logo-white.png" alt="Rhythm Deck" />
-</header>
+<header></header>
 
 <main>
 
   <h1>Video Compressor</h1>
-  <p class="subtitle">
-    Compress large videos locally in your browser — no uploads, no limits.
-  </p>
+
+  <div class="instructions">
+    <strong>How it works:</strong><br>
+    1. Select your video file<br>
+    2. Choose your target file size (MB)<br>
+    3. Set video dimensions (auto or manual)<br>
+    4. Choose compression quality<br>
+    5. Click <em>Compress & Download</em><br>
+    6. Everything runs locally in your browser
+  </div>
 
   <div class="card">
 
     <label>Select Video</label>
-    <input type="file" id="videoInput" accept="video/*" />
+    <input type="file" id="videoInput" accept="video/*">
 
-    <label>Resolution</label>
-    <select id="resolution">
-      <option value="1280">720p (Recommended)</option>
-      <option value="1920">1080p (High Quality)</option>
-      <option value="854">480p (Smallest File)</option>
+    <label>Target File Size: <span id="mbLabel">25</span> MB</label>
+    <input type="range" id="sizeSlider" min="5" max="300" value="25">
+
+    <label>Dimensions Mode</label>
+    <select id="dimensionMode">
+      <option value="auto">Automatic (Keep Aspect Ratio)</option>
+      <option value="manual">Manual (Exact Size)</option>
     </select>
+
+    <div id="autoDimensions">
+      <label>Width (height adjusts automatically)</label>
+      <input type="number" id="autoWidth" value="1280">
+    </div>
+
+    <div id="manualDimensions" style="display:none;">
+      <label>Width & Height</label>
+      <div class="row">
+        <input type="number" id="manualWidth" placeholder="Width">
+        <input type="number" id="manualHeight" placeholder="Height">
+      </div>
+    </div>
 
     <label>Compression Quality</label>
     <select id="crf">
-      <option value="23">Balanced</option>
-      <option value="28">Smaller File</option>
+      <option value="23">Balanced (Recommended)</option>
       <option value="18">Higher Quality</option>
+      <option value="28">Smaller File</option>
     </select>
 
     <button id="compressBtn">Compress & Download</button>
@@ -169,74 +197,78 @@
   const { fetchFile } = FFmpegUtil;
 
   const ffmpeg = new FFmpeg();
-
-  const videoInput = document.getElementById("videoInput");
-  const compressBtn = document.getElementById("compressBtn");
-  const progressBar = document.getElementById("progressBar");
-  const statusText = document.getElementById("statusText");
-
   let loaded = false;
+
+  const sizeSlider = document.getElementById("sizeSlider");
+  const mbLabel = document.getElementById("mbLabel");
+  const dimensionMode = document.getElementById("dimensionMode");
+  const autoBox = document.getElementById("autoDimensions");
+  const manualBox = document.getElementById("manualDimensions");
+
+  sizeSlider.oninput = () => mbLabel.textContent = sizeSlider.value;
+
+  dimensionMode.onchange = () => {
+    autoBox.style.display = dimensionMode.value === "auto" ? "block" : "none";
+    manualBox.style.display = dimensionMode.value === "manual" ? "block" : "none";
+  };
 
   async function loadFFmpeg() {
     if (loaded) return;
-
-    statusText.textContent = "Loading compression engine…";
-
     await ffmpeg.load({
       coreURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
       wasmURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm"
     });
-
     ffmpeg.on("progress", ({ progress }) => {
-      const percent = Math.round(progress * 100);
-      progressBar.style.width = percent + "%";
-      statusText.textContent = "Compressing… " + percent + "%";
+      document.getElementById("progressBar").style.width = Math.round(progress * 100) + "%";
+      document.getElementById("statusText").textContent = "Compressing… " + Math.round(progress * 100) + "%";
     });
-
     loaded = true;
   }
 
-  compressBtn.addEventListener("click", async () => {
-    const file = videoInput.files[0];
-    if (!file) {
-      alert("Please select a video.");
-      return;
-    }
-
-    compressBtn.disabled = true;
-    progressBar.style.width = "0%";
+  document.getElementById("compressBtn").onclick = async () => {
+    const file = document.getElementById("videoInput").files[0];
+    if (!file) return alert("Select a video first");
 
     await loadFFmpeg();
 
-    const resolution = document.getElementById("resolution").value;
-    const crf = document.getElementById("crf").value;
+    const duration = await new Promise(res => {
+      const v = document.createElement("video");
+      v.preload = "metadata";
+      v.onloadedmetadata = () => res(v.duration);
+      v.src = URL.createObjectURL(file);
+    });
 
-    statusText.textContent = "Preparing video…";
+    const targetBits = sizeSlider.value * 8 * 1024 * 1024;
+    const bitrate = Math.floor(targetBits / duration);
+
+    let scaleFilter;
+    if (dimensionMode.value === "auto") {
+      scaleFilter = `scale=${document.getElementById("autoWidth").value}:-2`;
+    } else {
+      scaleFilter = `scale=${document.getElementById("manualWidth").value}:${document.getElementById("manualHeight").value}`;
+    }
 
     await ffmpeg.writeFile("input.mp4", await fetchFile(file));
 
     await ffmpeg.exec([
       "-i", "input.mp4",
-      "-vf", `scale=${resolution}:-2`,
-      "-vcodec", "libx264",
+      "-vf", scaleFilter,
+      "-b:v", bitrate.toString(),
+      "-crf", document.getElementById("crf").value,
       "-preset", "fast",
-      "-crf", crf,
-      "-movflags", "faststart",
       "output.mp4"
     ]);
 
     const data = await ffmpeg.readFile("output.mp4");
     const blob = new Blob([data.buffer], { type: "video/mp4" });
 
-    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
+    a.href = URL.createObjectURL(blob);
     a.download = "rhythm-deck-compressed.mp4";
     a.click();
 
-    statusText.textContent = "Compression complete. Download started.";
-    compressBtn.disabled = false;
-  });
+    document.getElementById("statusText").textContent = "Compression complete.";
+  };
 </script>
 
 </body>
