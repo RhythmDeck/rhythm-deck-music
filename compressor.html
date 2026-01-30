@@ -2,23 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Rhythm Deck – Pro Video Compressor</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rhythm Deck – Video Compressor</title>
 
-<!-- FFmpeg -->
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/ffmpeg.min.js"></script>
-<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/util.min.js"></script>
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
+<script src="https://unpkg.com/@ffmpeg/util@0.12.6/dist/ffmpeg-util.js"></script>
 
 <style>
 body {
-  margin:0;
   background:#050505;
-  font-family:Arial, sans-serif;
+  font-family: Arial, sans-serif;
   color:#e5e7eb;
 }
 
 .container {
-  max-width:860px;
+  max-width:900px;
   margin:40px auto;
   padding:28px;
   border:2px solid #10b981;
@@ -29,13 +26,83 @@ body {
   background:linear-gradient(180deg,#0b0b0b,#060606);
 }
 
-h1 { color:#10b981; margin-top:0; }
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:26px;
+}
 
-.section { margin-top:26px; }
+.logo {
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
 
-label { display:block; font-weight:bold; margin-bottom:8px; }
+.logo img {
+  width:48px;
+  height:48px;
+}
 
-input, select, button {
+.logo-text strong {
+  color:#10b981;
+  font-size:18px;
+}
+
+.logo-text span {
+  font-size:12px;
+  color:#9ca3af;
+}
+
+.nav a {
+  color:#10b981;
+  text-decoration:none;
+  font-weight:bold;
+  margin-left:14px;
+}
+
+/* ===== HERO GRID ===== */
+.hero-grid {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:24px;
+  margin-bottom:28px;
+}
+
+/* LEFT */
+.instructions {
+  border:2px solid rgba(16,185,129,0.55);
+  border-radius:14px;
+  padding:16px;
+  font-size:13px;
+  box-shadow:
+    inset 0 0 0 1px rgba(16,185,129,0.25),
+    0 14px 30px rgba(0,0,0,0.7);
+}
+
+/* RIGHT */
+.image-box {
+  border:2px dashed rgba(16,185,129,0.35);
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  color:#6b7280;
+  box-shadow:0 12px 28px rgba(0,0,0,0.6);
+}
+
+.section {
+  margin-top:22px;
+}
+
+label {
+  display:block;
+  margin-bottom:6px;
+  font-weight:bold;
+}
+
+input, select {
   width:100%;
   padding:10px;
   border-radius:8px;
@@ -44,8 +111,10 @@ input, select, button {
 }
 
 button {
+  padding:10px 16px;
   background:#10b981;
-  color:#000;
+  border:none;
+  border-radius:10px;
   font-weight:bold;
   cursor:pointer;
 }
@@ -55,27 +124,23 @@ button.secondary {
   color:#e5e7eb;
 }
 
+.slider {
+  width:100%;
+}
+
 .badge {
   display:inline-block;
   padding:4px 10px;
-  font-size:12px;
   background:#10b981;
   color:#000;
+  font-size:12px;
   border-radius:999px;
-  font-weight:bold;
   margin-left:8px;
 }
 
-.info-box {
-  background:#0b0b0b;
-  border:1px solid rgba(16,185,129,0.35);
-  border-radius:10px;
-  padding:14px;
-  font-size:13px;
-  line-height:1.5;
-}
+.hidden { display:none; }
 
-.progress {
+.progress-bar {
   height:10px;
   background:#1f2933;
   border-radius:999px;
@@ -84,42 +149,56 @@ button.secondary {
 
 .progress-inner {
   height:100%;
-  width:0%;
   background:#10b981;
 }
 
-.hidden { display:none; }
+#status {
+  margin-top:14px;
+  font-size:13px;
+  color:#9ca3af;
+}
+
+/* Mobile fallback */
+@media (max-width: 760px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 </head>
 
 <body>
-
-<!-- HEADER -->
-<header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
-  <div class="flex items-center space-x-3">
-    <img src="logo-1-sm.jpg" class="w-10 h-10 rounded-full">
-    <div>
-      <h1 class="text-xl font-bold tracking-wide">RHYTHM DECK</h1>
-      <p class="text-xs text-gray-300">Unleash Your Beat</p>
-    </div>
-  </div>
-  <nav class="space-x-3 text-sm">
-    <a href="https://rhythm-deck-music.onrender.com" class="hover:text-green-400">Home</a>
-    <a href="https://rhythm-deck-music.onrender.com/contact.html" class="hover:text-green-400">Contact</a>
-  </nav>
-</header>
-
-<section style="height:350px;background:url('banner-cropped.jpg') center/cover;">
-</section>
-
 <div class="container">
 
-<h1>Pro Video Compressor</h1>
+<header>
+  <div class="logo">
+    <img src="logo-1-sm.jpg" alt="Rhythm Deck">
+    <div class="logo-text">
+      <strong>Rhythm Deck</strong><br>
+      <span>Tools for Modern Musicians</span>
+    </div>
+  </div>
+  <div class="nav">
+    <a href="index.html" target=_blank">Home</a>
+    <a href="contact.html" "target=_blank>Contact</a>
+  </div>
+</header>
 
-<div class="info-box">
-<strong>Album Mode</strong> automatically splits long videos into safe chunks,
-compresses them, and rejoins them into ONE final MP4.<br><br>
-Everything runs locally in your browser.
+<!-- LEFT = Instructions | RIGHT = Image -->
+<div class="hero-grid">
+  <div class="instructions">
+    <strong>How it works</strong><br><br>
+    1. Upload your video<br>
+    2. Choose target file size<br>
+    3. Select compression quality<br>
+    4. Optional HEVC for smaller files<br>
+    5. Compress & download<br><br>
+    🔒 Runs 100% locally in your browser
+  </div>
+
+  <div class="image-box">
+    Image / Promo Placeholder
+  </div>
 </div>
 
 <div class="section">
@@ -131,124 +210,124 @@ Everything runs locally in your browser.
 <label>Preset</label>
 <button onclick="setPreset('album')">Album</button>
 <button onclick="setPreset('single')" class="secondary">Single</button>
-<span id="albumBadge" class="badge hidden">Recommended for Albums</span>
 </div>
 
 <div class="section">
-<label>Target Size: <span id="targetLabel">2500</span> MB</label>
-<input type="range" id="sizeSlider" min="100" max="8000" value="2500">
+<label>Target Size (MB): <span id="mbLabel">800</span></label>
+<input type="range" min="100" max="8000" value="800" id="mbSlider" class="slider">
 </div>
 
 <div class="section">
 <label>Compression Quality</label>
-<select id="crf">
-  <option value="18">Higher Quality (CRF 18)</option>
-  <option value="23" selected>Balanced (CRF 23)</option>
-  <option value="28">Smaller File (CRF 28)</option>
+<select id="crfSelect">
+  <option value="18">Higher Quality</option>
+  <option value="23" selected>Balanced (Recommended)</option>
+  <option value="28">Smaller File</option>
 </select>
 </div>
 
 <div class="section">
 <label>
-<input type="checkbox" id="hevc"> Use HEVC (H.265)
+<input type="checkbox" id="hevcToggle">
+ Use HEVC (H.265)
+ <span id="albumBadge" class="badge hidden">Recommended for Albums</span>
 </label>
-
-<div class="info-box">
-<strong>HEVC (H.265)</strong><br>
-• 30–50% smaller files<br>
-• Slower compression<br>
-• Best for albums & long videos
-</div>
 </div>
 
 <div class="section">
-<label>Estimated Output</label>
-<div>Standard: <span id="estStd">–</span></div>
-<div>With HEVC: <span id="estHevc">–</span></div>
+<label>Estimated Size</label>
+<div class="progress-bar"><div class="progress-inner" style="width:100%"></div></div>
+<div style="margin-top:6px" class="progress-bar"><div class="progress-inner" style="width:55%"></div></div>
 </div>
 
 <div class="section">
-<button onclick="compress()">Compress & Download</button>
+<button onclick="compressVideo()">Compress & Download</button>
 </div>
 
-<div class="section">
-<div class="progress"><div class="progress-inner" id="bar"></div></div>
-<div id="status">Waiting…</div>
-</div>
+<div id="status"></div>
 
 </div>
 
 <script>
-const { createFFmpeg, fetchFile } = FFmpeg;
-const ffmpeg = createFFmpeg({ log:true });
+const FREE_KEY = 'rd_compressor_free_used';
+const ACCESS_KEY = 'rd_compressor_paid';
 
-const slider = document.getElementById("sizeSlider");
-const label = document.getElementById("targetLabel");
-const hevc = document.getElementById("hevc");
-const status = document.getElementById("status");
-const bar = document.getElementById("bar");
-const badge = document.getElementById("albumBadge");
+async function verifyStripe() {
+  const id = new URLSearchParams(window.location.search).get('session_id');
+  if (!id) return;
+  const r = await fetch(`/verify-stripe?session_id=${id}`);
+  const d = await r.json();
+  if (d.ok && d.access === 'compressor') {
+    localStorage.setItem(ACCESS_KEY, 'true');
+  }
+}
 
-slider.oninput = () => {
-  label.textContent = slider.value;
-  updateEstimates();
-};
+function hasAccess() {
+  return localStorage.getItem(ACCESS_KEY) === 'true';
+}
+
+function canUse() {
+  return hasAccess() || !localStorage.getItem(FREE_KEY);
+}
+
+const { FFmpeg } = FFmpegWASM;
+const { fetchFile } = FFmpegUtil;
+const ffmpeg = new FFmpeg();
+let loaded = false;
+
+async function loadFFmpeg() {
+  if (loaded) return;
+  await ffmpeg.load({
+    coreURL:"https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
+    wasmURL:"https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm"
+  });
+  loaded = true;
+}
+
+mbSlider.oninput = () => mbLabel.textContent = mbSlider.value;
+hevcToggle.onchange = () => albumBadge.classList.toggle('hidden', !hevcToggle.checked);
 
 function setPreset(p) {
-  if (p === "album") {
-    slider.value = 2500;
-    hevc.checked = true;
-    badge.classList.remove("hidden");
+  if (p === 'album') {
+    mbSlider.value = 2500;
+    hevcToggle.checked = true;
   } else {
-    slider.value = 300;
-    hevc.checked = false;
-    badge.classList.add("hidden");
+    mbSlider.value = 300;
+    hevcToggle.checked = false;
   }
-  label.textContent = slider.value;
-  updateEstimates();
+  mbLabel.textContent = mbSlider.value;
+  albumBadge.classList.toggle('hidden', !hevcToggle.checked);
 }
 
-function updateEstimates() {
-  document.getElementById("estStd").textContent = slider.value + " MB";
-  document.getElementById("estHevc").textContent =
-    Math.round(slider.value * 0.6) + " MB";
-}
+async function compressVideo() {
+  if (!canUse()) return alert("Free use already used. Purchase required.");
 
-async function compress() {
   const file = videoInput.files[0];
-  if (!file) return alert("Upload a video first");
+  if (!file) return alert("Upload a video");
 
-  if (!ffmpeg.isLoaded()) {
-    status.textContent = "Loading compressor… (first time only)";
-    await ffmpeg.load({
-      coreURL:"https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js"
-    });
-  }
+  status.textContent = "Loading engine…";
+  await loadFFmpeg();
 
-  status.textContent = "Preparing video…";
-  await ffmpeg.FS("writeFile","input.mp4",await fetchFile(file));
+  await ffmpeg.writeFile("input.mp4", await fetchFile(file));
 
-  const codec = hevc.checked ? "libx265" : "libx264";
-  status.textContent = "Compressing (Album-safe)…";
+  const codec = hevcToggle.checked ? "libx265" : "libx264";
+  status.textContent = "Compressing…";
 
-  await ffmpeg.run(
-    "-i","input.mp4",
-    "-vcodec",codec,
-    "-crf",document.getElementById("crf").value,
-    "-preset","medium",
-    "output.mp4"
-  );
+  await ffmpeg.exec(["-i","input.mp4","-vcodec",codec,"-crf",crfSelect.value,"output.mp4"]);
 
-  const data = ffmpeg.FS("readFile","output.mp4");
-  const url = URL.createObjectURL(new Blob([data.buffer],{type:"video/mp4"}));
+  const data = await ffmpeg.readFile("output.mp4");
+  const url = URL.createObjectURL(new Blob([data.buffer], {type:"video/mp4"}));
+
   const a = document.createElement("a");
   a.href = url;
-  a.download = "rhythm-deck-album.mp4";
+  a.download = "rhythm-deck-compressed.mp4";
   a.click();
 
   status.textContent = "Done ✔";
+  if (!hasAccess()) localStorage.setItem(FREE_KEY,'true');
 }
-</script>
 
+verifyStripe();
+</script>
 </body>
 </html>
