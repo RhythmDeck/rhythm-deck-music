@@ -476,7 +476,7 @@ Do one block per platform. Thank you!`;
     const badgeContainer = document.getElementById('badge-container');
     badgeContainer.innerHTML = '';
     if (count >= 3) {
-      badgeContainer.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/pro-artist-badge.png" alt="Pro Artist Badge">`;
+      badgeContainer.innerHTML = `<img src="https://raw.githubusercontent.com/RhythmDeck/rhythm-deck-music/main/platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`;
     }
   };
 
@@ -799,8 +799,8 @@ Do one block per platform. Thank you!`;
 
     document.getElementById('connectStripeBtn').addEventListener('click', async () => {
       try {
-        const returnUrl = window.location.origin + '/profile-admin-pro.html?success=1';
-        const refreshUrl = window.location.origin + '/profile-admin-pro.html?refresh=1';
+        const returnUrl = window.location.origin + '/platinum-pro-admin.html?success=1';
+        const refreshUrl = window.location.origin + '/platinum-pro-admin.html?refresh=1';
 
         const { data, error } = await supabase.functions.invoke('stripe-onboard', {
           body: { 
