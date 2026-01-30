@@ -3,40 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-  <!-- Simple Favicon using your logo-favicon.jpg -->
   <link rel="icon" href="logo-favicon.png" type="image/png">
-
-  <!-- SEO Meta Tags -->
   <title>Public Profile | Rhythm Deck</title>
   <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
   <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Rhythm Deck Team">
-
-  <!-- Open Graph / Facebook -->
   <meta property="og:title" content="Public Profile | Rhythm Deck">
   <meta property="og:description" content="Support artists with exclusive videos, live chats, tips, and premium downloads on Rhythm Deck.">
   <meta property="og:image" content="https://your-domain.com/og-image.jpg">
   <meta property="og:url" content="https://your-domain.com/public-profile.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Rhythm Deck">
-
-  <!-- Twitter / X Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Public Profile | Rhythm Deck">
   <meta name="twitter:description" content="Exclusive artist content, live streams, and direct support on Rhythm Deck.">
   <meta name="twitter:image" content="https://your-domain.com/twitter-image.jpg">
-
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-
   <style>
     body { font-family: 'Poppins', sans-serif; }
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;}
     @keyframes spin {0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-    .video-overlay {position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
+    .video-overlay {position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
     .video-overlay:hover {opacity:1}
     #videoModal {position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
     #videoModal.show {opacity:1;visibility:visible}
@@ -83,6 +73,19 @@
     .style2 {font-size: 14px;font-weight: bold;}
     .buy-btn {background:#10b981 !important;color:white !important;font-weight:bold;padding:1rem 1.5rem;border-radius:999px;box-shadow:0 4px 12px rgba(16,185,129,0.4);transition:all .3s;}
     .buy-btn:hover {background:#059669 !important;transform:scale(1.05);}
+    /* Bright clear thumbnails */
+    .video-card img.thumbnail-img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      object-position: center;
+      filter: brightness(1.05) contrast(1.08);
+      border-radius: 12px 12px 0 0;
+    }
+    .video-card:hover img.thumbnail-img {
+      filter: brightness(1.15) contrast(1.12);
+      transition: filter 0.3s ease;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
@@ -95,17 +98,20 @@
       <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
     </div>
   </section>
+
   <div class="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
     <h1 id="name" class="text-6xl md:text-7xl font-bold name-glow mb-6 tracking-tight">Loading...</h1>
     <p id="bio" class="text-lg md:text-xl text-gray-700 font-light max-w-4xl mx-auto leading-relaxed">Loading bio...</p>
   </div>
+
   <section class="max-w-6xl mx-auto px-6 pb-16">
     <h2 class="text-5xl font-bold text-center mb-16 text-gray-900">Videos</h2>
     <div id="videoList" class="grid md:grid-cols-3 gap-10"></div>
   </section>
+
   <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
     <div id="proFeaturesSection" class="hidden">
-      <h3 class="text-3xl font-black text-purple-800 mb-6">Watch Live & Chat </h3>
+      <h3 class="text-3xl font-black text-purple-800 mb-6">Watch Live & Chat</h3>
       <p class="style2">1. Click the red Livestream button to watch your favorite artist or band<br>2. Send a tip to your favorite artist or band</p>
       <br>
       <div class="grid lg:grid-cols-3 gap-8 mb-8">
@@ -127,7 +133,7 @@
         </div>
       </div>
       <div class="mt-8 text-center flex flex-col sm:flex-row gap-6 justify-center items-center">
-        <button id="joinLiveBtn" class="join-live-btn" onclick="joinLivestream()">
+        <button id="joinLiveBtn" class="join-live-btn" onClick="joinLivestream()">
           Join Livestream
         </button>
         <div id="tipBucketSection" class="hidden w-full sm:w-auto">
@@ -136,10 +142,10 @@
             <p class="text-sm text-gray-700 mb-4">Send a tip — choose an amount or enter your own</p>
             <div id="stripeStatus" class="mb-4 text-lg font-bold text-green-700">Tip Bucket Active!</div>
             <div class="flex flex-wrap justify-center gap-4 mb-6">
-              <button onclick="sendTip(5)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$5</button>
-              <button onclick="sendTip(10)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$10</button>
-              <button onclick="sendTip(20)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$20</button>
-              <button onclick="sendTip(50)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$50</button>
+              <button onClick="sendTip(5)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$5</button>
+              <button onClick="sendTip(10)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$10</button>
+              <button onClick="sendTip(20)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$20</button>
+              <button onClick="sendTip(50)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$50</button>
             </div>
             <div class="mt-4">
               <label class="block text-gray-700 font-bold mb-2">Or enter custom amount ($)</label>
@@ -147,7 +153,7 @@
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
                 <input type="number" id="customTipAmount" min="1" step="0.01" placeholder="Your amount" class="custom-tip-input w-full pl-10 pr-4 py-3 border-2 border-emerald-500 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-400 rounded-lg text-center text-xl font-bold">
               </div>
-              <button onclick="sendCustomTip()" class="mt-4 bg-emerald-700 hover:bg-emerald-800 text-white font-black py-3 px-10 rounded-lg shadow-lg w-full max-w-xs mx-auto">
+              <button onClick="sendCustomTip()" class="mt-4 bg-emerald-700 hover:bg-emerald-800 text-white font-black py-3 px-10 rounded-lg shadow-lg w-full max-w-xs mx-auto">
                 Send Custom Tip
               </button>
             </div>
@@ -157,28 +163,34 @@
       </div>
     </div>
   </section>
+
   <div id="videoModal">
     <div id="closeModal">×</div>
-    <video id="modalVideo" autoplay class="shadow-2xl"></video>
+    <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
   </div>
+
   <script>
     const sb = supabase.createClient(
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
+
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
+
     async function loadProfile() {
       if (!id) {
         document.getElementById('name').textContent = 'Profile not found';
         return;
       }
+
       let profile;
       let { data } = await sb
         .from('profiles')
         .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
         .eq('subdomain', id)
         .single();
+
       if (!data) {
         ({ data } = await sb
           .from('profiles')
@@ -186,23 +198,29 @@
           .eq('id', id)
           .single());
       }
+
       profile = data;
+
       if (!profile) {
         document.getElementById('name').textContent = 'Profile not found';
         return;
       }
+
       document.getElementById('name').textContent = profile.name || 'Artist';
       document.getElementById('bio').textContent = profile.bio || 'No bio yet';
+
       if (profile.banner_url) {
         const { data: urlData } = sb.storage.from('media').getPublicUrl(profile.banner_url);
         document.getElementById('banner').src = urlData.publicUrl + '?t=' + Date.now();
         document.getElementById('banner').classList.remove('hidden');
         document.getElementById('bannerPlaceholder').classList.add('hidden');
       }
+
       if (profile.logo_url) {
         const { data: urlData } = sb.storage.from('media').getPublicUrl(profile.logo_url);
         document.getElementById('logo').src = urlData.publicUrl + '?t=' + Date.now();
       }
+
       if (profile.plan === 'pro' || profile.plan === 'platinum') {
         document.getElementById('proFeaturesSection').classList.remove('hidden');
         if (profile.stripe_account_id) {
@@ -210,69 +228,94 @@
         }
       }
     }
+
     async function loadVideos() {
       const container = document.getElementById('videoList');
       container.innerHTML = '<p class="col-span-full text-center py-20 text-2xl text-gray-600">Loading videos...</p>';
+
       let profile;
       let { data } = await sb
         .from('profiles')
-        .select('id')
+        .select('id, plan')
         .eq('subdomain', id)
         .single();
+
       if (!data) {
-        ({ data } = await sb.from('profiles').select('id').eq('id', id).single());
+        ({ data } = await sb.from('profiles').select('id, plan').eq('id', id).single());
       }
+
       profile = data;
+
       if (!profile) {
         container.innerHTML = '<p class="col-span-full text-center text-red-600 text-2xl py-20">No videos available</p>';
         return;
       }
-      const { data: videos } = await sb
+
+      const { data: videos, error } = await sb
         .from('user_videos')
         .select('*')
         .eq('user_id', profile.id)
         .order('created_at', { ascending: false });
-      if (!videos?.length) {
+
+      if (error || !videos?.length) {
         container.innerHTML = '<p class="col-span-full text-center italic py-20 text-2xl text-gray-600">No videos yet</p>';
         return;
       }
+
       container.innerHTML = '';
+
+      // Fetch video count for badge eligibility
+      const { count: videoCount } = await sb
+        .from('user_videos')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', profile.id);
+
+      // Show correct badge if >= 3 videos
+      if (videoCount >= 3) {
+        const badgeContainer = document.createElement('div');
+        badgeContainer.className = 'absolute top-8 right-8 z-30';
+        badgeContainer.innerHTML = profile.plan === 'platinum'
+          ? `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge" class="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-2xl">`
+          : `<img src="pro-artist-badge.png" alt="Pro Artist Badge" class="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-2xl">`;
+        document.querySelector('section.relative.h-\\5b400px\\]').appendChild(badgeContainer);
+      }
+
       for (const v of videos) {
         const videoUrl = sb.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
         const thumbUrl = v.thumbnail_url
-          ? sb.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl
-          : 'https://via.placeholder.com/400x225?text=Video';
+          ? sb.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl + '?t=' + Date.now()
+          : 'https://via.placeholder.com/400x225/111/eee?text=Video+Thumbnail';
+
         const { count: likes = 0 } = await sb.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
         const { data: comments = [] } = await sb
           .from('video_comments')
           .select('id, name, comment')
           .eq('video_id', v.id)
           .order('created_at', { ascending: false });
+
         const price = v.price || 0;
         const isPaid = price > 0;
-        const controlsAttr = isPaid ? '' : 'controls';
-        const noControlsClass = isPaid ? 'no-controls' : '';
+
         const buyButton = isPaid
           ? `<button onclick="buyVideo(event, '${v.id}', ${price}, '${videoUrl}')" class="buy-btn mt-6 w-full text-lg">
                Buy & Download – $${price.toFixed(2)}
              </button>`
           : '';
+
         container.innerHTML += `
-          <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div class="video-card bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition duration-300">
             <div class="relative">
-              <video
-                ${controlsAttr}
-                class="${noControlsClass} w-full h-64 object-cover rounded-t-2xl"
-                poster="${thumbUrl}">
-                <source src="${videoUrl}" type="video/mp4">
-              </video>
-              ${isPaid ? `
-                <div class="video-overlay absolute inset-0 flex items-center justify-center bg-black/60 opacity-100 hover:opacity-90 transition" onclick="openVideoModal('${videoUrl}')">
-                  <svg class="w-20 h-20 text-white drop-shadow-2xl" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7L8 5z"/>
-                  </svg>
-                </div>
-              ` : ''}
+              <img 
+                src="${thumbUrl}" 
+                alt="${v.title || 'Video'}" 
+                class="thumbnail-img"
+                loading="lazy"
+              >
+              <div class="video-overlay" onclick="openVideoModal('${videoUrl}')">
+                <svg class="w-20 h-20 text-white drop-shadow-2xl" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7L8 5z"/>
+                </svg>
+              </div>
             </div>
             <div class="p-6">
               <h4 class="font-bold text-xl truncate mb-4">${v.title || 'Untitled'}</h4>
@@ -306,6 +349,7 @@
           </div>`;
       }
     }
+
     function openVideoModal(url) {
       const modal = document.getElementById('videoModal');
       const video = document.getElementById('modalVideo');
@@ -314,6 +358,7 @@
       modal.classList.add('show');
       video.play().catch(() => {});
     }
+
     function closeVideoModal() {
       const modal = document.getElementById('videoModal');
       const video = document.getElementById('modalVideo');
@@ -322,6 +367,7 @@
       video.src = '';
       modal.classList.remove('show');
     }
+
     async function likeVideo(videoId) {
       const { data: { user } } = await sb.auth.getUser();
       if (!user) {
@@ -341,6 +387,7 @@
       }
       loadVideos();
     }
+
     async function addComment(videoId) {
       const nameEl = document.getElementById(`commentName-${videoId}`);
       const textEl = document.getElementById(`commentText-${videoId}`);
@@ -359,6 +406,7 @@
       textEl.value = '';
       loadVideos();
     }
+
     function buyVideo(event, videoId, price, url) {
       event.preventDefault();
       event.stopPropagation();
@@ -373,15 +421,19 @@
         alert('Download started! Thank you for supporting the artist ❤️');
       }
     }
+
     function joinLivestream() {
       alert("Join Livestream clicked! (Test mode)");
     }
+
     function sendTip(amount) {
       alert(`Sending $${amount} tip! (Test mode)`);
     }
+
     function sendCustomTip() {
       alert("Custom tip sent! (Test mode)");
     }
+
     window.addEventListener('load', async () => {
       await loadProfile();
       await loadVideos();
