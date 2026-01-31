@@ -85,32 +85,35 @@
     .play-pause-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.45);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.3s;
+      transition: opacity 0.25s;
       z-index: 10;
       cursor: pointer;
     }
+    .play-pause-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
     .play-pause-btn {
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.65);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 90px;
-      height: 90px;
+      width: 100px;
+      height: 100px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.2s, background 0.2s;
-      pointer-events: auto;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      transition: all 0.2s;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.7);
     }
     .play-pause-btn:hover {
-      transform: scale(1.1);
-      background: rgba(0,0,0,0.8);
+      transform: scale(1.08);
+      background: rgba(0,0,0,0.85);
     }
     .hidden { display: none !important; }
     @media (max-width: 640px) { .hero-height { height: 60vh; min-height: 400px; } }
@@ -119,6 +122,7 @@
       border: 2px solid #6b7280;
       border-radius: 1.5rem;
       overflow: hidden;
+
       transition: all 0.3s;
     }
     .plan-card.pro { border-color: #10b981; }
@@ -236,7 +240,7 @@
   </div>
 </section>
 
-<!-- PROMO VIDEO – FIXED TO PLAY ON CLICK -->
+<!-- PROMO VIDEO -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
     <video
@@ -249,7 +253,7 @@
       Your browser does not support the video tag.
     </video>
 
-    <!-- Play/Pause Overlay -->
+    <!-- Overlay – always clickable when visible -->
     <div id="playPauseOverlay" class="play-pause-overlay">
       <button id="playPauseBtn" class="play-pause-btn">
         <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-28 sm:w-28" fill="currentColor" viewBox="0 0 24 24">
@@ -775,14 +779,13 @@
   <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-<!-- FULL SCRIPT – FIXED PROMO VIDEO -->
+<!-- FULL SCRIPT -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // PROMO VIDEO – FIXED PLAY LOGIC
+  // PROMO VIDEO – SIMPLIFIED & ROBUST
   const promoVideo = document.getElementById("promoVideo");
   if (promoVideo) {
     const overlay = document.getElementById("playPauseOverlay");
-    const btn = document.getElementById("playPauseBtn");
     const playIcon = document.getElementById("playIcon");
     const pauseIcon = document.getElementById("pauseIcon");
     const muteBtn = document.getElementById("muteBtn");
@@ -794,7 +797,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatTime(sec) {
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
-      return `${m}:${s.toString().padStart(2, '0')}`;
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
     promoVideo.addEventListener("loadedmetadata", () => {
@@ -806,9 +809,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const pct = (promoVideo.currentTime / promoVideo.duration) * 100;
       if (progressFill) progressFill.style.width = pct + "%";
       if (currentTimeEl) currentTimeEl.textContent = formatTime(promoVideo.currentTime);
-      // Update overlay visibility during playback
-      if (!promoVideo.paused && !promoVideo.ended) {
-        if (overlay) overlay.classList.add("hidden");
+      if (!promoVideo.paused && !promoVideo.ended && overlay) {
+        overlay.classList.add("hidden");
       }
     });
 
@@ -824,22 +826,26 @@ document.addEventListener("DOMContentLoaded", () => {
       if (pauseIcon) pauseIcon.classList.remove("hidden");
     });
 
-    function togglePlay() {
+    function togglePlayPause(e) {
+      e.stopPropagation(); // prevent double-trigger
       if (promoVideo.paused || promoVideo.ended) {
-        promoVideo.play().catch(e => console.log("Play blocked:", e));
+        promoVideo.play().catch(err => {
+          console.log("Play failed (likely user gesture needed):", err);
+        });
       } else {
         promoVideo.pause();
       }
     }
 
-    // Click ANYWHERE on overlay to toggle play/pause
+    // Make the **entire overlay** clickable
     if (overlay) {
-      overlay.addEventListener("click", togglePlay);
+      overlay.addEventListener("click", togglePlayPause);
     }
 
-    // Also allow clicking the icon button itself
-    if (btn) {
-      btn.addEventListener("click", togglePlay);
+    // Button inside also triggers (redundant but safe)
+    const playBtn = document.getElementById("playPauseBtn");
+    if (playBtn) {
+      playBtn.addEventListener("click", togglePlayPause);
     }
 
     if (muteBtn) {
@@ -855,12 +861,12 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Initial state: paused, overlay visible
+    // Start paused with overlay visible
     promoVideo.pause();
     if (overlay) overlay.classList.remove("hidden");
   }
 
-  // DROPDOWN LOGIC
+  // DROPDOWN
   const badge = document.getElementById('featuresBadge');
   const menu = document.getElementById('dropdownMenu');
   if (badge && menu) {
@@ -875,11 +881,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // LOGO ANIMATION
+  // LOGO
   const logo = document.getElementById("logo");
   if (logo) logo.classList.add("logo-intro");
 
-  // FEATURED & MAIN STAGE VIDEOS (MODAL)
+  // FEATURED MODAL VIDEOS
   const videoModal = document.getElementById("videoModal");
   const videoPlayer = document.getElementById("videoPlayer");
   const videoSource = document.getElementById("videoSource");
@@ -893,7 +899,7 @@ document.addEventListener("DOMContentLoaded", () => {
         videoPlayer.load();
         videoModal.classList.remove('hidden');
         videoModal.classList.add('active');
-        videoPlayer.play().catch(e => console.log("Modal play blocked:", e));
+        videoPlayer.play().catch(e => console.log("Modal play:", e));
       }
     });
   });
