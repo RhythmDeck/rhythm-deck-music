@@ -139,7 +139,12 @@ button:disabled {
   margin-top:6px;
   font-size:13px;
   color:#9ca3af;
-  text-align:right;
+  text-align:left;
+  font-weight:bold;
+}
+.timer {
+  float:right;
+  color:#10b981;
 }
 </style>
 </head>
@@ -220,13 +225,13 @@ button:disabled {
 <div id="statusWrap">
   <div id="status"></div>
   <div>
-    <div class="progress-label">Upload Progress</div>
+    <div class="progress-label">Uploading chunks <span id="uploadTimer" class="timer">00:00</span></div>
     <div id="uploadProgressOuter">
       <div id="uploadProgressInner"></div>
     </div>
     <div id="uploadProgressText" class="progress-label">0%</div>
 
-    <div class="progress-label" style="margin-top:20px;">Compression Progress</div>
+    <div class="progress-label" style="margin-top:20px;">Compressing <span id="compressTimer" class="timer">00:00</span></div>
     <div id="compressProgressOuter">
       <div id="compressProgressInner"></div>
     </div>
@@ -247,6 +252,48 @@ const uploadInner = document.getElementById('uploadProgressInner');
 const uploadText = document.getElementById('uploadProgressText');
 const compressInner = document.getElementById('compressProgressInner');
 const compressText = document.getElementById('compressProgressText');
+const uploadTimerEl = document.getElementById('uploadTimer');
+const compressTimerEl = document.getElementById('compressTimer');
+
+// Timers
+let uploadStartTime = null;
+let compressStartTime = null;
+let uploadTimerInterval = null;
+let compressTimerInterval = null;
+
+function formatTime(seconds) {
+  const min = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const sec = (seconds % 60).toString().padStart(2, '0');
+  return `${min}:${sec}`;
+}
+
+function startTimer(type) {
+  const now = Date.now();
+  if (type === 'upload') {
+    uploadStartTime = now;
+    uploadTimerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - uploadStartTime) / 1000);
+      uploadTimerEl.textContent = formatTime(elapsed);
+    }, 1000);
+  } else if (type === 'compress') {
+    compressStartTime = now;
+    compressTimerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - compressStartTime) / 1000);
+      compressTimerEl.textContent = formatTime(elapsed);
+    }, 1000);
+  }
+}
+
+function stopTimer(type) {
+  if (type === 'upload' && uploadTimerInterval) {
+    clearInterval(uploadTimerInterval);
+    uploadTimerInterval = null;
+  }
+  if (type === 'compress' && compressTimerInterval) {
+    clearInterval(compressTimerInterval);
+    compressTimerInterval = null;
+  }
+}
 
 dims.onchange = () => {
   manual.style.display = dims.value === 'manual' ? 'block' : 'none';
@@ -265,6 +312,14 @@ startBtn.onclick = async () => {
     return;
   }
   startBtn.disabled = true;
+
+  // Reset timers and labels
+  uploadStartTime = null;
+  compressStartTime = null;
+  uploadTimerEl.textContent = '00:00';
+  compressTimerEl.textContent = '00:00';
+  compressText.textContent = 'Waiting…';
+
   const file = fileInput.files[0];
   const totalBytes = file.size;
   let uploadedBytes = 0;
@@ -274,16 +329,20 @@ startBtn.onclick = async () => {
   let offset = 0;
 
   status.textContent = 'Uploading album…\n';
+  startTimer('upload');
+
   while (offset < totalBytes) {
     const slice = file.slice(offset, offset + chunkSize);
     const form = new FormData();
     form.append('chunk', slice);
     form.append('fileId', fileId);
     form.append('index', index);
-    await fetch('/compress/upload-chunk', {
-      method:'POST',
-      body:form
+
+    await fetch('https://rhythm-deck-music.onrender.com/compress/upload-chunk', {
+      method: 'POST',
+      body: form
     });
+
     uploadedBytes += slice.size;
     const percent = Math.min(100, Math.round((uploadedBytes / totalBytes) * 100));
     uploadInner.style.width = percent + '%';
@@ -293,10 +352,13 @@ startBtn.onclick = async () => {
     status.textContent += `Uploaded chunk ${index}\n`;
   }
 
-  // Upload done → start compression
+  // Upload done
+  stopTimer('upload');
   status.textContent += '\nStarting compression…\n';
   uploadInner.style.width = '100%';
   uploadText.textContent = '100%';
+  startTimer('compress');
+  compressText.textContent = 'Compressing… 0%';
 
   let width, height;
   if (dims.value === 'manual') {
@@ -306,10 +368,10 @@ startBtn.onclick = async () => {
     [width, height] = dims.value.split('x');
   }
 
-  const res = await fetch('/compress/start', {
-    method:'POST',
-    headers:{ 'Content-Type':'application/json' },
-    body:JSON.stringify({
+  const res = await fetch('https://rhythm-deck-music.onrender.com/compress/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       fileId,
       crf: crf.value,
       hevc: document.getElementById('hevc').checked,
@@ -322,17 +384,14 @@ startBtn.onclick = async () => {
   const data = await res.json();
   if (!data.ok) {
     status.textContent += 'Compression failed.';
+    stopTimer('compress');
     startBtn.disabled = false;
     return;
   }
 
-  // Compression started → show "Compressing" and start polling progress
-  status.textContent += '\nCompressing…\n';
-  compressText.textContent = 'Compressing… 0%';
-
-  // Poll compression progress every 3 seconds
+  // Start polling progress
   const progressInterval = setInterval(async () => {
-    const progRes = await fetch(`/compress/progress?fileId=${fileId}`);
+    const progRes = await fetch(`https://rhythm-deck-music.onrender.com/compress/progress?fileId=${fileId}`);
     const progData = await progRes.json();
 
     if (progData.progress !== undefined) {
@@ -342,8 +401,9 @@ startBtn.onclick = async () => {
 
       if (p >= 100) {
         clearInterval(progressInterval);
+        stopTimer('compress');
         status.textContent += '\nCompression complete.\nDownloading…';
-        window.location = data.download;
+        window.location = `https://rhythm-deck-music.onrender.com${data.download}`;
       }
     }
   }, 3000);
