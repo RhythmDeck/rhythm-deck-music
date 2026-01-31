@@ -2,102 +2,84 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Rhythm Deck – Video Compressor</title>
-
-<!-- FFmpeg WASM (stable) -->
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
-<script src="https://unpkg.com/@ffmpeg/util@0.12.6/dist/ffmpeg-util.js"></script>
-
-<!-- ZIP -->
-<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<title>Rhythm Deck – Album Compressor</title>
 
 <style>
 body {
   background:#050505;
-  font-family: Arial, sans-serif;
+  font-family:Arial, sans-serif;
   color:#e5e7eb;
 }
-
 .container {
-  max-width:1100px;
+  max-width:1200px;
   margin:40px auto;
   padding:30px;
   border:2px solid #10b981;
-  border-radius:20px;
+  border-radius:22px;
   background:linear-gradient(180deg,#0b0b0b,#060606);
-  box-shadow:0 20px 50px rgba(0,0,0,.8);
+  box-shadow:0 30px 70px rgba(0,0,0,.85);
 }
-
 header {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:28px;
+  margin-bottom:30px;
 }
-
-header a {
-  color:#10b981;
-  font-weight:bold;
-  text-decoration:none;
-  margin-left:18px;
+header img {
+  height:48px;
 }
-
-.hero-grid {
+.hero {
   display:grid;
-  grid-template-columns:1.3fr 1fr;
+  grid-template-columns:1fr 1.5fr;
   gap:30px;
-  margin-bottom:34px;
 }
-
 .instructions {
   border:2px solid #10b981;
   border-radius:18px;
   padding:26px;
-  font-size:17px;
-  line-height:1.7;
+  font-size:18px;
+  line-height:1.75;
 }
-
 .image-box img {
   width:100%;
-  border-radius:16px;
+  height:100%;
+  object-fit:cover;
+  border-radius:18px;
 }
-
-.section { margin-top:22px; }
-
+.section {
+  margin-top:26px;
+}
 label {
   font-weight:bold;
   display:block;
   margin-bottom:6px;
 }
-
 input, select {
   width:100%;
-  padding:11px;
-  border-radius:10px;
+  padding:12px;
+  border-radius:12px;
   border:none;
 }
-
 button {
-  padding:14px 22px;
+  padding:16px 26px;
   background:#10b981;
   border:none;
-  border-radius:14px;
+  border-radius:16px;
   font-weight:bold;
   cursor:pointer;
 }
-
-.badge {
-  background:#10b981;
-  color:#000;
-  font-size:12px;
-  padding:4px 10px;
-  border-radius:999px;
+button:disabled {
+  opacity:.5;
+  cursor:not-allowed;
 }
-
-#status {
-  margin-top:16px;
+.small {
+  font-size:14px;
   color:#9ca3af;
+}
+#status {
+  margin-top:18px;
   white-space:pre-line;
+  font-size:15px;
 }
 </style>
 </head>
@@ -106,66 +88,81 @@ button {
 <div class="container">
 
 <header>
-  <strong>Rhythm Deck Compressor</strong>
+  <img src="logo.png" alt="Rhythm Deck">
   <nav>
-    <a href="index.html" target="_blank">Home</a>
-    <a href="contact.html" target="_blank">Contact</a>
+    <a href="index.html" style="color:#10b981">Home</a>
   </nav>
 </header>
 
-<div class="hero-grid">
+<div class="hero">
   <div class="instructions">
-    <strong>How it works</strong><br><br>
-    • Upload a full album video or single track<br>
-    • Albums are split into 10-minute chunks<br>
-    • Each chunk is compressed individually<br>
-    • Download ZIP (album) or merged MP4<br><br>
+    <strong>Album Compressor</strong><br><br>
+
+    • Upload a full album video (any size)<br>
+    • File is uploaded in safe chunks<br>
+    • Album is split into 15-minute segments<br>
+    • Each segment is compressed server-side<br>
+    • Download as ZIP or merged MP4<br><br>
+
+    <strong>CRF (Quality)</strong><br>
+    Lower = higher quality / larger file<br>
+    18–20 → visually lossless<br>
+    22–24 → recommended<br>
+    26+ → aggressive compression<br><br>
+
     <strong>HEVC (H.265)</strong><br>
-    Smaller files at similar quality.<br>
-    Slower encoding, higher CPU use.<br><br>
-    🔒 All processing runs locally in your browser
+    ~40% smaller files than H.264<br>
+    Slower encode, same quality<br><br>
+
+    🔒 Processing happens on Rhythm Deck servers
   </div>
 
   <div class="image-box">
-    <img src="compressor.png" alt="Rhythm Deck Compressor">
+    <img src="compressor.png" alt="Compressor">
   </div>
 </div>
 
 <div class="section">
-<label>Upload Video</label>
-<input type="file" id="videoInput" accept="video/*">
+<label>Upload Album Video</label>
+<input type="file" id="file">
 </div>
 
 <div class="section">
 <label>Compression Quality (CRF)</label>
-<input type="range" id="crf" min="18" max="30" value="23">
-<div id="crfText"></div>
+<input type="range" min="18" max="30" value="23" id="crf">
+<div class="small" id="crfText"></div>
 </div>
 
 <div class="section">
-<label>Dimensions</label>
+<label>Target Dimensions</label>
 <select id="dimensions">
   <option value="auto">Automatic</option>
-  <option value="1080">1080p</option>
-  <option value="720">720p</option>
+  <option value="1920x1080">1080p</option>
+  <option value="1280x720">720p</option>
+  <option value="manual">Manual</option>
 </select>
+<div id="manualDims" style="display:none">
+  <input id="w" placeholder="Width">
+  <input id="h" placeholder="Height">
+</div>
 </div>
 
 <div class="section">
 <label>
-<input type="checkbox" id="hevc">
- Use HEVC (H.265)
- <span class="badge">Smaller files</span>
+<input type="checkbox" id="hevc"> Use HEVC (H.265)
 </label>
 </div>
 
 <div class="section">
-<strong>Estimated Size</strong>
-<div id="estimate">—</div>
+<label>Download Format</label>
+<select id="format">
+  <option value="zip">ZIP (album parts)</option>
+  <option value="mp4">Single MP4 (merged)</option>
+</select>
 </div>
 
 <div class="section">
-<button id="compressBtn">Compress & Download</button>
+<button id="start">Compress Album</button>
 </div>
 
 <div id="status"></div>
@@ -173,110 +170,89 @@ button {
 </div>
 
 <script>
-const { FFmpeg } = FFmpegWASM;
-const { fetchFile } = FFmpegUtil;
+const fileInput = document.getElementById('file');
+const startBtn = document.getElementById('start');
+const status = document.getElementById('status');
+const crf = document.getElementById('crf');
+const crfText = document.getElementById('crfText');
+const dims = document.getElementById('dimensions');
+const manual = document.getElementById('manualDims');
 
-const ffmpeg = new FFmpeg();
-let ffmpegLoaded = false;
-let originalMB = 0;
-
-async function loadFFmpeg() {
-  if (ffmpegLoaded) return;
-  status.textContent = "Loading encoder…";
-  await ffmpeg.load({
-    coreURL:"https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
-    wasmURL:"https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm"
-  });
-  ffmpegLoaded = true;
-}
-
-videoInput.onchange = () => {
-  originalMB = videoInput.files[0].size / 1024 / 1024;
-  updateEstimate();
+dims.onchange = () => {
+  manual.style.display = dims.value === 'manual' ? 'block' : 'none';
 };
 
-crf.oninput = updateEstimate;
-hevc.onchange = updateEstimate;
-dimensions.onchange = updateEstimate;
+crf.oninput = () => {
+  const v = crf.value;
+  const est = (30 - v) * 4;
+  crfText.textContent = `CRF ${v} → ~${est}% size reduction`;
+};
+crf.oninput();
 
-function updateEstimate() {
-  if (!originalMB) return;
-
-  const crfVal = parseInt(crf.value);
-  let ratio = hevc.checked ? 0.45 : 0.65;
-  ratio += (crfVal - 23) * 0.025;
-
-  if (dimensions.value === "720") ratio *= 0.6;
-  if (dimensions.value === "1080") ratio *= 0.8;
-
-  ratio = Math.max(0.2, Math.min(ratio, 0.9));
-  const est = originalMB * ratio;
-
-  crfText.textContent = `CRF ${crfVal} → approx ${est.toFixed(1)} MB`;
-  estimate.textContent =
-    `Original: ${originalMB.toFixed(1)} MB → Estimated: ${est.toFixed(1)} MB`;
-}
-
-compressBtn.onclick = async () => {
-  if (!videoInput.files[0]) {
-    alert("Upload a video first");
+startBtn.onclick = async () => {
+  if (!fileInput.files[0]) {
+    alert('Select a video');
     return;
   }
 
-  await loadFFmpeg();
-  status.textContent = "Preparing file…";
+  startBtn.disabled = true;
+  const file = fileInput.files[0];
+  const fileId = crypto.randomUUID();
+  const chunkSize = 100 * 1024 * 1024;
+  let index = 0;
+  let offset = 0;
 
-  const file = videoInput.files[0];
-  await ffmpeg.writeFile("input.mp4", await fetchFile(file));
+  status.textContent = 'Uploading album…\n';
 
-  const CHUNK = 600;
-  const parts = [];
-  let t = 0;
+  while (offset < file.size) {
+    const slice = file.slice(offset, offset + chunkSize);
+    const form = new FormData();
+    form.append('chunk', slice);
+    form.append('fileId', fileId);
+    form.append('index', index);
 
-  status.textContent = "Compressing chunks…\nThis can take several minutes.";
+    await fetch('/compress/upload-chunk', {
+      method:'POST',
+      body:form
+    });
 
-  while (t < 6 * 3600) { // hard safety cap
-    const out = `part_${t}.mp4`;
-
-    try {
-      await ffmpeg.exec([
-        "-ss", `${t}`,
-        "-t", `${CHUNK}`,
-        "-i", "input.mp4",
-        ...(dimensions.value !== "auto"
-          ? ["-vf", `scale=-2:${dimensions.value}`]
-          : []),
-        "-c:v", hevc.checked ? "libx265" : "libx264",
-        "-crf", crf.value,
-        out
-      ]);
-
-      await ffmpeg.readFile(out);
-      parts.push(out);
-      t += CHUNK;
-    } catch {
-      break;
-    }
+    offset += chunkSize;
+    index++;
+    status.textContent += `Uploaded chunk ${index}\n`;
   }
 
-  const zip = new JSZip();
-  for (const p of parts) {
-    const data = await ffmpeg.readFile(p);
-    zip.file(p, data.buffer);
+  status.textContent += '\nStarting compression…\n';
+
+  let width, height;
+  if (dims.value === 'manual') {
+    width = document.getElementById('w').value;
+    height = document.getElementById('h').value;
+  } else if (dims.value !== 'auto') {
+    [width, height] = dims.value.split('x');
   }
 
-  const blob = await zip.generateAsync({ type:"blob" });
-  download(blob, "rhythm-deck-compressed.zip");
+  const res = await fetch('/compress/start', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body:JSON.stringify({
+      fileId,
+      crf: crf.value,
+      hevc: document.getElementById('hevc').checked,
+      width,
+      height,
+      output: document.getElementById('format').value
+    })
+  });
 
-  status.textContent = "Done ✔";
+  const data = await res.json();
+  if (!data.ok) {
+    status.textContent += 'Compression failed.';
+    return;
+  }
+
+  status.textContent += '\nCompression complete.\nDownloading…';
+  window.location = data.download;
 };
-
-function download(blob, name) {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-}
 </script>
 </body>
 </html>
