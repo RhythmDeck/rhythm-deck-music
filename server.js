@@ -1,9 +1,14 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
+const multer = require('multer');
+const { exec } = require('child_process');
+
 const app = express();
 
 /* ─────────────────────────────────────────────
-   STRIPE + SUPABASE INIT (unchanged)
+   SUPABASE + STRIPE
 ───────────────────────────────────────────── */
 
 const { createClient } = require('@supabase/supabase-js');
@@ -18,12 +23,13 @@ if (process.env.STRIPE_SECRET_KEY) {
 }
 
 /* ─────────────────────────────────────────────
-   WEBHOOKS (MUST BE FIRST — UNCHANGED)
+   WEBHOOKS (MUST BE FIRST)
 ───────────────────────────────────────────── */
 
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
+
   try {
     event = stripe.webhooks.constructEvent(
       req.body,
@@ -31,16 +37,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.log('Webhook error:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    return res.status(400).send(err.message);
   }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const userId = session.client_reference_id;
     if (userId) {
-      await supabase
-        .from('profiles')
+      await supabase.from('profiles')
         .update({ payment_pending: false })
         .eq('id', userId);
     }
@@ -49,68 +53,16 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
   res.json({ received: true });
 });
 
-app.post('/webhook/rhythm-wav', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  const webhookSecret =
-    process.env.STRIPE_WEBHOOK_SECRET_RHYTHM_WAV ||
-    process.env.STRIPE_WEBHOOK_SECRET;
-
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-  } catch (err) {
-    console.error(`Rhythm Wav Webhook Error: ${err.message}`);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const userId = session.metadata?.user_id;
-
-    if (userId) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          rhythm_wav_premium: true,
-          rhythm_wav_subscription_id: session.subscription,
-          stripe_subscription_id: session.subscription,
-          subscription_status: 'active',
-          payment_pending: false,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', userId);
-
-      if (error) {
-        console.error('Failed to update Rhythm Wav premium:', error);
-      } else {
-        console.log(`User ${userId} upgraded to Rhythm Wav Premium`);
-      }
-    }
-  }
-
-  res.json({ received: true });
-});
-
 /* ─────────────────────────────────────────────
-   NORMAL MIDDLEWARE (UNCHANGED)
+   NORMAL MIDDLEWARE
 ───────────────────────────────────────────── */
 
 app.use(express.json());
 
-app.use(
-  express.static(__dirname, {
-    index: false,
-    extensions: ['html'],
-    setHeaders: (res, filePath) => {
-      if (/\.(jpg|jpeg|png|gif|webp|svg)$/i.test(filePath)) {
-        res.type(path.extname(filePath));
-      }
-      if (filePath.endsWith('.mp4')) {
-        res.type('video/mp4');
-      }
-    }
-  })
-);
+app.use(express.static(__dirname, {
+  index: false,
+  extensions: ['html']
+}));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -121,193 +73,146 @@ app.get('/', (req, res) => {
 ───────────────────────────────────────────── */
 
 const TalkJS = require('talkjs');
-const TALKJS_SECRET_KEY = process.env.TALKJS_SECRET_KEY;
-
 app.post('/talkjs-token', async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer '))
-      return res.status(401).json({ error: 'No token' });
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.sendStatus(401);
 
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    if (error || !user)
-      return res.status(401).json({ error: 'Invalid session' });
+  const token = authHeader.split(' ')[1];
+  const { data: { user } } = await supabase.auth.getUser(token);
+  if (!user) return res.sendStatus(401);
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('name')
-      .eq('id', user.id)
-      .single();
+  const signature = TalkJS.signUser({
+    id: user.id,
+    name: user.email
+  }, process.env.TALKJS_SECRET_KEY);
 
-    const talkUser = {
-      id: user.id,
-      name: (profile?.name || user.email.split('@')[0]).trim(),
-      email: user.email,
-      role: 'member'
-    };
-
-    const signature = TalkJS.signUser(talkUser, TALKJS_SECRET_KEY);
-    res.json({ token: signature });
-  } catch (err) {
-    console.error('TalkJS token error:', err);
-    res.status(500).json({ error: 'Server error' });
-  }
+  res.json({ token: signature });
 });
 
 /* ─────────────────────────────────────────────
-   RHYTHM WAV CHECKOUT (UNCHANGED)
+   COMPRESSOR BACKEND (SERVER-SIDE FFmpeg)
 ───────────────────────────────────────────── */
 
-app.post('/create-checkout-session', async (req, res) => {
-  const { priceId, userId } = req.body;
+const COMPRESS_ROOT = path.join(os.tmpdir(), 'rhythm-compressor');
+fs.mkdirSync(COMPRESS_ROOT, { recursive: true });
 
-  if (!priceId) {
-    return res.status(400).json({ error: 'Missing priceId' });
-  }
+const upload = multer({
+  dest: path.join(os.tmpdir(), 'compress-chunks'),
+  limits: { fileSize: 200 * 1024 * 1024 }
+});
+
+/* Upload chunk */
+app.post('/compress/upload-chunk', upload.single('chunk'), (req, res) => {
+  const { fileId, index } = req.body;
+  if (!fileId) return res.status(400).send('Missing fileId');
+
+  const dir = path.join(COMPRESS_ROOT, fileId);
+  fs.mkdirSync(dir, { recursive: true });
+
+  fs.renameSync(
+    req.file.path,
+    path.join(dir, `chunk_${index}`)
+  );
+
+  res.json({ ok: true });
+});
+
+/* Start compression */
+app.post('/compress/start', async (req, res) => {
+  const {
+    fileId,
+    crf = 23,
+    hevc = false,
+    width,
+    height,
+    output = 'zip'
+  } = req.body;
+
+  const dir = path.join(COMPRESS_ROOT, fileId);
+  const input = path.join(dir, 'input.mp4');
 
   try {
-    const session = await stripe.checkout.sessions.create({
-      line_items: [{ price: priceId, quantity: 1 }],
-      mode: 'subscription',
-      success_url:
-        'https://rhythm-deck-music.onrender.com/account-setup.html',
-      cancel_url:
-        'https://rhythm-deck-music.onrender.com/rhythm-wav-pricing.html',
-      billing_address_collection: 'required',
-      metadata: { user_id: userId }
+    const chunks = fs.readdirSync(dir)
+      .filter(f => f.startsWith('chunk_'))
+      .sort((a, b) => a.localeCompare(b));
+
+    const write = fs.createWriteStream(input);
+    for (const c of chunks) {
+      write.write(fs.readFileSync(path.join(dir, c)));
+    }
+    write.end();
+    await new Promise(r => write.on('finish', r));
+
+    const segmentsDir = path.join(dir, 'segments');
+    fs.mkdirSync(segmentsDir);
+
+    await execPromise(
+      `ffmpeg -i "${input}" -map 0 -c copy -f segment -segment_time 900 "${segmentsDir}/part_%03d.mp4"`
+    );
+
+    const compressedDir = path.join(dir, 'compressed');
+    fs.mkdirSync(compressedDir);
+
+    const parts = fs.readdirSync(segmentsDir);
+
+    for (const p of parts) {
+      const scale =
+        width && height ? `-vf scale=${width}:${height}` : '';
+      const codec = hevc ? 'libx265' : 'libx264';
+
+      await execPromise(
+        `ffmpeg -i "${segmentsDir}/${p}" ${scale} -c:v ${codec} -crf ${crf} -preset medium -c:a copy "${compressedDir}/${p}"`
+      );
+    }
+
+    let finalFile;
+
+    if (output === 'mp4') {
+      const list = parts.map(p => `file '${compressedDir}/${p}'`).join('\n');
+      fs.writeFileSync(path.join(dir, 'list.txt'), list);
+
+      finalFile = path.join(dir, 'final.mp4');
+      await execPromise(
+        `ffmpeg -f concat -safe 0 -i "${dir}/list.txt" -c copy "${finalFile}"`
+      );
+    } else {
+      finalFile = path.join(dir, 'album.zip');
+      await execPromise(
+        `cd "${compressedDir}" && zip -r "${finalFile}" .`
+      );
+    }
+
+    res.json({
+      ok: true,
+      download: `/compress/download/${fileId}`
     });
 
-    res.json({ url: session.url });
   } catch (err) {
-    console.error('Checkout session error:', err.message);
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: 'Compression failed' });
   }
 });
 
-/* ─────────────────────────────────────────────
-   EXISTING SIGNUP FLOW (UNCHANGED)
-───────────────────────────────────────────── */
+/* Download & cleanup */
+app.get('/compress/download/:fileId', (req, res) => {
+  const dir = path.join(COMPRESS_ROOT, req.params.fileId);
+  const file = fs.readdirSync(dir).find(f => f.endsWith('.zip') || f.endsWith('.mp4'));
+  if (!file) return res.sendStatus(404);
 
-const PRICE_IDS = {
-  '3month-trial': 'price_1SXkS4FV6v4usVQ1oHOnpMTd',
-  '1year': 'price_1SLKLEFV6v4usVQ1aUro0ZbP',
-  '2year': 'price_1SLWy5FV6v4usVQ12KvuIFim',
-  '3year': 'price_1SLX0IFV6v4usVQ1xsTaeCGk'
-};
-
-app.post('/signup', async (req, res) => {
-  const { name, email, subdomain, planDuration } = req.body;
-  const safeSubdomain = (subdomain || '')
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '');
-
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token' });
-    }
-
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    if (error || !user) {
-      return res.status(401).json({ message: 'Invalid session' });
-    }
-
-    await supabase.from('profiles').upsert({
-      id: user.id,
-      name: name || 'Artist',
-      email,
-      subdomain: safeSubdomain,
-      plan: planDuration ? 'pro' : 'free',
-      payment_pending: !!planDuration,
-      bio: '',
-      created_at: new Date().toISOString()
-    });
-
-    if (!planDuration) return res.json({ success: true });
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{ price: PRICE_IDS[planDuration], quantity: 1 }],
-      mode: planDuration === '3month-trial' ? 'payment' : 'subscription',
-      customer_email: email,
-      client_reference_id: user.id,
-      success_url: `${req.headers.origin}/profile-admin-pro.html?success=true`,
-      cancel_url: `${req.headers.origin}/signup.html?cancelled=true`
-    });
-
-    res.json({ url: session.url });
-  } catch (err) {
-    console.error('Signup error:', err);
-    res.status(500).json({ message: err.message });
-  }
-});
-
-/* ─────────────────────────────────────────────
-   ✅ COMPRESSOR — ONLY NEW CODE BELOW
-───────────────────────────────────────────── */
-
-const COMPRESSOR_PRICE_IDS = {
-  monthly: 'price_1SvOoG2WyyY6hPDEzqPOXGwl',
-  yearly: 'price_1SvOqY2WyyY6hPDECBUHd7V4'
-};
-
-app.post('/create-compressor-checkout', async (req, res) => {
-  const { plan } = req.body;
-
-  if (!COMPRESSOR_PRICE_IDS[plan]) {
-    return res.status(400).json({ error: 'Invalid compressor plan' });
-  }
-
-  try {
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      line_items: [
-        { price: COMPRESSOR_PRICE_IDS[plan], quantity: 1 }
-      ],
-      success_url:
-        'https://rhythm-deck-music.onrender.com/compressor.html?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url:
-        'https://rhythm-deck-music.onrender.com/compressor-signup.html',
-      metadata: { product: 'compressor' }
-    });
-
-    res.json({ url: session.url });
-  } catch (err) {
-    console.error('Compressor checkout error:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/verify-compressor', async (req, res) => {
-  const { session_id } = req.query;
-
-  if (!session_id) return res.json({ ok: false });
-
-  try {
-    const session = await stripe.checkout.sessions.retrieve(session_id);
-
-    if (
-      session.payment_status === 'paid' &&
-      session.metadata?.product === 'compressor'
-    ) {
-      return res.json({ ok: true });
-    }
-
-    res.json({ ok: false });
-  } catch (err) {
-    console.error('Verify compressor error:', err);
-    res.json({ ok: false });
-  }
+  res.download(path.join(dir, file), () => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
 });
 
 /* ───────────────────────────────────────────── */
 
+function execPromise(cmd) {
+  return new Promise((resolve, reject) => {
+    exec(cmd, (err) => err ? reject(err) : resolve());
+  });
+}
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`Rhythm Deck LIVE on port ${PORT}`);
-  console.log(`→ https://rhythm-deck-music.onrender.com`);
+  console.log(`Rhythm Deck live on port ${PORT}`);
 });
