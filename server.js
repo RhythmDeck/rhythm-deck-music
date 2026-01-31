@@ -52,13 +52,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
    NORMAL MIDDLEWARE
 ───────────────────────────────────────────── */
 app.use(express.json());
-app.use(express.static(__dirname, {
-  index: false,
-  extensions: ['html']
-}));
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
 
 /* ─────────────────────────────────────────────
    TALKJS (UNCHANGED)
@@ -89,6 +82,7 @@ const upload = multer({
 
 /* Upload chunk */
 app.post('/compress/upload-chunk', upload.single('chunk'), (req, res) => {
+  console.log('Upload chunk hit! fileId:', req.body.fileId, 'index:', req.body.index);
   const { fileId, index } = req.body;
   if (!fileId) return res.status(400).send('Missing fileId');
   const dir = path.join(COMPRESS_ROOT, fileId);
@@ -102,6 +96,7 @@ app.post('/compress/upload-chunk', upload.single('chunk'), (req, res) => {
 
 /* Start compression */
 app.post('/compress/start', async (req, res) => {
+  console.log('Start compression hit! fileId:', req.body.fileId);
   const {
     fileId,
     crf = 23,
@@ -191,7 +186,7 @@ app.post('/compress/start', async (req, res) => {
       download: `/compress/download/${fileId}`
     });
   } catch (err) {
-    console.error(err);
+    console.error('Compression error:', err);
     res.status(500).json({ error: 'Compression failed' });
   }
 });
@@ -223,6 +218,22 @@ app.get('/compress/download/:fileId', (req, res) => {
   res.download(path.join(dir, file), () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
+});
+
+/* ─────────────────────────────────────────────
+   STATIC FILES & FALLBACK – MUST BE LAST
+───────────────────────────────────────────── */
+app.use(express.static(__dirname, {
+  index: false,
+  extensions: ['html']
+}));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+/* Catch-all 404 */
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
 
 /* ───────────────────────────────────────────── */
