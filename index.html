@@ -90,6 +90,7 @@
       justify-content: center;
       transition: opacity 0.3s;
       pointer-events: none;
+      z-index: 10;
     }
     .play-pause-btn {
       background: rgba(0,0,0,0.6);
@@ -104,6 +105,7 @@
       cursor: pointer;
       transition: transform 0.2s;
       pointer-events: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
     .play-pause-btn:hover {
       transform: scale(1.1);
@@ -234,7 +236,7 @@
   </div>
 </section>
 
-<!-- PROMO VIDEO -->
+<!-- PROMO VIDEO – FIXED -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
     <video
@@ -245,25 +247,29 @@
     >
       Your browser does not support the video tag.
     </video>
+
+    <!-- Play/Pause Overlay -->
     <div id="playPauseOverlay" class="play-pause-overlay">
       <button id="playPauseBtn" class="play-pause-btn">
-        <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
+        <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-24 sm:w-24" fill="currentColor" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"/>
         </svg>
-        <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 hidden" fill="currentColor" viewBox="0 0 24 24">
+        <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-24 sm:w-24 hidden" fill="currentColor" viewBox="0 0 24 24">
           <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
         </svg>
       </button>
     </div>
+
+    <!-- Controls -->
     <div class="video-controls">
       <div class="flex items-center gap-3 sm:gap-4">
-        <button id="muteBtn" class="bg-white text-black px-3 sm:px-4 py-1 sm:py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm sm:text-base">
+        <button id="muteBtn" class="bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm sm:text-base">
           Mute
         </button>
       </div>
       <div class="flex items-center gap-2 sm:gap-3 flex-grow">
         <div class="volume-container">
-          <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.5" class="volume-slider w-20 sm:w-32">
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.5" class="volume-slider w-24 sm:w-32">
         </div>
         <span id="currentTime" class="time-text text-xs sm:text-sm">0:00</span>
         <div class="progress-bar flex-grow">
@@ -538,7 +544,6 @@
           <span><strong>Full commercial license</strong> – watermark-free, monetize anywhere</span>
         </li>
         <li class="flex items-start gap-3">
-
           <span class="text-amber-400 text-2xl">★</span>
           <span><strong>Priority generation queue</strong> – faster processing</span>
         </li>
@@ -772,7 +777,7 @@
 <!-- FULL SCRIPT -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // === PROMO VIDEO CONTROLS ===
+  // === PROMO VIDEO – FULL CONTROLS ===
   const promoVideo = document.getElementById("promoVideo");
   if (promoVideo) {
     const playPauseOverlay = document.getElementById("playPauseOverlay");
@@ -804,7 +809,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function togglePlayPause() {
       if (promoVideo.paused || promoVideo.ended) {
-        promoVideo.play().catch(() => {});
+        promoVideo.play().catch(err => console.log("Autoplay blocked:", err));
         if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
         if (playIcon) playIcon.classList.add("hidden");
         if (pauseIcon) pauseIcon.classList.remove("hidden");
@@ -816,9 +821,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    if (playPauseBtn) playPauseBtn.addEventListener("click", togglePlayPause);
-    if (playPauseOverlay) playPauseOverlay.addEventListener("click", togglePlayPause);
+    // Overlay click toggles play/pause
+    if (playPauseOverlay) {
+      playPauseOverlay.addEventListener("click", togglePlayPause);
+    }
 
+    // Play/pause button click
+    if (playPauseBtn) {
+      playPauseBtn.addEventListener("click", togglePlayPause);
+    }
+
+    // Mute toggle
     if (muteBtn) {
       muteBtn.addEventListener("click", () => {
         promoVideo.muted = !promoVideo.muted;
@@ -826,17 +839,19 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    // Volume control
     if (volumeSlider) {
       volumeSlider.addEventListener("input", (e) => {
         promoVideo.volume = parseFloat(e.target.value);
+        if (promoVideo.volume > 0) promoVideo.muted = false;
       });
     }
 
-    // Start paused with overlay visible
+    // Show overlay at start
     if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
   }
 
-  // === FEATURED / MAIN STAGE VIDEO MODAL ===
+  // === FEATURED / MAIN STAGE MODAL ===
   const videoModal = document.getElementById("videoModal");
   const videoPlayer = document.getElementById("videoPlayer");
   const videoSource = document.getElementById("videoSource");
@@ -875,7 +890,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // === DROPDOWN TOGGLE ===
+  // === DROPDOWN ===
   const badge = document.getElementById('featuresBadge');
   const menu = document.getElementById('dropdownMenu');
   if (badge && menu) {
