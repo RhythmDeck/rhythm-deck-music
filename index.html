@@ -36,6 +36,7 @@
       gap: 12px;
       opacity: 0;
       transition: opacity 0.3s ease;
+      z-index: 5;
     }
     .video-container:hover .video-controls, .video-controls:focus-within {
       opacity: 1;
@@ -89,26 +90,27 @@
       align-items: center;
       justify-content: center;
       transition: opacity 0.3s;
-      pointer-events: none;
       z-index: 10;
+      cursor: pointer;
     }
     .play-pause-btn {
       background: rgba(0,0,0,0.6);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 80px;
-      height: 80px;
+      width: 90px;
+      height: 90px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.2s, background 0.2s;
       pointer-events: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
     }
     .play-pause-btn:hover {
       transform: scale(1.1);
+      background: rgba(0,0,0,0.8);
     }
     .hidden { display: none !important; }
     @media (max-width: 640px) { .hero-height { height: 60vh; min-height: 400px; } }
@@ -123,7 +125,6 @@
     .plan-card.platinum { border-color: #d4af37; background: rgba(59, 37, 89, 0.7); }
     .plan-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
     .plan-badge { background: #d4af37; color: #1a0f2e; font-weight: bold; padding: 0.5rem 1rem; border-radius: 999px; }
-    /* Colorful menu buttons */
     .menu-btn {
       padding: 0.6rem 1.25rem;
       border-radius: 9999px;
@@ -141,7 +142,6 @@
     .benefits-btn { background: linear-gradient(to right, #f59e0b, #d97706); color: white; }
     .pricing-btn { background: linear-gradient(to right, #ec4899, #db2777); color: white; }
     .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
-    /* Features badge + dropdown */
     .features-badge {
       background: linear-gradient(135deg, #a855f7, #d946ef);
       color: white;
@@ -185,6 +185,7 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
+
 <!-- HEADER -->
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 shadow-lg">
   <div class="flex items-center space-x-3">
@@ -203,7 +204,6 @@
       <a href="contact.html" class="menu-btn contact-btn">Contact</a>
       <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
       <a href="signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
-      <!-- Features Dropdown Badge -->
       <div class="relative ml-2">
         <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
         <div id="dropdownMenu" class="dropdown-menu">
@@ -236,12 +236,13 @@
   </div>
 </section>
 
-<!-- PROMO VIDEO – FIXED -->
+<!-- PROMO VIDEO – FIXED TO PLAY ON CLICK -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
     <video
       id="promoVideo"
       src="Rhythm-Deck-Promo-Video.mp4"
+      preload="metadata"
       playsinline
       class="w-full h-auto max-h-[50vh] sm:max-h-[70vh] object-contain"
     >
@@ -251,10 +252,10 @@
     <!-- Play/Pause Overlay -->
     <div id="playPauseOverlay" class="play-pause-overlay">
       <button id="playPauseBtn" class="play-pause-btn">
-        <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-24 sm:w-24" fill="currentColor" viewBox="0 0 24 24">
+        <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-28 sm:w-28" fill="currentColor" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"/>
         </svg>
-        <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-24 sm:w-24 hidden" fill="currentColor" viewBox="0 0 24 24">
+        <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-28 sm:w-28 hidden" fill="currentColor" viewBox="0 0 24 24">
           <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
         </svg>
       </button>
@@ -774,14 +775,14 @@
   <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-<!-- FULL SCRIPT -->
+<!-- FULL SCRIPT – FIXED PROMO VIDEO -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // === PROMO VIDEO – FULL CONTROLS ===
+  // PROMO VIDEO – FIXED PLAY LOGIC
   const promoVideo = document.getElementById("promoVideo");
   if (promoVideo) {
-    const playPauseOverlay = document.getElementById("playPauseOverlay");
-    const playPauseBtn = document.getElementById("playPauseBtn");
+    const overlay = document.getElementById("playPauseOverlay");
+    const btn = document.getElementById("playPauseBtn");
     const playIcon = document.getElementById("playIcon");
     const pauseIcon = document.getElementById("pauseIcon");
     const muteBtn = document.getElementById("muteBtn");
@@ -790,10 +791,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentTimeEl = document.getElementById("currentTime");
     const durationEl = document.getElementById("duration");
 
-    function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s.toString().padStart(2, '0')}`;
     }
 
     promoVideo.addEventListener("loadedmetadata", () => {
@@ -802,36 +803,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     promoVideo.addEventListener("timeupdate", () => {
       if (!promoVideo.duration) return;
-      const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
-      if (progressFill) progressFill.style.width = `${percent}%`;
+      const pct = (promoVideo.currentTime / promoVideo.duration) * 100;
+      if (progressFill) progressFill.style.width = pct + "%";
       if (currentTimeEl) currentTimeEl.textContent = formatTime(promoVideo.currentTime);
+      // Update overlay visibility during playback
+      if (!promoVideo.paused && !promoVideo.ended) {
+        if (overlay) overlay.classList.add("hidden");
+      }
     });
 
-    function togglePlayPause() {
+    promoVideo.addEventListener("pause", () => {
+      if (overlay) overlay.classList.remove("hidden");
+      if (playIcon) playIcon.classList.remove("hidden");
+      if (pauseIcon) pauseIcon.classList.add("hidden");
+    });
+
+    promoVideo.addEventListener("play", () => {
+      if (overlay) overlay.classList.add("hidden");
+      if (playIcon) playIcon.classList.add("hidden");
+      if (pauseIcon) pauseIcon.classList.remove("hidden");
+    });
+
+    function togglePlay() {
       if (promoVideo.paused || promoVideo.ended) {
-        promoVideo.play().catch(err => console.log("Autoplay blocked:", err));
-        if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
-        if (playIcon) playIcon.classList.add("hidden");
-        if (pauseIcon) pauseIcon.classList.remove("hidden");
+        promoVideo.play().catch(e => console.log("Play blocked:", e));
       } else {
         promoVideo.pause();
-        if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
-        if (playIcon) playIcon.classList.remove("hidden");
-        if (pauseIcon) pauseIcon.classList.add("hidden");
       }
     }
 
-    // Overlay click toggles play/pause
-    if (playPauseOverlay) {
-      playPauseOverlay.addEventListener("click", togglePlayPause);
+    // Click ANYWHERE on overlay to toggle play/pause
+    if (overlay) {
+      overlay.addEventListener("click", togglePlay);
     }
 
-    // Play/pause button click
-    if (playPauseBtn) {
-      playPauseBtn.addEventListener("click", togglePlayPause);
+    // Also allow clicking the icon button itself
+    if (btn) {
+      btn.addEventListener("click", togglePlay);
     }
 
-    // Mute toggle
     if (muteBtn) {
       muteBtn.addEventListener("click", () => {
         promoVideo.muted = !promoVideo.muted;
@@ -839,19 +849,37 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Volume control
     if (volumeSlider) {
-      volumeSlider.addEventListener("input", (e) => {
+      volumeSlider.addEventListener("input", e => {
         promoVideo.volume = parseFloat(e.target.value);
-        if (promoVideo.volume > 0) promoVideo.muted = false;
       });
     }
 
-    // Show overlay at start
-    if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
+    // Initial state: paused, overlay visible
+    promoVideo.pause();
+    if (overlay) overlay.classList.remove("hidden");
   }
 
-  // === FEATURED / MAIN STAGE MODAL ===
+  // DROPDOWN LOGIC
+  const badge = document.getElementById('featuresBadge');
+  const menu = document.getElementById('dropdownMenu');
+  if (badge && menu) {
+    badge.addEventListener('click', e => {
+      e.stopPropagation();
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    });
+    document.addEventListener('click', e => {
+      if (!badge.contains(e.target) && !menu.contains(e.target)) {
+        menu.style.display = 'none';
+      }
+    });
+  }
+
+  // LOGO ANIMATION
+  const logo = document.getElementById("logo");
+  if (logo) logo.classList.add("logo-intro");
+
+  // FEATURED & MAIN STAGE VIDEOS (MODAL)
   const videoModal = document.getElementById("videoModal");
   const videoPlayer = document.getElementById("videoPlayer");
   const videoSource = document.getElementById("videoSource");
@@ -859,13 +887,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll('.featured-video').forEach(card => {
     card.addEventListener('click', () => {
-      const videoFile = card.getAttribute('data-video');
-      if (videoFile && videoSource && videoPlayer && videoModal) {
-        videoSource.src = videoFile;
+      const src = card.getAttribute('data-video');
+      if (src && videoSource && videoPlayer && videoModal) {
+        videoSource.src = src;
         videoPlayer.load();
         videoModal.classList.remove('hidden');
         videoModal.classList.add('active');
-        videoPlayer.play().catch(err => console.log("Play prevented:", err));
+        videoPlayer.play().catch(e => console.log("Modal play blocked:", e));
       }
     });
   });
@@ -880,7 +908,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (videoModal) {
-    videoModal.addEventListener('click', (e) => {
+    videoModal.addEventListener('click', e => {
       if (e.target === videoModal) {
         videoModal.classList.add('hidden');
         videoModal.classList.remove('active');
@@ -889,26 +917,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
-  // === DROPDOWN ===
-  const badge = document.getElementById('featuresBadge');
-  const menu = document.getElementById('dropdownMenu');
-  if (badge && menu) {
-    badge.addEventListener('click', (e) => {
-      e.stopPropagation();
-      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!badge.contains(e.target) && !menu.contains(e.target)) {
-        menu.style.display = 'none';
-      }
-    });
-  }
-
-  // Logo animation
-  const logo = document.getElementById("logo");
-  if (logo) logo.classList.add("logo-intro");
 });
 </script>
 </body>
