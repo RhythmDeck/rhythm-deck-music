@@ -12,7 +12,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     a:hover { color: #0000FF; }
-    #videoModal { display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 50; align-items: center; justify-content: center; }
+    #videoModal { display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; }
     #videoModal.active { display: flex; }
     .cursor-pointer { cursor: pointer; }
     .style1 { color: #FFFFFF }
@@ -113,7 +113,7 @@
     .plan-card {
       background: rgba(30, 27, 71, 0.6);
       border: 2px solid #6b7280;
-      border-radius: 1rem;
+      border-radius: 1.5rem;
       overflow: hidden;
       transition: all 0.3s;
     }
@@ -212,9 +212,13 @@
           <div class="dropdown-item" onclick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});">RHYTHM WAV PLAYLIST PLATFORM</div>
           <div class="dropdown-item" onclick="document.getElementById('video-compression-section').scrollIntoView({behavior: 'smooth'});">RHYTHM DECK VIDEO COMPRESSION TOOL</div>
           <div class="dropdown-item" onclick="document.getElementById('instruction-manuals-section').scrollIntoView({behavior: 'smooth'});">INSTRUCTION MANUALS</div>
-          <div class="dropdown-item" onclick="document.getElementById('qa-section').scrollIntoView({behavior: 'smooth'});">Q&A </div> 
+          <div class="dropdown-item" onclick="document.getElementById('qa-section').scrollIntoView({behavior: 'smooth'});">Q&A</div>
         </div>
       </div>
+      <button onclick="document.getElementById('instruction-manuals-section').scrollIntoView({behavior: 'smooth'});"
+              class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-5 py-2 rounded-lg font-bold transition shadow-lg border-2 border-emerald-500 text-base">
+        Instruction Manuals
+      </button>
     </div>
   </nav>
 </header>
@@ -285,7 +289,7 @@
   </div>
   <div>
     <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-left">Main Stage Feature</h3>
-    <div class="relative w-full overflow-hidden rounded-lg shadow-lg cursor-pointer group" data-video="Back-in-59.mp4">
+    <div class="relative w-full overflow-hidden rounded-lg shadow-lg cursor-pointer group featured-video" data-video="Back-in-59.mp4">
       <img src="back-in-59.png" alt="Main Stage Video" class="w-full object-cover aspect-video">
       <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 sm:h-16 sm:w-16 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -305,7 +309,7 @@
     <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Featured Artists</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="relative group cursor-pointer" data-video="Chrome-and-Gasoline.mp4">
+        <div class="relative group cursor-pointer featured-video" data-video="Chrome-and-Gasoline.mp4">
           <img src="chrome-gasoline.jpg" alt="The Sound Makers" class="w-full object-cover aspect-video">
           <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -318,7 +322,7 @@
         </div>
       </div>
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="relative group cursor-pointer" data-video="Midnight-Highway-Roar.mp4">
+        <div class="relative group cursor-pointer featured-video" data-video="Midnight-Highway-Roar.mp4">
           <img src="Midnight-Highway-Roar-thumbnail.jpg" alt="Electric Avenue" class="w-full object-cover aspect-video">
           <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -331,7 +335,7 @@
         </div>
       </div>
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="relative group cursor-pointer" data-video="The-Killer-Lives-On.mp4">
+        <div class="relative group cursor-pointer featured-video" data-video="The-Killer-Lives-On.mp4">
           <img src="the-killer-lives-on.jpg" alt="Vibe Studio" class="w-full object-cover aspect-video">
           <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -397,7 +401,7 @@
         <ul class="list-disc list-inside space-y-2 sm:space-y-3 text-base sm:text-lg">
           <li>All Pro Plan features</li>
           <li><strong class="text-yellow-300">Exclusive Access to Radio Station Database</strong> – Contact info for stations worldwide + professional email templates</li>
-          <li><strong class="text-yellow-300">Rhythm Vision Platinum Pro</strong> - Create professional videos and audio with the click of a few buttons</strong></li>
+          <li><strong class="text-yellow-300">Rhythm Vision Platinum Pro</strong> - Create professional videos and audio with the click of a few buttons</li>
           <li><strong class="text-yellow-300">Your Own Private Merch Store</strong> – Sell t-shirts, hoodies, hats, posters, etc. with zero upfront costs</li>
         </ul>
       </div>
@@ -465,7 +469,7 @@
 </section>
 
 <!-- RHYTHM VISION PLANS COMPARISON -->
-<section id="rhythm-vision-comparison-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-gray-900 to-black text-white">
+<section id="rhythm-vision-comparison-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-gray-900 to-black text-white rounded-3xl">
   <h3 class="text-3xl sm:text-4xl font-black mb-10 text-center bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
     Choose Your Rhythm Vision Experience
   </h3>
@@ -473,11 +477,11 @@
     Rhythm Vision Pro gives you powerful AI music video creation. Upgrade to Platinum for unlimited creative freedom, priority generation, and full commercial rights.
   </p>
   <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-    <div class="plan-card pro p-8 flex flex-col h-full">
+    <div class="plan-card pro p-8 flex flex-col h-full rounded-2xl">
       <div class="text-center mb-6">
         <h4 class="text-3xl font-bold text-emerald-400 mb-2">Rhythm Vision Pro</h4>
-        <p class="text-xl font-semibold text-amber-300">$8.95/mo or $89.95.00/year (Save $$17.00)</p>
-        <p class="text-xl font-semibold text-emerald-300">Included in Pro Plan or as a stand-alone app</p>
+        <p class="text-xl font-semibold text-amber-300">$8.95/mo or $89.95/year (Save $17.00)</p>
+        <p class="text-xl font-semibold text-emerald-300">Included in Pro Plan or as stand-alone app</p>
         <p class="text-sm text-gray-400 mt-2">Perfect for creators getting started</p>
       </div>
       <ul class="space-y-4 text-gray-200 flex-grow">
@@ -508,7 +512,7 @@
         </a>
       </div>
     </div>
-    <div class="plan-card platinum p-8 flex flex-col h-full relative overflow-hidden">
+    <div class="plan-card platinum p-8 flex flex-col h-full relative overflow-hidden rounded-2xl">
       <div class="absolute top-0 right-0 bg-yellow-500 text-black font-bold px-6 py-2 rounded-bl-xl">
         Recommended
       </div>
@@ -517,7 +521,7 @@
           PLATINUM
         </div>
         <h4 class="text-3xl font-bold text-amber-400 mb-2">Rhythm Vision Platinum</h4>
-        <p class="text-xl font-semibold text-amber-300">$12.95/mo or $130.00/year (Save $$25.00)</p>
+        <p class="text-xl font-semibold text-amber-300">$12.95/mo or $130.00/year (Save $25.00)</p>
         <p class="text-sm text-amber-200 mt-2">Unlimited power for professional creators</p>
       </div>
       <ul class="space-y-4 text-gray-200 flex-grow">
@@ -531,9 +535,10 @@
         </li>
         <li class="flex items-start gap-3">
           <span class="text-amber-400 text-2xl">★</span>
-          <span><strong>Full commercial license</strong> – watermark-free, monetize anywhere (YouTube, Spotify, sync, ads, etc.)</span>
+          <span><strong>Full commercial license</strong> – watermark-free, monetize anywhere</span>
         </li>
         <li class="flex items-start gap-3">
+
           <span class="text-amber-400 text-2xl">★</span>
           <span><strong>Priority generation queue</strong> – faster processing</span>
         </li>
@@ -550,7 +555,7 @@
     </div>
   </div>
 </section>
-<br><br>
+
 <!-- RHYTHM WAV PLAYLIST PLATFORM -->
 <section id="rhythm-wav-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-r from-purple-900 to-pink-900 rounded-2xl shadow-2xl text-white">
   <div class="text-center mb-8 sm:mb-10">
@@ -569,7 +574,7 @@
     </a>
   </div>
 </section>
-<br><br>
+
 <!-- RHYTHM DECK VIDEO COMPRESSION TOOL -->
 <section id="video-compression-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-indigo-900 to-purple-900 text-white rounded-2xl shadow-2xl">
   <div class="text-center mb-10">
@@ -637,7 +642,7 @@
     </div>
   </div>
 </section>
-<br><br>
+
 <!-- PRODUCERS & DISTRIBUTORS SECTION -->
 <section id="producers-distributors-section" class="max-w-6xl mx-auto py-20 sm:py-28 px-4 sm:px-6 bg-gradient-to-r from-emerald-900/80 via-teal-900/80 to-indigo-900/80 rounded-2xl shadow-2xl">
   <div class="text-center mb-8 sm:mb-10">
@@ -655,7 +660,7 @@
     </a>
   </div>
 </section>
-<br><br>
+
 <!-- INSTRUCTION MANUALS -->
 <section id="instruction-manuals-section" class="max-w-6xl mx-auto py-20 sm:py-24 px-4 sm:px-6 bg-gradient-to-br from-teal-900 to-emerald-900 text-white rounded-2xl shadow-xl">
   <div class="text-center mb-10 sm:mb-12">
@@ -685,7 +690,7 @@
     </p>
   </div>
 </section>
-<br><br>
+
 <!-- Q&A -->
 <section id="qa-section" class="bg-neutral-950 py-16 px-6">
   <div class="max-w-6xl mx-auto">
@@ -742,13 +747,15 @@
 </section>
 
 <!-- VIDEO MODAL -->
-<div id="videoModal" class="fixed inset-0 bg-black bg-opacity-80 items-center justify-center z-50 hidden">
-  <div class="relative w-full max-w-3xl px-4">
-    <video id="videoPlayer" class="w-full rounded-lg" controls preload="auto" playsinline webkit-playsinline>
-      <source id="videoSourceMp4" src="" type="video/mp4">
+<div id="videoModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999] hidden">
+  <div class="relative w-full max-w-5xl px-4">
+    <video id="videoPlayer" class="w-full rounded-2xl shadow-2xl" controls autoplay playsinline>
+      <source id="videoSource" src="" type="video/mp4">
       Your browser does not support the video tag.
     </video>
-    <button id="closeVideoBtn" class="absolute top-2 right-4 sm:right-2 bg-white text-black px-3 py-1 rounded-full font-bold">X</button>
+    <button id="closeVideoBtn" class="absolute -top-6 right-4 bg-red-600 text-white w-12 h-12 rounded-full text-3xl font-bold flex items-center justify-center shadow-lg hover:bg-red-700">
+      ×
+    </button>
   </div>
 </div>
 
@@ -762,10 +769,10 @@
   <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-<!-- SCRIPT -->
+<!-- FULL SCRIPT -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // Promo video controls
+  // === PROMO VIDEO CONTROLS ===
   const promoVideo = document.getElementById("promoVideo");
   if (promoVideo) {
     const playPauseOverlay = document.getElementById("playPauseOverlay");
@@ -797,7 +804,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function togglePlayPause() {
       if (promoVideo.paused || promoVideo.ended) {
-        promoVideo.play();
+        promoVideo.play().catch(() => {});
         if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
         if (playIcon) playIcon.classList.add("hidden");
         if (pauseIcon) pauseIcon.classList.remove("hidden");
@@ -824,9 +831,51 @@ document.addEventListener("DOMContentLoaded", () => {
         promoVideo.volume = parseFloat(e.target.value);
       });
     }
+
+    // Start paused with overlay visible
+    if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
   }
 
-  // Dropdown toggle
+  // === FEATURED / MAIN STAGE VIDEO MODAL ===
+  const videoModal = document.getElementById("videoModal");
+  const videoPlayer = document.getElementById("videoPlayer");
+  const videoSource = document.getElementById("videoSource");
+  const closeVideoBtn = document.getElementById("closeVideoBtn");
+
+  document.querySelectorAll('.featured-video').forEach(card => {
+    card.addEventListener('click', () => {
+      const videoFile = card.getAttribute('data-video');
+      if (videoFile && videoSource && videoPlayer && videoModal) {
+        videoSource.src = videoFile;
+        videoPlayer.load();
+        videoModal.classList.remove('hidden');
+        videoModal.classList.add('active');
+        videoPlayer.play().catch(err => console.log("Play prevented:", err));
+      }
+    });
+  });
+
+  if (closeVideoBtn) {
+    closeVideoBtn.addEventListener('click', () => {
+      videoModal.classList.add('hidden');
+      videoModal.classList.remove('active');
+      if (videoPlayer) videoPlayer.pause();
+      if (videoSource) videoSource.src = '';
+    });
+  }
+
+  if (videoModal) {
+    videoModal.addEventListener('click', (e) => {
+      if (e.target === videoModal) {
+        videoModal.classList.add('hidden');
+        videoModal.classList.remove('active');
+        if (videoPlayer) videoPlayer.pause();
+        if (videoSource) videoSource.src = '';
+      }
+    });
+  }
+
+  // === DROPDOWN TOGGLE ===
   const badge = document.getElementById('featuresBadge');
   const menu = document.getElementById('dropdownMenu');
   if (badge && menu) {
