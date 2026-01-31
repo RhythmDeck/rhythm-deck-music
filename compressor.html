@@ -4,8 +4,12 @@
 <meta charset="UTF-8" />
 <title>Rhythm Deck – Video Compressor</title>
 
+<!-- FFmpeg WASM -->
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
 <script src="https://unpkg.com/@ffmpeg/util@0.12.6/dist/ffmpeg-util.js"></script>
+
+<!-- ZIP -->
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <style>
 body {
@@ -15,7 +19,7 @@ body {
 }
 
 .container {
-  max-width:900px;
+  max-width:1000px;
   margin:40px auto;
   padding:28px;
   border:2px solid #10b981;
@@ -61,40 +65,37 @@ header {
   margin-left:14px;
 }
 
-/* ===== HERO GRID ===== */
 .hero-grid {
   display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:24px;
-  margin-bottom:28px;
+  grid-template-columns: 1.2fr 1fr;
+  gap:26px;
+  margin-bottom:30px;
 }
 
-/* LEFT */
 .instructions {
   border:2px solid rgba(16,185,129,0.55);
-  border-radius:14px;
-  padding:16px;
-  font-size:13px;
+  border-radius:16px;
+  padding:20px;
+  font-size:15px;
+  line-height:1.6;
   box-shadow:
     inset 0 0 0 1px rgba(16,185,129,0.25),
     0 14px 30px rgba(0,0,0,0.7);
 }
 
-/* RIGHT */
 .image-box {
   border:2px dashed rgba(16,185,129,0.35);
-  border-radius:14px;
+  border-radius:16px;
+  min-height:220px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:13px;
+  font-size:14px;
   color:#6b7280;
   box-shadow:0 12px 28px rgba(0,0,0,0.6);
 }
 
-.section {
-  margin-top:22px;
-}
+.section { margin-top:22px; }
 
 label {
   display:block;
@@ -111,10 +112,10 @@ input, select {
 }
 
 button {
-  padding:10px 16px;
+  padding:12px 18px;
   background:#10b981;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
   font-weight:bold;
   cursor:pointer;
 }
@@ -122,10 +123,6 @@ button {
 button.secondary {
   background:#1f2933;
   color:#e5e7eb;
-}
-
-.slider {
-  width:100%;
 }
 
 .badge {
@@ -138,8 +135,6 @@ button.secondary {
   margin-left:8px;
 }
 
-.hidden { display:none; }
-
 .progress-bar {
   height:10px;
   background:#1f2933;
@@ -150,19 +145,17 @@ button.secondary {
 .progress-inner {
   height:100%;
   background:#10b981;
+  width:0%;
 }
 
 #status {
   margin-top:14px;
-  font-size:13px;
+  font-size:14px;
   color:#9ca3af;
 }
 
-/* Mobile fallback */
 @media (max-width: 760px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
-  }
+  .hero-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -172,32 +165,30 @@ button.secondary {
 
 <header>
   <div class="logo">
-    <img src="logo-1-sm.jpg" alt="Rhythm Deck">
+    <img src="logo-1-sm.jpg">
     <div class="logo-text">
       <strong>Rhythm Deck</strong><br>
-      <span>Tools for Modern Musicians</span>
+      <span>Unleash Your Beat</span>
     </div>
   </div>
   <div class="nav">
-    <a href="index.html" target=_blank">Home</a>
-    <a href="contact.html" "target=_blank>Contact</a>
+    <a href="index.html" target="_blank">Home</a>
+    <a href="contact.html" target="_blank">Contact</a>
   </div>
 </header>
 
-<!-- LEFT = Instructions | RIGHT = Image -->
 <div class="hero-grid">
   <div class="instructions">
-    <strong>How it works</strong><br><br>
-    1. Upload your video<br>
-    2. Choose target file size<br>
-    3. Select compression quality<br>
-    4. Optional HEVC for smaller files<br>
-    5. Compress & download<br><br>
-    🔒 Runs 100% locally in your browser
+    <strong>How this works</strong><br><br>
+    • Upload a full album video or single<br>
+    • Albums are auto-split into 10-minute tracks<br>
+    • Each part is compressed individually<br>
+    • Choose ZIP (separate tracks) or single merged MP4<br>
+    • HEVC gives smaller files (slower, higher CPU)<br><br>
+    🔒 Everything runs locally in your browser
   </div>
-
   <div class="image-box">
-    Image / Promo Placeholder
+    Album / Artist Visual
   </div>
 </div>
 
@@ -213,35 +204,41 @@ button.secondary {
 </div>
 
 <div class="section">
-<label>Target Size (MB): <span id="mbLabel">800</span></label>
-<input type="range" min="100" max="8000" value="800" id="mbSlider" class="slider">
+<label>Output Mode</label>
+<select id="outputMode">
+  <option value="zip">ZIP (separate tracks)</option>
+  <option value="merge">Single merged MP4</option>
+</select>
 </div>
 
 <div class="section">
 <label>Compression Quality</label>
-<select id="crfSelect">
+<select id="crf">
   <option value="18">Higher Quality</option>
-  <option value="23" selected>Balanced (Recommended)</option>
+  <option value="23" selected>Balanced</option>
   <option value="28">Smaller File</option>
 </select>
 </div>
 
 <div class="section">
 <label>
-<input type="checkbox" id="hevcToggle">
+<input type="checkbox" id="hevc">
  Use HEVC (H.265)
- <span id="albumBadge" class="badge hidden">Recommended for Albums</span>
+ <span class="badge">Recommended for Albums</span>
 </label>
+<small style="color:#9ca3af">
+HEVC creates smaller files at similar quality, but takes longer and uses more CPU.
+</small>
 </div>
 
 <div class="section">
 <label>Estimated Size</label>
-<div class="progress-bar"><div class="progress-inner" style="width:100%"></div></div>
-<div style="margin-top:6px" class="progress-bar"><div class="progress-inner" style="width:55%"></div></div>
+<div class="progress-bar"><div id="bar" class="progress-inner"></div></div>
+<div id="estimate" style="margin-top:8px;font-size:13px"></div>
 </div>
 
 <div class="section">
-<button onclick="compressVideo()">Compress & Download</button>
+<button onclick="startCompression()">Compress & Download</button>
 </div>
 
 <div id="status"></div>
@@ -249,82 +246,110 @@ button.secondary {
 </div>
 
 <script>
-const FREE_KEY = 'rd_compressor_free_used';
-const ACCESS_KEY = 'rd_compressor_paid';
-
-async function verifyStripe() {
-  const id = new URLSearchParams(window.location.search).get('session_id');
-  if (!id) return;
-  const r = await fetch(`/verify-stripe?session_id=${id}`);
-  const d = await r.json();
-  if (d.ok && d.access === 'compressor') {
-    localStorage.setItem(ACCESS_KEY, 'true');
-  }
-}
-
-function hasAccess() {
-  return localStorage.getItem(ACCESS_KEY) === 'true';
-}
-
-function canUse() {
-  return hasAccess() || !localStorage.getItem(FREE_KEY);
-}
-
 const { FFmpeg } = FFmpegWASM;
 const { fetchFile } = FFmpegUtil;
 const ffmpeg = new FFmpeg();
 let loaded = false;
 
+const FREE_KEY = 'rd_compressor_free';
+const ACCESS_KEY = 'rd_compressor_paid';
+
 async function loadFFmpeg() {
   if (loaded) return;
   await ffmpeg.load({
-    coreURL:"https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
-    wasmURL:"https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm"
+    coreURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
+    wasmURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm"
   });
   loaded = true;
 }
 
-mbSlider.oninput = () => mbLabel.textContent = mbSlider.value;
-hevcToggle.onchange = () => albumBadge.classList.toggle('hidden', !hevcToggle.checked);
-
-function setPreset(p) {
-  if (p === 'album') {
-    mbSlider.value = 2500;
-    hevcToggle.checked = true;
-  } else {
-    mbSlider.value = 300;
-    hevcToggle.checked = false;
-  }
-  mbLabel.textContent = mbSlider.value;
-  albumBadge.classList.toggle('hidden', !hevcToggle.checked);
+async function verifyStripe() {
+  const id = new URLSearchParams(location.search).get('session_id');
+  if (!id) return;
+  const r = await fetch(`/verify-compressor?session_id=${id}`);
+  const d = await r.json();
+  if (d.ok) localStorage.setItem(ACCESS_KEY,'true');
 }
 
-async function compressVideo() {
-  if (!canUse()) return alert("Free use already used. Purchase required.");
+function canUse() {
+  return localStorage.getItem(ACCESS_KEY)==='true'
+      || !localStorage.getItem(FREE_KEY);
+}
 
+function setPreset(p) {
+  if (p==='album') {
+    outputMode.value='zip';
+    hevc.checked=true;
+  } else {
+    outputMode.value='merge';
+    hevc.checked=false;
+  }
+}
+
+videoInput.onchange = () => {
+  const sizeMB = videoInput.files[0].size / 1024 / 1024;
+  const est = hevc.checked ? sizeMB * 0.45 : sizeMB * 0.65;
+  bar.style.width = Math.min(100, (est/sizeMB)*100) + '%';
+  estimate.textContent =
+    `Original: ${sizeMB.toFixed(1)} MB → Estimated: ${est.toFixed(1)} MB`;
+};
+
+async function startCompression() {
+  if (!canUse()) return alert('Free use already used.');
   const file = videoInput.files[0];
-  if (!file) return alert("Upload a video");
+  if (!file) return alert('Upload a video');
 
-  status.textContent = "Loading engine…";
   await loadFFmpeg();
+  status.textContent='Processing…';
 
-  await ffmpeg.writeFile("input.mp4", await fetchFile(file));
+  await ffmpeg.writeFile('input.mp4', await fetchFile(file));
 
-  const codec = hevcToggle.checked ? "libx265" : "libx264";
-  status.textContent = "Compressing…";
+  const parts = [];
+  const duration = 600; // 10 minutes
+  let t = 0;
 
-  await ffmpeg.exec(["-i","input.mp4","-vcodec",codec,"-crf",crfSelect.value,"output.mp4"]);
+  while (true) {
+    const out = `part_${t}.mp4`;
+    await ffmpeg.exec([
+      '-i','input.mp4','-ss',`${t}`,
+      '-t',`${duration}`,
+      '-c:v',hevc.checked?'libx265':'libx264',
+      '-crf',crf.value,
+      out
+    ]);
+    try {
+      await ffmpeg.readFile(out);
+      parts.push(out);
+      t += duration;
+    } catch {
+      break;
+    }
+  }
 
-  const data = await ffmpeg.readFile("output.mp4");
-  const url = URL.createObjectURL(new Blob([data.buffer], {type:"video/mp4"}));
+  if (outputMode.value==='zip') {
+    const zip = new JSZip();
+    for (const p of parts) {
+      const data = await ffmpeg.readFile(p);
+      zip.file(p, data.buffer);
+    }
+    const blob = await zip.generateAsync({type:'blob'});
+    download(blob,'rhythm-deck-album.zip');
+  } else {
+    await ffmpeg.exec(['-i','input.mp4','-c','copy','final.mp4']);
+    const data = await ffmpeg.readFile('final.mp4');
+    download(new Blob([data.buffer],{type:'video/mp4'}),'rhythm-deck.mp4');
+  }
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "rhythm-deck-compressed.mp4";
+  status.textContent='Done ✔';
+  if (!localStorage.getItem(ACCESS_KEY))
+    localStorage.setItem(FREE_KEY,'true');
+}
+
+function download(blob,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=name;
   a.click();
-
-  status.textContent = "Done ✔";
-  if (!hasAccess()) localStorage.setItem(FREE_KEY,'true');
 }
 
 verifyStripe();
