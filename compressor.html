@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <title>Rhythm Deck – Video Compressor</title>
 
-<!-- FFmpeg WASM -->
+<!-- FFmpeg WASM (stable) -->
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
 <script src="https://unpkg.com/@ffmpeg/util@0.12.6/dist/ffmpeg-util.js"></script>
 
@@ -24,8 +24,8 @@ body {
   padding:30px;
   border:2px solid #10b981;
   border-radius:20px;
-  box-shadow:0 20px 50px rgba(0,0,0,.8);
   background:linear-gradient(180deg,#0b0b0b,#060606);
+  box-shadow:0 20px 50px rgba(0,0,0,.8);
 }
 
 header {
@@ -35,15 +35,11 @@ header {
   margin-bottom:28px;
 }
 
-.logo {
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-.logo img {
-  width:48px;
-  height:48px;
+header a {
+  color:#10b981;
+  font-weight:bold;
+  text-decoration:none;
+  margin-left:18px;
 }
 
 .hero-grid {
@@ -59,18 +55,11 @@ header {
   padding:26px;
   font-size:17px;
   line-height:1.7;
-  box-shadow:inset 0 0 0 1px rgba(16,185,129,.3);
 }
 
-.image-box {
-  border:2px dashed rgba(16,185,129,.4);
-  border-radius:18px;
-  min-height:320px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#6b7280;
-  font-size:15px;
+.image-box img {
+  width:100%;
+  border-radius:16px;
 }
 
 .section { margin-top:22px; }
@@ -86,7 +75,6 @@ input, select {
   padding:11px;
   border-radius:10px;
   border:none;
-  margin-bottom:10px;
 }
 
 button {
@@ -98,23 +86,18 @@ button {
   cursor:pointer;
 }
 
-button.secondary {
-  background:#1f2933;
-  color:#e5e7eb;
-}
-
 .badge {
   background:#10b981;
   color:#000;
   font-size:12px;
   padding:4px 10px;
   border-radius:999px;
-  margin-left:6px;
 }
 
 #status {
   margin-top:16px;
   color:#9ca3af;
+  white-space:pre-line;
 }
 </style>
 </head>
@@ -123,25 +106,28 @@ button.secondary {
 <div class="container">
 
 <header>
-  <div class="logo">
-    <img src="logo-1-sm.jpg">
-    <strong>Rhythm Deck</strong>
-  </div>
+  <strong>Rhythm Deck Compressor</strong>
+  <nav>
+    <a href="index.html" target="_blank">Home</a>
+    <a href="contact.html" target="_blank">Contact</a>
+  </nav>
 </header>
 
 <div class="hero-grid">
   <div class="instructions">
     <strong>How it works</strong><br><br>
     • Upload a full album video or single track<br>
-    • Albums are auto-split into 10-minute chunks<br>
+    • Albums are split into 10-minute chunks<br>
     • Each chunk is compressed individually<br>
-    • Download as ZIP or merged MP4<br>
-    • HEVC = smaller files, slower encoding<br><br>
+    • Download ZIP (album) or merged MP4<br><br>
+    <strong>HEVC (H.265)</strong><br>
+    Smaller files at similar quality.<br>
+    Slower encoding, higher CPU use.<br><br>
     🔒 All processing runs locally in your browser
   </div>
 
   <div class="image-box">
-    Album / Artist Visual
+    <img src="compressor.png" alt="Rhythm Deck Compressor">
   </div>
 </div>
 
@@ -151,29 +137,15 @@ button.secondary {
 </div>
 
 <div class="section">
-<label>Preset</label>
-<button onclick="setPreset('album')">Album</button>
-<button onclick="setPreset('single')" class="secondary">Single</button>
-</div>
-
-<div class="section">
-<label>Output Mode</label>
-<select id="outputMode">
-  <option value="zip">ZIP (separate tracks)</option>
-  <option value="merge">Single merged MP4</option>
-</select>
-</div>
-
-<div class="section">
 <label>Compression Quality (CRF)</label>
-<input type="range" id="crf" min="18" max="30" value="23" step="1">
-<div id="crfLabel">Recommended: 23 (Balanced)</div>
+<input type="range" id="crf" min="18" max="30" value="23">
+<div id="crfText"></div>
 </div>
 
 <div class="section">
 <label>Dimensions</label>
 <select id="dimensions">
-  <option value="auto">Automatic (keep original)</option>
+  <option value="auto">Automatic</option>
   <option value="1080">1080p</option>
   <option value="720">720p</option>
 </select>
@@ -181,8 +153,9 @@ button.secondary {
 
 <div class="section">
 <label>
-<input type="checkbox" id="hevc"> Use HEVC (H.265)
-<span class="badge">Smaller Files</span>
+<input type="checkbox" id="hevc">
+ Use HEVC (H.265)
+ <span class="badge">Smaller files</span>
 </label>
 </div>
 
@@ -192,7 +165,7 @@ button.secondary {
 </div>
 
 <div class="section">
-<button onclick="startCompression()">Compress & Download</button>
+<button id="compressBtn">Compress & Download</button>
 </div>
 
 <div id="status"></div>
@@ -202,33 +175,23 @@ button.secondary {
 <script>
 const { FFmpeg } = FFmpegWASM;
 const { fetchFile } = FFmpegUtil;
+
 const ffmpeg = new FFmpeg();
-let loaded = false;
-let originalSizeMB = 0;
+let ffmpegLoaded = false;
+let originalMB = 0;
 
 async function loadFFmpeg() {
-  if (loaded) return;
+  if (ffmpegLoaded) return;
+  status.textContent = "Loading encoder…";
   await ffmpeg.load({
     coreURL:"https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
     wasmURL:"https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.wasm"
   });
-  loaded = true;
-}
-
-function setPreset(type) {
-  if (type === 'album') {
-    outputMode.value = 'zip';
-    hevc.checked = true;
-  } else {
-    outputMode.value = 'merge';
-    hevc.checked = false;
-  }
-  updateEstimate();
+  ffmpegLoaded = true;
 }
 
 videoInput.onchange = () => {
-  if (!videoInput.files[0]) return;
-  originalSizeMB = videoInput.files[0].size / 1024 / 1024;
+  originalMB = videoInput.files[0].size / 1024 / 1024;
   updateEstimate();
 };
 
@@ -237,83 +200,81 @@ hevc.onchange = updateEstimate;
 dimensions.onchange = updateEstimate;
 
 function updateEstimate() {
-  if (!originalSizeMB) return;
+  if (!originalMB) return;
 
   const crfVal = parseInt(crf.value);
   let ratio = hevc.checked ? 0.45 : 0.65;
-
-  ratio += (crfVal - 23) * 0.02;
+  ratio += (crfVal - 23) * 0.025;
 
   if (dimensions.value === "720") ratio *= 0.6;
   if (dimensions.value === "1080") ratio *= 0.8;
 
   ratio = Math.max(0.2, Math.min(ratio, 0.9));
+  const est = originalMB * ratio;
 
-  const est = originalSizeMB * ratio;
+  crfText.textContent = `CRF ${crfVal} → approx ${est.toFixed(1)} MB`;
   estimate.textContent =
-    `Original: ${originalSizeMB.toFixed(1)} MB → Estimated: ${est.toFixed(1)} MB`;
+    `Original: ${originalMB.toFixed(1)} MB → Estimated: ${est.toFixed(1)} MB`;
 }
 
-async function startCompression() {
-  const file = videoInput.files[0];
-  if (!file) return alert("Upload a video first");
+compressBtn.onclick = async () => {
+  if (!videoInput.files[0]) {
+    alert("Upload a video first");
+    return;
+  }
 
   await loadFFmpeg();
-  status.textContent = "Processing… this may take a while";
+  status.textContent = "Preparing file…";
 
+  const file = videoInput.files[0];
   await ffmpeg.writeFile("input.mp4", await fetchFile(file));
 
-  const parts = [];
   const CHUNK = 600;
-  let start = 0;
+  const parts = [];
+  let t = 0;
 
-  while (true) {
-    const out = `part_${start}.mp4`;
-    const scale =
-      dimensions.value === "720" ? "scale=-2:720" :
-      dimensions.value === "1080" ? "scale=-2:1080" : null;
+  status.textContent = "Compressing chunks…\nThis can take several minutes.";
 
-    const args = [
-      "-ss", `${start}`,
-      "-t", `${CHUNK}`,
-      "-i", "input.mp4",
-      ...(scale ? ["-vf", scale] : []),
-      "-c:v", hevc.checked ? "libx265" : "libx264",
-      "-crf", crf.value,
-      out
-    ];
+  while (t < 6 * 3600) { // hard safety cap
+    const out = `part_${t}.mp4`;
 
     try {
-      await ffmpeg.exec(args);
+      await ffmpeg.exec([
+        "-ss", `${t}`,
+        "-t", `${CHUNK}`,
+        "-i", "input.mp4",
+        ...(dimensions.value !== "auto"
+          ? ["-vf", `scale=-2:${dimensions.value}`]
+          : []),
+        "-c:v", hevc.checked ? "libx265" : "libx264",
+        "-crf", crf.value,
+        out
+      ]);
+
       await ffmpeg.readFile(out);
       parts.push(out);
-      start += CHUNK;
+      t += CHUNK;
     } catch {
       break;
     }
   }
 
-  if (outputMode.value === "zip") {
-    const zip = new JSZip();
-    for (const p of parts) {
-      const data = await ffmpeg.readFile(p);
-      zip.file(p, data.buffer);
-    }
-    const blob = await zip.generateAsync({ type:"blob" });
-    download(blob, "rhythm-deck-album.zip");
-  } else {
-    await ffmpeg.exec(["-i","input.mp4","-c","copy","final.mp4"]);
-    const data = await ffmpeg.readFile("final.mp4");
-    download(new Blob([data.buffer],{type:"video/mp4"}),"rhythm-deck.mp4");
+  const zip = new JSZip();
+  for (const p of parts) {
+    const data = await ffmpeg.readFile(p);
+    zip.file(p, data.buffer);
   }
 
-  status.textContent = "Done ✔";
-}
+  const blob = await zip.generateAsync({ type:"blob" });
+  download(blob, "rhythm-deck-compressed.zip");
 
-function download(blob,name) {
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download=name;
+  status.textContent = "Done ✔";
+};
+
+function download(blob, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
   a.click();
 }
 </script>
