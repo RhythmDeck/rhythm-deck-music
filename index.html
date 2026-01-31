@@ -4,14 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rhythm Deck</title>
- 
   <link rel="icon" href="logo-favicon.png" type="image/png">
-  <!-- SEO Meta Tags -->
   <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
   <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Rhythm Deck Team">
- 
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     a:hover { color: #0000FF; }
@@ -19,7 +16,6 @@
     #videoModal.active { display: flex; }
     .cursor-pointer { cursor: pointer; }
     .style1 { color: #FFFFFF }
-    /* LOGO INTRO ANIMATION */
     @keyframes logoIntro {
       0% { transform: translate(140px, 60px) scale(4) rotate(0deg); opacity: 0; box-shadow: 0 0 0 rgba(0,255,120,0); }
       15% { opacity: 1; }
@@ -27,7 +23,6 @@
       100% { transform: translate(0, 0) scale(1) rotate(1080deg); box-shadow: none; }
     }
     .logo-intro { animation: logoIntro 5.5s ease-out forwards; transform-origin: center; will-change: transform; }
-    /* Video controls overlay */
     .video-controls {
       position: absolute;
       bottom: 0;
@@ -86,7 +81,6 @@
       border-radius: 50%;
       cursor: pointer;
     }
-    /* Play/Pause overlay when paused */
     .play-pause-overlay {
       position: absolute;
       inset: 0;
@@ -115,9 +109,7 @@
       transform: scale(1.1);
     }
     .hidden { display: none !important; }
-    /* Responsive hero */
     @media (max-width: 640px) { .hero-height { height: 60vh; min-height: 400px; } }
-    /* Platinum comparison table */
     .plan-card {
       background: rgba(30, 27, 71, 0.6);
       border: 2px solid #6b7280;
@@ -129,11 +121,70 @@
     .plan-card.platinum { border-color: #d4af37; background: rgba(59, 37, 89, 0.7); }
     .plan-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
     .plan-badge { background: #d4af37; color: #1a0f2e; font-weight: bold; padding: 0.5rem 1rem; border-radius: 999px; }
+    /* Colorful menu buttons */
+    .menu-btn {
+      padding: 0.6rem 1.25rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      font-size: 1rem;
+    }
+    .menu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+    .home-btn { background: linear-gradient(to right, #22c55e, #16a34a); color: white; }
+    .about-btn { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; }
+    .benefits-btn { background: linear-gradient(to right, #f59e0b, #d97706); color: white; }
+    .pricing-btn { background: linear-gradient(to right, #ec4899, #db2777); color: white; }
+    .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
+    /* Features badge + dropdown */
+    .features-badge {
+      background: linear-gradient(135deg, #a855f7, #d946ef);
+      color: white;
+      font-weight: bold;
+      padding: 0.5rem 1.1rem;
+      border-radius: 9999px;
+      box-shadow: 0 4px 12px rgba(168,85,247,0.5);
+      transition: all 0.3s;
+      cursor: pointer;
+      user-select: none;
+    }
+    .features-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(168,85,247,0.7);
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 0.5rem;
+      width: 280px;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      z-index: 50;
+      display: none;
+    }
+    .dropdown-item {
+      padding: 0.85rem 1.5rem;
+      color: #1f2937;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .dropdown-item:hover {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
 <!-- HEADER -->
-<header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
+<header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 shadow-lg">
   <div class="flex items-center space-x-3">
     <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
     <div>
@@ -142,34 +193,31 @@
     </div>
   </div>
   <nav class="flex flex-col items-end gap-4 sm:gap-3">
-    <!-- Main text links (top row, right-aligned on desktop) -->
-    <div class="flex flex-wrap justify-end gap-3 sm:gap-4 text-sm sm:text-base">
-      <a href="index.html" class="hover:underline text-green-400">Home</a>
-      <a href="about.html" class="hover:underline">About</a>
-      <a href="benefits.html" class="hover:underline">Benefits</a>
-      <a href="pricing.html" class="hover:underline">Pricing</a>
-      <a href="contact.html" class="hover:underline">Contact</a>
-      <a href="login.html" class="bg-white text-black px-3 sm:px-4 py-1 rounded hover:bg-gray-300">Login</a>
-      <a href="signup.html" class="bg-green-500 text-white px-3 sm:px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
-      <!-- Instruction Manuals Button -->
+    <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
+      <a href="index.html" class="menu-btn home-btn">Home</a>
+      <a href="about.html" class="menu-btn about-btn">About</a>
+      <a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
+      <a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
+      <a href="contact.html" class="menu-btn contact-btn">Contact</a>
+      <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
+      <a href="signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
+      <!-- Features Dropdown Badge -->
+      <div class="relative ml-2">
+        <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+        <div id="dropdownMenu" class="dropdown-menu">
+          <div class="dropdown-item" onclick="document.getElementById('free-vs-pro-section').scrollIntoView({behavior: 'smooth'});">FREE vs PRO</div>
+          <div class="dropdown-item" onclick="document.getElementById('platinum-pro-section').scrollIntoView({behavior: 'smooth'});">PLATINUM PRO</div>
+          <div class="dropdown-item" onclick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});">CORE FEATURES</div>
+          <div class="dropdown-item" onclick="document.getElementById('rhythm-vision-comparison-section').scrollIntoView({behavior: 'smooth'});">RHYTHM VISION PLANS COMPARISON</div>
+          <div class="dropdown-item" onclick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});">RHYTHM WAV PLAYLIST PLATFORM</div>
+          <div class="dropdown-item" onclick="document.getElementById('video-compression-section').scrollIntoView({behavior: 'smooth'});">RHYTHM DECK VIDEO COMPRESSION TOOL</div>
+          <div class="dropdown-item" onclick="document.getElementById('instruction-manuals-section').scrollIntoView({behavior: 'smooth'});">INSTRUCTION MANUALS</div>
+          <div class="dropdown-item" onclick="document.getElementById('qa-section').scrollIntoView({behavior: 'smooth'});">Q&A</div>
+        </div>
+      </div>
       <button onclick="document.getElementById('instruction-manuals-section').scrollIntoView({behavior: 'smooth'});"
-              class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 sm:px-6 py-1 sm:py-2 rounded-lg font-bold transition shadow-lg border-2 border-emerald-500">
+              class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-5 py-2 rounded-lg font-bold transition shadow-lg border-2 border-emerald-500 text-base">
         Instruction Manuals
-      </button>
-    </div>
-    <!-- Special buttons -->
-    <div class="flex flex-wrap justify-end gap-3 sm:gap-4">
-      <button onClick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});"
-              class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
-        Exclusive Rhythm Wav Play List Platform
-      </button>
-      <button onClick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});"
-              class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
-        Rhythm Vision
-      </button>
-      <button onClick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});"
-              class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold transition shadow-lg text-sm sm:text-base">
-        Producers, Distributors, Publishers, Supervisors
       </button>
     </div>
   </nav>
@@ -197,7 +245,6 @@
     >
       Your browser does not support the video tag.
     </video>
-    <!-- Play/Pause Overlay -->
     <div id="playPauseOverlay" class="play-pause-overlay">
       <button id="playPauseBtn" class="play-pause-btn">
         <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
@@ -208,7 +255,6 @@
         </svg>
       </button>
     </div>
-    <!-- Video Controls -->
     <div class="video-controls">
       <div class="flex items-center gap-3 sm:gap-4">
         <button id="muteBtn" class="bg-white text-black px-3 sm:px-4 py-1 sm:py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm sm:text-base">
@@ -233,20 +279,12 @@
 <!-- ABOUT + MAIN STAGE FEATURE -->
 <section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 grid md:grid-cols-2 gap-6 sm:gap-8 items-start">
   <div>
-    <h3 class="text-2xl sm:text-3xl font-bold mb-4">About Rhythm Deck</h3>
+    <h3 class="text-2xl sm:text-3xl font-bold mb-4">RetroRock Music: The Guardians of the Groove</h3>
     <p class="text-sm sm:text-base text-gray-700 leading-relaxed mb-4">
-      Rhythm Deck is a brand-new, user-friendly social media hub built for musicians of all genres.
-      From songwriters and beatmakers, vocalists and bands to producers and distributors —
-      we provide a simple way to generate visuals, promote your sound, and connect with other creators.
+      Founded in 1980 in the heart of Memphis, Tennessee, RetroRock Music has spent over four decades preserving and revitalizing the electric energy of the 1950s and 60s. Operating out of a studio just a stone’s throw from the historic sounds of Beale Street, the company was born from a passion for the raw, analog warmth of early rock and roll, rockabilly, and classic soul. Since its inception, RetroRock has dedicated itself to the craft of authentic songwriting and production, utilizing vintage gear and timeless techniques to ensure that the "Great American Tune" remains a living, breathing art form rather than a relic of the past.
     </p>
     <p class="text-sm sm:text-base text-gray-700 leading-relaxed mb-4">
-      We offer an intuitive space where you can showcase your latest tracks, build a distinctive brand, and connect directly with your fans.
-      With easy-to-navigate features, you can upload music, share performances, and engage with a growing community,
-      all while establishing your presence in the music world.
-    </p>
-    <p class="text-sm sm:text-base text-gray-700">
-      Explore innovative Rhythm Deck features and tools, grow your audience, and turn your tracks into dynamic visual experiences that stand out.<br>
-      Check out our <a href="benefits.html"><u>Benefits</u></a> page to see the cool things we are doing to showcase your music and help you build your brand and presence.
+      For over forty years, RetroRock has been more than just a production house; it has been a sanctuary for artists who believe in the power of a three-minute masterpiece and a driving backbeat. From shimmering surf-rock instrumentals to the soulful harmonies of the Motown era, their catalog reflects a deep mastery of the genres that defined a generation. By bridging the gap between the heritage of Memphis’s musical golden age and modern distribution, RetroRock Music continues to produce "great tunes" that resonate with both nostalgic purists and a new generation of listeners seeking the vintage aesthetic.
     </p>
   </div>
   <div>
@@ -313,6 +351,80 @@
   </div>
 </section>
 
+<!-- FREE vs PRO -->
+<section id="free-vs-pro-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
+  <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Plans & Features</h3>
+  <div class="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
+    <div class="rounded-lg overflow-hidden h-48 sm:h-64">
+      <img src="image-13-cropped.jpg" alt="Free vs Pro Plans" class="w-full h-full object-cover">
+    </div>
+    <div class="grid gap-6">
+      <div class="bg-white rounded-lg shadow p-6 border-2 border-green-400">
+        <h4 class="text-xl sm:text-2xl font-bold mb-4 text-center">Free Plan</h4>
+        <ul class="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700">
+          <li>Upload & Share Unlimited Videos</li>
+          <li>Personalized Profile Page. Add your own banner, logo, bio and upload your video content you want to showcase on your personal public feed.</li>
+          <li>and much more</li>
+        </ul>
+        <div class="text-center mt-4">
+          <a href="pricing.html" class="bg-green-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-green-400 text-sm sm:text-base">Compare Plans</a>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6 border-2 border-yellow-400">
+        <h4 class="text-xl sm:text-2xl font-bold mb-4 text-center text-yellow-500">Pro Plan</h4>
+        <ul class="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700">
+          <li>All Free Features +</li>
+          <li>Live Streaming</li>
+          <li>Rhythm Vision included</li>
+          <li>Cross-Platform Sharing (Facebook, YouTube, X and many more)</li>
+          <li>Eligibility for Featured & Main Stage</li>
+          <li>and much more</li>
+        </ul>
+        <div class="text-center mt-4">
+          <a href="pricing.html" class="bg-yellow-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-yellow-400 text-sm sm:text-base">Compare Plans</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATINUM PRO -->
+<section id="platinum-pro-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
+  <div class="bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl shadow-2xl p-6 sm:p-10 text-white">
+    <div class="text-center mb-6 sm:mb-8">
+      <h3 class="text-3xl sm:text-4xl font-black mb-4">Platinum Pro Plan – Take Your Career to the Next Level</h3>
+      <p class="text-lg sm:text-xl">Everything in Pro + exclusive radio promotion & merch tools</p>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6 sm:gap-10 items-start">
+      <div>
+        <h4 class="text-xl sm:text-2xl font-bold mb-4">All Pro Features + Exclusive Platinum Benefits</h4>
+        <ul class="list-disc list-inside space-y-2 sm:space-y-3 text-base sm:text-lg">
+          <li>All Pro Plan features</li>
+          <li><strong class="text-yellow-300">Exclusive Access to Radio Station Database</strong> – Contact info for stations worldwide + professional email templates</li>
+          <li><strong class="text-yellow-300">Rhythm Vision Platinum Pro</strong> - Create professional videos and audio with the click of a few buttons</strong></li>
+          <li><strong class="text-yellow-300">Your Own Private Merch Store</strong> – Sell t-shirts, hoodies, hats, posters, etc. with zero upfront costs</li>
+        </ul>
+      </div>
+      <div class="text-center md:text-left">
+        <h4 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Pricing</h4>
+        <p class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">$200.00 <span class="text-lg sm:text-xl font-normal">/ year</span></p>
+        <a href="pricing.html" class="inline-block bg-white text-gray-800 px-6 sm:px-10 py-3 sm:py-4 rounded-md hover:bg-gray-200 font-bold text-lg sm:text-xl">
+          View Full Details
+        </a>
+        <div class="mt-6 sm:mt-10 flex flex-col items-center">
+          <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-2xl">
+            <img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge" class="w-full h-full object-contain">
+          </div>
+          <p class="mt-3 sm:mt-4 text-lg sm:text-2xl font-bold">Platinum Pro Artist Badge</p>
+          <p class="text-center max-w-xs text-sm sm:text-base mt-2">
+            Prestigious platinum badge displayed on your profile — the ultimate status symbol
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CORE FEATURES -->
 <section id="core-features-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Our Core Features</h3>
@@ -357,7 +469,7 @@
 </section>
 
 <!-- RHYTHM VISION PLANS COMPARISON -->
-<section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-gray-900 to-black text-white">
+<section id="rhythm-vision-comparison-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-gray-900 to-black text-white">
   <h3 class="text-3xl sm:text-4xl font-black mb-10 text-center bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
     Choose Your Rhythm Vision Experience
   </h3>
@@ -443,81 +555,7 @@
   </div>
 </section>
 
-<!-- FREE vs PRO -->
-<section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
-  <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Plans & Features</h3>
-  <div class="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
-    <div class="rounded-lg overflow-hidden h-48 sm:h-64">
-      <img src="image-13-cropped.jpg" alt="Free vs Pro Plans" class="w-full h-full object-cover">
-    </div>
-    <div class="grid gap-6">
-      <div class="bg-white rounded-lg shadow p-6 border-2 border-green-400">
-        <h4 class="text-xl sm:text-2xl font-bold mb-4 text-center">Free Plan</h4>
-        <ul class="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700">
-          <li>Upload & Share Unlimited Videos</li>
-          <li>Personalized Profile Page. Add your own banner, logo, bio and upload your video content you want to showcase on your personal public feed.</li>
-          <li>and much more</li>
-        </ul>
-        <div class="text-center mt-4">
-          <a href="pricing.html" class="bg-green-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-green-400 text-sm sm:text-base">Compare Plans</a>
-        </div>
-      </div>
-      <div class="bg-white rounded-lg shadow p-6 border-2 border-yellow-400">
-        <h4 class="text-xl sm:text-2xl font-bold mb-4 text-center text-yellow-500">Pro Plan</h4>
-        <ul class="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700">
-          <li>All Free Features +</li>
-          <li>Live Streaming</li>
-          <li>Rhythm Vision included</li>
-          <li>Cross-Platform Sharing (Facebook, YouTube, X and more coming)</li>
-          <li>Eligibility for Featured & Main Stage</li>
-          <li>and much more</li>
-        </ul>
-        <div class="text-center mt-4">
-          <a href="pricing.html" class="bg-yellow-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-yellow-400 text-sm sm:text-base">Compare Plans</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PLATINUM PRO -->
-<section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
-  <div class="bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl shadow-2xl p-6 sm:p-10 text-white">
-    <div class="text-center mb-6 sm:mb-8">
-      <h3 class="text-3xl sm:text-4xl font-black mb-4">Platinum Pro Plan – Take Your Career to the Next Level</h3>
-      <p class="text-lg sm:text-xl">Everything in Pro + exclusive radio promotion & merch tools</p>
-    </div>
-    <div class="grid md:grid-cols-2 gap-6 sm:gap-10 items-start">
-      <div>
-        <h4 class="text-xl sm:text-2xl font-bold mb-4">All Pro Features + Exclusive Platinum Benefits</h4>
-        <ul class="list-disc list-inside space-y-2 sm:space-y-3 text-base sm:text-lg">
-          <li>All Pro Plan features</li>
-          <li><strong class="text-yellow-300">Exclusive Access to Radio Station Database</strong> – Contact info for stations worldwide + professional email templates</li>
-          <li><strong class="text-yellow-300">Rhythm Vision Platinum Pro</strong> - Create professional videos and audio with the click of a few buttons</strong></li>
-          <li><strong class="text-yellow-300">Your Own Private Merch Store</strong> – Sell t-shirts, hoodies, hats, posters, etc. with zero upfront costs</li>
-        </ul>
-      </div>
-      <div class="text-center md:text-left">
-        <h4 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Pricing</h4>
-        <p class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">$200.00 <span class="text-lg sm:text-xl font-normal">/ year</span></p>
-        <a href="pricing.html" class="inline-block bg-white text-gray-800 px-6 sm:px-10 py-3 sm:py-4 rounded-md hover:bg-gray-200 font-bold text-lg sm:text-xl">
-          View Full Details
-        </a>
-        <div class="mt-6 sm:mt-10 flex flex-col items-center">
-          <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-2xl">
-            <img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge" class="w-full h-full object-contain">
-          </div>
-          <p class="mt-3 sm:mt-4 text-lg sm:text-2xl font-bold">Platinum Pro Artist Badge</p>
-          <p class="text-center max-w-xs text-sm sm:text-base mt-2">
-            Prestigious platinum badge displayed on your profile — the ultimate status symbol
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- RHYTHM WAV SECTION -->
+<!-- RHYTHM WAV PLAYLIST PLATFORM -->
 <section id="rhythm-wav-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-r from-purple-900 to-pink-900 rounded-2xl shadow-2xl text-white">
   <div class="text-center mb-8 sm:mb-10">
     <h3 class="text-3xl sm:text-4xl font-black mb-4">Discover Rhythm Wav</h3>
@@ -536,7 +574,73 @@
   </div>
 </section>
 
-<br><br>
+<!-- RHYTHM DECK VIDEO COMPRESSION TOOL -->
+<section id="video-compression-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-indigo-900 to-purple-900 text-white rounded-2xl shadow-2xl">
+  <div class="text-center mb-10">
+    <h3 class="text-3xl sm:text-4xl font-black mb-6">Rhythm Deck Video Compression Tool</h3>
+    <p class="text-lg sm:text-xl max-w-4xl mx-auto leading-relaxed">
+      Compress your videos quickly and smartly before uploading — keep quality high while slashing file sizes dramatically.
+      Our built-in tool optimizes MP4 files for faster uploads, lower bandwidth usage, and better playback on all devices.
+    </p>
+  </div>
+  <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+    <div class="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-purple-400/30">
+      <h4 class="text-2xl font-bold mb-6 text-purple-300">Key Features</h4>
+      <ul class="space-y-4 text-gray-200 text-lg">
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">★</span>
+          <span>Up to 70–80% smaller files without noticeable quality loss</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">★</span>
+          <span>Preserves 1080p/4K sharpness, color accuracy & audio quality</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">★</span>
+          <span>One-click compression — drag, drop, compress, download</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">★</span>
+          <span>Batch processing — compress multiple videos at once</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">★</span>
+          <span>Preview before/after side-by-side</span>
+        </li>
+      </ul>
+    </div>
+    <div class="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-purple-400/30">
+      <h4 class="text-2xl font-bold mb-6 text-purple-300">Why Compress Before Uploading?</h4>
+      <ul class="space-y-4 text-gray-200 text-lg">
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">→</span>
+          <span>Upload 3–5× faster — no waiting forever on slow connections</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">→</span>
+          <span>Lower storage usage on our servers → more space for your content</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">→</span>
+          <span>Faster playback for fans — especially on mobile data</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">→</span>
+          <span>Avoid platform compression artifacts — control the quality yourself</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 text-2xl">→</span>
+          <span>Pro move: pros compress before upload to look polished</span>
+        </li>
+      </ul>
+      <div class="mt-10 text-center">
+        <a href="compressor-signup.html" class="inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl px-10 py-5 rounded-full transition transform hover:scale-105 shadow-2xl">
+          Get the Compression Tool – Sign Up Now
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- PRODUCERS & DISTRIBUTORS SECTION -->
 <section id="producers-distributors-section" class="max-w-6xl mx-auto py-20 sm:py-28 px-4 sm:px-6 bg-gradient-to-r from-emerald-900/80 via-teal-900/80 to-indigo-900/80 rounded-2xl shadow-2xl">
@@ -556,9 +660,7 @@
   </div>
 </section>
 
-<br><br>
-
-<!-- ACCESS INSTRUCTION MANUALS SECTION -->
+<!-- INSTRUCTION MANUALS -->
 <section id="instruction-manuals-section" class="max-w-6xl mx-auto py-20 sm:py-24 px-4 sm:px-6 bg-gradient-to-br from-teal-900 to-emerald-900 text-white rounded-2xl shadow-xl">
   <div class="text-center mb-10 sm:mb-12">
     <h3 class="text-3xl sm:text-4xl font-bold mb-6">Access Your Instruction Manuals</h3>
@@ -577,7 +679,7 @@
       All manuals and videos are available anytime in your account dashboard or on our dedicated manuals page.
     </p>
     <div class="mt-10">
-      <a href="instruction-manuals.html" 
+      <a href="instruction-manuals.html"
          class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl px-10 sm:px-14 py-4 sm:py-5 rounded-full transition transform hover:scale-105 shadow-xl">
         View All Instruction Manuals & Videos
       </a>
@@ -587,9 +689,9 @@
     </p>
   </div>
 </section>
-<br><br>
-<!-- Q&A SECTION -->
-<section class="bg-neutral-950 py-16 px-6">
+
+<!-- Q&A -->
+<section id="qa-section" class="bg-neutral-950 py-16 px-6">
   <div class="max-w-6xl mx-auto">
     <h3 class="text-3xl font-bold mb-8 text-center style1">Q&A</h3>
     <div class="grid md:grid-cols-2 gap-6">
@@ -664,50 +766,45 @@
   <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-<!-- SCRIPT – YOUTUBE-STYLE PROMO + MODAL FOR FEATURED/MAIN STAGE VIDEOS -->
+<!-- SCRIPT -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // === PROMO VIDEO – YOUTUBE STYLE ===
+  // Promo video controls
   const promoVideo = document.getElementById("promoVideo");
-  const playPauseOverlay = document.getElementById("playPauseOverlay");
-  const playPauseBtn = document.getElementById("playPauseBtn");
-  const playIcon = document.getElementById("playIcon");
-  const pauseIcon = document.getElementById("pauseIcon");
-  const muteBtn = document.getElementById("muteBtn");
-  const volumeSlider = document.getElementById("volumeSlider");
-  const progressBar = document.getElementById("progressBar");
-  const progressFill = document.getElementById("progressFill");
-  const currentTimeEl = document.getElementById("currentTime");
-  const durationEl = document.getElementById("duration");
   if (promoVideo) {
+    const playPauseOverlay = document.getElementById("playPauseOverlay");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const playIcon = document.getElementById("playIcon");
+    const pauseIcon = document.getElementById("pauseIcon");
+    const muteBtn = document.getElementById("muteBtn");
+    const volumeSlider = document.getElementById("volumeSlider");
+    const progressFill = document.getElementById("progressFill");
+    const currentTimeEl = document.getElementById("currentTime");
+    const durationEl = document.getElementById("duration");
+
     function formatTime(seconds) {
       const mins = Math.floor(seconds / 60);
       const secs = Math.floor(seconds % 60);
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
+
     promoVideo.addEventListener("loadedmetadata", () => {
       if (durationEl) durationEl.textContent = formatTime(promoVideo.duration || 0);
     });
+
     promoVideo.addEventListener("timeupdate", () => {
       if (!promoVideo.duration) return;
       const percent = (promoVideo.currentTime / promoVideo.duration) * 100;
       if (progressFill) progressFill.style.width = `${percent}%`;
       if (currentTimeEl) currentTimeEl.textContent = formatTime(promoVideo.currentTime);
     });
-    if (progressBar) {
-      progressBar.addEventListener("click", (e) => {
-        const rect = progressBar.getBoundingClientRect();
-        const pos = (e.clientX - rect.left) / rect.width;
-        promoVideo.currentTime = pos * promoVideo.duration;
-      });
-    }
+
     function togglePlayPause() {
       if (promoVideo.paused || promoVideo.ended) {
-        promoVideo.play().then(() => {
-          if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
-          if (playIcon) playIcon.classList.add("hidden");
-          if (pauseIcon) pauseIcon.classList.remove("hidden");
-        }).catch(err => console.warn("Play failed:", err));
+        promoVideo.play();
+        if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
+        if (playIcon) playIcon.classList.add("hidden");
+        if (pauseIcon) pauseIcon.classList.remove("hidden");
       } else {
         promoVideo.pause();
         if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
@@ -715,66 +812,40 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pauseIcon) pauseIcon.classList.add("hidden");
       }
     }
+
     if (playPauseBtn) playPauseBtn.addEventListener("click", togglePlayPause);
-    promoVideo.addEventListener("play", () => {
-      if (playPauseOverlay) playPauseOverlay.classList.add("hidden");
-      if (playIcon) playIcon.classList.add("hidden");
-      if (pauseIcon) pauseIcon.classList.remove("hidden");
-    });
-    promoVideo.addEventListener("pause", () => {
-      if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
-      if (playIcon) playIcon.classList.remove("hidden");
-      if (pauseIcon) pauseIcon.classList.add("hidden");
-    });
+    if (playPauseOverlay) playPauseOverlay.addEventListener("click", togglePlayPause);
+
     if (muteBtn) {
       muteBtn.addEventListener("click", () => {
         promoVideo.muted = !promoVideo.muted;
         muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
       });
     }
+
     if (volumeSlider) {
       volumeSlider.addEventListener("input", (e) => {
-        const vol = parseFloat(e.target.value);
-        promoVideo.volume = vol;
-        if (vol > 0) promoVideo.muted = false;
-        if (muteBtn) muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
+        promoVideo.volume = parseFloat(e.target.value);
       });
     }
-    if (playPauseOverlay) playPauseOverlay.classList.remove("hidden");
   }
-  // === MODAL VIDEO PLAYER FOR MAIN STAGE & FEATURED ARTISTS ===
-  const videoModal = document.getElementById("videoModal");
-  const videoPlayer = document.getElementById("videoPlayer");
-  const videoSource = document.getElementById("videoSourceMp4");
-  const closeVideoBtn = document.getElementById("closeVideoBtn");
-  document.querySelectorAll('.cursor-pointer[data-video]').forEach(card => {
-    card.addEventListener('click', () => {
-      const videoFile = card.getAttribute('data-video');
-      if (videoFile && videoSource && videoPlayer) {
-        videoSource.src = videoFile;
-        videoPlayer.load();
-        videoModal.classList.remove('hidden');
-        videoModal.classList.add('active');
-        videoPlayer.play().catch(err => console.warn("Auto-play blocked:", err));
-      }
+
+  // Dropdown toggle
+  const badge = document.getElementById('featuresBadge');
+  const menu = document.getElementById('dropdownMenu');
+  if (badge && menu) {
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     });
-  });
-  if (closeVideoBtn) {
-    closeVideoBtn.addEventListener('click', () => {
-      videoModal.classList.add('hidden');
-      videoModal.classList.remove('active');
-      if (videoPlayer) videoPlayer.pause();
-    });
-  }
-  if (videoModal) {
-    videoModal.addEventListener('click', (e) => {
-      if (e.target === videoModal) {
-        videoModal.classList.add('hidden');
-        videoModal.classList.remove('active');
-        if (videoPlayer) videoPlayer.pause();
+
+    document.addEventListener('click', (e) => {
+      if (!badge.contains(e.target) && !menu.contains(e.target)) {
+        menu.style.display = 'none';
       }
     });
   }
+
   // Logo animation
   const logo = document.getElementById("logo");
   if (logo) logo.classList.add("logo-intro");
