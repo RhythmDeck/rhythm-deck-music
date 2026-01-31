@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8" />
 <title>Rhythm Deck – Album Compressor</title>
-
 <style>
 body {
   background:#050505;
@@ -25,8 +24,44 @@ header {
   align-items:center;
   margin-bottom:30px;
 }
-header img {
+.logo-wrap {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo-wrap img {
   height:48px;
+}
+.logo-text {
+  font-size:1.5rem;
+  font-weight:bold;
+  color:#10b981;
+  line-height:1.1;
+}
+.tagline {
+  font-size:0.9rem;
+  color:#9ca3af;
+}
+nav a {
+  display:inline-block;
+  padding:10px 20px;
+  margin-left:12px;
+  border-radius:999px;
+  font-weight:bold;
+  text-decoration:none;
+  transition:all 0.2s;
+}
+nav a.home {
+  background:linear-gradient(90deg,#22c55e,#16a34a);
+  color:white;
+}
+nav a.contact {
+  background:linear-gradient(90deg,#8b5cf6,#7c3aed);
+  color:white;
+}
+nav a:hover {
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.5);
 }
 .hero {
   display:grid;
@@ -86,78 +121,74 @@ button:disabled {
   white-space:pre-line;
   font-size:15px;
 }
-#progressOuter {
+#uploadProgressOuter, #compressProgressOuter {
   background:#111;
   border-radius:12px;
   overflow:hidden;
   border:1px solid #10b981;
   height:22px;
+  margin-top:10px;
 }
-#progressInner {
+#uploadProgressInner, #compressProgressInner {
   height:100%;
   width:0%;
   background:linear-gradient(90deg,#10b981,#34d399);
-  transition:width .2s ease;
+  transition:width .3s ease;
 }
-#progressText {
+.progress-label {
   margin-top:6px;
   font-size:13px;
-  text-align:right;
   color:#9ca3af;
+  text-align:right;
 }
 </style>
 </head>
-
 <body>
 <div class="container">
-
 <header>
-  <img src="logo-1-sm.jpg" alt="Rhythm Deck">
+  <div class="logo-wrap">
+    <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo">
+    <div>
+      <div class="logo-text">RHYTHM DECK</div>
+      <div class="tagline">Unleash Your Beat</div>
+    </div>
+  </div>
   <nav>
-    <a href="index.html" style="color:#10b981">Home</a>
-    <a href="contact.html" style="color:#10b981">Contact</a>
+    <a href="index.html" class="home" target="_blank">Home</a>
+    <a href="contact.html" class="contact" target="_blank">Contact</a>
   </nav>
 </header>
-
 <div class="hero">
   <div class="instructions">
     <strong>Album Compressor</strong><br><br>
-
     • Upload a full album video (any size)<br>
     • File is uploaded in safe chunks<br>
     • Album is split into 15-minute segments<br>
     • Each segment is compressed server-side<br>
     • Download as ZIP or merged MP4<br><br>
-
     <strong>CRF (Quality)</strong><br>
     Lower = higher quality / larger file<br>
     18–20 → visually lossless<br>
     22–24 → recommended<br>
     26+ → aggressive compression<br><br>
-
     <strong>HEVC (H.265)</strong><br>
     ~40% smaller files than H.264<br>
     Slower encode, same quality<br><br>
-
     🔒 Processing happens on Rhythm Deck servers
   </div>
-
   <div class="image-box">
     <img src="compressor.png" alt="Compressor">
   </div>
 </div>
-
 <div class="section">
 <label>Upload Album Video</label>
 <input type="file" id="file">
 </div>
-
 <div class="section">
 <label>Compression Quality (CRF)</label>
 <input type="range" min="18" max="30" value="23" id="crf">
 <div class="small" id="crfText"></div>
 </div>
-
 <div class="section">
 <label>Target Dimensions</label>
 <select id="dimensions">
@@ -171,13 +202,11 @@ button:disabled {
   <input id="h" placeholder="Height">
 </div>
 </div>
-
 <div class="section">
 <label>
 <input type="checkbox" id="hevc"> Use HEVC (H.265)
 </label>
 </div>
-
 <div class="section">
 <label>Download Format</label>
 <select id="format">
@@ -185,21 +214,25 @@ button:disabled {
   <option value="mp4">Single MP4 (merged)</option>
 </select>
 </div>
-
 <div class="section">
 <button id="start">Compress Album</button>
 </div>
-
 <div id="statusWrap">
   <div id="status"></div>
   <div>
-    <div id="progressOuter">
-      <div id="progressInner"></div>
+    <div class="progress-label">Upload Progress</div>
+    <div id="uploadProgressOuter">
+      <div id="uploadProgressInner"></div>
     </div>
-    <div id="progressText">0%</div>
+    <div id="uploadProgressText" class="progress-label">0%</div>
+
+    <div class="progress-label" style="margin-top:20px;">Compression Progress</div>
+    <div id="compressProgressOuter">
+      <div id="compressProgressInner"></div>
+    </div>
+    <div id="compressProgressText" class="progress-label">Waiting…</div>
   </div>
 </div>
-
 </div>
 
 <script>
@@ -210,8 +243,10 @@ const crf = document.getElementById('crf');
 const crfText = document.getElementById('crfText');
 const dims = document.getElementById('dimensions');
 const manual = document.getElementById('manualDims');
-const progressInner = document.getElementById('progressInner');
-const progressText = document.getElementById('progressText');
+const uploadInner = document.getElementById('uploadProgressInner');
+const uploadText = document.getElementById('uploadProgressText');
+const compressInner = document.getElementById('compressProgressInner');
+const compressText = document.getElementById('compressProgressText');
 
 dims.onchange = () => {
   manual.style.display = dims.value === 'manual' ? 'block' : 'none';
@@ -229,42 +264,39 @@ startBtn.onclick = async () => {
     alert('Select a video');
     return;
   }
-
   startBtn.disabled = true;
   const file = fileInput.files[0];
   const totalBytes = file.size;
   let uploadedBytes = 0;
-
   const fileId = crypto.randomUUID();
   const chunkSize = 100 * 1024 * 1024;
   let index = 0;
   let offset = 0;
 
   status.textContent = 'Uploading album…\n';
-
   while (offset < totalBytes) {
     const slice = file.slice(offset, offset + chunkSize);
     const form = new FormData();
     form.append('chunk', slice);
     form.append('fileId', fileId);
     form.append('index', index);
-
     await fetch('/compress/upload-chunk', {
       method:'POST',
       body:form
     });
-
     uploadedBytes += slice.size;
     const percent = Math.min(100, Math.round((uploadedBytes / totalBytes) * 100));
-    progressInner.style.width = percent + '%';
-    progressText.textContent = percent + '%';
-
+    uploadInner.style.width = percent + '%';
+    uploadText.textContent = percent + '%';
     offset += chunkSize;
     index++;
     status.textContent += `Uploaded chunk ${index}\n`;
   }
 
+  // Upload done → start compression
   status.textContent += '\nStarting compression…\n';
+  uploadInner.style.width = '100%';
+  uploadText.textContent = '100%';
 
   let width, height;
   if (dims.value === 'manual') {
@@ -290,11 +322,31 @@ startBtn.onclick = async () => {
   const data = await res.json();
   if (!data.ok) {
     status.textContent += 'Compression failed.';
+    startBtn.disabled = false;
     return;
   }
 
-  status.textContent += '\nCompression complete.\nDownloading…';
-  window.location = data.download;
+  // Compression started → show "Compressing" and start polling progress
+  status.textContent += '\nCompressing…\n';
+  compressText.textContent = 'Compressing… 0%';
+
+  // Poll compression progress every 3 seconds
+  const progressInterval = setInterval(async () => {
+    const progRes = await fetch(`/compress/progress?fileId=${fileId}`);
+    const progData = await progRes.json();
+
+    if (progData.progress !== undefined) {
+      const p = Math.min(100, Math.round(progData.progress));
+      compressInner.style.width = p + '%';
+      compressText.textContent = `Compressing… ${p}%`;
+
+      if (p >= 100) {
+        clearInterval(progressInterval);
+        status.textContent += '\nCompression complete.\nDownloading…';
+        window.location = data.download;
+      }
+    }
+  }, 3000);
 };
 </script>
 </body>
