@@ -101,6 +101,8 @@
 </footer>
 
 <script>
+const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY');
+
 document.getElementById('compressorForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -108,28 +110,34 @@ document.getElementById('compressorForm').addEventListener('submit', async (e) =
   submitBtn.disabled = true;
   submitBtn.textContent = 'Redirecting to secure checkout…';
 
-  const plan  = document.getElementById('plan').value;
-  const email = document.getElementById('email').value.trim();
-  const name  = document.getElementById('name').value.trim();
+  const duration = document.getElementById('plan').value;
+  const email    = document.getElementById('email').value.trim();
 
   try {
-    const res = await fetch('/create-compressor-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan, email, name })
-    });
+    const res = await fetch(
+      'https://bxoqhmfnseskwqkywppg.supabase.co/functions/v1/create-checkout-session',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planType: 'compressor',
+          duration,
+          email
+        })
+      }
+    );
 
     if (!res.ok) {
       throw new Error('Failed to create checkout session');
     }
 
-    const data = await res.json();
+    const { sessionId } = await res.json();
 
-    if (!data.url) {
-      throw new Error('Invalid checkout response');
+    const result = await stripe.redirectToCheckout({ sessionId });
+
+    if (result.error) {
+      throw new Error(result.error.message);
     }
-
-    window.location.href = data.url;
 
   } catch (err) {
     alert(err.message);
