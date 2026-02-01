@@ -5,7 +5,9 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const multer = require('multer');
-const { exec } = require('child_process');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegStatic = require('ffmpeg-static');
+ffmpeg.setFfmpegPath(ffmpegStatic);
 const app = express();
 
 /* ─────────────────────────────────────────────
@@ -125,9 +127,14 @@ app.post('/compress/start', async (req, res) => {
     // Split into 15-minute segments
     const segmentsDir = path.join(dir, 'segments');
     fs.mkdirSync(segmentsDir);
-    await execPromise(
-      `ffmpeg -i "${input}" -map 0 -c copy -f segment -segment_time 900 "${segmentsDir}/part_%03d.mp4"`
-    );
+    await new Promise((resolve, reject) => {
+      ffmpeg(input)
+        .output(path.join(segmentsDir, 'part_%03d.mp4'))
+        .outputOptions('-c copy', '-f segment', '-segment_time 900')
+        .on('end', resolve)
+        .on('error', reject)
+        .run();
+    });
 
     // Compress each segment
     const compressedDir = path.join(dir, 'compressed');
@@ -137,18 +144,32 @@ app.post('/compress/start', async (req, res) => {
     let completed = 0;
 
     for (const p of parts) {
-      const scale = width && height ? `-vf scale=${width}:${height}` : '';
-      const codec = hevc ? 'libx265' : 'libx264';
-
       // Update progress before processing this segment
       fs.writeFileSync(
         path.join(dir, 'progress.json'),
         JSON.stringify({ percent: Math.round((completed / totalParts) * 100) })
       );
 
-      await execPromise(
-        `ffmpeg -i "${segmentsDir}/${p}" ${scale} -c:v ${codec} -crf ${crf} -preset medium -c:a copy "${compressedDir}/${p}"`
-      );
+      await new Promise((resolve, reject) => {
+        const command = ffmpeg(path.join(segmentsDir, p))
+          .output(path.join(compressedDir, p))
+          .videoCodec(hevc ? 'libx265' : 'libx264')
+          .addOption('-crf', crf)
+          .addOption('-preset', 'medium')
+          .audioCodec('copy');
+        
+        if (width && height) {
+          command.size(`${width}x${height}`);
+        }
+
+        command.on('end', resolve)
+          .on('error', reject)
+          .on('progress', (progress) => {
+            // Optional: finer progress within segment
+            console.log(`Processing segment ${p}: ${progress.percent}%`);
+          })
+          .run();
+      });
 
       completed++;
 
@@ -168,17 +189,25 @@ app.post('/compress/start', async (req, res) => {
     // Prepare final output (ZIP or merged MP4)
     let finalFile;
     if (output === 'mp4') {
-      const list = parts.map(p => `file '${compressedDir}/${p}'`).join('\n');
+      const list = parts.map(p => `file '${path.join(compressedDir, p)}'`).join('\n');
       fs.writeFileSync(path.join(dir, 'list.txt'), list);
       finalFile = path.join(dir, 'final.mp4');
-      await execPromise(
-        `ffmpeg -f concat -safe 0 -i "${dir}/list.txt" -c copy "${finalFile}"`
-      );
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(path.join(dir, 'list.txt'))
+          .inputFormat('concat')
+          .inputOptions('-safe 0')
+          .output(finalFile)
+          .outputOptions('-c copy')
+          .on('end', resolve)
+          .on('error', reject)
+          .run();
+      });
     } else {
       finalFile = path.join(dir, 'album.zip');
-      await execPromise(
-        `cd "${compressedDir}" && zip -r "${finalFile}" .`
-      );
+      await new Promise((resolve, reject) => {
+        exec(`cd "${compressedDir}" && zip -r "${finalFile}" .`, (err) => err ? reject(err) : resolve());
+      });
     }
 
     res.json({
