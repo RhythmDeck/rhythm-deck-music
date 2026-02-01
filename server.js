@@ -6,8 +6,6 @@ const fs = require('fs');
 const os = require('os');
 const multer = require('multer');
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegStatic = require('ffmpeg-static');
-ffmpeg.setFfmpegPath(ffmpegStatic);
 const app = express();
 
 /* ─────────────────────────────────────────────
@@ -165,7 +163,6 @@ app.post('/compress/start', async (req, res) => {
         command.on('end', resolve)
           .on('error', reject)
           .on('progress', (progress) => {
-            // Optional: finer progress within segment
             console.log(`Processing segment ${p}: ${progress.percent}%`);
           })
           .run();
