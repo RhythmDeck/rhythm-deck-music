@@ -8,6 +8,7 @@
 <base href="/" />
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://js.stripe.com/v3/?advancedFraudSignals=false"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
   .input-focus:focus {
@@ -101,48 +102,77 @@
 </footer>
 
 <script>
-const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
+/* ─────────────────────────────────────────────
+   SUPABASE CLIENT (USE YOUR EXISTING KEYS)
+───────────────────────────────────────────── */
+const supabase = supabaseJs.createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_ANON_KEY
+);
 
 document.getElementById('compressorForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const submitBtn = document.getElementById('submitBtn');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Redirecting to secure checkout…';
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating secure session…';
 
-  const duration = document.getElementById('plan').value;
-  const email    = document.getElementById('email').value.trim();
+  const name  = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const plan  = document.getElementById('plan').value;
 
   try {
+    /* 1️⃣ CREATE OR SIGN IN USER */
+    const { data: authData, error: authError } =
+      await supabase.auth.signInWithOtp({
+        email,
+        options: { data: { name } }
+      });
+
+    if (authError) throw authError;
+
+    const userId = authData.user.id;
+
+    /* 2️⃣ UPSERT PROFILE */
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: userId,
+        email,
+        name,
+        plan: 'video_compressor',
+        plan_duration: plan,
+        paid: false,
+        payment_pending: true,
+        updated_at: new Date().toISOString()
+      });
+
+    if (profileError) throw profileError;
+
+    /* 3️⃣ CREATE STRIPE CHECKOUT SESSION */
     const res = await fetch(
-      'https://bxoqhmfnseskwqkywppg.supabase.co/functions/v1/create-checkout-session',
+      'https://rhythm-deck-music.onrender.com/create-compressor-checkout',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          planType: 'compressor',
-          duration,
-          email
+          plan,
+          email,
+          userId
         })
       }
     );
 
-    if (!res.ok) {
-      throw new Error('Failed to create checkout session');
-    }
+    if (!res.ok) throw new Error('Checkout session failed');
 
-    const { sessionId } = await res.json();
-
-    const result = await stripe.redirectToCheckout({ sessionId });
-
-    if (result.error) {
-      throw new Error(result.error.message);
-    }
+    const { url } = await res.json();
+    window.location.href = url;
 
   } catch (err) {
-    alert(err.message);
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Continue to Secure Checkout';
+    console.error(err);
+    alert(err.message || 'Signup failed');
+    btn.disabled = false;
+    btn.textContent = 'Continue to Secure Checkout';
   }
 });
 </script>
