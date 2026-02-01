@@ -7,71 +7,29 @@ const os = require('os');
 const multer = require('multer');
 const ffmpeg = require('fluent-ffmpeg');
 const stripeLib = require('stripe');
-const TalkJS = require('talkjs');
+
 const app = express();
 
 /* ─────────────────────────────────────────────
-   SUPABASE + STRIPE
+   STRIPE
 ───────────────────────────────────────────── */
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
 const stripe = stripeLib(process.env.STRIPE_SECRET_KEY);
 
 /* ─────────────────────────────────────────────
-   STRIPE WEBHOOK (MUST BE FIRST)
-───────────────────────────────────────────── */
-app.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }),
-  async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
-    } catch (err) {
-      return res.status(400).send(err.message);
-    }
-
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      const userId = session.client_reference_id;
-
-      if (userId) {
-        await supabase
-          .from('profiles')
-          .update({ payment_pending: false })
-          .eq('id', userId);
-      }
-    }
-
-    res.json({ received: true });
-  }
-);
-
-/* ─────────────────────────────────────────────
-   NORMAL MIDDLEWARE
+   MIDDLEWARE
 ───────────────────────────────────────────── */
 app.use(express.json());
+app.use(express.static(__dirname));
 
 /* ─────────────────────────────────────────────
    STRIPE CHECKOUT – VIDEO COMPRESSOR (FIXED)
 ───────────────────────────────────────────── */
 app.post('/create-compressor-checkout', async (req, res) => {
   try {
-    const { plan, email, name } = req.body;
+    const { plan, email, userId } = req.body;
 
-    if (!plan) {
-      return res.status(400).json({ error: 'Missing plan' });
+    if (!plan || !email || !userId) {
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
     let priceId;
@@ -80,66 +38,42 @@ app.post('/create-compressor-checkout', async (req, res) => {
       priceId = process.env.STRIPE_COMPRESSOR_PRICE_ID_MONTHLY;
     } else if (plan === 'yearly') {
       priceId = process.env.STRIPE_COMPRESSOR_PRICE_ID_YEARLY;
-    } else {
+    }
+
+    if (!priceId) {
       return res.status(400).json({ error: 'Invalid plan' });
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-
-      customer_email: email,
-
+      mode: 'payment',
+      payment_method_types: ['card'],
       line_items: [
         {
           price: priceId,
           quantity: 1
         }
       ],
-
+      success_url: `${process.env.BASE_URL}/compressor.html?success=1`,
+      cancel_url: `${process.env.BASE_URL}/compressor-signup.html?canceled=1`,
+      customer_email: email,
+      client_reference_id: userId,
       metadata: {
         product: 'video_compressor',
         plan,
-        name
-      },
-
-      success_url: `${process.env.BASE_URL}/compressor.html?success=1`,
-      cancel_url: `${process.env.BASE_URL}/signup-to-compressor.html?canceled=1`
+        userId
+      }
     });
 
     res.json({ url: session.url });
+
   } catch (err) {
     console.error('Stripe Checkout Error:', err);
-    res.status(500).json({ error: 'Checkout failed' });
+    res.status(500).json({ error: 'Failed to create checkout session' });
   }
 });
 
 /* ─────────────────────────────────────────────
-   TALKJS
-───────────────────────────────────────────── */
-app.post('/talkjs-token', async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.sendStatus(401);
-
-  const token = authHeader.split(' ')[1];
-  const {
-    data: { user }
-  } = await supabase.auth.getUser(token);
-
-  if (!user) return res.sendStatus(401);
-
-  const signature = TalkJS.signUser(
-    {
-      id: user.id,
-      name: user.email
-    },
-    process.env.TALKJS_SECRET_KEY
-  );
-
-  res.json({ token: signature });
-});
-
-/* ─────────────────────────────────────────────
-   COMPRESSOR BACKEND
+   COMPRESSOR BACKEND (UNCHANGED)
 ───────────────────────────────────────────── */
 const COMPRESS_ROOT = path.join(os.tmpdir(), 'rhythm-compressor');
 fs.mkdirSync(COMPRESS_ROOT, { recursive: true });
@@ -209,15 +143,6 @@ app.get('/compress/download/:fileId', (req, res) => {
   res.download(file, () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
-});
-
-/* ─────────────────────────────────────────────
-   STATIC FILES
-───────────────────────────────────────────── */
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 /* ───────────────────────────────────────────── */
