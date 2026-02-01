@@ -18,7 +18,6 @@
 
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
 
-<!-- HEADER -->
 <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
   <div class="flex items-center space-x-3">
     <img src="logo-1-sm.jpg" class="w-10 h-10 rounded-full" alt="Rhythm Deck">
@@ -33,24 +32,21 @@
   </nav>
 </header>
 
-<!-- MAIN -->
 <main class="flex-grow flex items-center justify-center py-12 px-4">
   <div class="bg-white shadow-2xl rounded-xl max-w-5xl w-full flex overflow-hidden">
 
-    <!-- IMAGE LEFT -->
     <div class="w-1/2 hidden md:block">
       <img src="contact.png" alt="Album Compression" class="w-full h-full object-cover">
     </div>
 
-    <!-- FORM RIGHT -->
     <div class="w-full md:w-1/2 p-8 md:p-10">
       <h2 class="text-3xl font-bold text-center mb-6">
         Video Compressor Access
       </h2>
 
       <p class="text-center text-gray-600 mb-8">
-        Compress full album videos locally in your browser.<br>
-        No uploads. No limits. Studio-grade results.
+        Compress single videos and full album videos<br>
+        Studio-grade results with same high quality.
       </p>
 
       <form id="compressorForm" class="space-y-4">
@@ -81,8 +77,8 @@
           <input type="checkbox" id="terms" required
             class="mt-1 h-4 w-4 text-green-500">
           <label for="terms" class="text-sm text-gray-700">
-            I have read and understand the
-            <a href="terms.html" target="_blank" class="text-green-600 hover:underline">Terms of Service</a>
+            I agree to the
+            <a href="terms.html" target="_blank" class="text-green-600 hover:underline">Terms</a>
             and
             <a href="privacy.html" target="_blank" class="text-green-600 hover:underline">Privacy Policy</a>
           </label>
@@ -90,7 +86,6 @@
 
         <button
           type="submit"
-          id="submitBtn"
           class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-lg text-lg transition">
           Continue to Secure Checkout
         </button>
@@ -100,13 +95,7 @@
   </div>
 </main>
 
-<!-- FOOTER -->
 <footer class="bg-black text-white p-5 text-center text-sm">
-  <nav class="mb-2 space-x-4">
-    <a href="contact.html" target="_blank" class="hover:text-green-400">Contact</a>
-    <a href="privacy.html" target="_blank" class="hover:text-green-400">Privacy Policy</a>
-    <a href="terms.html" target="_blank" class="hover:text-green-400">Terms</a>
-  </nav>
   <p>© 2025 Rhythm Deck Music</p>
 </footer>
 
@@ -125,12 +114,11 @@ document.getElementById('compressorForm').addEventListener('submit', async (e) =
   const email = document.getElementById('email').value.trim();
   const name  = document.getElementById('name').value.trim();
 
-  if (!plan) return;
 
   const res = await fetch('/create-compressor-checkout', {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({
       priceId: PRICE_IDS[plan],
       email,
       name
