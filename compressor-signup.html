@@ -108,16 +108,21 @@
     }
 
     try {
-      // Sign in or create user with OTP
+      // 1. Create user with OTP (magic link) - but DO NOT send email during testing
+      // Comment this out for testing - uncomment when going live
+      /*
       const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: { data: { name } }
       });
       if (authError) throw authError;
-
       const userId = authData.user.id;
+      */
 
-      // Save to profiles table
+      // For testing: simulate user ID (replace with real auth later)
+      const userId = 'test-user-' + Date.now(); // temporary fake ID for testing
+
+      // 2. Save to profiles table
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -132,7 +137,7 @@
         });
       if (profileError) throw profileError;
 
-      // Go to Stripe checkout
+      // 3. Go to Stripe checkout
       const res = await fetch('/create-compressor-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
