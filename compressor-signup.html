@@ -80,7 +80,6 @@
 <footer class="bg-black text-white p-5 text-center text-sm">
   <p>© 2025 Rhythm Deck Music</p>
 </footer>
-
 <script>
 /* ─────────────────────────────────────────────
    SUPABASE CLIENT (single declaration only)
@@ -90,23 +89,19 @@ const supabase = createClient(
   window.SUPABASE_URL || 'https://bxoqhmfnseskwqkywppg.supabase.co',
   window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgk***************'
 );
-
 document.getElementById('compressorForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.textContent = 'Creating secure session…';
-
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
   const plan = document.getElementById('plan').value;
-
   if (!plan) {
     btn.disabled = false;
     btn.textContent = 'Continue to Secure Checkout';
     return;
   }
-
   try {
     /* 1️⃣ CREATE OR SIGN IN USER WITH OTP */
     const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
@@ -115,7 +110,6 @@ document.getElementById('compressorForm').addEventListener('submit', async (e) =
     });
     if (authError) throw authError;
     const userId = authData.user.id;
-
     /* 2️⃣ UPSERT PROFILE */
     const { error: profileError } = await supabase
       .from('profiles')
@@ -130,7 +124,6 @@ document.getElementById('compressorForm').addEventListener('submit', async (e) =
         updated_at: new Date().toISOString()
       });
     if (profileError) throw profileError;
-
     /* 3️⃣ CREATE STRIPE CHECKOUT SESSION */
     const res = await fetch(
       '/create-compressor-checkout',
@@ -144,17 +137,13 @@ document.getElementById('compressorForm').addEventListener('submit', async (e) =
         })
       }
     );
-
     if (!res.ok) {
       const errorText = await res.text();
       throw new Error(`Checkout session failed: ${errorText}`);
     }
-
     const { url } = await res.json();
-
     // Redirect to Stripe checkout
     window.location.href = url;
-
   } catch (err) {
     console.error(err);
     alert(err.message || 'Signup failed. Please try again.');
