@@ -5,9 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const multer = require('multer');
-const ffmpeg = require('fluent-ffmpeg');
 const stripeLib = require('stripe');
-const TalkJS = require('talkjs');
 
 const app = express();
 
@@ -18,7 +16,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 /* ─────────────────────────────────────────────
@@ -43,58 +41,59 @@ app.post(
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (err) {
-      console.error('Webhook signature error:', err.message);
       return res.status(400).send(err.message);
     }
 
+    const data = event.data.object;
+
     if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      const metadata = session.metadata || {};
-      const product = metadata.product;
-      const plan = metadata.plan;
-      const userId = session.client_reference_id;
+      const userId = data.client_reference_id;
 
-      if (!userId) {
-        console.warn('Missing client_reference_id');
-        return res.json({ received: true });
-      }
-
-      /* ───────── VIDEO COMPRESSOR ───────── */
-      if (product === 'video_compressor') {
+      if (userId) {
         await supabase
           .from('profiles')
           .update({
-            video_compressor_access: true,
-            plan: 'video_compressor',
-            plan_term: plan,
-            subscription_status: 'active',
-            payment_pending: false
+            plan: 'compressor',
+            paid: true,
+            term: data.metadata?.term || 1,
+            subscription_end: new Date(
+              Date.now() +
+                (data.metadata?.term || 1) *
+                  30 *
+                  24 *
+                  60 *
+                  60 *
+                  1000
+            )
           })
           .eq('id', userId);
       }
+    }
 
-      /* ───────── PRO PLAN ───────── */
-      if (product === 'pro_plan') {
+    if (event.type === 'customer.subscription.updated') {
+      const sub = data;
+      const userId = sub.metadata?.userId;
+
+      if (userId) {
         await supabase
           .from('profiles')
           .update({
-            plan: 'pro',
-            plan_term: plan,
-            subscription_status: 'active',
-            payment_pending: false
+            paid: sub.status === 'active',
+            subscription_end: new Date(sub.current_period_end * 1000)
           })
           .eq('id', userId);
       }
+    }
 
-      /* ───────── PLATINUM PLAN ───────── */
-      if (product === 'platinum_plan') {
+    if (event.type === 'customer.subscription.deleted') {
+      const sub = data;
+      const userId = sub.metadata?.userId;
+
+      if (userId) {
         await supabase
           .from('profiles')
           .update({
-            plan: 'platinum',
-            plan_term: plan,
-            subscription_status: 'active',
-            payment_pending: false
+            paid: false
           })
           .eq('id', userId);
       }
@@ -104,196 +103,101 @@ app.post(
   }
 );
 
-/* ─────────────────────────────────────────────
-   NORMAL MIDDLEWARE
-───────────────────────────────────────────── */
+/* ───────────────────────────────────────────── */
 app.use(express.json());
+app.use(express.static(__dirname));
 
 /* ─────────────────────────────────────────────
-   STRIPE CHECKOUT — VIDEO COMPRESSOR
+   ENSURE PROFILE
+───────────────────────────────────────────── */
+app.post('/ensure-profile', async (req, res) => {
+  const { userId, email, name } = req.body;
+
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .single();
+
+  if (!data) {
+    await supabase.from('profiles').insert({
+      id: userId,
+      email,
+      name,
+      plan: 'free',
+      paid: false
+    });
+  }
+
+  res.json({ ok: true });
+});
+
+/* ─────────────────────────────────────────────
+   STRIPE CHECKOUT — COMPRESSOR
 ───────────────────────────────────────────── */
 app.post('/create-compressor-checkout', async (req, res) => {
   try {
-    const { plan, email, name, userId } = req.body;
+    const { plan, email, userId } = req.body;
 
     let priceId;
+    let term;
+
     if (plan === 'monthly') {
       priceId = process.env.STRIPE_COMPRESSOR_PRICE_ID_MONTHLY;
+      term = 1;
     } else if (plan === 'yearly') {
       priceId = process.env.STRIPE_COMPRESSOR_PRICE_ID_YEARLY;
+      term = 12;
     } else {
       return res.status(400).json({ error: 'Invalid plan' });
     }
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
+      payment_method_types: ['card'],
       customer_email: email,
-      client_reference_id: userId,
-
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1
-        }
-      ],
-
-      metadata: {
-        product: 'video_compressor',
-        plan,
-        name
-      },
-
-      success_url: `${process.env.BASE_URL}/compressor.html?success=1`,
-      cancel_url: `${process.env.BASE_URL}/signup-to-compressor.html?canceled=1`
-    });
-
-    res.json({ url: session.url });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Checkout failed' });
-  }
-});
-
-/* ─────────────────────────────────────────────
-   STRIPE CHECKOUT — PRO / PLATINUM (GENERIC)
-───────────────────────────────────────────── */
-app.post('/create-plan-checkout', async (req, res) => {
-  try {
-    const { product, plan, email, userId } = req.body;
-
-    let priceId;
-
-    if (product === 'pro_plan' && plan === 'monthly') {
-      priceId = process.env.STRIPE_PRO_MONTHLY;
-    } else if (product === 'pro_plan' && plan === 'yearly') {
-      priceId = process.env.STRIPE_PRO_YEARLY;
-    } else if (product === 'platinum_plan' && plan === 'monthly') {
-      priceId = process.env.STRIPE_PLATINUM_MONTHLY;
-    } else if (product === 'platinum_plan' && plan === 'yearly') {
-      priceId = process.env.STRIPE_PLATINUM_YEARLY;
-    } else {
-      return res.status(400).json({ error: 'Invalid product or plan' });
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      customer_email: email,
-      client_reference_id: userId,
 
       line_items: [{ price: priceId, quantity: 1 }],
 
+      client_reference_id: userId,
+
       metadata: {
-        product,
-        plan
+        userId,
+        term
       },
 
-      success_url: `${process.env.BASE_URL}/dashboard.html?success=1`,
-      cancel_url: `${process.env.BASE_URL}/pricing.html?canceled=1`
+      success_url: `${process.env.BASE_URL}/compressor.html?success=1`,
+      cancel_url: `${process.env.BASE_URL}/compressor-signup.html?canceled=1`
     });
 
     res.json({ url: session.url });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Checkout failed' });
+    res.status(500).json({ error: 'Stripe checkout failed' });
   }
 });
 
 /* ─────────────────────────────────────────────
-   TALKJS TOKEN
+   ACCESS CHECK — COMPRESSOR
 ───────────────────────────────────────────── */
-app.post('/talkjs-token', async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.sendStatus(401);
+app.get('/api/check-compressor-access', async (req, res) => {
+  const userId = req.query.userId;
 
-  const token = authHeader.split(' ')[1];
-  const {
-    data: { user }
-  } = await supabase.auth.getUser(token);
+  const { data } = await supabase
+    .from('profiles')
+    .select('paid, plan')
+    .eq('id', userId)
+    .single();
 
-  if (!user) return res.sendStatus(401);
-
-  const signature = TalkJS.signUser(
-    { id: user.id, name: user.email },
-    process.env.TALKJS_SECRET_KEY
-  );
-
-  res.json({ token: signature });
-});
-
-/* ─────────────────────────────────────────────
-   VIDEO COMPRESSOR BACKEND
-───────────────────────────────────────────── */
-const COMPRESS_ROOT = path.join(os.tmpdir(), 'rhythm-compressor');
-fs.mkdirSync(COMPRESS_ROOT, { recursive: true });
-
-const upload = multer({
-  dest: path.join(os.tmpdir(), 'compress-chunks'),
-  limits: { fileSize: 200 * 1024 * 1024 }
-});
-
-app.post('/compress/upload-chunk', upload.single('chunk'), (req, res) => {
-  const { fileId, index } = req.body;
-  const dir = path.join(COMPRESS_ROOT, fileId);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.renameSync(req.file.path, path.join(dir, `chunk_${index}`));
-  res.json({ ok: true });
-});
-
-app.post('/compress/start', async (req, res) => {
-  const { fileId, crf = 23, hevc = false } = req.body;
-  const dir = path.join(COMPRESS_ROOT, fileId);
-  const input = path.join(dir, 'input.mp4');
-
-  try {
-    const chunks = fs.readdirSync(dir).filter(f => f.startsWith('chunk_')).sort();
-    const write = fs.createWriteStream(input);
-
-    for (const c of chunks) {
-      write.write(fs.readFileSync(path.join(dir, c)));
-    }
-    write.end();
-    await new Promise(r => write.on('finish', r));
-
-    const output = path.join(dir, 'final.mp4');
-
-    await new Promise((resolve, reject) => {
-      ffmpeg(input)
-        .videoCodec(hevc ? 'libx265' : 'libx264')
-        .addOption('-crf', crf)
-        .output(output)
-        .on('end', resolve)
-        .on('error', reject)
-        .run();
-    });
-
-    res.json({ ok: true, download: `/compress/download/${fileId}` });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Compression failed' });
+  if (!data || !data.paid || data.plan !== 'compressor') {
+    return res.status(403).json({ allowed: false });
   }
-});
 
-app.get('/compress/download/:fileId', (req, res) => {
-  const dir = path.join(COMPRESS_ROOT, req.params.fileId);
-  const file = path.join(dir, 'final.mp4');
-  if (!fs.existsSync(file)) return res.sendStatus(404);
-
-  res.download(file, () => {
-    fs.rmSync(dir, { recursive: true, force: true });
-  });
-});
-
-/* ─────────────────────────────────────────────
-   STATIC FILES
-───────────────────────────────────────────── */
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.json({ allowed: true });
 });
 
 /* ───────────────────────────────────────────── */
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`Rhythm Deck live on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
