@@ -52,8 +52,7 @@
         </div>
         <div>
           <label class="block font-semibold mb-1">Subdomain (required)</label>
-          <input id="subdomain" required minlength="3" pattern="[a-z0-9-]+" title="Only lowercase letters, numbers, and hyphens allowed" class="w-full border rounded-lg p-3 input-focus" placeholder="e.g. mycompressor">
-          <p class="text-sm text-gray-500 mt-1">Used for your profile URL (e.g. mycompressor.rhythmdeckmusic.com)</p>
+          <input id="subdomain" required minlength="3" pattern="^[a-z0-9-]+$" title="Only lowercase letters, numbers, and hyphens allowed" class="w-full border rounded-lg p-3 input-focus" placeholder="e.g. mycompressor">
         </div>
         <div>
           <label class="block font-semibold mb-1">Choose Plan</label>
@@ -91,7 +90,7 @@
 
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc' // <-- YOUR FULL WORKING ANON KEY HERE
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc' // YOUR FULL WORKING ANON KEY
   );
 
   const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
@@ -108,7 +107,7 @@
     const subdomainRaw = document.getElementById('subdomain').value.trim().toLowerCase();
     const plan = document.getElementById('plan').value;
 
-    // Basic subdomain validation (already required in HTML, but double-check)
+    // Subdomain validation
     const subdomain = subdomainRaw.replace(/[^a-z0-9-]/g, '');
     if (!subdomain || subdomain.length < 3) {
       alert('Subdomain must be at least 3 characters and contain only lowercase letters, numbers, or hyphens.');
