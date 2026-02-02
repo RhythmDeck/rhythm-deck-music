@@ -1,19 +1,16 @@
 require('dotenv').config();
-
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const multer = require('multer');
 const stripeLib = require('stripe');
-
 const app = express();
 
 /* ─────────────────────────────────────────────
    SUPABASE
 ───────────────────────────────────────────── */
 const { createClient } = require('@supabase/supabase-js');
-
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -33,7 +30,6 @@ app.post(
   async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
-
     try {
       event = stripe.webhooks.constructEvent(
         req.body,
@@ -41,14 +37,12 @@ app.post(
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (err) {
-      return res.status(400).send(err.message);
+      console.error('Webhook signature failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-
     const data = event.data.object;
-
     if (event.type === 'checkout.session.completed') {
       const userId = data.client_reference_id;
-
       if (userId) {
         await supabase
           .from('profiles')
@@ -69,11 +63,9 @@ app.post(
           .eq('id', userId);
       }
     }
-
     if (event.type === 'customer.subscription.updated') {
       const sub = data;
       const userId = sub.metadata?.userId;
-
       if (userId) {
         await supabase
           .from('profiles')
@@ -84,11 +76,9 @@ app.post(
           .eq('id', userId);
       }
     }
-
     if (event.type === 'customer.subscription.deleted') {
       const sub = data;
       const userId = sub.metadata?.userId;
-
       if (userId) {
         await supabase
           .from('profiles')
@@ -98,50 +88,23 @@ app.post(
           .eq('id', userId);
       }
     }
-
     res.json({ received: true });
   }
 );
 
-/* ───────────────────────────────────────────── */
-app.use(express.json());
-app.use(express.static(__dirname));
-
 /* ─────────────────────────────────────────────
-   ENSURE PROFILE
+   NORMAL MIDDLEWARE
 ───────────────────────────────────────────── */
-app.post('/ensure-profile', async (req, res) => {
-  const { userId, email, name } = req.body;
-
-  const { data } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('id', userId)
-    .single();
-
-  if (!data) {
-    await supabase.from('profiles').insert({
-      id: userId,
-      email,
-      name,
-      plan: 'free',
-      paid: false
-    });
-  }
-
-  res.json({ ok: true });
-});
+app.use(express.json());
 
 /* ─────────────────────────────────────────────
-   STRIPE CHECKOUT — COMPRESSOR
+   STRIPE CHECKOUT — COMPRESSOR (MUST BE BEFORE STATIC)
 ───────────────────────────────────────────── */
 app.post('/create-compressor-checkout', async (req, res) => {
   try {
     const { plan, email, userId } = req.body;
-
     let priceId;
     let term;
-
     if (plan === 'monthly') {
       priceId = process.env.STRIPE_COMPRESSOR_PRICE_ID_MONTHLY;
       term = 1;
@@ -151,30 +114,46 @@ app.post('/create-compressor-checkout', async (req, res) => {
     } else {
       return res.status(400).json({ error: 'Invalid plan' });
     }
-
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       customer_email: email,
-
       line_items: [{ price: priceId, quantity: 1 }],
-
       client_reference_id: userId,
-
       metadata: {
         userId,
         term
       },
-
-      success_url: `${process.env.BASE_URL}/compressor.html?success=1`,
-      cancel_url: `${process.env.BASE_URL}/compressor-signup.html?canceled=1`
+      success_url: `${process.env.BASE_URL || 'https://rhythm-deck-music.onrender.com'}/compressor.html?success=1`,
+      cancel_url: `${process.env.BASE_URL || 'https://rhythm-deck-music.onrender.com'}/compressor-signup.html?canceled=1`
     });
-
     res.json({ url: session.url });
   } catch (err) {
-    console.error(err);
+    console.error('Checkout error:', err);
     res.status(500).json({ error: 'Stripe checkout failed' });
   }
+});
+
+/* ─────────────────────────────────────────────
+   ENSURE PROFILE
+───────────────────────────────────────────── */
+app.post('/ensure-profile', async (req, res) => {
+  const { userId, email, name } = req.body;
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .single();
+  if (!data) {
+    await supabase.from('profiles').insert({
+      id: userId,
+      email,
+      name,
+      plan: 'free',
+      paid: false
+    });
+  }
+  res.json({ ok: true });
 });
 
 /* ─────────────────────────────────────────────
@@ -182,19 +161,21 @@ app.post('/create-compressor-checkout', async (req, res) => {
 ───────────────────────────────────────────── */
 app.get('/api/check-compressor-access', async (req, res) => {
   const userId = req.query.userId;
-
   const { data } = await supabase
     .from('profiles')
     .select('paid, plan')
     .eq('id', userId)
     .single();
-
   if (!data || !data.paid || data.plan !== 'compressor') {
     return res.status(403).json({ allowed: false });
   }
-
   res.json({ allowed: true });
 });
+
+/* ─────────────────────────────────────────────
+   STATIC FILES & FALLBACK – MUST BE LAST
+───────────────────────────────────────────── */
+app.use(express.static(__dirname));
 
 /* ───────────────────────────────────────────── */
 const PORT = process.env.PORT || 10000;
