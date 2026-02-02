@@ -82,24 +82,16 @@
 </footer>
 
 <script>
-// Wait for DOM and all scripts to be ready
-document.addEventListener('DOMContentLoaded', function () {
-  // Check if Supabase library loaded successfully
-  if (typeof supabaseJs === 'undefined') {
-    console.error('Supabase library failed to load');
-    alert('Failed to load required library. Please refresh the page or check your internet connection.');
-    return;
-  }
-
-  // Create Supabase client (only once)
-  const { createClient } = supabaseJs;
-  const supabase = createClient(
-    window.SUPABASE_URL || 'https://bxoqhmfnseskwqkywppg.supabase.co',
-    window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgk***************'
+// Wait until everything is loaded
+window.addEventListener('load', function() {
+  // Create Supabase client
+  const supabase = supabaseJs.createClient(
+    'https://bxoqhmfnseskwqkywppg.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgk***************'
   );
 
-  // Form submit handler
-  document.getElementById('compressorForm').addEventListener('submit', async function (e) {
+  // Form submit
+  document.getElementById('compressorForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const btn = document.getElementById('submitBtn');
@@ -117,15 +109,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     try {
-      // 1. Sign in or create user with OTP
+      // Sign in or create user with OTP
       const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: { data: { name } }
       });
       if (authError) throw authError;
+
       const userId = authData.user.id;
 
-      // 2. Upsert profile
+      // Save user info to profiles table
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -140,30 +133,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       if (profileError) throw profileError;
 
-      // 3. Create Stripe checkout session
+      // Go to Stripe checkout
       const res = await fetch('/create-compressor-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan,
-          email,
-          userId
-        })
+        body: JSON.stringify({ plan, email, userId })
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Checkout session failed: ${errorText}`);
-      }
+      if (!res.ok) throw new Error('Checkout failed');
 
       const { url } = await res.json();
-
-      // Redirect to Stripe checkout
       window.location.href = url;
 
     } catch (err) {
-      console.error('Signup error:', err);
-      alert(err.message || 'Signup failed. Please try again or contact support.');
+      console.error(err);
+      alert('Error: ' + (err.message || 'Please try again'));
       btn.disabled = false;
       btn.textContent = 'Continue to Secure Checkout';
     }
