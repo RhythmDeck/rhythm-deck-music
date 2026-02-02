@@ -83,85 +83,93 @@
 
 <script>
 (function() {
-  /* ─────────────────────────────────────────────
-     SUPABASE CLIENT (isolated in IIFE to avoid global duplicate)
-  ───────────────────────────────────────────── */
-  const { createClient } = supabaseJs;
-  const supabase = createClient(
-    window.SUPABASE_URL || 'https://bxoqhmfnseskwqkywppg.supabase.co',
-    window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgk***************'
-  );
-
-  document.getElementById('compressorForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Creating secure session…';
-
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const plan = document.getElementById('plan').value;
-
-    if (!plan) {
-      btn.disabled = false;
-      btn.textContent = 'Continue to Secure Checkout';
+  // Wait for the Supabase library to fully load
+  window.addEventListener('load', function() {
+    if (typeof supabaseJs === 'undefined') {
+      console.error('Supabase library did not load');
+      alert('Failed to load required library. Please refresh or check your connection.');
       return;
     }
 
-    try {
-      /* 1️⃣ CREATE OR SIGN IN USER WITH OTP */
-      const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
-        email,
-        options: { data: { name } }
-      });
-      if (authError) throw authError;
-      const userId = authData.user.id;
+    // SUPABASE CLIENT - only declared once, inside this scope
+    const { createClient } = supabaseJs;
+    const supabase = createClient(
+      window.SUPABASE_URL || 'https://bxoqhmfnseskwqkywppg.supabase.co',
+      window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgk***************'
+    );
 
-      /* 2️⃣ UPSERT PROFILE */
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: userId,
-          email,
-          name,
-          plan: 'video_compressor',
-          plan_duration: plan,
-          paid: false,
-          payment_pending: true,
-          updated_at: new Date().toISOString()
-        });
-      if (profileError) throw profileError;
+    // Form submit handler
+    document.getElementById('compressorForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creating secure session…';
 
-      /* 3️⃣ CREATE STRIPE CHECKOUT SESSION */
-      const res = await fetch(
-        '/create-compressor-checkout',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            plan,
-            email,
-            userId
-          })
-        }
-      );
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const plan = document.getElementById('plan').value;
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Checkout session failed: ${errorText}`);
+      if (!plan) {
+        btn.disabled = false;
+        btn.textContent = 'Continue to Secure Checkout';
+        return;
       }
 
-      const { url } = await res.json();
+      try {
+        // 1. CREATE OR SIGN IN USER WITH OTP
+        const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
+          email,
+          options: { data: { name } }
+        });
+        if (authError) throw authError;
+        const userId = authData.user.id;
 
-      // Redirect to Stripe checkout
-      window.location.href = url;
+        // 2. UPSERT PROFILE
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: userId,
+            email,
+            name,
+            plan: 'video_compressor',
+            plan_duration: plan,
+            paid: false,
+            payment_pending: true,
+            updated_at: new Date().toISOString()
+          });
+        if (profileError) throw profileError;
 
-    } catch (err) {
-      console.error(err);
-      alert(err.message || 'Signup failed. Please try again.');
-      btn.disabled = false;
-      btn.textContent = 'Continue to Secure Checkout';
-    }
+        // 3. CREATE STRIPE CHECKOUT SESSION
+        const res = await fetch(
+          '/create-compressor-checkout',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              plan,
+              email,
+              userId
+            })
+          }
+        );
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`Checkout session failed: ${errorText}`);
+        }
+
+        const { url } = await res.json();
+
+        // Redirect to Stripe checkout
+        window.location.href = url;
+
+      } catch (err) {
+        console.error(err);
+        alert(err.message || 'Signup failed. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Continue to Secure Checkout';
+      }
+    });
   });
 })();
 </script>
