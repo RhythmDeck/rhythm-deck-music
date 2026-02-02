@@ -82,16 +82,23 @@
 </footer>
 
 <script>
-// Wait until everything is loaded
-window.addEventListener('load', function() {
+// Wait for the page and all scripts to load completely
+window.addEventListener('load', function () {
+  // Safety check
+  if (typeof supabaseJs === 'undefined') {
+    console.error('Supabase library did not load');
+    alert('Failed to load required library. Please refresh the page or check your internet.');
+    return;
+  }
+
   // Create Supabase client
   const supabase = supabaseJs.createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgk***************'
   );
 
-  // Form submit
-  document.getElementById('compressorForm').addEventListener('submit', async (e) => {
+  // Form submit handler
+  document.getElementById('compressorForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const btn = document.getElementById('submitBtn');
@@ -115,10 +122,9 @@ window.addEventListener('load', function() {
         options: { data: { name } }
       });
       if (authError) throw authError;
-
       const userId = authData.user.id;
 
-      // Save user info to profiles table
+      // Save to profiles table
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -140,7 +146,10 @@ window.addEventListener('load', function() {
         body: JSON.stringify({ plan, email, userId })
       });
 
-      if (!res.ok) throw new Error('Checkout failed');
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Checkout failed: ${errorText}`);
+      }
 
       const { url } = await res.json();
       window.location.href = url;
