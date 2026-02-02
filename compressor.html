@@ -133,7 +133,7 @@ button:disabled {
   height:100%;
   width:0%;
   background:linear-gradient(90deg,#10b981,#34d399);
-  transition:width .3s ease;
+  transition:width 0.4s ease;
 }
 .progress-label {
   margin-top:6px;
@@ -230,7 +230,6 @@ button:disabled {
       <div id="uploadProgressInner"></div>
     </div>
     <div id="uploadProgressText" class="progress-label">0%</div>
-
     <div class="progress-label" style="margin-top:20px;">Compressing <span id="compressTimer" class="timer">00:00</span></div>
     <div id="compressProgressOuter">
       <div id="compressProgressInner"></div>
@@ -239,7 +238,6 @@ button:disabled {
   </div>
 </div>
 </div>
-
 <script>
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
@@ -311,24 +309,27 @@ startBtn.onclick = async () => {
     alert('Select a video');
     return;
   }
-  startBtn.disabled = true;
 
-  // Reset timers and labels
-  uploadStartTime = null;
-  compressStartTime = null;
+  startBtn.disabled = true;
+  startBtn.textContent = 'Processing...';
+
+  // Reset UI
+  uploadInner.style.width = '0%';
+  uploadText.textContent = '0%';
+  compressInner.style.width = '0%';
+  compressText.textContent = 'Waiting...';
   uploadTimerEl.textContent = '00:00';
   compressTimerEl.textContent = '00:00';
-  compressText.textContent = 'Waiting…';
+  status.textContent = 'Uploading album...\n';
 
   const file = fileInput.files[0];
   const totalBytes = file.size;
   let uploadedBytes = 0;
   const fileId = crypto.randomUUID();
-  const chunkSize = 100 * 1024 * 1024;
+  const chunkSize = 100 * 1024 * 1024; // 100MB chunks
   let index = 0;
   let offset = 0;
 
-  status.textContent = 'Uploading album…\n';
   startTimer('upload');
 
   while (offset < totalBytes) {
@@ -338,25 +339,48 @@ startBtn.onclick = async () => {
     form.append('fileId', fileId);
     form.append('index', index);
 
-    await fetch('https://rhythm-deck-music.onrender.com/compress/upload-chunk', {
-      method: 'POST',
-      body: form
-    });
+    // Real-time sub-chunk progress
+    const subChunkStart = Date.now();
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://rhythm-deck-music.onrender.com/compress/upload-chunk');
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const chunkUploaded = e.loaded;
+        const chunkPercent = (chunkUploaded / slice.size) * 100;
+        const totalPercent = ((uploadedBytes + chunkUploaded) / totalBytes) * 100;
+        uploadInner.style.width = totalPercent + '%';
+        uploadText.textContent = Math.round(totalPercent) + '%';
+      }
+    };
 
-    uploadedBytes += slice.size;
-    const percent = Math.min(100, Math.round((uploadedBytes / totalBytes) * 100));
-    uploadInner.style.width = percent + '%';
-    uploadText.textContent = percent + '%';
-    offset += chunkSize;
-    index++;
-    status.textContent += `Uploaded chunk ${index}\n`;
+    await new Promise((resolve) => {
+      xhr.onload = () => {
+        uploadedBytes += slice.size;
+        const percent = Math.min(100, Math.round((uploadedBytes / totalBytes) * 100));
+        uploadInner.style.width = percent + '%';
+        uploadText.textContent = percent + '%';
+        status.textContent += `Uploaded chunk ${index + 1}\n`;
+        offset += chunkSize;
+        index++;
+        resolve();
+      };
+      xhr.onerror = () => {
+        status.textContent += 'Upload failed.\n';
+        stopTimer('upload');
+        startBtn.disabled = false;
+        startBtn.textContent = 'Compress Album';
+        resolve();
+      };
+      xhr.send(form);
+    });
   }
 
   // Upload done
   stopTimer('upload');
-  status.textContent += '\nStarting compression…\n';
+  status.textContent += '\nStarting compression...\n';
   uploadInner.style.width = '100%';
   uploadText.textContent = '100%';
+
   startTimer('compress');
   compressText.textContent = 'Compressing… 0%';
 
@@ -386,19 +410,18 @@ startBtn.onclick = async () => {
     status.textContent += 'Compression failed.';
     stopTimer('compress');
     startBtn.disabled = false;
+    startBtn.textContent = 'Compress Album';
     return;
   }
 
-  // Start polling progress
+  // Real-time compression progress polling
   const progressInterval = setInterval(async () => {
     const progRes = await fetch(`https://rhythm-deck-music.onrender.com/compress/progress?fileId=${fileId}`);
     const progData = await progRes.json();
-
     if (progData.progress !== undefined) {
       const p = Math.min(100, Math.round(progData.progress));
       compressInner.style.width = p + '%';
       compressText.textContent = `Compressing… ${p}%`;
-
       if (p >= 100) {
         clearInterval(progressInterval);
         stopTimer('compress');
@@ -406,7 +429,10 @@ startBtn.onclick = async () => {
         window.location = `https://rhythm-deck-music.onrender.com${data.download}`;
       }
     }
-  }, 3000);
+  }, 2000); // Poll every 2 seconds for smooth updates
+
+  startBtn.disabled = false;
+  startBtn.textContent = 'Compress Album';
 };
 </script>
 </body>
