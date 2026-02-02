@@ -44,26 +44,22 @@
       <form id="compressorForm" class="space-y-4">
         <div>
           <label class="block font-semibold mb-1">Name / Artist Name</label>
-          <input id="name" required
-            class="w-full border rounded-lg p-3 input-focus">
+          <input id="name" required class="w-full border rounded-lg p-3 input-focus">
         </div>
         <div>
           <label class="block font-semibold mb-1">Email</label>
-          <input id="email" type="email" required
-            class="w-full border rounded-lg p-3 input-focus">
+          <input id="email" type="email" required class="w-full border rounded-lg p-3 input-focus">
         </div>
         <div>
           <label class="block font-semibold mb-1">Choose Plan</label>
-          <select id="plan" required
-            class="w-full border rounded-lg p-3">
+          <select id="plan" required class="w-full border rounded-lg p-3">
             <option value="" disabled selected>Select a plan</option>
             <option value="monthly">Monthly — $9.95 / month</option>
             <option value="yearly">Yearly — Save 15%</option>
           </select>
         </div>
         <div class="flex items-start gap-2">
-          <input type="checkbox" id="terms" required
-            class="mt-1 h-4 w-4 text-green-500">
+          <input type="checkbox" id="terms" required class="mt-1 h-4 w-4 text-green-500">
           <label for="terms" class="text-sm text-gray-700">
             I agree to the
             <a href="terms.html" target="_blank" class="text-green-600 hover:underline">Terms</a>
@@ -84,9 +80,10 @@
 <footer class="bg-black text-white p-5 text-center text-sm">
   <p>© 2025 Rhythm Deck Music</p>
 </footer>
+
 <script>
 /* ─────────────────────────────────────────────
-   SUPABASE CLIENT
+   SUPABASE CLIENT (single declaration only)
 ───────────────────────────────────────────── */
 const { createClient } = supabaseJs;
 const supabase = createClient(
@@ -111,7 +108,7 @@ document.getElementById('compressorForm').addEventListener('submit', async (e) =
   }
 
   try {
-    /* 1️⃣ CREATE OR SIGN IN USER */
+    /* 1️⃣ CREATE OR SIGN IN USER WITH OTP */
     const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: { data: { name } }
@@ -160,7 +157,7 @@ document.getElementById('compressorForm').addEventListener('submit', async (e) =
 
   } catch (err) {
     console.error(err);
-    alert(err.message || 'Signup failed');
+    alert(err.message || 'Signup failed. Please try again.');
     btn.disabled = false;
     btn.textContent = 'Continue to Secure Checkout';
   }
