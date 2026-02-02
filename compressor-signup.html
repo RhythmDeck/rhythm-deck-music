@@ -109,8 +109,8 @@
     }
 
     try {
-      // For testing: create user with temporary password (no email sent)
-      const tempPassword = 'test123456'; // temporary - user never sees this
+      // Create user with temporary strong password (no email sent)
+      const tempPassword = 'Test123!456'; // meets Supabase rules: lower, upper, number, special
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password: tempPassword,
