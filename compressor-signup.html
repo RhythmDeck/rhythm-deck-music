@@ -51,6 +51,11 @@
           <input id="email" type="email" required class="w-full border rounded-lg p-3 input-focus">
         </div>
         <div>
+          <label class="block font-semibold mb-1">Subdomain (required)</label>
+          <input id="subdomain" required minlength="3" pattern="[a-z0-9-]+" title="Only lowercase letters, numbers, and hyphens allowed" class="w-full border rounded-lg p-3 input-focus" placeholder="e.g. mycompressor">
+          <p class="text-sm text-gray-500 mt-1">Used for your profile URL (e.g. mycompressor.rhythmdeckmusic.com)</p>
+        </div>
+        <div>
           <label class="block font-semibold mb-1">Choose Plan</label>
           <select id="plan" required class="w-full border rounded-lg p-3">
             <option value="" disabled selected>Select a plan</option>
@@ -100,7 +105,17 @@
 
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
+    const subdomainRaw = document.getElementById('subdomain').value.trim().toLowerCase();
     const plan = document.getElementById('plan').value;
+
+    // Basic subdomain validation (already required in HTML, but double-check)
+    const subdomain = subdomainRaw.replace(/[^a-z0-9-]/g, '');
+    if (!subdomain || subdomain.length < 3) {
+      alert('Subdomain must be at least 3 characters and contain only lowercase letters, numbers, or hyphens.');
+      btn.disabled = false;
+      btn.textContent = 'Continue to Secure Checkout';
+      return;
+    }
 
     if (!plan) {
       btn.disabled = false;
@@ -110,7 +125,7 @@
 
     try {
       // Create user with temporary strong password (no email sent)
-      const tempPassword = 'Test123!456'; // meets Supabase rules: lower, upper, number, special
+      const tempPassword = 'Test123!456';
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password: tempPassword,
@@ -122,13 +137,14 @@
 
       const userId = authData.user.id;
 
-      // Save to profiles table
+      // Save to profiles table (includes subdomain)
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           id: userId,
           email,
           name,
+          subdomain,
           plan: 'video_compressor',
           plan_duration: plan,
           paid: false,
