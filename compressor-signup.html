@@ -7,6 +7,7 @@
 <base href="/" />
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://js.stripe.com/v3/?advancedFraudSignals=false"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .input-focus:focus {
     box-shadow: 0 0 0 3px rgba(16,185,129,0.4);
@@ -108,21 +109,20 @@
     }
 
     try {
-      // 1. Create user with OTP (magic link) - but DO NOT send email during testing
-      // Comment this out for testing - uncomment when going live
-      /*
-      const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
+      // For testing: create user with temporary password (no email sent)
+      const tempPassword = 'test123456'; // temporary - user never sees this
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
-        options: { data: { name } }
+        password: tempPassword,
+        options: {
+          data: { name }
+        }
       });
       if (authError) throw authError;
+
       const userId = authData.user.id;
-      */
 
-      // For testing: simulate user ID (replace with real auth later)
-      const userId = 'test-user-' + Date.now(); // temporary fake ID for testing
-
-      // 2. Save to profiles table
+      // Save to profiles table
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -137,7 +137,7 @@
         });
       if (profileError) throw profileError;
 
-      // 3. Go to Stripe checkout
+      // Go to Stripe checkout
       const res = await fetch('/create-compressor-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
