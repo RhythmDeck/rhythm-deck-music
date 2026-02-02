@@ -7,7 +7,6 @@
 <base href="/" />
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://js.stripe.com/v3/?advancedFraudSignals=false"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .input-focus:focus {
     box-shadow: 0 0 0 3px rgba(16,185,129,0.4);
@@ -81,24 +80,17 @@
   <p>© 2025 Rhythm Deck Music</p>
 </footer>
 
-<script>
-// Wait for the page and all scripts to load completely
-window.addEventListener('load', function () {
-  // Safety check
-  if (typeof supabaseJs === 'undefined') {
-    console.error('Supabase library did not load');
-    alert('Failed to load required library. Please refresh the page or check your internet.');
-    return;
-  }
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-  // Create Supabase client
-  const supabase = supabaseJs.createClient(
+  const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgk***************'
   );
 
-  // Form submit handler
-  document.getElementById('compressorForm').addEventListener('submit', async function (e) {
+  const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
+
+  document.getElementById('compressorForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const btn = document.getElementById('submitBtn');
@@ -116,15 +108,16 @@ window.addEventListener('load', function () {
     }
 
     try {
-      // Sign in or create user with OTP
+      // 1. Create or sign in user with OTP
       const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: { data: { name } }
       });
       if (authError) throw authError;
+
       const userId = authData.user.id;
 
-      // Save to profiles table
+      // 2. Save to profiles table
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -139,7 +132,7 @@ window.addEventListener('load', function () {
         });
       if (profileError) throw profileError;
 
-      // Go to Stripe checkout
+      // 3. Go to Stripe checkout
       const res = await fetch('/create-compressor-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -155,13 +148,12 @@ window.addEventListener('load', function () {
       window.location.href = url;
 
     } catch (err) {
-      console.error(err);
+      console.error('Signup error:', err);
       alert('Error: ' + (err.message || 'Please try again'));
       btn.disabled = false;
       btn.textContent = 'Continue to Secure Checkout';
     }
   });
-});
 </script>
 </body>
 </html>
