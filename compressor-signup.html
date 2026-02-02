@@ -85,7 +85,7 @@
 
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgk***************'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc' // <-- YOUR FULL WORKING ANON KEY HERE
   );
 
   const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
@@ -108,7 +108,7 @@
     }
 
     try {
-      // 1. Create or sign in user with OTP
+      // Sign in or create user with OTP
       const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: { data: { name } }
@@ -117,7 +117,7 @@
 
       const userId = authData.user.id;
 
-      // 2. Save to profiles table
+      // Save to profiles table
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -132,7 +132,7 @@
         });
       if (profileError) throw profileError;
 
-      // 3. Go to Stripe checkout
+      // Go to Stripe checkout
       const res = await fetch('/create-compressor-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
