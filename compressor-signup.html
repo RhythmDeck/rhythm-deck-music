@@ -51,7 +51,8 @@
           <input id="email" type="email" required class="w-full border rounded-lg p-3 input-focus">
         </div>
         <div>
-          <label class="block font-semibold mb-1">Subdomain (required)</label>
+          <label class="block font-semibold mb-1">Subdomain (required)<br>
+          <small class="text-gray-500">No spaces. Hyphens allowed (e.g. rick-wilson)</small></label>
           <input id="subdomain" required minlength="3" pattern="^[a-z0-9-]+$" title="Only lowercase letters, numbers, and hyphens allowed" class="w-full border rounded-lg p-3 input-focus" placeholder="e.g. mycompressor">
         </div>
         <div>
@@ -90,7 +91,7 @@
 
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc' // YOUR FULL WORKING ANON KEY
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc' // YOUR FULL WORKING ANON KEY HERE
   );
 
   const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
