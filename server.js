@@ -127,10 +127,10 @@ app.post('/create-compressor-checkout', async (req, res) => {
       success_url: `${process.env.BASE_URL || 'https://rhythm-deck-music.onrender.com'}/compressor.html?success=1`,
       cancel_url: `${process.env.BASE_URL || 'https://rhythm-deck-music.onrender.com'}/compressor-signup.html?canceled=1`
     });
-    console.log('Checkout session created:', session.id);
+    console.log('Checkout session created for user:', userId, 'plan:', plan);
     res.json({ url: session.url });
   } catch (err) {
-    console.error('Checkout error:', err);
+    console.error('Checkout error:', err.message);
     res.status(500).json({ error: 'Stripe checkout failed' });
   }
 });
