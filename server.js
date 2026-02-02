@@ -98,7 +98,7 @@ app.post(
 app.use(express.json());
 
 /* ─────────────────────────────────────────────
-   STRIPE CHECKOUT — COMPRESSOR (MUST BE BEFORE STATIC)
+   STRIPE CHECKOUT — COMPRESSOR (BEFORE STATIC!)
 ───────────────────────────────────────────── */
 app.post('/create-compressor-checkout', async (req, res) => {
   try {
@@ -127,6 +127,7 @@ app.post('/create-compressor-checkout', async (req, res) => {
       success_url: `${process.env.BASE_URL || 'https://rhythm-deck-music.onrender.com'}/compressor.html?success=1`,
       cancel_url: `${process.env.BASE_URL || 'https://rhythm-deck-music.onrender.com'}/compressor-signup.html?canceled=1`
     });
+    console.log('Checkout session created:', session.id);
     res.json({ url: session.url });
   } catch (err) {
     console.error('Checkout error:', err);
