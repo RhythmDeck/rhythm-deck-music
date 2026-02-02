@@ -4,176 +4,67 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rhythm Deck | Video Compressor Signup</title>
-
-<base href="/" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://js.stripe.com/v3/?advancedFraudSignals=false"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-  .input-focus:focus {
-    box-shadow: 0 0 0 3px rgba(16,185,129,0.4);
-  }
-</style>
 </head>
 
-<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-<header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
-  <div class="flex items-center space-x-3">
-    <img src="logo-1-sm.jpg" class="w-10 h-10 rounded-full" alt="Rhythm Deck">
-    <div>
-      <h1 class="text-xl font-bold tracking-wide">RHYTHM DECK</h1>
-      <p class="text-xs text-gray-300">Unleash Your Beat</p>
-    </div>
-  </div>
-  <nav class="space-x-3 text-sm">
-    <a href="index.html" target="_blank" class="hover:text-green-400">Home</a>
-    <a href="contact.html" target="_blank" class="hover:text-green-400">Contact</a>
-  </nav>
-</header>
+<div class="bg-white p-10 rounded-xl shadow-xl max-w-lg w-full">
+  <h2 class="text-3xl font-bold text-center mb-6">Video Compressor</h2>
 
-<main class="flex-grow flex items-center justify-center py-12 px-4">
-  <div class="bg-white shadow-2xl rounded-xl max-w-5xl w-full flex overflow-hidden">
+  <p class="text-center mb-6">
+    High-quality video compression for releases, albums, and promos.
+  </p>
 
-    <div class="w-1/2 hidden md:block">
-      <img src="contact.png" alt="Album Compression" class="w-full h-full object-cover">
-    </div>
+  <form id="form" class="space-y-4">
 
-    <div class="w-full md:w-1/2 p-8 md:p-10">
-      <h2 class="text-3xl font-bold text-center mb-6">
-        Video Compressor Access
-      </h2>
+    <input id="name" required placeholder="Name / Artist Name"
+      class="w-full border p-3 rounded">
 
-      <p class="text-center text-gray-600 mb-8">
-        Compress single videos and full album videos<br>
-        Studio-grade results with same high quality.
-      </p>
+    <input id="email" type="email" required placeholder="Email"
+      class="w-full border p-3 rounded">
 
-      <form id="compressorForm" class="space-y-4">
+    <select id="plan" required class="w-full border p-3 rounded">
+      <option value="" disabled selected>Select Plan</option>
+      <option value="monthly">Monthly — $9.95</option>
+      <option value="yearly">Yearly — Save 15%</option>
+    </select>
 
-        <div>
-          <label class="block font-semibold mb-1">Name / Artist Name</label>
-          <input id="name" required
-            class="w-full border rounded-lg p-3 input-focus">
-        </div>
-
-        <div>
-          <label class="block font-semibold mb-1">Email</label>
-          <input id="email" type="email" required
-            class="w-full border rounded-lg p-3 input-focus">
-        </div>
-
-        <div>
-          <label class="block font-semibold mb-1">Choose Plan</label>
-          <select id="plan" required
-            class="w-full border rounded-lg p-3">
-            <option value="" disabled selected>Select a plan</option>
-            <option value="monthly">Monthly — $9.95 / month</option>
-            <option value="yearly">Yearly — Save 15%</option>
-          </select>
-        </div>
-
-        <div class="flex items-start gap-2">
-          <input type="checkbox" id="terms" required
-            class="mt-1 h-4 w-4 text-green-500">
-          <label for="terms" class="text-sm text-gray-700">
-            I agree to the
-            <a href="terms.html" target="_blank" class="text-green-600 hover:underline">Terms</a>
-            and
-            <a href="privacy.html" target="_blank" class="text-green-600 hover:underline">Privacy Policy</a>
-          </label>
-        </div>
-
-        <button
-          type="submit"
-          id="submitBtn"
-          class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-lg text-lg transition">
-          Continue to Secure Checkout
-        </button>
-
-      </form>
-    </div>
-  </div>
-</main>
-
-<footer class="bg-black text-white p-5 text-center text-sm">
-  <p>© 2025 Rhythm Deck Music</p>
-</footer>
+    <button id="btn"
+      class="w-full bg-green-600 text-white py-3 rounded font-bold">
+      Continue to Checkout
+    </button>
+  </form>
+</div>
 
 <script>
-/* ─────────────────────────────────────────────
-   SUPABASE CLIENT (USE YOUR EXISTING KEYS)
-───────────────────────────────────────────── */
-const supabase = supabaseJs.createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_ANON_KEY
-);
-
-document.getElementById('compressorForm').addEventListener('submit', async (e) => {
+document.getElementById('form').addEventListener('submit', async e => {
   e.preventDefault();
 
-  const btn = document.getElementById('submitBtn');
+  const btn = document.getElementById('btn');
   btn.disabled = true;
-  btn.textContent = 'Creating secure session…';
+  btn.textContent = 'Redirecting…';
 
-  const name  = document.getElementById('name').value.trim();
+  const plan = document.getElementById('plan').value;
   const email = document.getElementById('email').value.trim();
-  const plan  = document.getElementById('plan').value;
+  const name = document.getElementById('name').value.trim();
 
-  try {
-    /* 1️⃣ CREATE OR SIGN IN USER */
-    const { data: authData, error: authError } =
-      await supabase.auth.signInWithOtp({
-        email,
-        options: { data: { name } }
-      });
+  const user = await fetch('/auth/user').then(r => r.json());
 
-    if (authError) throw authError;
+  await fetch('/ensure-profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: user.id, email, name })
+  });
 
-    const userId = authData.user.id;
+  const res = await fetch('/create-compressor-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan, email, userId: user.id })
+  });
 
-    /* 2️⃣ UPSERT PROFILE */
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: userId,
-        email,
-        name,
-        plan: 'video_compressor',
-        plan_duration: plan,
-        paid: false,
-        payment_pending: true,
-        updated_at: new Date().toISOString()
-      });
-
-    if (profileError) throw profileError;
-
-    /* 3️⃣ CREATE STRIPE CHECKOUT SESSION */
-    const res = await fetch(
-      'https://rhythm-deck-music.onrender.com/create-compressor-checkout',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan,
-          email,
-          userId
-        })
-      }
-    );
-
-    if (!res.ok) throw new Error('Checkout session failed');
-
-    const { url } = await res.json();
-    window.location.href = url;
-
-  } catch (err) {
-    console.error(err);
-    alert(err.message || 'Signup failed');
-    btn.disabled = false;
-    btn.textContent = 'Continue to Secure Checkout';
-  }
+  const data = await res.json();
+  window.location.href = data.url;
 });
 </script>
 
