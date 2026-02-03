@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Public Profile | Rhythm Deck</title>
 
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase v2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -19,14 +22,41 @@
       align-items: center;
       justify-content: center;
       z-index: 9999;
+      padding: 1rem;
     }
+
     #videoModal.show { display: flex; }
+
+    #modalVideo {
+      max-width: 95vw;
+      max-height: 80vh;
+      background: black;
+      border-radius: 12px;
+    }
+
+    #closeModal {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #ef4444;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10000;
+    }
   </style>
 </head>
 
 <body class="bg-gray-50">
 
-<!-- HEADER -->
+<!-- ================= HEADER ================= -->
 <section class="relative h-72 bg-gradient-to-br from-purple-900 to-blue-900">
   <img id="banner" class="absolute inset-0 w-full h-full object-cover hidden">
   <div class="absolute bottom-6 left-6 w-32 h-32 bg-white rounded-full overflow-hidden border-8 border-white">
@@ -34,144 +64,169 @@
   </div>
 </section>
 
-<!-- PROFILE -->
+<!-- ================= PROFILE ================= -->
 <div class="max-w-4xl mx-auto text-center mt-20 px-6">
   <h1 id="name" class="text-5xl font-black text-emerald-600">Loading…</h1>
-  <p id="bio" class="mt-4 text-gray-700 text-lg"></p>
+  <p id="bio" class="mt-4 text-gray-700 text-lg">Loading profile…</p>
 </div>
 
-<!-- LIVE STREAM -->
+<!-- ================= LIVESTREAM ================= -->
 <section class="max-w-6xl mx-auto mt-16 px-6">
-  <h2 class="text-3xl font-bold mb-4">Live Stream</h2>
+  <h2 class="text-3xl font-black mb-6 text-center">Live Stream</h2>
 
-  <div id="livestreamBox"
-       class="bg-black rounded-xl text-white h-80 flex items-center justify-center text-xl">
-    Offline
-  </div>
-</section>
-
-<!-- CHAT + TIPS -->
-<section class="max-w-6xl mx-auto mt-12 px-6 grid md:grid-cols-3 gap-8">
-
-  <!-- CHAT -->
-  <div class="md:col-span-2 bg-white rounded-xl shadow p-6">
-    <h3 class="text-2xl font-bold mb-4">Live Chat</h3>
-    <div id="chatBox"
-         class="h-64 overflow-y-auto border rounded p-4 text-gray-600">
-      Chat will appear when the stream is live.
+  <div class="bg-black rounded-xl shadow-xl overflow-hidden">
+    <div class="aspect-video flex items-center justify-center text-white text-xl font-bold bg-gradient-to-br from-gray-800 to-gray-900">
+      Live Stream Offline
     </div>
   </div>
 
-  <!-- TIP BUCKET -->
-  <div class="bg-gradient-to-br from-emerald-500 to-green-600 text-white rounded-xl shadow p-6">
-    <h3 class="text-2xl font-bold mb-4">Tip the Artist</h3>
-    <p class="mb-4">Support the stream 💚</p>
-    <button class="w-full bg-white text-emerald-600 font-bold py-3 rounded-lg">
-      Tip (Test Mode)
+  <!-- Tip Bucket -->
+  <div class="mt-6 flex justify-center">
+    <button
+      onclick="alert('Stripe test mode — tipping enabled on Pro profiles')"
+      class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-8 py-4 rounded-xl shadow-lg">
+      💸 Tip the Artist
     </button>
   </div>
-
 </section>
 
-<!-- VIDEOS -->
-<section class="max-w-6xl mx-auto mt-16 px-6">
+<!-- ================= CHAT ================= -->
+<section class="max-w-4xl mx-auto mt-16 px-6">
+  <h2 class="text-3xl font-black mb-4 text-center">Live Chat</h2>
+
+  <div class="bg-white rounded-xl shadow-lg p-4 h-64 flex flex-col">
+    <div class="flex-1 overflow-y-auto text-gray-600 italic flex items-center justify-center">
+      Chat will appear when livestream is active
+    </div>
+
+    <input
+      disabled
+      placeholder="Chat disabled while offline"
+      class="mt-4 border p-3 rounded-lg bg-gray-100 cursor-not-allowed">
+  </div>
+</section>
+
+<!-- ================= VIDEOS ================= -->
+<section class="max-w-6xl mx-auto mt-20 px-6">
   <h2 class="text-4xl font-bold text-center mb-10">Videos</h2>
   <div id="videoList" class="grid md:grid-cols-3 gap-8"></div>
 </section>
 
-<!-- VIDEO MODAL -->
+<!-- ================= VIDEO MODAL ================= -->
 <div id="videoModal">
-  <video id="modalVideo" controls class="max-w-4xl w-full rounded-xl"></video>
+  <div id="closeModal">✕</div>
+  <video id="modalVideo" controls></video>
 </div>
 
 <script>
-/* ===============================
-   SUPABASE
-================================ */
-const supabase = window.supabase.createClient(
+/* =================================================
+   SUPABASE CLIENT (RENAMED — NO CONFLICT)
+================================================= */
+const sb = window.supabase.createClient(
   "https://bxoqhmfnseskwqkywppg.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 );
 
+/* =================================================
+   GET PROFILE ID
+================================================= */
 const params = new URLSearchParams(window.location.search);
 const profileId = params.get("id");
 
-/* ===============================
+/* =================================================
    LOAD PROFILE
-================================ */
+================================================= */
 async function loadProfile() {
-  const { data } = await supabase
+  if (!profileId) return null;
+
+  const { data, error } = await sb
     .from("profiles")
     .select("*")
     .or(`id.eq.${profileId},subdomain.eq.${profileId}`)
     .single();
 
-  if (!data) return null;
+  if (error || !data) {
+    document.getElementById("name").innerText = "Profile not found";
+    return null;
+  }
 
-  name.innerText = data.name;
-  bio.innerText = data.bio || "";
+  document.getElementById("name").innerText = data.name || "Artist";
+  document.getElementById("bio").innerText = data.bio || "";
 
   if (data.banner_url) {
-    banner.src = supabase.storage.from("media")
-      .getPublicUrl(data.banner_url).data.publicUrl;
-    banner.classList.remove("hidden");
+    document.getElementById("banner").src =
+      sb.storage.from("media").getPublicUrl(data.banner_url).data.publicUrl;
+    document.getElementById("banner").classList.remove("hidden");
   }
 
   if (data.logo_url) {
-    logo.src = supabase.storage.from("media")
-      .getPublicUrl(data.logo_url).data.publicUrl;
+    document.getElementById("logo").src =
+      sb.storage.from("media").getPublicUrl(data.logo_url).data.publicUrl;
   }
 
   return data.id;
 }
 
-/* ===============================
+/* =================================================
    LOAD VIDEOS
-================================ */
+================================================= */
 async function loadVideos(userId) {
-  const { data } = await supabase
+  const container = document.getElementById("videoList");
+
+  const { data, error } = await sb
     .from("user_videos")
     .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
 
-    .eq("user_id", userId);
-
-  if (!data || !data.length) {
-    videoList.innerHTML =
+  if (error || !data || data.length === 0) {
+    container.innerHTML =
       `<p class="col-span-full text-center text-gray-500">No videos yet.</p>`;
     return;
   }
 
-  data.forEach(v => {
-    const url = supabase.storage.from("media")
-      .getPublicUrl(v.video_url).data.publicUrl;
+  container.innerHTML = "";
 
-    videoList.innerHTML += `
-      <div onclick="playVideo('${url}')"
-           class="bg-white shadow rounded-xl cursor-pointer">
-        <div class="p-4 font-bold">${v.title}</div>
-      </div>`;
+  data.forEach(v => {
+    const videoUrl =
+      sb.storage.from("media").getPublicUrl(v.video_url).data.publicUrl;
+
+    container.innerHTML += `
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer"
+           onclick="openVideo('${videoUrl}')">
+        <img
+          src="https://via.placeholder.com/400x225/10b981/ffffff?text=Video"
+          class="w-full h-56 object-cover">
+        <div class="p-4 font-bold">${v.title || "Untitled"}</div>
+      </div>
+    `;
   });
 }
 
-/* ===============================
-   VIDEO PLAYER
-================================ */
-function playVideo(url) {
-  modalVideo.src = url;
-  videoModal.classList.add("show");
+/* =================================================
+   VIDEO MODAL
+================================================= */
+function openVideo(url) {
+  const modal = document.getElementById("videoModal");
+  const video = document.getElementById("modalVideo");
+  video.src = url;
+  modal.classList.add("show");
 }
-videoModal.onclick = () => {
-  modalVideo.pause();
-  modalVideo.src = "";
-  videoModal.classList.remove("show");
+
+document.getElementById("closeModal").onclick = () => {
+  const modal = document.getElementById("videoModal");
+  const video = document.getElementById("modalVideo");
+  video.pause();
+  video.src = "";
+  modal.classList.remove("show");
 };
 
-/* ===============================
+/* =================================================
    INIT
-================================ */
+================================================= */
 (async () => {
   const userId = await loadProfile();
-  if (userId) loadVideos(userId);
+  if (userId) await loadVideos(userId);
 })();
 </script>
 
