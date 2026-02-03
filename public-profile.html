@@ -3,220 +3,453 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="logo-favicon.png" type="image/png">
   <title>Public Profile | Rhythm Deck</title>
-
+  <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
+  <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Rhythm Deck Team">
+  <meta property="og:title" content="Public Profile | Rhythm Deck">
+  <meta property="og:description" content="Support artists with exclusive videos, live chats, tips, and premium downloads on Rhythm Deck.">
+  <meta property="og:image" content="https://your-domain.com/og-image.jpg">
+  <meta property="og:url" content="https://your-domain.com/public-profile.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Rhythm Deck">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Public Profile | Rhythm Deck">
+  <meta name="twitter:description" content="Exclusive artist content, live streams, and direct support on Rhythm Deck.">
+  <meta name="twitter:image" content="https://your-domain.com/twitter-image.jpg">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: system-ui, sans-serif; }
-
-    #videoModal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.85);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 1rem;
-    }
-
-    #videoModal.show { display: flex; }
-
-    #modalVideo {
-      max-width: 95vw;
-      max-height: 80vh;
-      background: black;
-      border-radius: 12px;
-    }
-
+    body { font-family: 'Poppins', sans-serif; }
+    .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;}
+    @keyframes spin {0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .video-overlay {position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;cursor:pointer}
+    .video-overlay:hover {opacity:1}
+    #videoModal {position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
+    #videoModal.show {opacity:1;visibility:visible}
+    #modalVideo {max-width:90%;max-height:85vh;border:4px solid #10b981;border-radius:12px;box-shadow:0 0 40px rgba(16,185,129,.5);background:#000;}
     #closeModal {
-      position: fixed;
+      position:absolute !important;
+      top:30px;
+      right:30px;
+      background:#10b981;
+      color:white;
+      width:80px;
+      height:80px;
+      border-radius:50%;
+      font-size:50px;
+      font-weight:bold;
+      display:flex !important;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      box-shadow:0 0 30px rgba(0,0,0,.7);
+      z-index:99999 !important;
+      border:4px solid white;
+      pointer-events:auto !important;
+    }
+    #closeModal:hover {background:#059669; transform:scale(1.1);}
+    .name-glow { color: #10b981; text-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    video.no-controls::-webkit-media-controls,
+    video.no-controls::-webkit-media-controls-enclosure,
+    video.no-controls::-webkit-media-controls-panel,
+    video.no-controls::-webkit-media-controls-overflow-button,
+    video.no-controls::-webkit-media-controls-download-button,
+    video.no-controls::-webkit-media-controls-mute-button,
+    video.no-controls::-webkit-media-controls-fullscreen-button {
+      display: none !important;
+    }
+    .live-badge{position:absolute;top:16px;left:16px;background:#ef4444;color:white;font-weight:900;padding:10px 24px;border-radius:50px;animation:pulse 2s infinite;z-index:10;font-size:1.2rem}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.8)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+    .comment-bubble{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;margin-bottom:.5rem}
+    .comment-name{font-weight:700;color:#10b981}
+    .comment-text{color:#1f2937;margin-left:.5rem;font-weight:500}
+    .join-live-btn {background:#ef4444;color:white;font-weight:900;font-size:1.5rem;padding:1.25rem 3rem;border-radius:1rem;box-shadow:0 10px 25px rgba(239,68,68,0.4);transition:all .3s;}
+    .join-live-btn:hover {background:#dc2626;transform:scale(1.05);box-shadow:0 15px 35px rgba(239,68,68,0.6);}
+    .custom-tip-input {background:white;border:2px solid #10b981;border-radius:0.5rem;padding:0.75rem;text-align:center;font-size:1.25rem;font-weight:bold;color:#065f46;}
+    .style2 {font-size: 14px;font-weight: bold;}
+    .buy-btn {background:#10b981 !important;color:white !important;font-weight:bold;padding:1rem 1.5rem;border-radius:999px;box-shadow:0 4px 12px rgba(16,185,129,0.4);transition:all .3s;}
+    .buy-btn:hover {background:#059669 !important;transform:scale(1.05);}
+    .video-card img.thumbnail-img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      object-position: center;
+      filter: brightness(1.05) contrast(1.08);
+      border-radius: 12px 12px 0 0;
+    }
+    .video-card:hover img.thumbnail-img {
+      filter: brightness(1.15) contrast(1.12);
+      transition: filter 0.3s ease;
+    }
+    #badge-container {
+      position: absolute;
       top: 20px;
       right: 20px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #ef4444;
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10000;
+      z-index: 30;
+    }
+    #badge-container img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 20px rgba(255,215,0,0.7));
+      transition: all 0.3s;
+    }
+    #badge-container img:hover {
+      transform: scale(1.1);
     }
   </style>
 </head>
-
-<body class="bg-gray-50">
-
-<!-- ================= HEADER ================= -->
-<section class="relative h-72 bg-gradient-to-br from-purple-900 to-blue-900">
-  <img id="banner" class="absolute inset-0 w-full h-full object-cover hidden">
-  <div class="absolute bottom-6 left-6 w-32 h-32 bg-white rounded-full overflow-hidden border-8 border-white">
-    <img id="logo" class="w-full h-full object-cover">
-  </div>
-</section>
-
-<!-- ================= PROFILE ================= -->
-<div class="max-w-4xl mx-auto text-center mt-20 px-6">
-  <h1 id="name" class="text-5xl font-black text-emerald-600">Loading…</h1>
-  <p id="bio" class="mt-4 text-gray-700 text-lg">Loading profile…</p>
-</div>
-
-<!-- ================= VIDEOS ================= -->
-<section class="max-w-6xl mx-auto mt-16 px-6">
-  <h2 class="text-4xl font-bold text-center mb-10">Videos</h2>
-  <div id="videoList" class="grid md:grid-cols-3 gap-8"></div>
-</section>
-
-<!-- ================= LIVESTREAM / CHAT / TIP ================= -->
-<section id="liveSection"
-         class="max-w-6xl mx-auto mt-20 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-xl">
-
-  <h3 class="text-3xl font-black text-purple-800 mb-6 text-center">
-    Live Stream & Fan Support
-  </h3>
-
-  <div class="grid md:grid-cols-3 gap-6">
-
-    <!-- VIDEO -->
-    <div class="md:col-span-2 bg-black rounded-xl flex items-center justify-center h-64 text-white text-xl font-bold">
-      Artist is not live right now
+<body class="bg-gray-50 text-gray-900 min-h-screen relative">
+  <!-- Banner Section with Badge Container -->
+  <section class="relative h-[400px] bg-gradient-to-br from-purple-950 to-blue-950 overflow-hidden shadow-2xl">
+    <img id="banner" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
+    <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-5xl font-bold opacity-50">
+      Loading Banner...
     </div>
+    <div class="absolute bottom-8 left-8 w-40 h-40 rounded-full border-[12px] border-white/90 shadow-2xl overflow-hidden bg-white z-10">
+      <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
+    </div>
+    <div id="badge-container"></div>
+  </section>
 
-    <!-- CHAT -->
-    <div class="bg-white rounded-xl shadow p-4 flex flex-col">
-      <h4 class="font-black mb-3">Live Chat</h4>
-      <div class="flex-1 bg-gray-100 rounded p-3 text-sm text-gray-500 flex items-center justify-center">
-        Chat opens when the artist goes live
+  <div class="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
+    <h1 id="name" class="text-6xl md:text-7xl font-bold name-glow mb-6 tracking-tight">Loading...</h1>
+    <p id="bio" class="text-lg md:text-xl text-gray-700 font-light max-w-4xl mx-auto leading-relaxed">Loading bio...</p>
+  </div>
+
+  <section class="max-w-6xl mx-auto px-6 pb-16">
+    <h2 class="text-5xl font-bold text-center mb-16 text-gray-900">Videos</h2>
+    <div id="videoList" class="grid md:grid-cols-3 gap-10"></div>
+  </section>
+
+  <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
+    <div id="proFeaturesSection" class="hidden">
+      <h3 class="text-3xl font-black text-purple-800 mb-6">Watch Live & Chat</h3>
+      <p class="style2">1. Click the red Livestream button to watch your favorite artist or band<br>2. Send a tip to your favorite artist or band</p>
+      <br>
+      <div class="grid lg:grid-cols-3 gap-8 mb-8">
+        <div class="lg:col-span-2">
+          <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
+            <div id="offlineMessage" class="text-center">Artist is not live right now</div>
+            <div id="livepeer-player" class="hidden w-full h-full"></div>
+            <div id="liveIndicator" class="live-badge hidden">LIVE NOW</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-xl p-6 flex flex-col h-full">
+          <h4 class="font-black text-xl text-purple-700 mb-4">Live Chat</h4>
+          <div id="liveChatMessages" class="flex-1 overflow-y-auto bg-gray-50 p-4 rounded-lg min-h-0 max-h-96 space-y-3">
+            <p class="text-gray-500 text-center italic">Chat appears when the artist goes live</p>
+          </div>
+          <div class="mt-4">
+            <p class="text-sm text-gray-600 mb-2">Artist must be live to chat</p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 text-center flex flex-col sm:flex-row gap-6 justify-center items-center">
+        <button id="joinLiveBtn" class="join-live-btn" onClick="joinLivestream()">
+          Join Livestream
+        </button>
+        <div id="tipBucketSection" class="hidden w-full sm:w-auto">
+          <div class="bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-xl shadow-xl border-4 border-emerald-400 text-center">
+            <h4 class="text-2xl font-black text-emerald-800 mb-3">Support the Artist</h4>
+            <p class="text-sm text-gray-700 mb-4">Send a tip — choose an amount or enter your own</p>
+            <div id="stripeStatus" class="mb-4 text-lg font-bold text-green-700">Tip Bucket Active!</div>
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+              <button onClick="sendTip(5)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$5</button>
+              <button onClick="sendTip(10)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$10</button>
+              <button onClick="sendTip(20)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$20</button>
+              <button onClick="sendTip(50)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$50</button>
+            </div>
+            <div class="mt-4">
+              <label class="block text-gray-700 font-bold mb-2">Or enter custom amount ($)</label>
+              <div class="relative max-w-xs mx-auto">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                <input type="number" id="customTipAmount" min="1" step="0.01" placeholder="Your amount" class="custom-tip-input w-full pl-10 pr-4 py-3 border-2 border-emerald-500 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-400 rounded-lg text-center text-xl font-bold">
+              </div>
+              <button onClick="sendCustomTip()" class="mt-4 bg-emerald-700 hover:bg-emerald-800 text-white font-black py-3 px-10 rounded-lg shadow-lg w-full max-w-xs mx-auto">
+                Send Custom Tip
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-6">Powered by Stripe • Secure & Instant</p>
+          </div>
+        </div>
       </div>
     </div>
+  </section>
+
+  <div id="videoModal">
+    <div id="closeModal">×</div>
+    <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
   </div>
 
-  <!-- TIP BUCKET -->
-  <div class="mt-8 bg-emerald-100 p-6 rounded-xl text-center border-4 border-emerald-400">
-    <h4 class="text-2xl font-black text-emerald-800 mb-3">
-      Support the Artist
-    </h4>
+  <script>
+    const sb = supabase.createClient(
+      "https://bxoqhmfnseskwqkywppg.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+    );
 
-    <p class="mb-4 text-gray-700">
-      Tip bucket enabled (Stripe test mode)
-    </p>
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
 
-    <div class="flex justify-center gap-4 flex-wrap">
-      <button class="bg-emerald-600 text-white font-black px-6 py-3 rounded-lg">$5</button>
-      <button class="bg-emerald-600 text-white font-black px-6 py-3 rounded-lg">$10</button>
-      <button class="bg-emerald-600 text-white font-black px-6 py-3 rounded-lg">$20</button>
-    </div>
-  </div>
-</section>
+    async function loadProfile() {
+      if (!id) {
+        document.getElementById('name').textContent = 'Profile not found';
+        return;
+      }
 
-<!-- ================= VIDEO MODAL ================= -->
-<div id="videoModal">
-  <div id="closeModal">✕</div>
-  <video id="modalVideo" controls></video>
-</div>
+      let profile;
+      let { data, error } = await sb
+        .from('profiles')
+        .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+        .eq('subdomain', id)
+        .single();
 
-<!-- ================= SCRIPT ================= -->
-<script>
-/* ================= SUPABASE (SINGLE INSTANCE) ================= */
-const supabase = window.supabase.createClient(
-  "https://bxoqhmfnseskwqkywppg.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
-);
+      if (error || !data) {
+        ({ data, error } = await sb
+          .from('profiles')
+          .select('id, name, bio, banner_url, logo_url, plan, stripe_account_id')
+          .eq('id', id)
+          .single());
+      }
 
-/* ================= URL PARAM ================= */
-const params = new URLSearchParams(window.location.search);
-const profileId = params.get("id");
+      profile = data;
 
-/* ================= LOAD PROFILE ================= */
-async function loadProfile() {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("subdomain", profileId)
-    .single();
+      if (error || !profile) {
+        document.getElementById('name').textContent = 'Profile not found';
+        return;
+      }
 
-  if (error || !data) {
-    document.getElementById("name").innerText = "Profile Not Found";
-    return null;
-  }
+      document.getElementById('name').textContent = profile.name || 'Artist';
+      document.getElementById('bio').textContent = profile.bio || 'No bio yet';
 
-  document.getElementById("name").innerText = data.name || data.username;
-  document.getElementById("bio").innerText = data.bio || "";
+      if (profile.banner_url) {
+        const { data: urlData } = sb.storage.from('media').getPublicUrl(profile.banner_url);
+        document.getElementById('banner').src = urlData.publicUrl + '?t=' + Date.now();
+        document.getElementById('banner').classList.remove('hidden');
+        document.getElementById('bannerPlaceholder').classList.add('hidden');
+      }
 
-  if (data.banner_url) {
-    document.getElementById("banner").src =
-      supabase.storage.from("media").getPublicUrl(data.banner_url).data.publicUrl;
-    document.getElementById("banner").classList.remove("hidden");
-  }
+      if (profile.logo_url) {
+        const { data: urlData } = sb.storage.from('media').getPublicUrl(profile.logo_url);
+        document.getElementById('logo').src = urlData.publicUrl + '?t=' + Date.now();
+      }
 
-  if (data.logo_url) {
-    document.getElementById("logo").src =
-      supabase.storage.from("media").getPublicUrl(data.logo_url).data.publicUrl;
-  }
+      if (profile.plan === 'pro' || profile.plan === 'platinum') {
+        document.getElementById('proFeaturesSection').classList.remove('hidden');
+        if (profile.stripe_account_id) {
+          document.getElementById('tipBucketSection').classList.remove('hidden');
+        }
+      }
 
-  return data.id;
-}
+      return profile; // Return profile for use in loadVideos
+    }
 
-/* ================= LOAD VIDEOS ================= */
-async function loadVideos(userId) {
-  const { data } = await supabase
-    .from("user_videos")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    async function loadVideos() {
+      const container = document.getElementById('videoList');
+      container.innerHTML = '<p class="col-span-full text-center py-20 text-2xl text-gray-600">Loading videos...</p>';
 
-  const container = document.getElementById("videoList");
+      const profile = await loadProfile(); // Ensure profile is loaded first
+      if (!profile) {
+        container.innerHTML = '<p class="col-span-full text-center text-red-600 text-2xl py-20">Profile not found</p>';
+        return;
+      }
 
-  if (!data || data.length === 0) {
-    container.innerHTML =
-      `<p class="col-span-full text-center text-gray-500">No videos yet.</p>`;
-    return;
-  }
+      const { data: videos, error: videoError } = await sb
+        .from('user_videos')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false });
 
-  container.innerHTML = "";
+      if (videoError || !videos?.length) {
+        container.innerHTML = '<p class="col-span-full text-center italic py-20 text-2xl text-gray-600">No videos yet</p>';
+        return;
+      }
 
-  data.forEach(v => {
-    const url = supabase.storage.from("media").getPublicUrl(v.video_url).data.publicUrl;
+      container.innerHTML = '';
 
-    container.innerHTML += `
-      <div class="bg-white rounded-xl shadow-lg cursor-pointer"
-           onclick="openVideo('${url}')">
-        <div class="h-48 bg-black text-white flex items-center justify-center text-5xl">▶</div>
-        <div class="p-4 font-bold">${v.title || "Untitled"}</div>
-      </div>
-    `;
-  });
-}
+      // Check video count for badge
+      const { count: videoCount } = await sb
+        .from('user_videos')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', profile.id);
 
-/* ================= VIDEO MODAL ================= */
-function openVideo(url) {
-  const modal = document.getElementById("videoModal");
-  const video = document.getElementById("modalVideo");
-  video.src = url;
-  modal.classList.add("show");
-}
+      // Show badge if >= 3 videos
+      if (videoCount >= 3) {
+        const badgeContainer = document.getElementById('badge-container');
+        badgeContainer.innerHTML = profile.plan === 'platinum'
+          ? `<img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge">`
+          : `<img src="pro-artist-badge.png" alt="Pro Artist Badge">`;
+      }
 
-document.getElementById("closeModal").onclick = () => {
-  const modal = document.getElementById("videoModal");
-  const video = document.getElementById("modalVideo");
-  video.pause();
-  video.src = "";
-  modal.classList.remove("show");
-};
+      for (const v of videos) {
+        const videoUrl = sb.storage.from('media').getPublicUrl(v.video_url).data.publicUrl;
+        const thumbUrl = v.thumbnail_url
+          ? sb.storage.from('media').getPublicUrl(v.thumbnail_url).data.publicUrl + '?t=' + Date.now()
+          : 'https://via.placeholder.com/400x225/111/eee?text=Video+Thumbnail';
 
-/* ================= INIT ================= */
-(async () => {
-  if (!profileId) return;
-  const userId = await loadProfile();
-  if (userId) await loadVideos(userId);
-})();
-</script>
+        const { count: likes = 0 } = await sb.from('video_likes').select('*', { count: 'exact', head: true }).eq('video_id', v.id);
+        const { data: comments = [] } = await sb
+          .from('video_comments')
+          .select('id, name, comment')
+          .eq('video_id', v.id)
+          .order('created_at', { ascending: false });
 
+        const price = v.price || 0;
+        const isPaid = price > 0;
+
+        const buyButton = isPaid
+          ? `<button onclick="buyVideo(event, '${v.id}', ${price}, '${videoUrl}')" class="buy-btn mt-6 w-full text-lg">
+               Buy & Download – $${price.toFixed(2)}
+             </button>`
+          : '';
+
+        container.innerHTML += `
+          <div class="video-card bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition duration-300">
+            <div class="relative">
+              <img 
+                src="${thumbUrl}" 
+                alt="${v.title || 'Video'}" 
+                class="thumbnail-img"
+                loading="lazy"
+              >
+              <div class="video-overlay" onclick="openVideoModal('${videoUrl}')">
+                <svg class="w-20 h-20 text-white drop-shadow-2xl" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7L8 5z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="p-6">
+              <h4 class="font-bold text-xl truncate mb-4">${v.title || 'Untitled'}</h4>
+              <div class="flex justify-between items-center mb-6">
+                <button class="flex items-center gap-3 text-2xl font-bold hover:text-red-600 transition" onclick="likeVideo('${v.id}')">
+                  ❤️ ${likes}
+                </button>
+                <button onclick="navigator.clipboard.writeText('${videoUrl}'); alert('Link copied!')" class="text-green-600 font-bold hover:text-green-700 text-lg">
+                  Share
+                </button>
+              </div>
+              <div class="border-t pt-4 mb-6">
+                <h5 class="font-bold text-lg mb-3">Comments</h5>
+                ${comments.length === 0 ? '<p class="text-gray-500 italic text-sm">No comments yet</p>' : ''}
+                ${comments.map(c => `
+                  <div class="comment-bubble mb-3">
+                    <span class="comment-name">${c.name}:</span>
+                    <span class="comment-text">${c.comment}</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="mt-4">
+                <input type="text" id="commentName-${v.id}" placeholder="Your name" class="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <textarea id="commentText-${v.id}" placeholder="Add a comment..." class="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500" rows="2"></textarea>
+                <button onclick="addComment('${v.id}')" class="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition w-full font-medium">
+                  Post Comment
+                </button>
+              </div>
+              ${buyButton}
+            </div>
+          </div>`;
+      }
+    }
+
+    function openVideoModal(url) {
+      const modal = document.getElementById('videoModal');
+      const video = document.getElementById('modalVideo');
+      video.src = url;
+      video.load();
+      modal.classList.add('show');
+      video.play().catch(() => {});
+    }
+
+    function closeVideoModal() {
+      const modal = document.getElementById('videoModal');
+      const video = document.getElementById('modalVideo');
+      video.pause();
+      video.currentTime = 0;
+      video.src = '';
+      modal.classList.remove('show');
+    }
+
+    async function likeVideo(videoId) {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) {
+        alert('Please log in to like videos');
+        return;
+      }
+      const { data: existing } = await sb
+        .from('video_likes')
+        .select('id')
+        .eq('video_id', videoId)
+        .eq('user_id', user.id)
+        .single();
+      if (existing) {
+        await sb.from('video_likes').delete().eq('id', existing.id);
+      } else {
+        await sb.from('video_likes').insert({ video_id: videoId, user_id: user.id });
+      }
+      loadVideos();
+    }
+
+    async function addComment(videoId) {
+      const nameEl = document.getElementById(`commentName-${videoId}`);
+      const textEl = document.getElementById(`commentText-${videoId}`);
+      const name = nameEl.value.trim();
+      const comment = textEl.value.trim();
+      if (!name || !comment) {
+        alert('Please enter your name and a comment');
+        return;
+      }
+      await sb.from('video_comments').insert({
+        video_id: videoId,
+        name: name,
+        comment: comment
+      });
+      nameEl.value = '';
+      textEl.value = '';
+      loadVideos();
+    }
+
+    function buyVideo(event, videoId, price, url) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (confirm(`Pay $${price.toFixed(2)} to download this video? (Test mode)`)) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'video-' + videoId + '.mp4';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        alert('Download started! Thank you for supporting the artist ❤️');
+      }
+    }
+
+    function joinLivestream() {
+      alert("Join Livestream clicked! (Test mode)");
+    }
+
+    function sendTip(amount) {
+      alert(`Sending $${amount} tip! (Test mode)`);
+    }
+
+    function sendCustomTip() {
+      alert("Custom tip sent! (Test mode)");
+    }
+
+    window.addEventListener('load', async () => {
+      await loadProfile();
+      await loadVideos();
+      if (!document.getElementById('proFeaturesSection').classList.contains('hidden')) {
+        document.getElementById('joinLiveBtn').classList.remove('hidden');
+      }
+      document.getElementById('closeModal').onclick = closeVideoModal;
+      document.getElementById('videoModal').onclick = (e) => {
+        if (e.target === document.getElementById('videoModal')) closeVideoModal();
+      };
+    });
+  </script>
 </body>
 </html>
