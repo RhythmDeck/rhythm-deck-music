@@ -3,628 +3,194 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" href="logo-favicon.png" type="image/png">
   <title>Public Profile | Rhythm Deck</title>
-
-  <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
-  <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
-  <meta name="robots" content="index, follow">
-  <meta name="author" content="Rhythm Deck Team">
-
-  <meta property="og:title" content="Public Profile | Rhythm Deck">
-  <meta property="og:description" content="Support artists with exclusive videos, live chats, tips, and premium downloads on Rhythm Deck.">
-  <meta property="og:image" content="https://your-domain.com/og-image.jpg">
-  <meta property="og:url" content="https://your-domain.com/public-profile.html">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Rhythm Deck">
-
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Public Profile | Rhythm Deck">
-  <meta name="twitter:description" content="Exclusive artist content, live streams, and direct support on Rhythm Deck.">
-  <meta name="twitter:image" content="https://your-domain.com/twitter-image.jpg">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    body { font-family: 'Poppins', sans-serif; }
+    body { font-family: system-ui, sans-serif; }
 
-    .spinner {
-      border:4px solid #f3f3f3;
-      border-top:4px solid #10b981;
-      border-radius:50%;
-      width:20px;
-      height:20px;
-      animation:spin 1s linear infinite;
-      display:inline-block;
-    }
-
-    @keyframes spin {
-      0% { transform:rotate(0deg); }
-      100% { transform:rotate(360deg); }
-    }
-
-    .video-overlay {
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,.4);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      opacity:0;
-      transition:opacity .3s;
-      cursor:pointer;
-    }
-
-    .video-overlay:hover { opacity:1; }
-
-    /* MODAL SAFETY PREP (FULL LOGIC LATER) */
     #videoModal {
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.95);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:1000;
-      opacity:0;
-      visibility:hidden;
-      transition:opacity .25s ease;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1rem;
     }
 
-    #videoModal.show {
-      opacity:1;
-      visibility:visible;
-    }
+    #videoModal.show { display: flex; }
 
     #modalVideo {
-      max-width:95vw;
-      max-height:80vh;
-      width:auto;
-      height:auto;
-      object-fit:contain;
-      border:4px solid #10b981;
-      border-radius:14px;
-      background:#000;
-      box-shadow:0 0 40px rgba(16,185,129,.5);
+      max-width: 95vw;
+      max-height: 80vh;
+      background: black;
+      border-radius: 12px;
     }
 
     #closeModal {
-      position:fixed;
-      top:24px;
-      right:24px;
-      width:56px;
-      height:56px;
-      background:#10b981;
-      color:white;
-      font-size:36px;
-      font-weight:900;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      z-index:1100;
-      box-shadow:0 0 20px rgba(0,0,0,.6);
-      border:4px solid white;
-    }
-
-    #closeModal:hover {
-      background:#059669;
-      transform:scale(1.08);
-    }
-
-    .name-glow {
-      color:#10b981;
-      text-shadow:0 4px 12px rgba(0,0,0,0.4);
-    }
-
-    .live-badge {
-      position:absolute;
-      top:16px;
-      left:16px;
-      background:#ef4444;
-      color:white;
-      font-weight:900;
-      padding:10px 24px;
-      border-radius:50px;
-      animation:pulse 2s infinite;
-      z-index:10;
-      font-size:1.2rem;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow:0 0 0 0 rgba(239,68,68,.8); }
-      70% { box-shadow:0 0 0 16px rgba(239,68,68,0); }
-      100% { box-shadow:0 0 0 0 rgba(239,68,68,0); }
-    }
-
-    #badge-container {
-      position:absolute;
-      top:20px;
-      right:20px;
-      z-index:30;
-    }
-
-    #badge-container img {
-      width:120px;
-      height:120px;
-      object-fit:contain;
-      filter:drop-shadow(0 0 20px rgba(255,215,0,.7));
-      transition:transform .3s;
-    }
-
-    #badge-container img:hover {
-      transform:scale(1.1);
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #ef4444;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10000;
     }
   </style>
 </head>
 
-<body class="bg-gray-50 text-gray-900 min-h-screen relative">
+<body class="bg-gray-50">
 
-  <!-- BANNER / PROFILE HEADER -->
-  <section class="relative h-[400px] bg-gradient-to-br from-purple-950 to-blue-950 overflow-hidden shadow-2xl">
-    <img id="banner" src="" alt="Banner" class="absolute inset-0 w-full h-full object-cover hidden">
-    <div id="bannerPlaceholder" class="absolute inset-0 flex items-center justify-center text-white text-5xl font-bold opacity-50">
-      Loading Banner...
-    </div>
-
-    <div class="absolute bottom-8 left-8 w-40 h-40 rounded-full border-[12px] border-white/90 shadow-2xl overflow-hidden bg-white z-10">
-      <img id="logo" src="logo-placeholder.png" alt="Logo" class="w-full h-full object-cover">
-    </div>
-
-    <div id="badge-container"></div>
-  </section>
-
-  <!-- PROFILE NAME / BIO -->
-  <div class="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
-    <h1 id="name" class="text-6xl md:text-7xl font-bold name-glow mb-6 tracking-tight">
-      Loading...
-    </h1>
-    <p id="bio" class="text-lg md:text-xl text-gray-700 font-light max-w-4xl mx-auto leading-relaxed">
-      Loading bio...
-    </p>
-  </div>
-<br>
-  <!-- VIDEOS SECTION -->
-  <section class="max-w-6xl mx-auto px-6 pb-16">
-    <h2 class="text-5xl font-bold text-center mb-16 text-gray-900">
-      Videos
-    </h2>
-    <div id="videoList" class="grid md:grid-cols-3 gap-10"></div>
-  </section>
-
-  <!-- PRO / PLATINUM LIVE FEATURES -->
-  <section class="max-w-6xl mx-auto mt-12 p-8 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-2xl border-l-8 border-purple-600">
-    <div id="proFeaturesSection" class="hidden">
-
-      <h3 class="text-3xl font-black text-purple-800 mb-6">
-        Watch Live & Chat
-      </h3>
-
-      <p class="style2 mb-6">
-        1. Click the red Livestream button to watch your favorite artist or band<br>
-        2. Send a tip to support the artist in real time
-      </p>
-
-      <div class="grid lg:grid-cols-3 gap-8 mb-8">
-        <!-- VIDEO PLAYER -->
-        <div class="lg:col-span-2">
-          <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center text-white text-2xl font-bold">
-            <div id="offlineMessage" class="text-center">
-              Artist is not live right now
-            </div>
-
-            <div id="livepeer-player" class="hidden w-full h-full"></div>
-            <div id="liveIndicator" class="live-badge hidden">
-              LIVE NOW
-            </div>
-          </div>
-        </div>
-
-        <!-- LIVE CHAT -->
-        <div class="bg-white rounded-xl shadow-xl p-6 flex flex-col h-full">
-          <h4 class="font-black text-xl text-purple-700 mb-4">
-            Live Chat
-          </h4>
-
-          <div id="liveChatMessages"
-               class="flex-1 overflow-y-auto bg-gray-50 p-4 rounded-lg min-h-0 max-h-96 space-y-3">
-            <p class="text-gray-500 text-center italic">
-              Chat appears when the artist goes live
-            </p>
-          </div>
-
-          <div class="mt-4">
-            <p class="text-sm text-gray-600">
-              Artist must be live to chat
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- JOIN LIVE + TIP BUCKET -->
-      <div class="mt-8 text-center flex flex-col sm:flex-row gap-6 justify-center items-center">
-
-        <button id="joinLiveBtn"
-                class="join-live-btn"
-                onclick="joinLivestream()">
-          Join Livestream
-        </button>
-
-        <!-- TIP BUCKET -->
-        <div id="tipBucketSection" class="hidden w-full sm:w-auto">
-          <div class="bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-xl shadow-xl border-4 border-emerald-400 text-center">
-
-            <h4 class="text-2xl font-black text-emerald-800 mb-3">
-              Support the Artist
-            </h4>
-
-            <p class="text-sm text-gray-700 mb-4">
-              Send a tip — choose an amount or enter your own
-            </p>
-
-            <div id="stripeStatus"
-                 class="mb-4 text-lg font-bold text-green-700">
-              Tip Bucket Active!
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-4 mb-6">
-              <button onclick="sendTip(5)"  class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$5</button>
-              <button onclick="sendTip(10)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$10</button>
-              <button onclick="sendTip(20)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$20</button>
-              <button onclick="sendTip(50)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-8 rounded-lg shadow-lg">$50</button>
-            </div>
-
-            <div class="mt-4">
-              <label class="block text-gray-700 font-bold mb-2">
-                Or enter custom amount ($)
-              </label>
-
-              <div class="relative max-w-xs mx-auto">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
-                <input type="number"
-                       id="customTipAmount"
-                       min="1"
-                       step="0.01"
-                       placeholder="Your amount"
-                       class="custom-tip-input w-full pl-10 pr-4 py-3 border-2 border-emerald-500 rounded-lg text-center text-xl font-bold">
-              </div>
-
-              <button onclick="sendCustomTip()"
-                      class="mt-4 bg-emerald-700 hover:bg-emerald-800 text-white font-black py-3 px-10 rounded-lg shadow-lg w-full max-w-xs mx-auto">
-                Send Custom Tip
-              </button>
-            </div>
-
-            <p class="text-xs text-gray-500 mt-6">
-              Powered by Stripe • Secure & Instant
-            </p>
-
-          </div>
-        </div>
-      </div>
-
+  <!-- HEADER -->
+  <section class="relative h-72 bg-gradient-to-br from-purple-900 to-blue-900">
+    <img id="banner" class="absolute inset-0 w-full h-full object-cover hidden">
+    <div class="absolute bottom-6 left-6 w-32 h-32 bg-white rounded-full overflow-hidden border-8 border-white">
+      <img id="logo" class="w-full h-full object-cover">
     </div>
   </section>
 
-  <!-- VIDEO MODAL (FIXED SIZE + ALWAYS VISIBLE CLOSE BUTTON) -->
-  <div id="videoModal"
-       class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-6">
-
-    <div class="relative bg-black rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col">
-
-      <!-- CLOSE BUTTON -->
-      <button id="closeModal"
-              onclick="closeModal()"
-              class="absolute -top-5 -right-5 bg-red-600 hover:bg-red-700 text-white font-black rounded-full w-12 h-12 flex items-center justify-center shadow-xl z-50">
-        ✕
-      </button>
-
-      <!-- VIDEO -->
-      <video id="modalVideo"
-             controls
-             autoplay
-             class="w-full h-auto max-h-[75vh] rounded-xl bg-black object-contain">
-      </video>
-
-    </div>
+  <!-- PROFILE -->
+  <div class="max-w-4xl mx-auto text-center mt-20 px-6">
+    <h1 id="name" class="text-5xl font-black text-emerald-600">Loading…</h1>
+    <p id="bio" class="mt-4 text-gray-700 text-lg">Loading profile…</p>
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
-  <script>
-    const sb = window.supabase.createClient(
+  <!-- VIDEOS -->
+  <section class="max-w-6xl mx-auto mt-16 px-6">
+    <h2 class="text-4xl font-bold text-center mb-10">Videos</h2>
+    <div id="videoList" class="grid md:grid-cols-3 gap-8"></div>
+  </section>
+
+  <!-- VIDEO MODAL -->
+  <div id="videoModal">
+    <div id="closeModal">✕</div>
+    <video id="modalVideo" controls></video>
+  </div>
+
+<script>
+/* ===============================
+   SUPABASE CLIENT (SINGLE SOURCE)
+================================ */
+const supabase = window.supabase.createClient(
   "https://bxoqhmfnseskwqkywppg.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 );
 
-    /* ------------------------------
-       LOAD PROFILE
-    ------------------------------ */
-    async function loadProfile() {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("username", profileUsername)
-        .single();
+/* ===============================
+   GET PROFILE ID FROM URL
+================================ */
+const params = new URLSearchParams(window.location.search);
+const profileId = params.get("id");
 
-      if (error || !data) {
-        document.getElementById("profileName").innerText = "Profile Not Found";
-        return;
-      }
-
-      document.getElementById("profileName").innerText = data.display_name || data.username;
-      document.getElementById("profileBio").innerText = data.bio || "No bio available";
-      document.getElementById("profileAvatar").src = data.avatar_url || "default-avatar.png";
-
-      if (data.plan === "pro" || data.plan === "platinum") {
-        document.getElementById("proFeaturesSection").classList.remove("hidden");
-      }
-    }
-
-    /* ------------------------------
-       LOAD VIDEOS
-    ------------------------------ */
-    async function loadVideos() {
-      const { data, error } = await supabase
-        .from("videos")
-        .select("*")
-        .eq("username", profileUsername)
-        .order("created_at", { ascending: false });
-
-      const container = document.getElementById("videoList");
-
-      if (error || !data || data.length === 0) {
-        container.innerHTML = `<p class="text-center text-gray-500 col-span-full">No videos uploaded yet.</p>`;
-        return;
-      }
-
-      container.innerHTML = "";
-
-      data.forEach(video => {
-        const card = document.createElement("div");
-        card.className = "bg-white rounded-xl shadow-xl overflow-hidden cursor-pointer hover:scale-105 transition";
-
-        card.innerHTML = `
-          <div class="relative">
-            <img src="${video.thumbnail_url}" class="w-full h-56 object-cover">
-            <div class="absolute inset-0 flex items-center justify-center text-white text-5xl font-black bg-black/40">
-              ▶
-            </div>
-          </div>
-
-          <div class="p-5">
-            <h4 class="font-black text-lg mb-1">${video.title}</h4>
-            <p class="text-sm text-gray-600">${video.description || ""}</p>
-          </div>
-        `;
-
-        card.onclick = () => openVideoModal(video.video_url);
-        container.appendChild(card);
-      });
-    }
-
-    /* ------------------------------
-       VIDEO MODAL CONTROLS
-    ------------------------------ */
-    function openVideoModal(videoUrl) {
-      const modal = document.getElementById("videoModal");
-      const video = document.getElementById("modalVideo");
-
-      video.src = videoUrl;
-      modal.classList.remove("hidden");
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeModal() {
-      const modal = document.getElementById("videoModal");
-      const video = document.getElementById("modalVideo");
-
-      video.pause();
-      video.src = "";
-      modal.classList.add("hidden");
-      document.body.style.overflow = "auto";
-    }
-
-    /* ------------------------------
-       LIVESTREAM PLACEHOLDERS
-    ------------------------------ */
-    function joinLivestream() {
-      alert("Livestream will open when artist is live.");
-    }
-
-    function sendTip(amount) {
-      alert("Sending $" + amount + " tip...");
-    }
-
-    function sendCustomTip() {
-      const amt = document.getElementById("customTipAmount").value;
-      if (!amt || amt <= 0) return alert("Enter a valid amount");
-      alert("Sending custom tip: $" + amt);
-    }
-
-    /* ------------------------------
-       INIT
-    ------------------------------ */
-    loadProfile();
-    loadVideos();
-  </script>
-
-<style>
-  /* ===============================
-     GLOBAL POLISH
-  =============================== */
-  body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: linear-gradient(to bottom right, #f9fafb, #eef2f7);
+/* ===============================
+   LOAD PROFILE
+================================ */
+async function loadProfile() {
+  if (!profileId) {
+    document.getElementById("name").innerText = "Profile not found";
+    return null;
   }
 
-  img {
-    max-width: 100%;
-    display: block;
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .or(`id.eq.${profileId},subdomain.eq.${profileId}`)
+    .single();
+
+  if (error || !data) {
+    document.getElementById("name").innerText = "Profile not found";
+    return null;
   }
 
-  /* ===============================
-     PROFILE HEADER
-  =============================== */
-  #profileAvatar {
-    width: 128px;
-    height: 128px;
-    border-radius: 9999px;
-    object-fit: cover;
-    border: 6px solid #10b981;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  document.getElementById("name").innerText = data.name || "Artist";
+  document.getElementById("bio").innerText = data.bio || "";
+
+  if (data.banner_url) {
+    document.getElementById("banner").src =
+      supabase.storage.from("media").getPublicUrl(data.banner_url).data.publicUrl;
+    document.getElementById("banner").classList.remove("hidden");
   }
 
-  /* ===============================
-     PRO BADGE
-  =============================== */
-  .pro-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    font-weight: 900;
-    font-size: 0.75rem;
-    padding: 4px 10px;
-    border-radius: 9999px;
-    margin-left: 8px;
-    box-shadow: 0 4px 12px rgba(16,185,129,0.4);
-    vertical-align: middle;
+  if (data.logo_url) {
+    document.getElementById("logo").src =
+      supabase.storage.from("media").getPublicUrl(data.logo_url).data.publicUrl;
   }
 
-  /* ===============================
-     VIDEO GRID
-  =============================== */
-  #videoList {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.5rem;
+  return data.id;
+}
+
+/* ===============================
+   LOAD VIDEOS
+================================ */
+async function loadVideos(userId) {
+  const container = document.getElementById("videoList");
+
+  const { data, error } = await supabase
+    .from("user_videos")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    container.innerHTML =
+      `<p class="col-span-full text-center text-gray-500">No videos yet.</p>`;
+    return;
   }
 
-  /* ===============================
-     VIDEO CARD
-  =============================== */
-  #videoList > div {
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
+  container.innerHTML = "";
 
-  #videoList > div:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-  }
+  data.forEach(v => {
+    const videoUrl =
+      supabase.storage.from("media").getPublicUrl(v.video_url).data.publicUrl;
 
-  /* ===============================
-     VIDEO MODAL FIXES
-  =============================== */
-  #videoModal video {
-    background: black;
-  }
+    container.innerHTML += `
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer"
+           onclick="openVideo('${videoUrl}')">
+        <img src="https://via.placeholder.com/400x225?text=Video"
+             class="w-full h-56 object-cover">
+        <div class="p-4 font-bold">${v.title || "Untitled"}</div>
+      </div>
+    `;
+  });
+}
 
-  #videoModal button {
-    line-height: 1;
-  }
+/* ===============================
+   VIDEO MODAL
+================================ */
+function openVideo(url) {
+  const modal = document.getElementById("videoModal");
+  const video = document.getElementById("modalVideo");
+  video.src = url;
+  modal.classList.add("show");
+}
 
-  /* ===============================
-     LIVESTREAM SECTION
-  =============================== */
-  .live-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 900;
-    color: #dc2626;
-    animation: pulse 1.5s infinite;
-  }
+document.getElementById("closeModal").onclick = () => {
+  const modal = document.getElementById("videoModal");
+  const video = document.getElementById("modalVideo");
+  video.pause();
+  video.src = "";
+  modal.classList.remove("show");
+};
 
-  .live-dot {
-    width: 12px;
-    height: 12px;
-    background: #dc2626;
-    border-radius: 9999px;
-  }
-
-  @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.4; }
-    100% { opacity: 1; }
-  }
-
-  /* ===============================
-     BUTTONS
-  =============================== */
-  .primary-btn {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    font-weight: 900;
-    padding: 12px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(16,185,129,0.4);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .primary-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 16px 40px rgba(16,185,129,0.6);
-  }
-
-  .tip-btn {
-    background: #111827;
-    color: white;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-weight: 800;
-    transition: background 0.2s ease, transform 0.2s ease;
-  }
-
-  .tip-btn:hover {
-    background: #000;
-    transform: scale(1.05);
-  }
-
-  /* ===============================
-     INPUTS
-  =============================== */
-  input[type="number"] {
-    border-radius: 10px;
-    border: 2px solid #e5e7eb;
-    padding: 10px;
-    font-weight: 700;
-    width: 100%;
-  }
-
-  input[type="number"]:focus {
-    outline: none;
-    border-color: #10b981;
-  }
-
-  /* ===============================
-     RESPONSIVE
-  =============================== */
-  @media (max-width: 768px) {
-    #profileAvatar {
-      width: 96px;
-      height: 96px;
-    }
-
-    #videoModal .max-w-4xl {
-      max-width: 100%;
-    }
-
-    .primary-btn {
-      width: 100%;
-      text-align: center;
-    }
-  }
-</style>
-
-<!-- OPTIONAL FOOTER -->
-<footer class="mt-20 py-10 text-center text-sm text-gray-500">
-  © <span id="year"></span> Rhythm Deck · All Rights Reserved
-</footer>
-
-<script>
-  document.getElementById("year").innerText = new Date().getFullYear();
+/* ===============================
+   INIT
+================================ */
+(async () => {
+  const userId = await loadProfile();
+  if (userId) await loadVideos(userId);
+})();
 </script>
 
 </body>
