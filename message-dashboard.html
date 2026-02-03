@@ -57,138 +57,186 @@ Send Reply
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const supabase = createClient(
-'https://bxoqhmfnseskwqkywppg.supabase.co',
-'YOUR_ANON_KEY_HERE'
+  'https://bxoqhmfnseskwqkywppg.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
 );
 
-let userId=null;
-let messages=[];
-let activeRoot=null;
+let userId = null;
+let messages = [];
+let activeRoot = null;
+let initialized = false;
 
-async function loadMessages(){
-const { data:{user} }=await supabase.auth.getUser();
-if(!user){location.href='login.html';return;}
-userId=user.id;
+/* ───────────────────────── AUTH SAFE INIT ───────────────────────── */
 
-const { data,error } = await supabase
-.from('collab_requests')
-.select(`
-id,parent_id,sender_id,receiver_id,message,created_at,read_at,
-sender:sender_id(name),
-receiver:receiver_id(name)
-`)
-.or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-.order('created_at',{ascending:false});
+async function initAuth() {
+  const { data } = await supabase.auth.getSession();
 
-if(error){console.error(error);return;}
-messages=data||[];
+  if (!data.session) {
+    location.replace('login.html');
+    return;
+  }
 
-const threads={};
-messages.forEach(m=>{
-const root=m.parent_id||m.id;
-if(!threads[root])threads[root]=[];
-threads[root].push(m);
+  userId = data.session.user.id;
+  loadMessages();
+}
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (!initialized && session?.user) {
+    initialized = true;
+    userId = session.user.id;
+    loadMessages();
+  }
 });
 
-const list=document.getElementById('conversationList');
-list.innerHTML='';
+initAuth();
 
-Object.entries(threads).forEach(([rootId,thread])=>{
-const root=thread.find(m=>!m.parent_id);
-const latest=thread.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
-const isUnread = !root.read_at && root.receiver_id===userId;
+/* ───────────────────────── MESSAGES ───────────────────────── */
 
-const name = root.sender_id===userId ? root.receiver.name : root.sender.name;
+async function loadMessages() {
+  if (!userId) return;
 
-const div=document.createElement('div');
-div.className='msg-item p-4 border-b border-gray-800 cursor-pointer';
-div.innerHTML=`
-<div class="flex justify-between items-center">
-<div>
-<p class="font-bold">${name}</p>
-<p class="msg-preview text-gray-300">${latest.message}</p>
-</div>
-<div class="flex items-center gap-3">
-${isUnread?'<span class="px-3 py-1 rounded-full badge-new">New</span>':'<span class="px-3 py-1 rounded-full badge-read">Read</span>'}
-<button onclick="deleteThread('${rootId}',event)" class="text-red-400 text-xl">🗑️</button>
-</div>
-</div>
-`;
-div.onclick=()=>openThread(rootId);
-list.appendChild(div);
-});
+  const { data, error } = await supabase
+    .from('collab_requests')
+    .select(`
+      id,parent_id,sender_id,receiver_id,message,created_at,read_at,
+      sender:sender_id(name),
+      receiver:receiver_id(name)
+    `)
+    .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+    .order('created_at', { ascending: false });
 
-if(Object.keys(threads).length)openThread(Object.keys(threads)[0]);
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  messages = data || [];
+  renderConversations();
 }
 
-async function openThread(rootId){
-activeRoot=rootId;
-const thread=messages.filter(m=>m.id===rootId||m.parent_id===rootId)
-.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+function renderConversations() {
+  const list = document.getElementById('conversationList');
+  list.innerHTML = '';
 
-const root=thread[0];
-if(root.receiver_id===userId && !root.read_at){
-await supabase.from('collab_requests').update({read_at:new Date().toISOString()}).eq('id',root.id);
+  const threads = {};
+  messages.forEach(m => {
+    const root = m.parent_id || m.id;
+    if (!threads[root]) threads[root] = [];
+    threads[root].push(m);
+  });
+
+  Object.entries(threads).forEach(([rootId, thread]) => {
+    const root = thread.find(m => !m.parent_id);
+    if (!root) return;
+
+    const latest = thread.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
+    const isUnread = !root.read_at && root.receiver_id === userId;
+    const name = root.sender_id === userId ? root.receiver.name : root.sender.name;
+
+    const div = document.createElement('div');
+    div.className = 'msg-item p-4 border-b border-gray-800 cursor-pointer';
+    div.onclick = () => openThread(rootId);
+
+    div.innerHTML = `
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="font-bold">${name}</p>
+          <p class="msg-preview text-gray-300">${latest.message}</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="px-3 py-1 rounded-full ${isUnread ? 'badge-new' : 'badge-read'}">
+            ${isUnread ? 'New' : 'Read'}
+          </span>
+          <button onclick="deleteThread('${rootId}',event)" class="text-red-400 text-xl">🗑️</button>
+        </div>
+      </div>
+    `;
+
+    list.appendChild(div);
+  });
+
+  const first = Object.keys(threads)[0];
+  if (first) openThread(first);
 }
 
-const name=root.sender_id===userId?root.receiver.name:root.sender.name;
+async function openThread(rootId) {
+  activeRoot = rootId;
+  const thread = messages
+    .filter(m => m.id === rootId || m.parent_id === rootId)
+    .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
 
-let html=`<h2 class="text-3xl font-black text-emerald-400 mb-6">${name}</h2>`;
-thread.forEach(m=>{
-const sender=m.sender_id===userId?'You':name;
-html+=`
-<div class="mb-4 p-4 rounded-xl bg-black/30">
-<p class="font-bold text-emerald-300">${sender}</p>
-<p>${m.message}</p>
-</div>
-`;
-});
+  const root = thread[0];
 
-html+=`<button onclick="openReply('${name}')" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
-document.getElementById('messageView').innerHTML=html;
-loadMessages();
+  if (root.receiver_id === userId && !root.read_at) {
+    await supabase.from('collab_requests')
+      .update({ read_at: new Date().toISOString() })
+      .eq('id', root.id);
+  }
+
+  const name = root.sender_id === userId ? root.receiver.name : root.sender.name;
+
+  let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${name}</h2>`;
+  thread.forEach(m => {
+    const who = m.sender_id === userId ? 'You' : name;
+    html += `
+      <div class="mb-4 p-4 rounded-xl bg-black/30">
+        <p class="font-bold text-emerald-300">${who}</p>
+        <p>${m.message}</p>
+      </div>
+    `;
+  });
+
+  html += `<button onclick="openReply('${name}')" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
+  document.getElementById('messageView').innerHTML = html;
 }
 
-function openReply(name){
-document.getElementById('replyName').innerText=name;
-document.getElementById('replyModal').classList.remove('hidden');
-document.getElementById('replyModal').classList.add('flex');
+function openReply(name) {
+  document.getElementById('replyName').innerText = name;
+  document.getElementById('replyModal').classList.remove('hidden');
+  document.getElementById('replyModal').classList.add('flex');
 }
 
-function closeReply(){
-document.getElementById('replyModal').classList.add('hidden');
-document.getElementById('replyText').value='';
+function closeReply() {
+  document.getElementById('replyModal').classList.add('hidden');
+  document.getElementById('replyText').value = '';
 }
 
-async function sendReply(){
-const text=document.getElementById('replyText').value.trim();
-if(!text)return;
+async function sendReply() {
+  const text = document.getElementById('replyText').value.trim();
+  if (!text) return;
 
-const root=messages.find(m=>m.id===activeRoot);
-const receiver=root.sender_id===userId?root.receiver_id:root.sender_id;
+  const root = messages.find(m => m.id === activeRoot);
+  const receiver = root.sender_id === userId ? root.receiver_id : root.sender_id;
 
-await supabase.from('collab_requests').insert({
-parent_id:activeRoot,
-sender_id:userId,
-receiver_id:receiver,
-message:text
-});
+  await supabase.from('collab_requests').insert({
+    parent_id: activeRoot,
+    sender_id: userId,
+    receiver_id: receiver,
+    message: text
+  });
 
-closeReply();
-loadMessages();
+  closeReply();
+  loadMessages();
 }
 
-async function deleteThread(rootId,e){
-e.stopPropagation();
-if(!confirm('Delete this conversation?'))return;
-const toDelete=messages.filter(m=>m.id===rootId||m.parent_id===rootId);
-for(const m of toDelete){
-await supabase.from('collab_requests').delete().eq('id',m.id);
-}
-loadMessages();
-}
+async function deleteThread(rootId, e) {
+  e.stopPropagation();
+  if (!confirm('Delete this conversation?')) return;
 
-loadMessages();
+  const toDelete = messages.filter(m => m.id === rootId || m.parent_id === rootId);
+  for (const m of toDelete) {
+    await supabase.from('collab_requests').delete().eq('id', m.id);
+  }
+  loadMessages();
+}
 </script>
+
 </body>
 </html>
