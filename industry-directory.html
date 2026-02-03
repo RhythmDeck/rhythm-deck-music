@@ -7,174 +7,134 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   body {
-    background: #f3e8ff;
+    background: linear-gradient(135deg, #f3e8ff, #e0f2fe);
     font-family: system-ui, sans-serif;
   }
   .card {
     transition: all 0.3s ease;
-    background: white;
   }
   .card:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
   }
-  .modal {
-    animation: fadeIn 0.2s ease;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-.style1 {color: #00CC00}
 </style>
 </head>
 <body class="min-h-screen py-12">
 
 <div class="max-w-7xl mx-auto px-6">
-  <!-- Header with logo, title, tagline, and back button -->
+
+  <!-- Header -->
   <header class="flex items-center justify-between mb-16">
     <div class="flex items-center gap-4">
       <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="h-16 w-16 rounded-full">
       <div>
         <h1 class="text-4xl font-bold text-purple-900">RHYTHM DECK</h1>
-        <p class="text-lg text-purple-700">Unleash the Beat</p>
+        <p class="text-lg text-purple-700">Unleash Your Beat</p>
       </div>
     </div>
-    <a href="profile-admin-pro.html" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
+    <a href="profile-admin-pro.html" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold px-10 py-4 rounded-full shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
       Back to Dashboard
     </a>
   </header>
-   <h1 class="text-4xl font-bold text-purple-900 mb-8 text-center">Industry Directory</h1><br><br>
+
   <!-- Producers -->
-  <h2 align="left" class="text-4xl font-bold text-purple-900 mb-8 text-left">Music Producers</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">Alex Rivera</h3>
-        <p class="text-purple-600 font-medium">Trap / Reggaeton Producer</p>
-        <p class="text-gray-600 my-4">Credits: Bad Bunny, J Balvin, Ozuna. 12× Platinum.</p>
-        <button onclick="connectTo('Alex Rivera')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+  <h2 class="text-4xl font-bold text-purple-900 mb-8">Music Producers</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">Alex Rivera</h3>
+      <p class="text-purple-600 font-medium">Trap / Reggaeton</p>
+      <p class="text-gray-600 my-4">Credits: Bad Bunny, J Balvin, Ozuna • 12× Platinum</p>
+      <button onclick="connectTo('Alex Rivera')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
 
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">Sophia Chen</h3>
-        <p class="text-purple-600 font-medium">Cinematic Pop Producer</p>
-        <p class="text-gray-600 my-4">Credits: Billie Eilish, The Weeknd, Netflix scores.</p>
-        <button onclick="connectTo('Sophia Chen')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">Sophia Chen</h3>
+      <p class="text-purple-600 font-medium">Cinematic Pop</p>
+      <p class="text-gray-600 my-4">Credits: Billie Eilish, The Weeknd, Netflix</p>
+      <button onclick="connectTo('Sophia Chen')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
 
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">Jamal Knox</h3>
-        <p class="text-purple-600 font-medium">Hip-Hop / R&B Producer</p>
-        <p class="text-gray-600 my-4">Credits: Drake, SZA, Kendrick Lamar features. 5× Platinum.</p>
-        <button onclick="connectTo('Jamal Knox')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">Jamal Knox</h3>
+      <p class="text-purple-600 font-medium">Hip-Hop / R&B</p>
+      <p class="text-gray-600 my-4">Credits: Drake, SZA, Kendrick Lamar</p>
+      <button onclick="connectTo('Jamal Knox')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
-
   </div>
 
   <!-- Distributors -->
-  <h2 align="left" class="text-4xl font-bold text-purple-900 mb-8 text-left">Music Distributors</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">DistroWave Global</h3>
-        <p class="text-purple-600 font-medium">Digital Distributor</p>
-        <p class="text-gray-600 my-4">150+ platforms • Fast payouts • Playlist pitching included.</p>
-        <button onclick="connectTo('DistroWave Global')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+  <h2 class="text-4xl font-bold text-purple-900 mb-8">Music Distributors</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">DistroWave Global</h3>
+      <p class="text-purple-600 font-medium">Global Digital Distribution</p>
+      <p class="text-gray-600 my-4">150+ platforms • Fast payouts • Playlist pitching</p>
+      <button onclick="connectTo('DistroWave Global')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
 
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">IndieFlow Distribution</h3>
-        <p class="text-purple-600 font-medium">Indie & Latin Specialist</p>
-        <p class="text-gray-600 my-4">Spotify & TikTok focus • Transparent royalties.</p>
-        <button onclick="connectTo('IndieFlow Distribution')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">IndieFlow Distribution</h3>
+      <p class="text-purple-600 font-medium">Indie & Latin Focus</p>
+      <p class="text-gray-600 my-4">Spotify & TikTok specialist • Transparent royalties</p>
+      <button onclick="connectTo('IndieFlow Distribution')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
 
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">TuneCore Pro</h3>
-        <p class="text-purple-600 font-medium">Global Distribution</p>
-        <p class="text-gray-600 my-4">Keep 100% royalties • YouTube monetization included.</p>
-        <button onclick="connectTo('TuneCore Pro')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">TuneCore Pro</h3>
+      <p class="text-purple-600 font-medium">Keep 100% Royalties</p>
+      <p class="text-gray-600 my-4">YouTube monetization • Global reach</p>
+      <button onclick="connectTo('TuneCore Pro')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
-
   </div>
 
   <!-- Publishers -->
-  <h2 align="left" class="text-4xl font-bold text-purple-900 mb-8 text-left">Music Publishers</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">Pulse Music Group</h3>
-        <p class="text-purple-600 font-medium">Music Publisher</p>
-        <p class="text-gray-600 my-4">Sync licensing • Admin • Roster includes Grammy winners.</p>
-        <button onclick="connectTo('Pulse Music Group')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+  <h2 class="text-4xl font-bold text-purple-900 mb-8">Music Publishers</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">Pulse Music Group</h3>
+      <p class="text-purple-600 font-medium">Sync & Admin Publishing</p>
+      <p class="text-gray-600 my-4">Grammy-winning roster • Creative sync team</p>
+      <button onclick="connectTo('Pulse Music Group')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
 
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">Kobalt Music</h3>
-        <p class="text-purple-600 font-medium">Independent Publisher</p>
-        <p class="text-gray-600 my-4">Creative & admin services • Tech-driven royalty tracking.</p>
-        <button onclick="connectTo('Kobalt Music')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">Kobalt Music</h3>
+      <p class="text-purple-600 font-medium">Independent Publisher</p>
+      <p class="text-gray-600 my-4">Tech-driven royalties • Creative services</p>
+      <button onclick="connectTo('Kobalt Music')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
 
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">Warner Chappell</h3>
-        <p class="text-purple-600 font-medium">Major Publisher</p>
-        <p class="text-gray-600 my-4">Global sync & creative team • Extensive catalog.</p>
-        <button onclick="connectTo('Warner Chappell')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">Warner Chappell</h3>
+      <p class="text-purple-600 font-medium">Major Global Publisher</p>
+      <p class="text-gray-600 my-4">Extensive catalog • Sync licensing</p>
+      <button onclick="connectTo('Warner Chappell')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
-
   </div>
 
   <!-- Music Supervisors -->
-  <h2 align="left" class="text-4xl font-bold text-purple-900 mb-8 text-left">Music Supervisors</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">Lena Torres</h3>
-        <p class="text-purple-600 font-medium">Music Supervisor</p>
-        <p class="text-gray-600 my-4">Credits: Euphoria, Stranger Things, Bridgerton, major ad campaigns.</p>
-        <button onclick="connectTo('Lena Torres')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+  <h2 class="text-4xl font-bold text-purple-900 mb-8">Music Supervisors</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">Lena Torres</h3>
+      <p class="text-purple-600 font-medium">TV / Film Supervisor</p>
+      <p class="text-gray-600 my-4">Euphoria, Stranger Things, Bridgerton</p>
+      <button onclick="connectTo('Lena Torres')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
 
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">Marcus Hale</h3>
-        <p class="text-purple-600 font-medium">Film & TV Supervisor</p>
-        <p class="text-gray-600 my-4">Credits: Marvel, HBO Max, Nike campaigns.</p>
-        <button onclick="connectTo('Marcus Hale')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">Marcus Hale</h3>
+      <p class="text-purple-600 font-medium">Film & Advertising</p>
+      <p class="text-gray-600 my-4">Marvel, HBO, Nike campaigns</p>
+      <button onclick="connectTo('Marcus Hale')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
 
-    <div class="card rounded-3xl overflow-hidden shadow-xl">
-      <div class="p-8">
-        <h3 class="text-2xl font-bold mb-1">Elena Voss</h3>
-        <p class="text-purple-600 font-medium">Advertising Supervisor</p>
-        <p class="text-gray-600 my-4">Credits: Apple, Coca-Cola, Netflix originals.</p>
-        <button onclick="connectTo('Elena Voss')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
-      </div>
+    <div class="card bg-white rounded-3xl p-8 shadow-xl">
+      <h3 class="text-2xl font-bold mb-1">Elena Voss</h3>
+      <p class="text-purple-600 font-medium">TV & Sync Specialist</p>
+      <p class="text-gray-600 my-4">Apple, Coca-Cola, Netflix originals</p>
+      <button onclick="connectTo('Elena Voss')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Send Message</button>
     </div>
-
   </div>
 </div>
 
@@ -184,7 +144,7 @@
     <h3 class="text-2xl font-bold mb-2" id="modalTitle">Message Alex Rivera</h3>
     <p class="text-gray-500 mb-6">Send a short message — they'll receive it in their dashboard.</p>
     
-    <textarea id="messageText" rows="5" class="w-full border border-gray-300 rounded-2xl p-4 focus:outline-none focus:border-purple-600" placeholder="Hi Alex, I love your work on the latest Bad Bunny track..."></textarea>
+    <textarea id="messageText" rows="5" class="w-full border border-gray-300 rounded-2xl p-4 focus:outline-none focus:border-purple-600" placeholder="Hi Alex, I really love your latest track..."></textarea>
     
     <div class="flex gap-4 mt-8">
       <button onclick="closeModal()" class="flex-1 py-4 border border-gray-300 rounded-2xl font-semibold">Cancel</button>
@@ -228,7 +188,6 @@ function sendMessage() {
   document.body.appendChild(toast);
 
   setTimeout(() => toast.remove(), 3000);
-
   closeModal();
   document.getElementById('messageText').value = '';
 }
