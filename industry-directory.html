@@ -1,646 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Industry Dashboard - Rhythm Deck</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
-    .artist-box {
-      background: linear-gradient(to bottom right, #1f2937, #111827);
-      border-radius: 1rem;
-      padding: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 4px 0 0 #10b981;
-      transition: transform 0.3s;
-      position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-    .artist-box::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: #10b981;
-      opacity: 0.5;
-    }
-    .artist-box:hover { transform: translateY(-3px); }
-    .logo-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #10b981; }
-    .media-list { max-height: 120px; overflow-y: auto; font-size: 0.85rem; }
-    .media-item {
-      padding: 0.4rem;
-      background: #374151;
-      border-radius: 0.5rem;
-      margin-bottom: 0.3rem;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .media-item:hover { background: #4b5563; }
-    .stat { font-size: 0.8rem; margin-bottom: 0.5rem; }
-    .bio { font-size: 0.8rem; max-height: 50px; overflow-y: auto; }
-    .instructions { font-size: 0.9rem; margin-bottom: 1.5rem; }
-    .grid-container { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-    .msg-item:hover { background: rgba(255,255,255,0.08); }
-    .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .selected { background: rgba(255,255,255,0.1) !important; }
-    .reply-indent { margin-left: 2.5rem; border-left: 3px solid #10b981; padding-left: 1.25rem; opacity: 0.9; }
-    #replyModal.hidden { display: none; }
-    .status-pending { background: #f59e0b; color: white; }
-    .status-accepted { background: #10b981; color: white; }
-    .status-declined { background: #ef4444; color: white; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhythm Deck – Industry Directory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    background: #f3e8ff;
+    font-family: system-ui, sans-serif;
+  }
+  .card {
+    transition: all 0.3s ease;
+    background: white;
+  }
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  }
+  .modal {
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+.style1 {color: #00CC00}
+</style>
 </head>
-<body class="min-h-screen font-sans antialiased">
-  <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
-      <div class="flex items-center gap-3 sm:gap-4">
-        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
-        <div>
-          <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-            Rhythm Deck
-          </h1>
-          <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
-        </div>
-      </div>
-      <div class="flex items-center">
-        <a href="index.html" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-emerald-400 hover:text-emerald-300 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition shadow-md text-sm sm:text-base">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 sm:h-5 w-4 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Home
-        </a>
+<body class="min-h-screen py-12">
+
+<div class="max-w-7xl mx-auto px-6">
+  <!-- Header with logo, title, tagline, and back button -->
+  <header class="flex items-center justify-between mb-16">
+    <div class="flex items-center gap-4">
+      <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="h-16 w-16 rounded-full">
+      <div>
+        <h1 class="text-4xl font-bold text-purple-900">RHYTHM DECK</h1>
+        <p class="text-lg text-purple-700">Unleash the Beat</p>
       </div>
     </div>
+    <a href="profile-admin.html" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
+      Back to Dashboard
+    </a>
   </header>
+   <h1 class="text-4xl font-bold text-purple-900 mb-8 text-center">Industry Directory</h1><br><br>
+  <!-- Producers -->
+  <h2 align="left" class="text-4xl font-bold text-purple-900 mb-8 text-left">Music Producers</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-    <h2 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-emerald-400">
-      Industry Dashboard
-    </h2>
-    <p class="text-lg text-gray-300 mb-6 text-center instructions">
-      Browse all Pro and Platinum artists with active accounts. Use the filters to search by genre, song title, or artist's name. Click on videos or MP3s to play them. Use the Contact Artist button to send a message through Rhythm Deck (no direct contact info allowed). Refresh the page to see new artists who have signed up for Pro or Platinum plans.
-    </p>
-
-    <div class="flex flex-col md:flex-row gap-4 mb-8">
-      <input id="searchName" type="text" placeholder="Search by artist's name" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
-      <input id="searchSong" type="text" placeholder="Search by song title" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
-      <select id="filterGenre" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
-        <option value="">Filter by genre</option>
-        <option value="acoustic">Acoustic</option>
-        <option value="afrobeat">Afrobeat</option>
-        <option value="alternative">Alternative</option>
-        <option value="ambient">Ambient</option>
-        <option value="blues">Blues</option>
-        <option value="classical">Classical</option>
-        <option value="country">Country</option>
-        <option value="dance">Dance</option>
-        <option value="disco">Disco</option>
-        <option value="drum and bass">Drum and Bass</option>
-        <option value="dubstep">Dubstep</option>
-        <option value="electronic">Electronic</option>
-        <option value="emo">Emo</option>
-        <option value="folk">Folk</option>
-        <option value="funk">Funk</option>
-        <option value="garage">Garage</option>
-        <option value="grunge">Grunge</option>
-        <option value="hard rock">Hard Rock</option>
-        <option value="heavy metal">Heavy Metal</option>
-        <option value="hip hop">Hip Hop</option>
-        <option value="house">House</option>
-        <option value="indie">Indie</option>
-        <option value="jazz">Jazz</option>
-        <option value="latin">Latin</option>
-        <option value="metal">Metal</option>
-        <option value="new age">New Age</option>
-        <option value="opera">Opera</option>
-        <option value="pop">Pop</option>
-        <option value="progressive rock">Progressive Rock</option>
-        <option value="punk">Punk</option>
-        <option value="r&b">R&B</option>
-        <option value="rap">Rap</option>
-        <option value="reggae">Reggae</option>
-        <option value="rock">Rock</option>
-        <option value="soul">Soul</option>
-        <option value="techno">Techno</option>
-        <option value="trance">Trance</option>
-        <option value="world">World</option>
-        <option value="alternative rock">Alternative Rock</option>
-        <option value="bluegrass">Bluegrass</option>
-        <option value="britpop">Britpop</option>
-        <option value="chillout">Chillout</option>
-        <option value="christian">Christian</option>
-        <option value="classical crossover">Classical Crossover</option>
-        <option value="contemporary r&b">Contemporary R&B</option>
-        <option value="death metal">Death Metal</option>
-        <option value="deep house">Deep House</option>
-        <option value="drumstep">Drumstep</option>
-        <option value="edm">EDM</option>
-        <option value="electropop">Electropop</option>
-        <option value="experimental">Experimental</option>
-        <option value="folk rock">Folk Rock</option>
-        <option value="glam rock">Glam Rock</option>
-        <option value="gospel">Gospel</option>
-        <option value="grime">Grime</option>
-        <option value="hardcore">Hardcore</option>
-        <option value="indie pop">Indie Pop</option>
-        <option value="indie rock">Indie Rock</option>
-        <option value="k-pop">K-Pop</option>
-        <option value="lo-fi">Lo-Fi</option>
-        <option value="nu metal">Nu Metal</option>
-        <option value="orchestral">Orchestral</option>
-        <option value="post-rock">Post-Rock</option>
-        <option value="psychedelic rock">Psychedelic Rock</option>
-        <option value="reggaeton">Reggaeton</option>
-        <option value="shoegaze">Shoegaze</option>
-        <option value="synthpop">Synthpop</option>
-        <option value="trap">Trap</option>
-        <option value="trip hop">Trip Hop</option>
-      </select>
-    </div>
-
-    <div id="artistGrid" class="grid grid-container gap-6">
-      <!-- Artists loaded here -->
-    </div>
-
-    <!-- Messages Section -->
-    <section class="mt-16 bg-black/40 rounded-2xl p-8">
-      <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
-        <div class="bg-black/30 rounded-2xl overflow-hidden flex flex-col">
-          <div class="p-4 border-b border-purple-600">
-            <h3 class="text-xl font-bold">Conversations</h3>
-          </div>
-          <div id="conversationList" class="flex-1 overflow-y-auto"></div>
-        </div>
-        <div id="messageView" class="lg:col-span-2 bg-black/30 rounded-2xl p-8 flex flex-col overflow-y-auto">
-          <p class="text-gray-400 text-center mt-20">Select a conversation to view messages</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Video Play Modal -->
-  <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
-    <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-4xl mx-4">
-      <video id="videoPlayer" controls class="w-full h-auto rounded-lg">
-        <source src="" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
-      <div class="text-center pt-4">
-        <button onClick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">
-          Close
-        </button>
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">Alex Rivera</h3>
+        <p class="text-purple-600 font-medium">Trap / Reggaeton Producer</p>
+        <p class="text-gray-600 my-4">Credits: Bad Bunny, J Balvin, Ozuna. 12× Platinum.</p>
+        <button onclick="connectTo('Alex Rivera')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
       </div>
     </div>
+
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">Sophia Chen</h3>
+        <p class="text-purple-600 font-medium">Cinematic Pop Producer</p>
+        <p class="text-gray-600 my-4">Credits: Billie Eilish, The Weeknd, Netflix scores.</p>
+        <button onclick="connectTo('Sophia Chen')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
+      </div>
+    </div>
+
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">Jamal Knox</h3>
+        <p class="text-purple-600 font-medium">Hip-Hop / R&B Producer</p>
+        <p class="text-gray-600 my-4">Credits: Drake, SZA, Kendrick Lamar features. 5× Platinum.</p>
+        <button onclick="connectTo('Jamal Knox')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Contact Modal -->
-  <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
-    <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
-      <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
-        Message <span id="messageArtistName"></span>
-      </h3>
-      <textarea id="messageContent" rows="5" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Type your message here... (no email, phone, or external links allowed)"></textarea>
-      <div class="text-center pt-6">
-        <button onClick="sendMessage()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full">
-          Send Message
-        </button>
-        <button onClick="closeMessageModal()" class="mt-4 text-gray-400 hover:underline">Cancel</button>
+  <!-- Distributors -->
+  <h2 align="left" class="text-4xl font-bold text-purple-900 mb-8 text-left">Music Distributors</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">DistroWave Global</h3>
+        <p class="text-purple-600 font-medium">Digital Distributor</p>
+        <p class="text-gray-600 my-4">150+ platforms • Fast payouts • Playlist pitching included.</p>
+        <button onclick="connectTo('DistroWave Global')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
       </div>
     </div>
-  </div>
 
-  <!-- Reply Modal -->
-  <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
-    <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
-      <button id="closeReplyBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
-        ×
-      </button>
-      <div class="p-8 pt-16">
-        <h2 class="text-4xl font-black text-emerald-400 mb-6 text-center">
-          Reply to <span id="replyTargetName"></span>
-        </h2>
-        <textarea id="replyMessage" rows="6" placeholder="Write your reply..." class="w-full p-4 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
-        <button id="sendReplyBtn" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition shadow-xl transform hover:scale-105">
-          Send Reply
-        </button>
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">IndieFlow Distribution</h3>
+        <p class="text-purple-600 font-medium">Indie & Latin Specialist</p>
+        <p class="text-gray-600 my-4">Spotify & TikTok focus • Transparent royalties.</p>
+        <button onclick="connectTo('IndieFlow Distribution')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
       </div>
     </div>
+
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">TuneCore Pro</h3>
+        <p class="text-purple-600 font-medium">Global Distribution</p>
+        <p class="text-gray-600 my-4">Keep 100% royalties • YouTube monetization included.</p>
+        <button onclick="connectTo('TuneCore Pro')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
+      </div>
+    </div>
+
   </div>
 
-  <footer class="bg-black text-white mt-16 p-8 text-center text-sm border-t border-gray-800">
-    <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
-  </footer>
+  <!-- Publishers -->
+  <h2 align="left" class="text-4xl font-bold text-purple-900 mb-8 text-left">Music Publishers</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-    const supabase = createClient(
-      'https://bxoqhmfnseskwqkywppg.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-    );
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">Pulse Music Group</h3>
+        <p class="text-purple-600 font-medium">Music Publisher</p>
+        <p class="text-gray-600 my-4">Sync licensing • Admin • Roster includes Grammy winners.</p>
+        <button onclick="connectTo('Pulse Music Group')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
+      </div>
+    </div>
 
-    let currentUserId = null;
-    let messageArtistId = null;
-    let artists = [];
-    let currentConversationId = null;
-    let currentMessages = [];
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">Kobalt Music</h3>
+        <p class="text-purple-600 font-medium">Independent Publisher</p>
+        <p class="text-gray-600 my-4">Creative & admin services • Tech-driven royalty tracking.</p>
+        <button onclick="connectTo('Kobalt Music')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
+      </div>
+    </div>
 
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        alert('Please log in to access the dashboard.');
-        window.location.href = 'login.html';
-        return;
-      }
-      currentUserId = user.id;
-      loadArtists();
-      loadMessages();
-    }
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">Warner Chappell</h3>
+        <p class="text-purple-600 font-medium">Major Publisher</p>
+        <p class="text-gray-600 my-4">Global sync & creative team • Extensive catalog.</p>
+        <button onclick="connectTo('Warner Chappell')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
+      </div>
+    </div>
 
-    async function loadArtists() {
-      const { data: fetchedArtists, error: artistError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('plan', ['pro', 'platinum'])
-        .order('name', { ascending: true });
-      if (artistError) {
-        console.error('Error loading artists:', artistError);
-        alert('Failed to load artists: ' + artistError.message);
-        return;
-      }
-      const artistIds = fetchedArtists.map(a => a.id);
-      const { data: media, error: mediaError } = await supabase
-        .from('user_videos')
-        .select('id, user_id, title, video_url, thumbnail_url, type')
-        .in('user_id', artistIds);
-      if (mediaError) console.error('Media load error:', mediaError);
-      const processedMedia = media?.map(item => {
-        const { data: publicData } = supabase.storage.from('media').getPublicUrl(item.video_url);
-        return {
-          ...item,
-          public_url: publicData.publicUrl
-        };
-      }) || [];
-      const mediaByArtist = {};
-      processedMedia.forEach(item => {
-        if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
-        mediaByArtist[item.user_id].push(item);
-      });
-      let totalLikesByArtist = {};
-      let totalCommentsByArtist = {};
-      if (media && media.length > 0) {
-        const videoIds = media.map(v => v.id);
-        const { data: likes } = await supabase
-          .from('video_likes')
-          .select('video_id')
-          .in('video_id', videoIds);
-        likes?.forEach(l => {
-          const artistId = media.find(v => v.id === l.video_id)?.user_id;
-          if (artistId) totalLikesByArtist[artistId] = (totalLikesByArtist[artistId] || 0) + 1;
-        });
-        const { data: comments } = await supabase
-          .from('video_comments')
-          .select('video_id')
-          .in('video_id', videoIds);
-        comments?.forEach(c => {
-          const artistId = media.find(v => v.id === c.video_id)?.user_id;
-          if (artistId) totalCommentsByArtist[artistId] = (totalCommentsByArtist[artistId] || 0) + 1;
-        });
-      }
-      artists = fetchedArtists.map(artist => ({
-        ...artist,
-        videos: mediaByArtist[artist.id] || [],
-        totalHearts: totalLikesByArtist[artist.id] || 0,
-        totalComments: totalCommentsByArtist[artist.id] || 0
-      }));
-      renderArtists(artists);
-    }
+  </div>
 
-    function renderArtists(filteredArtists) {
-      const artistGrid = document.getElementById('artistGrid');
-      artistGrid.innerHTML = filteredArtists.map(artist => {
-        const media = artist.videos || [];
-        const mediaList = media.map(item => `
-          <div class="media-item" onclick="${item.type === 'video' ? `openVideoModal('${item.public_url}')` : `playMP3('${item.public_url}')`}">
-            ${item.title || 'Untitled'} (${item.type.toUpperCase()})
-          </div>
-        `).join('');
-        return `
-          <div class="artist-box">
-            <div class="flex items-start gap-3 mb-2">
-              <img src="${artist.logo_url || 'logo-placeholder.jpg'}" alt="${artist.name}" class="logo-img">
-              <div class="flex-1">
-                <h3 class="text-base font-bold">${artist.name}</h3>
-                <p class="text-xs text-gray-400">${artist.plan.toUpperCase()} Artist</p>
-              </div>
-            </div>
-            <p class="bio text-xs text-gray-300 mb-2">${artist.bio || 'No bio available'}</p>
-            <div class="stat flex gap-2 mb-2">
-              <span class="stat-badge">❤️ ${artist.totalHearts}</span>
-              <span class="stat-badge">💬 ${artist.totalComments}</span>
-            </div>
-            <div class="media-list">
-              <h4 class="text-xs font-medium text-gray-400 mb-1">Videos / MP3s</h4>
-              ${mediaList || '<p class="text-gray-500 text-xs">No media uploaded</p>'}
-            </div>
-            <div class="flex gap-2 mt-3">
-              <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
-                View Profile
-              </a>
-              <button onclick="openMessageModal('${artist.id}', '${artist.name.replace(/'/g, "\\'")}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs">
-                Contact
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+  <!-- Music Supervisors -->
+  <h2 align="left" class="text-4xl font-bold text-purple-900 mb-8 text-left">Music Supervisors</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-    function filterArtists() {
-      const searchName = document.getElementById('searchName').value.toLowerCase();
-      const searchSong = document.getElementById('searchSong').value.toLowerCase();
-      const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
-      const filtered = artists.filter(artist => {
-        const nameMatch = artist.name.toLowerCase().includes(searchName);
-        const genreMatch = !filterGenre || artist.genre?.toLowerCase().includes(filterGenre);
-        const songMatch = !searchSong || artist.videos?.some(v => v.title?.toLowerCase().includes(searchSong));
-        return nameMatch && genreMatch && songMatch;
-      });
-      renderArtists(filtered);
-    }
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">Lena Torres</h3>
+        <p class="text-purple-600 font-medium">Music Supervisor</p>
+        <p class="text-gray-600 my-4">Credits: Euphoria, Stranger Things, Bridgerton, major ad campaigns.</p>
+        <button onclick="connectTo('Lena Torres')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
+      </div>
+    </div>
 
-    document.getElementById('searchName').addEventListener('input', filterArtists);
-    document.getElementById('searchSong').addEventListener('input', filterArtists);
-    document.getElementById('filterGenre').addEventListener('change', filterArtists);
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">Marcus Hale</h3>
+        <p class="text-purple-600 font-medium">Film & TV Supervisor</p>
+        <p class="text-gray-600 my-4">Credits: Marvel, HBO Max, Nike campaigns.</p>
+        <button onclick="connectTo('Marcus Hale')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
+      </div>
+    </div>
 
-    window.openVideoModal = function(url) {
-      const modal = document.getElementById('videoModal');
-      const video = modal.querySelector('video');
-      const source = video.querySelector('source');
-      source.src = url;
-      video.load();
-      modal.classList.remove('hidden');
-      video.play().catch(e => {
-        console.error('Video play failed:', e);
-        alert('Could not play video — URL may be invalid or private.');
-      });
-    };
+    <div class="card rounded-3xl overflow-hidden shadow-xl">
+      <div class="p-8">
+        <h3 class="text-2xl font-bold mb-1">Elena Voss</h3>
+        <p class="text-purple-600 font-medium">Advertising Supervisor</p>
+        <p class="text-gray-600 my-4">Credits: Apple, Coca-Cola, Netflix originals.</p>
+        <button onclick="connectTo('Elena Voss')" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-700 transition">Connect</button>
+      </div>
+    </div>
 
-    window.closeVideoModal = function() {
-      const modal = document.getElementById('videoModal');
-      const video = modal.querySelector('video');
-      video.pause();
-      video.currentTime = 0;
-      modal.classList.add('hidden');
-    };
+  </div>
+</div>
 
-    window.playMP3 = function(url) {
-      const audio = new Audio(url);
-      audio.play().catch(e => {
-        console.error('MP3 play failed:', e);
-        alert('Could not play MP3 — URL may be invalid or private.');
-      });
-      alert('Playing MP3... (close alert to stop)');
-    };
+<!-- Message Modal -->
+<div id="messageModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+  <div class="bg-white rounded-3xl max-w-lg w-full mx-4 p-8">
+    <h3 class="text-2xl font-bold mb-2" id="modalTitle">Message Alex Rivera</h3>
+    <p class="text-gray-500 mb-6">Send a short message — they'll receive it in their dashboard.</p>
+    
+    <textarea id="messageText" rows="5" class="w-full border border-gray-300 rounded-2xl p-4 focus:outline-none focus:border-purple-600" placeholder="Hi Alex, I love your work on the latest Bad Bunny track..."></textarea>
+    
+    <div class="flex gap-4 mt-8">
+      <button onclick="closeModal()" class="flex-1 py-4 border border-gray-300 rounded-2xl font-semibold">Cancel</button>
+      <button onclick="sendMessage()" class="flex-1 py-4 bg-purple-600 text-white rounded-2xl font-bold">Send Message</button>
+    </div>
+  </div>
+</div>
 
-    window.openMessageModal = function(artistId, artistName) {
-      messageArtistId = artistId;
-      document.getElementById('messageArtistName').textContent = artistName;
-      document.getElementById('messageModal').classList.remove('hidden');
-    };
+<script>
+let currentRecipient = '';
 
-    window.closeMessageModal = function() {
-      document.getElementById('messageModal').classList.add('hidden');
-      document.getElementById('messageContent').value = '';
-    };
+function connectTo(name) {
+  currentRecipient = name;
+  document.getElementById('modalTitle').textContent = `Message ${name}`;
+  document.getElementById('messageModal').classList.remove('hidden');
+  document.getElementById('messageText').focus();
+}
 
-    window.sendMessage = async function() {
-      const message = document.getElementById('messageContent').value.trim();
-      if (!message) return alert('Please type a message.');
+function closeModal() {
+  document.getElementById('messageModal').classList.add('hidden');
+}
 
-      const { error } = await supabase.from('collab_requests').insert({
-        sender_id: currentUserId,
-        receiver_id: messageArtistId,
-        message: message,
-        created_at: new Date().toISOString(),
-        status: 'pending'
-      });
+function sendMessage() {
+  const message = document.getElementById('messageText').value.trim();
+  if (!message) return;
 
-      if (error) {
-        console.error('Send message error:', error);
-        alert('Failed to send message: ' + error.message);
-      } else {
-        alert('Message sent successfully!');
-        closeMessageModal();
-      }
-    };
+  console.log(`Message sent to ${currentRecipient}: ${message}`);
 
-    function openReplyModal(targetId, name) {
-      currentConversationId = targetId;
-      document.getElementById('replyTargetName').textContent = name || 'User';
-      document.getElementById('replyModal').classList.remove('hidden');
-      document.getElementById('replyMessage').focus();
-    }
+  const toast = document.createElement('div');
+  toast.style.position = 'fixed';
+  toast.style.bottom = '30px';
+  toast.style.left = '50%';
+  toast.style.transform = 'translateX(-50%)';
+  toast.style.background = '#10b981';
+  toast.style.color = 'white';
+  toast.style.padding = '16px 32px';
+  toast.style.borderRadius = '9999px';
+  toast.style.boxShadow = '0 10px 15px -3px rgb(0 0 0 / 0.3)';
+  toast.style.zIndex = '9999';
+  toast.textContent = `Message sent to ${currentRecipient}!`;
+  document.body.appendChild(toast);
 
-    function closeReplyModal() {
-      document.getElementById('replyModal').classList.add('hidden');
-      document.getElementById('replyMessage').value = '';
-    }
+  setTimeout(() => toast.remove(), 3000);
 
-    async function sendReply() {
-      const message = document.getElementById('replyMessage').value.trim();
-      if (!message) return alert('Please write a reply!');
-
-      const original = currentMessages.find(m => m.id === currentConversationId);
-      const receiverId = original?.sender_id || currentUserId;
-
-      const { error } = await supabase.from('collab_requests').insert({
-        parent_id: currentConversationId,
-        sender_id: currentUserId,
-        receiver_id: receiverId,
-        message: message,
-        created_at: new Date().toISOString(),
-        status: 'pending'
-      });
-
-      if (error) {
-        console.error('Send reply error:', error);
-        alert('Failed to send reply: ' + (error.message || 'Unknown error'));
-      } else {
-        alert('Reply sent!');
-        closeReplyModal();
-        loadMessages();
-      }
-    }
-
-    async function updateStatus(messageId, newStatus) {
-      const { error } = await supabase.from('collab_requests').update({ status: newStatus }).eq('id', messageId).eq('receiver_id', currentUserId);
-      if (error) {
-        alert('Failed to update status: ' + error.message);
-      } else {
-        loadMessages();
-      }
-    }
-
-    function showThread(originalMsg) {
-      currentConversationId = originalMsg.id;
-
-      const replies = currentMessages
-        .filter(m => m.parent_id === originalMsg.id)
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-      let statusHtml = '';
-      if (originalMsg.status === 'pending' && originalMsg.receiver_id === currentUserId) {
-        statusHtml = `
-          <div class="flex space-x-4 mt-4">
-            <button onclick="updateStatus('${originalMsg.id}', 'accepted')" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-bold text-white">
-              Accept
-            </button>
-            <button onclick="updateStatus('${originalMsg.id}', 'declined')" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-bold text-white">
-              Decline
-            </button>
-          </div>
-        `;
-      } else if (originalMsg.status) {
-        const statusClass = originalMsg.status === 'pending' ? 'status-pending' :
-                           originalMsg.status === 'accepted' ? 'status-accepted' :
-                           'status-declined';
-        statusHtml = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
-          ${originalMsg.status.charAt(0).toUpperCase() + originalMsg.status.slice(1)}
-        </span>`;
-      }
-
-      let html = `
-        <div class="flex-1 overflow-y-auto pr-4 space-y-6">
-          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
-            <div class="flex justify-between items-center mb-4">
-              <div>
-                <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender?.name || 'User'}</h2>
-                <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
-              </div>
-              ${statusHtml}
-            </div>
-            <p class="text-lg whitespace-pre-line">${originalMsg.message}</p>
-          </div>
-      `;
-
-      if (replies.length > 0) {
-        html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
-        replies.forEach(reply => {
-          html += `
-            <div class="reply-indent bg-black/30 rounded-xl p-5">
-              <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
-              <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
-              <p class="mt-2">${reply.message}</p>
-            </div>
-          `;
-        });
-      } else {
-        html += `<p class="text-gray-400 italic mt-6">No replies yet</p>`;
-      }
-
-      html += `
-        </div>
-        <div class="mt-8 flex justify-end">
-          <button id="replyThreadBtn" data-target-id="${originalMsg.id}" data-target-name="${(originalMsg.sender?.name || 'User').replace(/"/g, '&quot;').replace(/'/g, "&#39;")}"
-                  class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-10 py-4 rounded-xl text-xl transition transform hover:scale-105 shadow-xl">
-            Reply to this thread
-          </button>
-        </div>
-      `;
-
-      document.getElementById('messageView').innerHTML = html;
-
-      document.getElementById('replyThreadBtn')?.addEventListener('click', function() {
-        openReplyModal(this.dataset.targetId, this.dataset.targetName);
-      });
-    }
-
-    async function loadMessages() {
-      const list = document.getElementById('conversationList');
-      if (!list) return;
-
-      list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
-
-      const { data: messages, error } = await supabase
-        .from('collab_requests')
-        .select(`
-          id,
-          parent_id,
-          sender_id,
-          receiver_id,
-          message,
-          created_at,
-          read_at,
-          status,
-          sender:sender_id (name)
-        `)
-        .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Load messages error:', error);
-        list.innerHTML = `<p class="text-red-400 text-center py-10">Error loading messages: ${error.message || 'Unknown error'}</p>`;
-        document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
-        return;
-      }
-
-      currentMessages = messages || [];
-
-      if (!currentMessages.length) {
-        list.innerHTML = '<p class="text-gray-400 text-center py-10">No messages yet</p>';
-        document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
-        return;
-      }
-
-      const topLevel = currentMessages.filter(m => !m.parent_id);
-
-      list.innerHTML = topLevel.map(msg => {
-        let statusBadge = '';
-        if (msg.status) {
-          const statusClass = msg.status === 'pending' ? 'status-pending' :
-                             msg.status === 'accepted' ? 'status-accepted' :
-                             'status-declined';
-          statusBadge = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
-            ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
-          </span>`;
-        }
-
-        return `
-          <div data-id="${msg.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
-            <div class="flex justify-between items-center">
-              <p class="font-bold">${msg.sender?.name || 'Unknown'}</p>
-              ${statusBadge}
-            </div>
-            <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
-            <p class="msg-preview text-gray-300">${msg.message.substring(0, 80)}${msg.message.length > 80 ? '...' : ''}</p>
-          </div>
-        `;
-      }).join('');
-
-      document.querySelectorAll('.msg-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const msgId = item.dataset.id;
-          const msg = currentMessages.find(m => m.id === msgId);
-          if (msg) showThread(msg);
-        });
-      });
-
-      if (topLevel.length > 0) {
-        showThread(topLevel[0]);
-      }
-    }
-
-    init();
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
-      document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
-    });
-  </script>
+  closeModal();
+  document.getElementById('messageText').value = '';
+}
+</script>
 </body>
 </html>
