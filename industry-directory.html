@@ -1,143 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Industry Directory | Rhythm Deck</title>
+  <title>Industry Dashboard - Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .profile-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
+    .artist-box {
+      background: linear-gradient(to bottom right, #1f2937, #111827);
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 4px 0 0 #10b981;
+      transition: transform 0.3s;
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .artist-box::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #10b981;
+      opacity: 0.5;
+    }
+    .artist-box:hover { transform: translateY(-3px); }
+    .logo-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #10b981; }
+    .media-list { max-height: 120px; overflow-y: auto; font-size: 0.85rem; }
+    .media-item {
+      padding: 0.4rem;
+      background: #374151;
+      border-radius: 0.5rem;
+      margin-bottom: 0.3rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .media-item:hover { background: #4b5563; }
+    .stat { font-size: 0.8rem; margin-bottom: 0.5rem; }
+    .bio { font-size: 0.8rem; max-height: 50px; overflow-y: auto; }
+    .instructions { font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .grid-container { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .msg-item:hover { background: rgba(255,255,255,0.08); }
+    .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .selected { background: rgba(255,255,255,0.1) !important; }
+    .reply-indent { margin-left: 2.5rem; border-left: 3px solid #10b981; padding-left: 1.25rem; opacity: 0.9; }
+    #replyModal.hidden { display: none; }
+    .status-pending { background: #f59e0b; color: white; }
+    .status-accepted { background: #10b981; color: white; }
+    .status-declined { background: #ef4444; color: white; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
-  <!-- Header (same as your other pages) -->
-  <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
-    <div class="flex items-center space-x-3">
-      <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
-      <div>
-        <h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
-        <p class="text-sm text-gray-300">Unleash Your Beat</p>
+<body class="min-h-screen font-sans antialiased">
+  <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            Rhythm Deck
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-4 justify-center sm:justify-end">
+        <button onClick="goToDashboard()" class="btn-dashboard">
+          ← Back to Dashboard
+        </button>
+        <a href="industry-directory.html" target="_blank" class="btn-industry">
+          Contact Industry Pros →
+        </a>
       </div>
     </div>
-    <nav class="space-x-4">
-      <a href="index.html" class="hover:text-emerald-400 transition">Home</a>
-      <a href="about.html" class="hover:text-emerald-400 transition">About</a>
-      <a href="benefits.html" class="hover:text-emerald-400 transition">Benefits</a>
-      <a href="contact.html" class="hover:text-emerald-400 transition">Contact</a>
-      <a href="pricing.html" class="hover:text-emerald-400 transition">Pricing</a>
-      <a href="login.html" class="bg-white text-black px-4 py-2 rounded-full hover:bg-gray-300 transition shadow-md">Login</a>
-      <a href="signup.html" class="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-400 transition shadow-md">Sign Up</a>
-    </nav>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-5xl font-black text-center mb-4 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
-      Industry Directory
-    </h1>
-    <p class="text-xl text-center text-gray-300 mb-12">
-      Connect with producers, distributors, publishers, and supervisors who might love your sound.
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+    <h2 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-emerald-400">
+      Industry Dashboard
+    </h2>
+    <p class="text-lg text-gray-300 mb-6 text-center instructions">
+      Browse all Pro and Platinum artists with active accounts. Use the filters to search by genre, song title, or artist's name. Click on videos or MP3s to play them. Use the Contact Artist button to send a message through Rhythm Deck (no direct contact info allowed). Refresh the page to see new artists who have signed up for Pro or Platinum plans.
     </p>
 
-    <!-- Producers -->
-    <section class="mb-16">
-      <h2 class="text-4xl font-bold text-emerald-400 mb-8 text-center">Music Producers</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="profile-card bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-500/30 hover:border-emerald-500 transition-all">
-          <h3 class="text-2xl font-bold mb-2">Alex Rivera</h3>
-          <p class="text-emerald-300 mb-1">Hip-Hop • Trap • R&B</p>
-          <p class="text-gray-400 text-sm mb-4">12× platinum credits • Major label collaborations</p>
-          <button class="message-btn w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition"
-        data-id="f67d78c0-bca1-4af6-a83c-99b6a5a75b2b"
-        data-name="Alex Rivera">
-  Message Producer
-</button>
+    <div class="flex flex-col md:flex-row gap-4 mb-8">
+      <input id="searchName" type="text" placeholder="Search by artist's name" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
+      <input id="searchSong" type="text" placeholder="Search by song title" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
+      <select id="filterGenre" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
+        <option value="">Filter by genre</option>
+        <option value="acoustic">Acoustic</option>
+        <option value="afrobeat">Afrobeat</option>
+        <option value="alternative">Alternative</option>
+        <option value="ambient">Ambient</option>
+        <option value="blues">Blues</option>
+        <option value="classical">Classical</option>
+        <option value="country">Country</option>
+        <option value="dance">Dance</option>
+        <option value="disco">Disco</option>
+        <option value="drum and bass">Drum and Bass</option>
+        <option value="dubstep">Dubstep</option>
+        <option value="electronic">Electronic</option>
+        <option value="emo">Emo</option>
+        <option value="folk">Folk</option>
+        <option value="funk">Funk</option>
+        <option value="garage">Garage</option>
+        <option value="grunge">Grunge</option>
+        <option value="hard rock">Hard Rock</option>
+        <option value="heavy metal">Heavy Metal</option>
+        <option value="hip hop">Hip Hop</option>
+        <option value="house">House</option>
+        <option value="indie">Indie</option>
+        <option value="jazz">Jazz</option>
+        <option value="latin">Latin</option>
+        <option value="metal">Metal</option>
+        <option value="new age">New Age</option>
+        <option value="opera">Opera</option>
+        <option value="pop">Pop</option>
+        <option value="progressive rock">Progressive Rock</option>
+        <option value="punk">Punk</option>
+        <option value="r&b">R&B</option>
+        <option value="rap">Rap</option>
+        <option value="reggae">Reggae</option>
+        <option value="rock">Rock</option>
+        <option value="soul">Soul</option>
+        <option value="techno">Techno</option>
+        <option value="trance">Trance</option>
+        <option value="world">World</option>
+        <option value="alternative rock">Alternative Rock</option>
+        <option value="bluegrass">Bluegrass</option>
+        <option value="britpop">Britpop</option>
+        <option value="chillout">Chillout</option>
+        <option value="christian">Christian</option>
+        <option value="classical crossover">Classical Crossover</option>
+        <option value="contemporary r&b">Contemporary R&B</option>
+        <option value="death metal">Death Metal</option>
+        <option value="deep house">Deep House</option>
+        <option value="drumstep">Drumstep</option>
+        <option value="edm">EDM</option>
+        <option value="electropop">Electropop</option>
+        <option value="experimental">Experimental</option>
+        <option value="folk rock">Folk Rock</option>
+        <option value="glam rock">Glam Rock</option>
+        <option value="gospel">Gospel</option>
+        <option value="grime">Grime</option>
+        <option value="hardcore">Hardcore</option>
+        <option value="indie pop">Indie Pop</option>
+        <option value="indie rock">Indie Rock</option>
+        <option value="k-pop">K-Pop</option>
+        <option value="lo-fi">Lo-Fi</option>
+        <option value="nu metal">Nu Metal</option>
+        <option value="orchestral">Orchestral</option>
+        <option value="post-rock">Post-Rock</option>
+        <option value="psychedelic rock">Psychedelic Rock</option>
+        <option value="reggaeton">Reggaeton</option>
+        <option value="shoegaze">Shoegaze</option>
+        <option value="synthpop">Synthpop</option>
+        <option value="trap">Trap</option>
+        <option value="trip hop">Trip Hop</option>
+      </select>
+    </div>
+
+    <div id="artistGrid" class="grid grid-container gap-6">
+      <!-- Artists loaded here -->
+    </div>
+
+    <!-- Messages Section -->
+    <section class="mt-16 bg-black/40 rounded-2xl p-8">
+      <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
+        <div class="bg-black/30 rounded-2xl overflow-hidden flex flex-col">
+          <div class="p-4 border-b border-purple-600">
+            <h3 class="text-xl font-bold">Conversations</h3>
+          </div>
+          <div id="conversationList" class="flex-1 overflow-y-auto"></div>
         </div>
-
-        <div class="profile-card bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-500/30 hover:border-emerald-500 transition-all">
-          <h3 class="text-2xl font-bold mb-2">Sofia Chen</h3>
-          <p class="text-emerald-300 mb-1">Electronic • Pop • Indie</p>
-          <p class="text-gray-400 text-sm mb-4">Festival remixer • Sync placements</p>
-          <button class="message-btn w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition"
-                  data-id="producer-sofia-uuid-mock" data-name="Sofia Chen">
-            Message Producer
-          </button>
+        <div id="messageView" class="lg:col-span-2 bg-black/30 rounded-2xl p-8 flex flex-col overflow-y-auto">
+          <p class="text-gray-400 text-center mt-20">Select a conversation to view messages</p>
         </div>
-
-        <!-- Add 1–2 more mock producers if you want -->
-      </div>
-    </section>
-
-    <!-- Distributors -->
-    <section class="mb-16">
-      <h2 class="text-4xl font-bold text-emerald-400 mb-8 text-center">Music Distributors</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="profile-card bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-500/30 hover:border-emerald-500 transition-all">
-          <h3 class="text-2xl font-bold mb-2">Global Beat Distribution</h3>
-          <p class="text-emerald-300 mb-1">Worldwide digital & physical</p>
-          <p class="text-gray-400 text-sm mb-4">Spotify, Apple Music, TikTok, YouTube</p>
-          <button class="message-btn w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition"
-                  data-id="distro-global-uuid-mock" data-name="Global Beat Distribution">
-            Message Distributor
-          </button>
-        </div>
-
-        <!-- Add more mock distributors -->
-      </div>
-    </section>
-
-    <!-- Publishers -->
-    <section class="mb-16">
-      <h2 class="text-4xl font-bold text-emerald-400 mb-8 text-center">Music Publishers</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="profile-card bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-500/30 hover:border-emerald-500 transition-all">
-          <h3 class="text-2xl font-bold mb-2">Pulse Music Group</h3>
-          <p class="text-emerald-300 mb-1">Independent publishing & sync</p>
-          <p class="text-gray-400 text-sm mb-4">Film, TV, advertising placements</p>
-          <button class="message-btn w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition"
-                  data-id="pub-pulse-uuid-mock" data-name="Pulse Music Group">
-            Message Publisher
-          </button>
-        </div>
-
-        <!-- Add more mock publishers -->
-      </div>
-    </section>
-
-    <!-- Supervisors -->
-    <section class="mb-16">
-      <h2 class="text-4xl font-bold text-emerald-400 mb-8 text-center">Music Supervisors</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="profile-card bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-500/30 hover:border-emerald-500 transition-all">
-          <h3 class="text-2xl font-bold mb-2">Lena Morales</h3>
-          <p class="text-emerald-300 mb-1">Film, TV & Streaming</p>
-          <p class="text-gray-400 text-sm mb-4">Netflix, HBO, Amazon Prime credits</p>
-          <button class="message-btn w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition"
-                  data-id="sup-lena-uuid-mock" data-name="Lena Morales">
-            Message Supervisor
-          </button>
-        </div>
-
-        <!-- Add more mock supervisors -->
       </div>
     </section>
   </main>
 
-  <!-- Quick Message Modal -->
-  <div id="quickMessageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
-    <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative p-8">
-      <button id="closeQuickModal" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
-        ×
-      </button>
-      <h2 class="text-4xl font-black text-emerald-400 mb-6 text-center">
-        Message <span id="quickTargetName"></span>
-      </h2>
-      <textarea id="quickMessageText" rows="6" placeholder="Introduce yourself and tell them why you'd love to work together..." 
-                class="w-full p-4 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
-      <button id="sendQuickMessage" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition shadow-xl transform hover:scale-105">
-        Send Message
-      </button>
+  <!-- Video Play Modal -->
+  <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
+    <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-4xl mx-4">
+      <video id="videoPlayer" controls class="w-full h-auto rounded-lg">
+        <source src="" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <div class="text-center pt-4">
+        <button onClick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">
+          Close
+        </button>
+      </div>
     </div>
   </div>
+
+  <!-- Contact Modal -->
+  <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
+    <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
+      <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
+        Message <span id="messageArtistName"></span>
+      </h3>
+      <textarea id="messageContent" rows="5" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500" placeholder="Type your message here... (no email, phone, or external links allowed)"></textarea>
+      <div class="text-center pt-6">
+        <button onClick="sendMessage()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full">
+          Send Message
+        </button>
+        <button onClick="closeMessageModal()" class="mt-4 text-gray-400 hover:underline">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reply Modal -->
+  <div id="replyModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden">
+    <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
+      <button id="closeReplyBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
+        ×
+      </button>
+      <div class="p-8 pt-16">
+        <h2 class="text-4xl font-black text-emerald-400 mb-6 text-center">
+          Reply to <span id="replyTargetName"></span>
+        </h2>
+        <textarea id="replyMessage" rows="6" placeholder="Write your reply..." class="w-full p-4 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
+        <button id="sendReplyBtn" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition shadow-xl transform hover:scale-105">
+          Send Reply
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-black text-white mt-16 p-8 text-center text-sm border-t border-gray-800">
+    <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
+  </footer>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -147,66 +244,402 @@
     );
 
     let currentUserId = null;
-    let currentTargetId = null;
+    let messageArtistId = null;
+    let artists = [];
+    let currentConversationId = null;
+    let currentMessages = [];
 
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        alert("Please log in first");
-        location.href = 'login.html';
+        alert('Please log in to access the dashboard.');
+        window.location.href = 'login.html';
         return;
       }
       currentUserId = user.id;
+      loadArtists();
+      loadMessages();
     }
 
-    function openQuickMessageModal(targetId, name) {
-      currentTargetId = targetId;
-      document.getElementById('quickTargetName').textContent = name;
-      document.getElementById('quickMessageModal').classList.remove('hidden');
-      document.getElementById('quickMessageText').focus();
+    async function loadArtists() {
+      const { data: fetchedArtists, error: artistError } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('plan', ['pro', 'platinum'])
+        .order('name', { ascending: true });
+      if (artistError) {
+        console.error('Error loading artists:', artistError);
+        alert('Failed to load artists: ' + artistError.message);
+        return;
+      }
+      const artistIds = fetchedArtists.map(a => a.id);
+      const { data: media, error: mediaError } = await supabase
+        .from('user_videos')
+        .select('id, user_id, title, video_url, thumbnail_url, type')
+        .in('user_id', artistIds);
+      if (mediaError) console.error('Media load error:', mediaError);
+      const processedMedia = media?.map(item => {
+        const { data: publicData } = supabase.storage.from('media').getPublicUrl(item.video_url);
+        return {
+          ...item,
+          public_url: publicData.publicUrl
+        };
+      }) || [];
+      const mediaByArtist = {};
+      processedMedia.forEach(item => {
+        if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
+        mediaByArtist[item.user_id].push(item);
+      });
+      let totalLikesByArtist = {};
+      let totalCommentsByArtist = {};
+      if (media && media.length > 0) {
+        const videoIds = media.map(v => v.id);
+        const { data: likes } = await supabase
+          .from('video_likes')
+          .select('video_id')
+          .in('video_id', videoIds);
+        likes?.forEach(l => {
+          const artistId = media.find(v => v.id === l.video_id)?.user_id;
+          if (artistId) totalLikesByArtist[artistId] = (totalLikesByArtist[artistId] || 0) + 1;
+        });
+        const { data: comments } = await supabase
+          .from('video_comments')
+          .select('video_id')
+          .in('video_id', videoIds);
+        comments?.forEach(c => {
+          const artistId = media.find(v => v.id === c.video_id)?.user_id;
+          if (artistId) totalCommentsByArtist[artistId] = (totalCommentsByArtist[artistId] || 0) + 1;
+        });
+      }
+      artists = fetchedArtists.map(artist => ({
+        ...artist,
+        videos: mediaByArtist[artist.id] || [],
+        totalHearts: totalLikesByArtist[artist.id] || 0,
+        totalComments: totalCommentsByArtist[artist.id] || 0
+      }));
+      renderArtists(artists);
     }
 
-    function closeQuickMessageModal() {
-      document.getElementById('quickMessageModal').classList.add('hidden');
-      document.getElementById('quickMessageText').value = '';
-      currentTargetId = null;
+    function renderArtists(filteredArtists) {
+      const artistGrid = document.getElementById('artistGrid');
+      artistGrid.innerHTML = filteredArtists.map(artist => {
+        const media = artist.videos || [];
+        const mediaList = media.map(item => `
+          <div class="media-item" onclick="${item.type === 'video' ? `openVideoModal('${item.public_url}')` : `playMP3('${item.public_url}')`}">
+            ${item.title || 'Untitled'} (${item.type.toUpperCase()})
+          </div>
+        `).join('');
+        return `
+          <div class="artist-box">
+            <div class="flex items-start gap-3 mb-2">
+              <img src="${artist.logo_url || 'logo-placeholder.jpg'}" alt="${artist.name}" class="logo-img">
+              <div class="flex-1">
+                <h3 class="text-base font-bold">${artist.name}</h3>
+                <p class="text-xs text-gray-400">${artist.plan.toUpperCase()} Artist</p>
+              </div>
+            </div>
+            <p class="bio text-xs text-gray-300 mb-2">${artist.bio || 'No bio available'}</p>
+            <div class="stat flex gap-2 mb-2">
+              <span class="stat-badge">❤️ ${artist.totalHearts}</span>
+              <span class="stat-badge">💬 ${artist.totalComments}</span>
+            </div>
+            <div class="media-list">
+              <h4 class="text-xs font-medium text-gray-400 mb-1">Videos / MP3s</h4>
+              ${mediaList || '<p class="text-gray-500 text-xs">No media uploaded</p>'}
+            </div>
+            <div class="flex gap-2 mt-3">
+              <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
+                View Profile
+              </a>
+              <button onclick="openMessageModal('${artist.id}', '${artist.name.replace(/'/g, "\\'")}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs">
+                Contact
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
-    async function sendQuickMessage() {
-      const text = document.getElementById('quickMessageText').value.trim();
-      if (!text) return alert('Please write a message!');
+    function filterArtists() {
+      const searchName = document.getElementById('searchName').value.toLowerCase();
+      const searchSong = document.getElementById('searchSong').value.toLowerCase();
+      const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
+      const filtered = artists.filter(artist => {
+        const nameMatch = artist.name.toLowerCase().includes(searchName);
+        const genreMatch = !filterGenre || artist.genre?.toLowerCase().includes(filterGenre);
+        const songMatch = !searchSong || artist.videos?.some(v => v.title?.toLowerCase().includes(searchSong));
+        return nameMatch && genreMatch && songMatch;
+      });
+      renderArtists(filtered);
+    }
+
+    document.getElementById('searchName').addEventListener('input', filterArtists);
+    document.getElementById('searchSong').addEventListener('input', filterArtists);
+    document.getElementById('filterGenre').addEventListener('change', filterArtists);
+
+    window.openVideoModal = function(url) {
+      const modal = document.getElementById('videoModal');
+      const video = modal.querySelector('video');
+      const source = video.querySelector('source');
+      source.src = url;
+      video.load();
+      modal.classList.remove('hidden');
+      video.play().catch(e => {
+        console.error('Video play failed:', e);
+        alert('Could not play video — URL may be invalid or private.');
+      });
+    };
+
+    window.closeVideoModal = function() {
+      const modal = document.getElementById('videoModal');
+      const video = modal.querySelector('video');
+      video.pause();
+      video.currentTime = 0;
+      modal.classList.add('hidden');
+    };
+
+    window.playMP3 = function(url) {
+      const audio = new Audio(url);
+      audio.play().catch(e => {
+        console.error('MP3 play failed:', e);
+        alert('Could not play MP3 — URL may be invalid or private.');
+      });
+      alert('Playing MP3... (close alert to stop)');
+    };
+
+    window.openMessageModal = function(artistId, artistName) {
+      messageArtistId = artistId;
+      document.getElementById('messageArtistName').textContent = artistName;
+      document.getElementById('messageModal').classList.remove('hidden');
+    };
+
+    window.closeMessageModal = function() {
+      document.getElementById('messageModal').classList.add('hidden');
+      document.getElementById('messageContent').value = '';
+    };
+
+    window.sendMessage = async function() {
+      const message = document.getElementById('messageContent').value.trim();
+      if (!message) return alert('Please type a message.');
 
       const { error } = await supabase.from('collab_requests').insert({
         sender_id: currentUserId,
-        receiver_id: currentTargetId,
-        message: text,
+        receiver_id: messageArtistId,
+        message: message,
         created_at: new Date().toISOString(),
         status: 'pending'
       });
 
       if (error) {
-        console.error('Send error:', error);
-        alert('Failed to send: ' + (error.message || 'Unknown error'));
+        console.error('Send message error:', error);
+        alert('Failed to send message: ' + error.message);
       } else {
-        alert('Message sent! Check your Collab Messages for replies.');
-        closeQuickMessageModal();
+        alert('Message sent successfully!');
+        closeMessageModal();
+      }
+    };
+
+    function openReplyModal(targetId, name) {
+      currentConversationId = targetId;
+      document.getElementById('replyTargetName').textContent = name || 'User';
+      document.getElementById('replyModal').classList.remove('hidden');
+      document.getElementById('replyMessage').focus();
+    }
+
+    function closeReplyModal() {
+      document.getElementById('replyModal').classList.add('hidden');
+      document.getElementById('replyMessage').value = '';
+    }
+
+    async function sendReply() {
+      const message = document.getElementById('replyMessage').value.trim();
+      if (!message) return alert('Please write a reply!');
+
+      const original = currentMessages.find(m => m.id === currentConversationId);
+      const receiverId = original?.sender_id || currentUserId;
+
+      const { error } = await supabase.from('collab_requests').insert({
+        parent_id: currentConversationId,
+        sender_id: currentUserId,
+        receiver_id: receiverId,
+        message: message,
+        created_at: new Date().toISOString(),
+        status: 'pending'
+      });
+
+      if (error) {
+        console.error('Send reply error:', error);
+        alert('Failed to send reply: ' + (error.message || 'Unknown error'));
+      } else {
+        alert('Reply sent!');
+        closeReplyModal();
+        loadMessages();
       }
     }
 
-    // Add click handlers to all "Message" buttons
-    document.addEventListener('DOMContentLoaded', () => {
-      init();
+    async function updateStatus(messageId, newStatus) {
+      const { error } = await supabase.from('collab_requests').update({ status: newStatus }).eq('id', messageId).eq('receiver_id', currentUserId);
+      if (error) {
+        alert('Failed to update status: ' + error.message);
+      } else {
+        loadMessages();
+      }
+    }
 
-      document.querySelectorAll('.message-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.dataset.id;
-          const name = btn.dataset.name;
-          openQuickMessageModal(id, name);
+    function showThread(originalMsg) {
+      currentConversationId = originalMsg.id;
+
+      const replies = currentMessages
+        .filter(m => m.parent_id === originalMsg.id)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+      let statusHtml = '';
+      if (originalMsg.status === 'pending' && originalMsg.receiver_id === currentUserId) {
+        statusHtml = `
+          <div class="flex space-x-4 mt-4">
+            <button onclick="updateStatus('${originalMsg.id}', 'accepted')" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-bold text-white">
+              Accept
+            </button>
+            <button onclick="updateStatus('${originalMsg.id}', 'declined')" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-bold text-white">
+              Decline
+            </button>
+          </div>
+        `;
+      } else if (originalMsg.status) {
+        const statusClass = originalMsg.status === 'pending' ? 'status-pending' :
+                           originalMsg.status === 'accepted' ? 'status-accepted' :
+                           'status-declined';
+        statusHtml = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
+          ${originalMsg.status.charAt(0).toUpperCase() + originalMsg.status.slice(1)}
+        </span>`;
+      }
+
+      let html = `
+        <div class="flex-1 overflow-y-auto pr-4 space-y-6">
+          <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender?.name || 'User'}</h2>
+                <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
+              </div>
+              ${statusHtml}
+            </div>
+            <p class="text-lg whitespace-pre-line">${originalMsg.message}</p>
+          </div>
+      `;
+
+      if (replies.length > 0) {
+        html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
+        replies.forEach(reply => {
+          html += `
+            <div class="reply-indent bg-black/30 rounded-xl p-5">
+              <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
+              <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
+              <p class="mt-2">${reply.message}</p>
+            </div>
+          `;
+        });
+      } else {
+        html += `<p class="text-gray-400 italic mt-6">No replies yet</p>`;
+      }
+
+      html += `
+        </div>
+        <div class="mt-8 flex justify-end">
+          <button id="replyThreadBtn" data-target-id="${originalMsg.id}" data-target-name="${(originalMsg.sender?.name || 'User').replace(/"/g, '&quot;').replace(/'/g, "&#39;")}"
+                  class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-10 py-4 rounded-xl text-xl transition transform hover:scale-105 shadow-xl">
+            Reply to this thread
+          </button>
+        </div>
+      `;
+
+      document.getElementById('messageView').innerHTML = html;
+
+      document.getElementById('replyThreadBtn')?.addEventListener('click', function() {
+        openReplyModal(this.dataset.targetId, this.dataset.targetName);
+      });
+    }
+
+    async function loadMessages() {
+      const list = document.getElementById('conversationList');
+      if (!list) return;
+
+      list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
+
+      const { data: messages, error } = await supabase
+        .from('collab_requests')
+        .select(`
+          id,
+          parent_id,
+          sender_id,
+          receiver_id,
+          message,
+          created_at,
+          read_at,
+          status,
+          sender:sender_id (name)
+        `)
+        .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Load messages error:', error);
+        list.innerHTML = `<p class="text-red-400 text-center py-10">Error loading messages: ${error.message || 'Unknown error'}</p>`;
+        document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
+        return;
+      }
+
+      currentMessages = messages || [];
+
+      if (!currentMessages.length) {
+        list.innerHTML = '<p class="text-gray-400 text-center py-10">No messages yet</p>';
+        document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
+        return;
+      }
+
+      const topLevel = currentMessages.filter(m => !m.parent_id);
+
+      list.innerHTML = topLevel.map(msg => {
+        let statusBadge = '';
+        if (msg.status) {
+          const statusClass = msg.status === 'pending' ? 'status-pending' :
+                             msg.status === 'accepted' ? 'status-accepted' :
+                             'status-declined';
+          statusBadge = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
+            ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
+          </span>`;
+        }
+
+        return `
+          <div data-id="${msg.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
+            <div class="flex justify-between items-center">
+              <p class="font-bold">${msg.sender?.name || 'Unknown'}</p>
+              ${statusBadge}
+            </div>
+            <p class="text-sm text-gray-400">${new Date(msg.created_at).toLocaleString()}</p>
+            <p class="msg-preview text-gray-300">${msg.message.substring(0, 80)}${msg.message.length > 80 ? '...' : ''}</p>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.msg-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const msgId = item.dataset.id;
+          const msg = currentMessages.find(m => m.id === msgId);
+          if (msg) showThread(msg);
         });
       });
 
-      document.getElementById('closeQuickModal')?.addEventListener('click', closeQuickMessageModal);
-      document.getElementById('sendQuickMessage')?.addEventListener('click', sendQuickMessage);
+      if (topLevel.length > 0) {
+        showThread(topLevel[0]);
+      }
+    }
+
+    init();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
+      document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
     });
   </script>
 </body>
