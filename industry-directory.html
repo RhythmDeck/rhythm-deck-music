@@ -5,196 +5,219 @@
   <title>Industry Directory | Rhythm Deck</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     body { font-family: system-ui, sans-serif; }
-    .modal-bg { background: rgba(0,0,0,.85); }
-    .img-wrap { position: relative; }
-    .upload-overlay {
+    .modal-bg { background: rgba(0,0,0,.8); }
+
+    .avatar-wrap {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+    }
+
+    .avatar-wrap img {
+      width: 64px;
+      height: 64px;
+      border-radius: 9999px;
+      object-fit: cover;
+      background: #1f2937;
+      border: 3px solid #10b981;
+    }
+
+    .avatar-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,.65);
+      border-radius: 9999px;
+      background: rgba(0,0,0,.7);
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      transition: opacity .2s;
-      cursor: pointer;
+      font-size: 10px;
       font-weight: 900;
       text-align: center;
+      opacity: 0;
+      cursor: pointer;
+      transition: opacity .2s;
     }
-    .img-wrap:hover .upload-overlay { opacity: 1; }
+
+    .avatar-wrap:hover .avatar-overlay { opacity: 1; }
   </style>
 </head>
 
 <body class="bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 text-white min-h-screen">
 
-<!-- ================= HEADER ================= -->
 <header class="bg-black border-b-4 border-emerald-500 py-6">
   <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
     <div class="flex items-center gap-6">
-      <img src="logo-1-sm.jpg" class="w-16 h-16 rounded-full shadow-xl">
+      <img src="logo-1-sm.jpg" class="w-16 h-16 rounded-full shadow-xl" />
       <div>
         <h1 class="text-4xl font-black text-emerald-400">Rhythm Deck</h1>
         <p class="text-lg text-purple-300 font-semibold">Unleash Your Beat</p>
       </div>
     </div>
+    <a href="profile-admin-pro.html"
+       class="bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 rounded-xl font-black shadow-lg">
+      ⬅ Back to Dashboard
+    </a>
   </div>
 </header>
 
-<!-- ================= TITLE ================= -->
 <section class="text-center py-16">
   <h2 class="text-5xl font-black mb-4">Industry Directory</h2>
-  <p class="text-purple-300 text-xl">Connect directly with verified music industry professionals</p>
+  <p class="text-purple-300 text-xl">Connect directly with music industry professionals</p>
 </section>
 
 <div class="max-w-7xl mx-auto px-6 space-y-24 pb-32">
 
 <!-- ================= MUSIC PRODUCERS ================= -->
 <section>
-<h3 class="text-4xl font-black text-emerald-400 mb-10">Music Producers</h3>
-<div class="grid md:grid-cols-3 gap-10">
+  <h3 class="text-4xl font-black text-emerald-400 mb-10">Music Producers</h3>
+  <div class="grid md:grid-cols-3 gap-10">
 
-<!-- Producer 1 -->
-<div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-  <div class="img-wrap mb-4">
-    <img id="img-prod1" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-    <label class="upload-overlay rounded-lg">
-      Upload Photo / Logo
-      <input type="file" hidden accept="image/*" onchange="saveImage('prod1',this.files[0])">
-    </label>
+    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">Alex Rivera</h4>
+          <p class="text-purple-300 text-sm">Genre-bending producer / songwriter</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-prod1">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('prod1',this.files[0])">
+          </label>
+        </div>
+      </div>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>Neon Skies EP</li>
+        <li>Midnight Drive</li>
+        <li>Echoes of Tomorrow</li>
+      </ul>
+      <button onclick="openModal('Alex Rivera')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
+    </div>
+
+    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">Sofia Chen</h4>
+          <p class="text-purple-300 text-sm">Pop & cinematic music producer</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-prod2">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('prod2',this.files[0])">
+          </label>
+        </div>
+      </div>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>Silver Screen OST</li>
+        <li>Pulse City</li>
+        <li>Dream State</li>
+      </ul>
+      <button onclick="openModal('Sofia Chen')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
+    </div>
+
+    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">Marcus Lane</h4>
+          <p class="text-purple-300 text-sm">Hip-hop & R&B specialist</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-prod3">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('prod3',this.files[0])">
+          </label>
+        </div>
+      </div>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>Street Kings Vol.2</li>
+        <li>After Hours</li>
+        <li>Low Tide</li>
+      </ul>
+      <button onclick="openModal('Marcus Lane')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
+    </div>
+
   </div>
-  <h4 class="text-2xl font-bold">Alex Rivera</h4>
-  <p class="text-purple-300 text-sm mt-2">
-    Genre-bending producer & songwriter blending hip-hop, cinematic, and alt-pop.
-  </p>
-  <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-    <li>Neon Skies EP</li>
-    <li>Midnight Drive</li>
-    <li>Echoes of Tomorrow</li>
-  </ul>
-  <button onclick="openModal('Alex Rivera')" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-black">
-    💬 Send Message
-  </button>
-</div>
-
-<!-- Producer 2 -->
-<div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-  <div class="img-wrap mb-4">
-    <img id="img-prod2" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-    <label class="upload-overlay rounded-lg">
-      Upload Photo / Logo
-      <input type="file" hidden accept="image/*" onchange="saveImage('prod2',this.files[0])">
-    </label>
-  </div>
-  <h4 class="text-2xl font-bold">Sofia Chen</h4>
-  <p class="text-purple-300 text-sm mt-2">
-    Cinematic producer specializing in film, television, and emotional storytelling.
-  </p>
-  <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-    <li>Silver Screen OST</li>
-    <li>Pulse City</li>
-    <li>Dream State</li>
-  </ul>
-  <button onclick="openModal('Sofia Chen')" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-black">
-    💬 Send Message
-  </button>
-</div>
-
-<!-- Producer 3 -->
-<div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-  <div class="img-wrap mb-4">
-    <img id="img-prod3" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-    <label class="upload-overlay rounded-lg">
-      Upload Photo / Logo
-      <input type="file" hidden accept="image/*" onchange="saveImage('prod3',this.files[0])">
-    </label>
-  </div>
-  <h4 class="text-2xl font-bold">Marcus Lane</h4>
-  <p class="text-purple-300 text-sm mt-2">
-    Urban & R&B producer focused on raw vocals, groove, and authenticity.
-  </p>
-  <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-    <li>Street Kings Vol. 2</li>
-    <li>After Hours</li>
-    <li>Low Tide</li>
-  </ul>
-  <button onclick="openModal('Marcus Lane')" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-black">
-    💬 Send Message
-  </button>
-</div>
-
-</div>
 </section>
 
 <!-- ================= MUSIC DISTRIBUTORS ================= -->
 <section>
-<h3 class="text-4xl font-black text-emerald-400 mb-10">Music Distributors</h3>
-<div class="grid md:grid-cols-3 gap-10">
+  <h3 class="text-4xl font-black text-emerald-400 mb-10">Music Distributors</h3>
+  <div class="grid md:grid-cols-3 gap-10">
 
-<div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-  <div class="img-wrap mb-4">
-    <img id="img-dist1" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-    <label class="upload-overlay rounded-lg">
-      Upload Logo
-      <input type="file" hidden accept="image/*" onchange="saveImage('dist1',this.files[0])">
-    </label>
+    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">Nova Distribution</h4>
+          <p class="text-purple-300 text-sm">Global digital distribution</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-dist1">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('dist1',this.files[0])">
+          </label>
+        </div>
+      </div>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>IndieWave Catalog</li>
+        <li>Global Beats Series</li>
+        <li>Rising Stars 2024</li>
+      </ul>
+      <button onclick="openModal('Nova Distribution')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
+    </div>
+
+    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">EchoWave</h4>
+          <p class="text-purple-300 text-sm">Indie-artist focused distributor</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-dist2">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('dist2',this.files[0])">
+          </label>
+        </div>
+      </div>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>Bedroom Pop Collective</li>
+        <li>Lo-Fi Sessions</li>
+        <li>Alt Sound Vol.1</li>
+      </ul>
+      <button onclick="openModal('EchoWave')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
+    </div>
+
+    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">StreamForge</h4>
+          <p class="text-purple-300 text-sm">Playlist & DSP placement</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-dist3">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('dist3',this.files[0])">
+          </label>
+        </div>
+      </div>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>DSP Boost Program</li>
+        <li>Playlist Domination</li>
+        <li>Viral Hits Campaign</li>
+      </ul>
+      <button onclick="openModal('StreamForge')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
+    </div>
+
   </div>
-  <h4 class="text-2xl font-bold">Nova Distribution</h4>
-  <p class="text-purple-300 text-sm mt-2">
-    Global digital distribution with marketing and playlist placement support.
-  </p>
-  <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-    <li>IndieWave Catalog</li>
-    <li>Global Beats Series</li>
-    <li>Rising Stars 2024</li>
-  </ul>
-  <button onclick="openModal('Nova Distribution')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-</div>
-
-<div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-  <div class="img-wrap mb-4">
-    <img id="img-dist2" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-    <label class="upload-overlay rounded-lg">
-      Upload Logo
-      <input type="file" hidden accept="image/*" onchange="saveImage('dist2',this.files[0])">
-    </label>
-  </div>
-  <h4 class="text-2xl font-bold">EchoWave</h4>
-  <p class="text-purple-300 text-sm mt-2">
-    Indie-artist-focused distributor with transparent reporting and fair splits.
-  </p>
-  <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-    <li>Bedroom Pop Collective</li>
-    <li>Lo-Fi Sessions</li>
-    <li>Alt Sound Vol. 1</li>
-  </ul>
-  <button onclick="openModal('EchoWave')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-</div>
-
-<div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-  <div class="img-wrap mb-4">
-    <img id="img-dist3" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-    <label class="upload-overlay rounded-lg">
-      Upload Logo
-      <input type="file" hidden accept="image/*" onchange="saveImage('dist3',this.files[0])">
-    </label>
-  </div>
-  <h4 class="text-2xl font-bold">StreamForge</h4>
-  <p class="text-purple-300 text-sm mt-2">
-    Data-driven DSP growth strategies and viral release campaigns.
-  </p>
-  <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-    <li>DSP Boost Program</li>
-    <li>Playlist Domination</li>
-    <li>Viral Hits Campaign</li>
-  </ul>
-  <button onclick="openModal('StreamForge')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-</div>
-
-</div>
 </section>
 
 <!-- ================= MUSIC PUBLISHERS ================= -->
@@ -202,73 +225,70 @@
   <h3 class="text-4xl font-black text-emerald-400 mb-10">Music Publishers</h3>
   <div class="grid md:grid-cols-3 gap-10">
 
-    <!-- Publisher 1 -->
     <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="img-wrap mb-4">
-        <img id="img-pub1" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-        <label class="upload-overlay rounded-lg">
-          Upload Logo
-          <input type="file" hidden accept="image/*" onchange="saveImage('pub1',this.files[0])">
-        </label>
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">Pulse Publishing</h4>
+          <p class="text-purple-300 text-sm">Sync & licensing experts</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-pub1">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('pub1',this.files[0])">
+          </label>
+        </div>
       </div>
-      <h4 class="text-2xl font-bold">Pulse Publishing</h4>
-      <p class="text-purple-300 text-sm mt-2">
-        Modern music publishing company focused on sync placements, film, and streaming originals.
-      </p>
-      <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-        <li>Netflix Original Series Syncs</li>
-        <li>Prime Video Originals</li>
-        <li>Studio One Major Cuts</li>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>Netflix Syncs</li>
+        <li>Prime Originals</li>
+        <li>Studio One Cuts</li>
       </ul>
-      <button onclick="openModal('Pulse Publishing')" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-black">
-        💬 Send Message
-      </button>
+      <button onclick="openModal('Pulse Publishing')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
     </div>
 
-    <!-- Publisher 2 -->
     <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="img-wrap mb-4">
-        <img id="img-pub2" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-        <label class="upload-overlay rounded-lg">
-          Upload Logo
-          <input type="file" hidden accept="image/*" onchange="saveImage('pub2',this.files[0])">
-        </label>
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">Harmonic Rights</h4>
+          <p class="text-purple-300 text-sm">Artist-first publishing</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-pub2">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('pub2',this.files[0])">
+          </label>
+        </div>
       </div>
-      <h4 class="text-2xl font-bold">Harmonic Rights Group</h4>
-      <p class="text-purple-300 text-sm mt-2">
-        Rights management and royalty maximization for independent and major-label artists.
-      </p>
-      <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-        <li>National TV Licensing</li>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>TV Licensing</li>
         <li>Radio Rotation Deals</li>
-        <li>Catalog Expansion Programs</li>
+        <li>Catalog Growth</li>
       </ul>
-      <button onclick="openModal('Harmonic Rights Group')" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-black">
-        💬 Send Message
-      </button>
+      <button onclick="openModal('Harmonic Rights')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
     </div>
 
-    <!-- Publisher 3 -->
     <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="img-wrap mb-4">
-        <img id="img-pub3" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-        <label class="upload-overlay rounded-lg">
-          Upload Logo
-          <input type="file" hidden accept="image/*" onchange="saveImage('pub3',this.files[0])">
-        </label>
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">SilverChord</h4>
+          <p class="text-purple-300 text-sm">Global royalty management</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-pub3">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('pub3',this.files[0])">
+          </label>
+        </div>
       </div>
-      <h4 class="text-2xl font-bold">SilverChord Publishing</h4>
-      <p class="text-purple-300 text-sm mt-2">
-        Global publishing house specializing in international royalty collection and legacy catalogs.
-      </p>
-      <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-        <li>Global Royalty Administration</li>
-        <li>EU & Asia Market Expansion</li>
-        <li>Legacy Artist Catalogs</li>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>Global Royalties</li>
+        <li>EU Expansion</li>
+        <li>Legacy Catalogs</li>
       </ul>
-      <button onclick="openModal('SilverChord Publishing')" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-black">
-        💬 Send Message
-      </button>
+      <button onclick="openModal('SilverChord')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
     </div>
 
   </div>
@@ -279,96 +299,94 @@
   <h3 class="text-4xl font-black text-emerald-400 mb-10">Music Supervisors</h3>
   <div class="grid md:grid-cols-3 gap-10">
 
-    <!-- Supervisor 1 -->
     <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="img-wrap mb-4">
-        <img id="img-sup1" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-        <label class="upload-overlay rounded-lg">
-          Upload Photo
-          <input type="file" hidden accept="image/*" onchange="saveImage('sup1',this.files[0])">
-        </label>
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">Lena Fox</h4>
+          <p class="text-purple-300 text-sm">Film & TV supervisor</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-sup1">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('sup1',this.files[0])">
+          </label>
+        </div>
       </div>
-      <h4 class="text-2xl font-bold">Lena Fox</h4>
-      <p class="text-purple-300 text-sm mt-2">
-        Music supervisor for television and independent film with a focus on emotional storytelling.
-      </p>
-      <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
         <li>HBO Drama Series</li>
-        <li>Sundance Film Festival Shorts</li>
-        <li>Independent Feature Films</li>
+        <li>Sundance Shorts</li>
+        <li>Indie Films</li>
       </ul>
-      <button onclick="openModal('Lena Fox')" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-black">
-        💬 Send Message
-      </button>
+      <button onclick="openModal('Lena Fox')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
     </div>
 
-    <!-- Supervisor 2 -->
     <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="img-wrap mb-4">
-        <img id="img-sup2" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-        <label class="upload-overlay rounded-lg">
-          Upload Logo
-          <input type="file" hidden accept="image/*" onchange="saveImage('sup2',this.files[0])">
-        </label>
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">Orbit Sync</h4>
+          <p class="text-purple-300 text-sm">Streaming & advertising</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-sup2">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('sup2',this.files[0])">
+          </label>
+        </div>
       </div>
-      <h4 class="text-2xl font-bold">Orbit Sync</h4>
-      <p class="text-purple-300 text-sm mt-2">
-        High-impact music supervision for advertising, trailers, and branded campaigns.
-      </p>
-      <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-        <li>Apple Product Campaigns</li>
-        <li>Netflix Trailer Placements</li>
-        <li>Global Brand Launches</li>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>Apple Ads</li>
+        <li>Netflix Trailers</li>
+        <li>Brand Campaigns</li>
       </ul>
-      <button onclick="openModal('Orbit Sync')" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-black">
-        💬 Send Message
-      </button>
+      <button onclick="openModal('Orbit Sync')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
     </div>
 
-    <!-- Supervisor 3 -->
     <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="img-wrap mb-4">
-        <img id="img-sup3" class="w-full h-48 object-cover rounded-lg bg-gray-800">
-        <label class="upload-overlay rounded-lg">
-          Upload Logo
-          <input type="file" hidden accept="image/*" onchange="saveImage('sup3',this.files[0])">
-        </label>
+      <div class="flex items-center gap-4">
+        <div>
+          <h4 class="text-2xl font-bold">FrameTone</h4>
+          <p class="text-purple-300 text-sm">Trailers & branded content</p>
+        </div>
+        <div class="avatar-wrap ml-auto">
+          <img id="img-sup3">
+          <label class="avatar-overlay">
+            Upload
+            <input type="file" hidden accept="image/*" onchange="saveAvatar('sup3',this.files[0])">
+          </label>
+        </div>
       </div>
-      <h4 class="text-2xl font-bold">FrameTone Music</h4>
-      <p class="text-purple-300 text-sm mt-2">
-        Trailer, gaming, and streaming promo supervision with cinematic impact.
-      </p>
-      <ul class="text-emerald-300 mt-3 text-sm list-disc list-inside">
-        <li>AAA Game Launch Trailers</li>
-        <li>Major Film Trailers</li>
-        <li>Streaming Platform Promos</li>
+      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+        <li>Game Launches</li>
+        <li>Movie Trailers</li>
+        <li>Streaming Promos</li>
       </ul>
-      <button onclick="openModal('FrameTone Music')" class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-black">
-        💬 Send Message
-      </button>
+      <button onclick="openModal('FrameTone')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
     </div>
 
   </div>
 </section>
 
-<!-- ================= MESSAGE MODAL ================= -->
+</div>
+
 <div id="messageModal" class="fixed inset-0 hidden items-center justify-center modal-bg z-50">
   <div class="bg-black border-4 border-emerald-500 rounded-xl w-full max-w-xl p-8">
     <h3 class="text-3xl font-black mb-4">Message <span id="recipientName"></span></h3>
     <textarea class="w-full h-40 bg-gray-900 border border-emerald-500 rounded-lg p-4 text-white"></textarea>
     <div class="flex justify-between mt-6">
       <button onclick="closeModal()" class="bg-gray-700 px-6 py-3 rounded-lg font-bold">Cancel</button>
-      <button onclick="closeModal()" class="bg-emerald-600 hover:bg-emerald-700 px-6 py-3 rounded-lg font-black">Send Message</button>
+      <button onclick="closeModal()" class="bg-emerald-600 px-6 py-3 rounded-lg font-black">Send Message</button>
     </div>
   </div>
 </div>
 
 <script>
-function saveImage(id,file){
+function saveAvatar(id,file){
   const reader = new FileReader();
   reader.onload = () => {
-    localStorage.setItem("img_"+id, reader.result);
-    document.getElementById("img_"+id).src = reader.result;
+    localStorage.setItem("avatar_"+id, reader.result);
+    document.getElementById("img-"+id).src = reader.result;
   };
   reader.readAsDataURL(file);
 }
@@ -384,9 +402,9 @@ function closeModal(){
   messageModal.classList.remove("flex");
 }
 
-["prod1","prod2","prod3","dist1","dist2","dist3"].forEach(id=>{
-  const saved = localStorage.getItem("img_"+id);
-  if(saved) document.getElementById("img_"+id).src = saved;
+["prod1","prod2","prod3","dist1","dist2","dist3","pub1","pub2","pub3","sup1","sup2","sup3"].forEach(id=>{
+  const saved = localStorage.getItem("avatar_"+id);
+  if(saved) document.getElementById("img-"+id).src = saved;
 });
 </script>
 
