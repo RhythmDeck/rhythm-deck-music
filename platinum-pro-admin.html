@@ -178,15 +178,15 @@
                     class="w-full p-5 bg-gray-900 border-2 border-emerald-600 rounded-xl text-white placeholder-gray-400 focus:border-emerald-400 focus:outline-none resize-none font-medium text-lg"
                     placeholder="Write your main message here (one version) — AI will adapt it for each platform with hashtags..."></textarea>
           <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <button onclick="useAI('Grok', 'https://grok.x.ai/')"
+            <button onClick="useAI('Grok', 'https://grok.x.ai/')"
                     class="ai-btn bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
               Use Grok
             </button>
-            <button onclick="useAI('Gemini', 'https://gemini.google.com/')"
+            <button onClick="useAI('Gemini', 'https://gemini.google.com/')"
                     class="ai-btn bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
               Use Gemini
             </button>
-            <button onclick="useAI('ChatGPT', 'https://chat.openai.com/')"
+            <button onClick="useAI('ChatGPT', 'https://chat.openai.com/')"
                     class="ai-btn bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-xl transform hover:scale-105 transition">
               Use ChatGPT
             </button>
@@ -327,32 +327,91 @@
         </div>
 
         <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
-          <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Video</h3>
-          <p class="mb-4 text-[14px] font-bold text-black style2">Note* - Refresh page to view new likes and comments</p>
-          <div class="grid md:grid-cols-2 gap-6">
-            <div>
-              <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
-              <input type="file" accept="image/*" id="thumbnailInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
-            </div>
-            <div>
-              <label class="block font-bold mb-3 text-gray-700">Video File (.mp4)</label>
-              <input type="file" accept="video/mp4" id="videoInput" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer">
-            </div>
-          </div>
-          <div class="mt-6">
-            <label class="block font-bold mb-3 text-gray-700">Price for Fans to Buy & Download (USD)</label>
-            <input type="number" id="videoPrice" min="0" step="0.01" value="0.00" placeholder="e.g. 4.99 or 0 for free" class="w-full border border-gray-300 p-4 rounded-lg text-xl font-semibold text-center bg-white">
-            <p class="text-sm text-gray-600 mt-2">Enter 0.00 for free. Any price above $0 means fans must pay to download.</p>
-          </div>
-          <button id="uploadVideo" class="w-full bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg shadow-lg flex items-center justify-center">
-            <span>Upload & Publish Video</span>
-            <div id="uploadSpinner" class="spinner hidden ml-3"></div>
-          </button>
-        </div>
+  <h3 class="text-2xl font-bold mb-6 text-gray-800">Upload New Video</h3>
+  <p class="mb-4 text-[14px] font-bold text-black style2">
+    Note* - Refresh page to view new likes and comments
+  </p>
 
-        <div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-      </div>
+  <!-- COMPRESSION INFO BOX -->
+  <div class="mt-4 bg-white p-5 rounded-xl border border-emerald-200 shadow-[ -6px_6px_0px_0px_rgba(16,185,129,0.6) ]">
+    <h4 class="text-lg font-black text-emerald-700 mb-2">
+      Why compress your video before uploading?
+    </h4>
+
+    <p class="text-sm text-gray-700 mb-3 leading-relaxed">
+      Thumbnails are totally fine to upload as-is — they’re usually small files.
+      But if your <strong>song video or album video is over 28MB</strong>,
+      compressing it first makes a big difference.
+    </p>
+
+    <ul class="list-disc list-inside text-sm text-gray-700 space-y-1 mb-3">
+      <li><strong>Uploads faster and is less likely to fail</strong></li>
+      <li><strong>Plays smoother for fans (less buffering)</strong></li>
+      <li><strong>Processes more reliably across devices</strong></li>
+      <li><strong>Keeps visual and audio quality while reducing file size</strong></li>
+    </ul>
+
+    <p class="text-sm text-gray-700 mb-3 leading-relaxed">
+      Our video compressor uses modern encoding to remove unnecessary data
+      while keeping your video looking great. Same vibe, smaller file,
+      happier uploads.
+    </p>
+    
+    <p class="text-sm text-gray-700 mb-3 leading-relaxed">
+     After video compresion is 
+      completed you will see a Download button. 
+      Save your compressed video and upload here.
+      Our exclusive Rhythm Deck Video Compressor opens in a new window/tab 
+      so you can come back to this profile admin page.
+    </p>
+
+    <p class="text-sm italic text-gray-600 mb-4">
+      Heads up 😄 — compression can take a couple minutes to 10 minutes or more
+      depending on video size and internet speed. Your computer is basically
+      lifting weights… let it cook. It’s worth it.
+    </p>
+
+    <div class="flex items-center gap-4 flex-wrap">
+      <a
+        href="compressor.html"
+        target="_blank"
+        class="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black px-6 py-3 rounded-lg shadow-lg transition transform hover:scale-105"
+      >
+        <span class="text-2xl">🎬</span>
+        <span>Open Video Compressor</span>
+      </a>
+
+      <span
+        id="compressorWarning"
+        class="hidden bg-yellow-100 text-yellow-800 font-bold px-4 py-2 rounded-full text-sm shadow"
+      >
+        ⚠️ Video is over 28MB — compression recommended
+      </span>
     </div>
+  </div>
+
+  <!-- UPLOAD INPUTS -->
+  <div class="grid md:grid-cols-2 gap-6 mt-6">
+    <div>
+      <label class="block font-bold mb-3 text-gray-700">Thumbnail Image</label>
+      <input
+        type="file"
+        accept="image/*"
+        id="thumbnailInput"
+        class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer"
+      >
+    </div>
+
+    <div>
+      <label class="block font-bold mb-3 text-gray-700">Video File (.mp4)</label>
+      <input
+        type="file"
+        accept="video/mp4"
+        id="videoInput"
+        class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-green-600 file:text-white file:cursor-pointer"
+      >
+    </div>
+  </div>
 
     <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
       <details class="group">
