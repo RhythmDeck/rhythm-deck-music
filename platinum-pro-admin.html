@@ -412,6 +412,59 @@
       >
     </div>
   </div>
+  <!-- PRICE -->
+  <div class="mt-6">
+    <label class="block font-bold mb-3 text-gray-700">
+      Price for Fans to Buy & Download (USD)
+    </label>
+    <input
+      type="number"
+      id="videoPrice"
+      min="0"
+      step="0.01"
+      value="0.00"
+      placeholder="e.g. 4.99 or 0 for free"
+      class="w-full border border-gray-300 p-4 rounded-lg text-xl font-semibold text-center bg-white"
+    >
+    <p class="text-sm text-gray-600 mt-2">
+      Enter 0.00 for free. Any price above $0 means fans must pay to download.
+    </p>
+  </div>
+
+  <!-- UPLOAD BUTTON -->
+  <button
+    id="uploadVideo"
+    class="w-full mt-6 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 font-bold text-lg shadow-lg flex items-center justify-center"
+  >
+    <span>Upload & Publish Video</span>
+    <div id="uploadSpinner" class="spinner hidden ml-3"></div>
+  </button>
+
+  <!-- FILE SIZE DETECTION SCRIPT -->
+  <script>
+    const videoInput = document.getElementById("videoInput");
+    const compressorWarning = document.getElementById("compressorWarning");
+
+    if (videoInput && compressorWarning) {
+      videoInput.addEventListener("change", () => {
+        const file = videoInput.files[0];
+        if (!file) {
+          compressorWarning.classList.add("hidden");
+          return;
+        }
+
+        const sizeMB = file.size / (1024 * 1024);
+        if (sizeMB > 28) {
+          compressorWarning.classList.remove("hidden");
+        } else {
+          compressorWarning.classList.add("hidden");
+        }
+      });
+    }
+  </script>
+</div>
+
+<div id="videoList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
     <div class="mt-16 p-8 bg-red-50 border-4 border-red-500 rounded-2xl max-w-4xl mx-auto">
       <details class="group">
