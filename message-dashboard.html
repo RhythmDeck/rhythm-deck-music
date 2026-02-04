@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Messages | Rhythm Deck</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo-favicon.png" type="image/png">
+  <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
+  <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Rhythm Deck Team">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 .msg-item:hover { background: rgba(255,255,255,0.08); }
@@ -64,6 +68,7 @@ Messages
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc',
@@ -184,8 +189,11 @@ async function openThread(rootId) {
       </div>
     `;
   });
-  html += `<button onclick="openReply('${name}')" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
+  html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
   document.getElementById('messageView').innerHTML = html;
+
+  // Attach event listener after HTML is inserted
+  document.getElementById('replyButton')?.addEventListener('click', () => openReply(name));
 }
 
 function openReply(name) {
