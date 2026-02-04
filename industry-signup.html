@@ -1,24 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Industry Signup - Rhythm Deck</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Industry Sign Up - Rhythm Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<style>
-body {
-  background: linear-gradient(to bottom, #000000, #0f172a);
-  color: white;
-}
-</style>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #000000, #0f172a);
+      color: white;
+    }
+    .password-toggle {
+      cursor: pointer;
+      position: absolute;
+      right: 1rem;
+      top: 3.2rem;
+      color: #9ca3af;
+    }
+  </style>
 </head>
 
 <body class="min-h-screen font-sans antialiased">
 
-<!-- HEADER -->
 <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
-  <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-4">
       <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-emerald-500" />
       <div>
@@ -28,97 +34,85 @@ body {
         <p class="text-sm text-gray-300">Unleash Your Beat</p>
       </div>
     </div>
-    <a href="index.html" class="bg-gray-800 px-6 py-3 rounded-lg text-emerald-400 hover:bg-gray-700">
+    <a href="index.html" class="bg-gray-800 px-6 py-3 rounded-lg text-emerald-400 font-medium">
       ← Back to Home
     </a>
   </div>
 </header>
 
-<!-- MAIN -->
-<main class="max-w-7xl mx-auto px-6 py-24">
-  <div class="grid md:grid-cols-2 gap-16 items-center">
+<main class="max-w-6xl mx-auto px-6 py-20">
+  <div class="grid md:grid-cols-2 gap-14 items-center">
 
-    <!-- LEFT IMAGE -->
-    <img src="industry-collab.jpg" class="rounded-2xl shadow-2xl w-full">
+    <img src="industry-collab.jpg" class="rounded-xl shadow-2xl">
 
-    <!-- FORM -->
-    <div class="bg-gray-900/70 border border-emerald-600/50 rounded-2xl p-12 shadow-2xl">
-
-      <h2 class="text-4xl font-black text-center text-emerald-400 mb-6">
-        Industry Professional Signup
+    <div class="bg-gray-900/70 rounded-2xl p-10 border border-emerald-600/50">
+      <h2 class="text-4xl font-bold text-center text-emerald-400 mb-10">
+        Industry Professional Sign Up
       </h2>
 
-      <p class="text-center text-gray-300 mb-10">
-        Create your industry profile and start collaborating.
-      </p>
+      <form class="space-y-6" autocomplete="off">
 
-      <form class="space-y-6" onsubmit="event.preventDefault(); handleSignup();">
-
-        <!-- IMAGE UPLOAD -->
         <div>
-          <label class="block text-gray-300 mb-2">Company Logo (optional)</label>
-          <input type="file" id="logo"
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg">
+          <label class="block text-sm mb-2">Full Name</label>
+          <input id="full_name" autocomplete="off"
+            class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
         <div>
-          <label class="block text-gray-300 mb-2">Full Name *</label>
-          <input id="full_name" type="text" required
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg">
+          <label class="block text-sm mb-2">Email Address</label>
+          <input id="email" type="email" autocomplete="off"
+            class="w-full p-4 bg-gray-800 rounded-lg" required>
+        </div>
+
+        <!-- IMAGE UPLOAD (RESTORED) -->
+        <div>
+          <label class="block text-sm mb-2">Logo / Profile Image</label>
+          <input id="logo" type="file" accept="image/*"
+            class="w-full bg-gray-800 p-3 rounded-lg">
         </div>
 
         <div>
-          <label class="block text-gray-300 mb-2">Company / Brand *</label>
-          <input id="company" type="text" required
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg">
+          <label class="block text-sm mb-2">Company</label>
+          <input id="company" autocomplete="off"
+            class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
         <div>
-          <label class="block text-gray-300 mb-2">Industry Role *</label>
-          <select id="industry_role" required
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg">
-            <option value="">Select Role</option>
-            <option value="producer">Producer</option>
-            <option value="label">Label</option>
-            <option value="manager">Manager</option>
-            <option value="publisher">Publisher</option>
-            <option value="distributor">Distributor</option>
+          <label class="block text-sm mb-2">Industry Role</label>
+          <select id="industry_role" class="w-full p-4 bg-gray-800 rounded-lg" required>
+            <option value="">Select role</option>
+            <option value="producer">Music Producer</option>
+            <option value="distributor">Music Distributor</option>
+            <option value="publisher">Music Publisher</option>
+            <option value="supervisor">Music Supervisor</option>
           </select>
         </div>
 
-        <div>
-          <label class="block text-gray-300 mb-2">Email *</label>
-          <input id="email" type="email" required
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg">
+        <div class="relative">
+          <label class="block text-sm mb-2">Password</label>
+          <input id="password" type="password" autocomplete="new-password"
+            class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <span class="password-toggle" onclick="togglePassword('password')">👁️</span>
         </div>
 
-        <div>
-          <label class="block text-gray-300 mb-2">Password *</label>
-          <input id="password" type="password" required
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg">
+        <div class="relative">
+          <label class="block text-sm mb-2">Confirm Password</label>
+          <input id="confirm_password" type="password" autocomplete="new-password"
+            class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <span class="password-toggle" onclick="togglePassword('confirm_password')">👁️</span>
         </div>
 
-        <div>
-          <label class="block text-gray-300 mb-2">Confirm Password *</label>
-          <input id="confirm_password" type="password"
-            autocomplete="new-password" required
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg">
-        </div>
-
-        <button type="submit"
-          class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-black text-xl hover:scale-105 transition">
-          Create Industry Account
+        <button type="button" onclick="handleSignup()"
+          class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-bold text-xl">
+          Create Account
         </button>
-
-        <p id="status" class="text-center text-sm mt-4"></p>
-
+        <br>
+<p><strong>Already have an account? </strong><a href="industry-login.html" target-"_blank"><strong>Sign in here</strong></a></p>
       </form>
     </div>
-
   </div>
 </main>
 
-<!-- SUPABASE LOGIC -->
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -127,47 +121,67 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
-window.handleSignup = async () => {
-  const status = document.getElementById('status');
+window.togglePassword = (id) => {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+};
 
+window.handleSignup = async () => {
   const fullName = document.getElementById('full_name').value.trim();
+  const email = document.getElementById('email').value.trim();
   const company = document.getElementById('company').value.trim();
   const industryRole = document.getElementById('industry_role').value;
-  const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const confirm = document.getElementById('confirm_password').value;
+  const logoFile = document.getElementById('logo').files[0];
 
   if (password !== confirm) {
-    status.textContent = 'Passwords do not match';
-    status.className = 'text-red-400 text-center';
+    alert('Passwords do not match');
     return;
   }
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const subdomain = company
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
 
   if (error) {
-    status.textContent = error.message;
-    status.className = 'text-red-400 text-center';
+    alert(error.message);
     return;
   }
 
-  const userId = data.user.id;
+  let logoUrl = null;
 
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .insert({
-      id: userId,
-      email,
-      name: fullName,
-      role: 'industry',
-      industry_role: industryRole,
-      industry_company: company,
-      plan: 'industry'
-    });
+  if (logoFile) {
+    const path = `${data.user.id}/logo.${logoFile.name.split('.').pop()}`;
+    await supabase.storage
+      .from('industry-logos')
+      .upload(path, logoFile, { upsert: true });
+
+    logoUrl = supabase.storage
+      .from('industry-logos')
+      .getPublicUrl(path).data.publicUrl;
+  }
+
+  const { error: profileError } = await supabase.from('profiles').insert({
+    id: data.user.id,
+    email,
+    name: fullName,
+    role: 'industry',
+    industry_role: industryRole,
+    industry_company: company,
+    subdomain,
+    industry_logo_url: logoUrl,
+    plan: 'industry'
+  });
 
   if (profileError) {
-    status.textContent = profileError.message;
-    status.className = 'text-red-400 text-center';
+    alert(profileError.message);
     return;
   }
 
