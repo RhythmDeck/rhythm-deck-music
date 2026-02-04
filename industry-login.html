@@ -5,162 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Industry Login - Rhythm Deck</title>
 <script src="https://cdn.tailwindcss.com"></script>
-
-<style>
-body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
-.password-toggle {
-  cursor: pointer;
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af;
-}
-</style>
 </head>
 
-<body class="min-h-screen font-sans antialiased">
+<body class="min-h-screen bg-gradient-to-b from-black to-slate-900 text-white">
 
-<!-- HEADER -->
-<header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
-  <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-    <div class="flex items-center gap-4">
-      <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-emerald-500" />
-      <div>
-        <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-          Rhythm Deck
-        </h1>
-        <p class="text-sm text-gray-300">Unleash Your Beat</p>
-      </div>
-    </div>
-    <a href="index.html" class="bg-gray-800 px-6 py-3 rounded-lg text-emerald-400 hover:bg-gray-700">
-      ← Back to Home
-    </a>
-  </div>
-</header>
+<main class="max-w-md mx-auto px-6 py-32">
+  <div class="bg-gray-900/80 border border-emerald-600/50 rounded-2xl p-12 shadow-2xl">
+    <h1 class="text-4xl font-black text-center text-emerald-400 mb-8">
+      Industry Login
+    </h1>
 
-<!-- MAIN -->
-<main class="max-w-7xl mx-auto px-6 py-24">
-  <div class="grid md:grid-cols-2 gap-12 items-center">
+    <form class="space-y-6" onsubmit="event.preventDefault(); handleLogin();">
+      <input id="email" type="email" placeholder="Email"
+        class="w-full p-4 bg-gray-800 rounded-lg" required>
 
-    <img src="industry-collab.jpg" class="rounded-xl shadow-2xl w-full">
+      <input id="password" type="password" placeholder="Password"
+        class="w-full p-4 bg-gray-800 rounded-lg" required>
 
-    <div class="bg-gray-900/70 border border-emerald-600/50 rounded-2xl p-12 shadow-2xl">
-      <h2 class="text-4xl font-bold text-center text-emerald-400 mb-6">
-        Industry Login
-      </h2>
+      <button type="submit"
+        class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-black text-xl hover:scale-105 transition">
+        Log In
+      </button>
 
-      <p class="text-center text-gray-300 mb-10">
-        Access your Rhythm Deck dashboard and manage collaborations.
-      </p>
-
-      <form class="space-y-6" onsubmit="event.preventDefault(); handleLogin();">
-        <div>
-          <label class="block text-gray-300 mb-2">Email *</label>
-          <input id="email" type="email" required
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg focus:border-emerald-500">
-        </div>
-
-        <div class="relative">
-          <label class="block text-gray-300 mb-2">Password *</label>
-          <input id="password" type="password" required
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg focus:border-emerald-500">
-          <span class="password-toggle" onclick="togglePassword('password')">👁️</span>
-        </div>
-
-        <div class="flex justify-between text-sm">
-          <label class="flex items-center gap-2">
-            <input type="checkbox" id="remember" class="accent-emerald-500">
-            Remember me
-          </label>
-          <button type="button" onclick="openForgotPasswordModal()" class="text-emerald-400 hover:underline">
-            Forgot password?
-          </button>
-        </div>
-
-        <button type="submit"
-          class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-black text-xl hover:scale-105 transition">
-          Log In
-        </button>
-
-        <p class="text-center text-gray-400 mt-6">
-          Don’t have an account?
-          <a href="industry-signup.html" class="text-emerald-400 hover:underline">Sign up</a>
-        </p>
-      </form>
-    </div>
-
+      <p id="status" class="text-center text-sm mt-4"></p>
+    </form>
   </div>
 </main>
 
-<!-- FORGOT PASSWORD MODAL -->
-<div id="forgotModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
-  <div class="bg-gray-900 p-8 rounded-2xl max-w-md w-full relative">
-    <button onclick="closeForgotModal()" class="absolute top-4 right-4 text-3xl text-red-500">×</button>
-    <h3 class="text-2xl font-bold text-emerald-400 mb-4 text-center">Reset Password</h3>
-    <input id="resetEmail" type="email" placeholder="you@company.com"
-      class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg mb-6">
-    <button onclick="sendResetEmail()" class="w-full bg-emerald-600 py-4 rounded-xl font-bold">
-      Send Reset Link
-    </button>
-    <p id="resetStatus" class="text-center mt-4 text-sm"></p>
-  </div>
-</div>
-
-<!-- GLOBAL FUNCTIONS -->
-<script>
-window.togglePassword = id => {
-  const f = document.getElementById(id);
-  f.type = f.type === 'password' ? 'text' : 'password';
-};
-
-window.openForgotPasswordModal = () => {
-  document.getElementById('forgotModal').classList.remove('hidden');
-};
-
-window.closeForgotModal = () => {
-  document.getElementById('forgotModal').classList.add('hidden');
-};
-
-window.handleLogin = async () => {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
-
-  const { error } = await window.supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  window.location.href = 'industry-dashboard.html';
-};
-
-window.sendResetEmail = async () => {
-  const email = document.getElementById('resetEmail').value.trim();
-  const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://rhythm-deck-music.onrender.com/reset-password.html'
-  });
-
-  document.getElementById('resetStatus').textContent = error
-    ? error.message
-    : 'Reset link sent! Check your email.';
-};
-</script>
-
-<!-- SUPABASE -->
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
-window.supabase = supabase;
+window.handleLogin = async () => {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const status = document.getElementById('status');
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    status.textContent = error.message;
+    status.className = 'text-red-400 text-center';
+    return;
+  }
+
+  const userId = data.user.id;
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+
+  if (profileError || !profile) {
+    status.textContent = 'Profile not found';
+    status.className = 'text-red-400 text-center';
+    return;
+  }
+
+  if (profile.role === 'industry') {
+    window.location.href = 'industry-dashboard.html';
+  } else {
+    window.location.href = 'profile-admin.html';
+  }
+};
 </script>
 
 </body>
