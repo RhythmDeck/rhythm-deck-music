@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Industry Dashboard - Rhythm Deck</title>
+  <link rel="icon" href="logo-favicon.png" type="image/png">
+  <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
+  <meta name="keywords" content="music producers, music distributors, music publishers, music supervisors, rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Rhythm Deck Team">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
@@ -65,14 +70,15 @@
           <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
         </div>
       </div>
+
       <div class="flex items-center gap-6">
+        <!-- Welcome message – fetches fresh name per logged-in user -->
         <div id="welcomeUser" class="text-lg font-bold text-emerald-400 hidden"></div>
-        <a href="index.html" class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-emerald-400 hover:text-emerald-300 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition shadow-md text-sm sm:text-base">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 sm:h-5 w-4 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Home
-        </a>
+
+        <!-- Shiny gold Logout button -->
+        <button onclick="logout()" class="bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold px-8 py-3 rounded-full shadow-xl transition transform hover:scale-105">
+          Logout
+        </button>
       </div>
     </div>
   </header>
@@ -166,7 +172,7 @@
     <!-- Artists Grid -->
     <div id="artistGrid" class="grid grid-container gap-6"></div>
 
-    <!-- New Email-Style Messages Section -->
+    <!-- Email-Style Messages Section -->
     <section class="mt-16 bg-black/40 rounded-2xl p-8">
       <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[80vh]">
@@ -212,7 +218,7 @@
     </div>
   </div>
 
-  <!-- Contact Modal (for sending new messages to artists) -->
+  <!-- Contact Modal (New Message to Artist) -->
   <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
       <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
@@ -276,12 +282,13 @@
       }
       currentUserId = user.id;
 
-      // Get current user's name for welcome message
+      // Fetch correct name for currently logged-in user
       const { data: profile } = await supabase
         .from('profiles')
         .select('name')
         .eq('id', currentUserId)
         .single();
+
       currentUserName = profile?.name || 'Industry Pro';
       document.getElementById('welcomeUser').textContent = `Welcome, ${currentUserName}`;
       document.getElementById('welcomeUser').classList.remove('hidden');
@@ -291,13 +298,13 @@
     }
 
     async function loadArtists() {
-      const { data: fetchedArtists, error: artistError } = await supabase
+      const { data: fetchedArtists, error } = await supabase
         .from('profiles')
         .select('*')
         .in('plan', ['pro', 'platinum'])
         .order('name', { ascending: true });
-      if (artistError) {
-        console.error('Error loading artists:', artistError);
+      if (error) {
+        console.error('Error loading artists:', error);
         return;
       }
       artists = fetchedArtists;
@@ -368,6 +375,7 @@
         receiver_id: messageArtistId,
         subject,
         body: message,
+        owner_id: currentUserId,
         folder: 'sent'
       });
 
@@ -390,8 +398,8 @@
           sender:sender_id(name),
           receiver:receiver_id(name)
         `)
+        .eq('owner_id', currentUserId)
         .eq('folder', folder)
-        .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -499,7 +507,9 @@
         receiver_id: receiverId,
         subject,
         body: message,
-        parent_id: activeMessageId
+        parent_id: activeMessageId,
+        owner_id: currentUserId,
+        folder: 'sent'
       });
 
       if (error) {
@@ -516,6 +526,12 @@
       document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
       document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
     });
+
+    // Logout
+    function logout() {
+      supabase.auth.signOut();
+      location.href = 'login.html';
+    }
 
     init();
   </script>
