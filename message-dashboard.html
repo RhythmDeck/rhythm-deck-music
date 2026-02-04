@@ -5,10 +5,10 @@
 <title>Messages | Rhythm Deck</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="logo-favicon.png" type="image/png">
-  <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
-  <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
-  <meta name="robots" content="index, follow">
-  <meta name="author" content="Rhythm Deck Team">
+<meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
+<meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Rhythm Deck Team">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 .msg-item:hover { background: rgba(255,255,255,0.08); }
@@ -19,7 +19,6 @@
 </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen flex flex-col">
-
 <!-- Header -->
 <header class="bg-black/60 border-b border-purple-700/50 py-6 px-6 flex items-center justify-between">
   <div class="flex items-center gap-4">
@@ -69,7 +68,6 @@ Messages
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc',
@@ -87,7 +85,6 @@ let messages = [];
 let activeRoot = null;
 let initialized = false;
 
-/* ───────────────────────── AUTH SAFE INIT ───────────────────────── */
 async function initAuth() {
   const { data } = await supabase.auth.getSession();
   if (!data.session) {
@@ -108,7 +105,6 @@ supabase.auth.onAuthStateChange((_event, session) => {
 
 initAuth();
 
-/* ───────────────────────── MESSAGES ───────────────────────── */
 async function loadMessages() {
   if (!userId) return;
   const { data, error } = await supabase
@@ -132,20 +128,28 @@ function renderConversations() {
   const list = document.getElementById('conversationList');
   list.innerHTML = '';
   const threads = {};
+
+  // Group by root
   messages.forEach(m => {
     const root = m.parent_id || m.id;
     if (!threads[root]) threads[root] = [];
     threads[root].push(m);
   });
 
-  Object.entries(threads).forEach(([rootId, thread]) => {
-    const root = thread.find(m => !m.parent_id);
-    if (!root) return;
-    const latest = thread.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
+  // Sort threads by most recent message
+  const sortedThreads = Object.entries(threads).sort(([,a], [,b]) => {
+    const latestA = a.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, a[0]);
+    const latestB = b.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, b[0]);
+    return new Date(latestB.created_at) - new Date(latestA.created_at);
+  });
+
+  sortedThreads.forEach(([rootId, thread]) => {
+    const root = thread.find(m => !m.parent_id) || thread[0];
+    const latest = thread.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, thread[0]);
     const isUnread = !root.read_at && root.receiver_id === userId;
     const name = root.sender_id === userId ? root.receiver.name : root.sender.name;
     const div = document.createElement('div');
-    div.className = 'msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5';
+    div.className = `msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${activeRoot === rootId ? 'selected' : ''}`;
     div.onclick = () => openThread(rootId);
     div.innerHTML = `
       <div class="flex justify-between items-center">
@@ -164,16 +168,22 @@ function renderConversations() {
     list.appendChild(div);
   });
 
-  const first = Object.keys(threads)[0];
-  if (first) openThread(first);
+  // Only auto-open if no active thread or if active thread no longer exists
+  if (!activeRoot || !messages.some(m => (m.id === activeRoot || m.parent_id === activeRoot))) {
+    const first = sortedThreads[0]?.[0];
+    if (first) openThread(first);
+  } else {
+    // Re-render current thread to reflect new messages
+    openThread(activeRoot);
+  }
 }
 
 async function openThread(rootId) {
   activeRoot = rootId;
   const thread = messages
     .filter(m => m.id === rootId || m.parent_id === rootId)
-    .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-  const root = thread[0];
+    .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+  const root = thread.find(m => !m.parent_id) || thread[0];
   if (root.receiver_id === userId && !root.read_at) {
     await supabase.from('collab_requests')
       .update({ read_at: new Date().toISOString() })
@@ -192,9 +202,9 @@ async function openThread(rootId) {
   });
   html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
   document.getElementById('messageView').innerHTML = html;
-
-  // Attach event listener to Reply button after HTML is inserted
   document.getElementById('replyButton')?.addEventListener('click', () => openReply(name));
+  // Scroll to bottom
+  document.getElementById('messageView').scrollTop = document.getElementById('messageView').scrollHeight;
 }
 
 function openReply(name) {
@@ -215,30 +225,25 @@ async function sendReply() {
     alert('Please type a message');
     return;
   }
-
   const root = messages.find(m => m.id === activeRoot);
   if (!root) {
     alert('No active conversation');
     return;
   }
-
   const receiver = root.sender_id === userId ? root.receiver_id : root.sender_id;
-
   const { error } = await supabase.from('collab_requests').insert({
     parent_id: activeRoot,
     sender_id: userId,
     receiver_id: receiver,
     message: text
   });
-
   if (error) {
     console.error('Reply failed:', error);
     alert('Failed to send reply: ' + error.message);
     return;
   }
-
   closeReply();
-  loadMessages(); // Reload to show new reply
+  loadMessages(); // Reload everything
 }
 
 async function deleteThread(rootId, e) {
@@ -251,7 +256,7 @@ async function deleteThread(rootId, e) {
   loadMessages();
 }
 
-// Attach sendReply listener once on page load (since modal is static)
+// Attach sendReply once (modal is static)
 document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
 </script>
 </body>
