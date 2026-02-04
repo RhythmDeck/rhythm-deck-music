@@ -18,7 +18,6 @@
 
 <body class="min-h-screen font-sans antialiased">
 
-<!-- HEADER -->
 <header class="sticky top-0 z-10 bg-black/90 border-b border-gray-800">
   <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
     <div class="flex items-center gap-3">
@@ -40,20 +39,14 @@
   <h2 class="text-3xl font-bold text-center text-emerald-400 mb-6">My Messages</h2>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[75vh]">
-
-    <!-- CONVERSATIONS -->
     <div class="bg-black/30 rounded-xl overflow-y-auto" id="conversationList"></div>
-
-    <!-- MESSAGE VIEW -->
     <div id="messageView" class="lg:col-span-2 bg-black/30 rounded-xl p-6 overflow-y-auto">
       <p class="text-gray-400 text-center mt-24">Select a conversation</p>
     </div>
-
   </div>
 </section>
 </main>
 
-<!-- REPLY MODAL -->
 <div id="replyModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-50">
   <div class="bg-gray-900 rounded-2xl p-8 max-w-lg w-full relative">
     <button onclick="closeReply()" class="absolute top-4 right-4 text-3xl text-red-400">&times;</button>
@@ -66,23 +59,23 @@
 </div>
 
 <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'YOUR_PUBLIC_ANON_KEY'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
 let currentUser;
 let conversations = [];
 let activeThread = null;
 
-async function init() {
-  const { data } = await supabase.auth.getUser();
-  if (!data.user) return location.href = 'login.html';
-  currentUser = data.user.id;
-  loadMessages();
+/* ✅ SAFE AUTH CHECK */
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) {
+  window.location.href = 'industry-login.html';
 }
+currentUser = session.user.id;
 
 async function loadMessages() {
   const { data, error } = await supabase
@@ -171,7 +164,8 @@ window.sendReply = async function(){
   loadMessages();
 };
 
-init();
+loadMessages();
 </script>
+
 </body>
 </html>
