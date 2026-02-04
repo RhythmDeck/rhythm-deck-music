@@ -1,34 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Industry Sign Up - Rhythm Deck</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Industry Sign Up - Rhythm Deck</title>
+<script src="https://cdn.tailwindcss.com"></script>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    body {
-      background: linear-gradient(to bottom, #000000, #0f172a);
-      color: white;
-    }
-    .password-toggle {
-      cursor: pointer;
-      position: absolute;
-      right: 1rem;
-      top: 3.2rem;
-      color: #9ca3af;
-    }
-  </style>
+<style>
+  body {
+    background: linear-gradient(to bottom, #000000, #0f172a);
+    color: white;
+  }
+  .password-toggle {
+    cursor: pointer;
+    position: absolute;
+    right: 1rem;
+    top: 3.2rem;
+    color: #9ca3af;
+  }
+</style>
 </head>
 
 <body class="min-h-screen font-sans antialiased">
 
-<!-- HEADER -->
 <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-4">
-      <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-emerald-500" />
+      <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-emerald-500">
       <div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
           Rhythm Deck
@@ -42,44 +40,36 @@
   </div>
 </header>
 
-<!-- MAIN -->
 <main class="max-w-6xl mx-auto px-6 py-20">
   <div class="grid md:grid-cols-2 gap-14 items-center">
 
-    <!-- LEFT IMAGE -->
-    <img src="industry-collab.jpg" class="rounded-xl shadow-2xl w-full" />
+    <img src="industry-collab.jpg" class="rounded-xl shadow-2xl">
 
-    <!-- FORM -->
     <div class="bg-gray-900/70 rounded-2xl p-10 border border-emerald-600/50">
       <h2 class="text-4xl font-bold text-center text-emerald-400 mb-10">
         Industry Professional Sign Up
       </h2>
 
-      <form class="space-y-6" autocomplete="off">
+      <form class="space-y-6" onsubmit="event.preventDefault(); handleSignup();">
 
         <div>
           <label class="block text-sm mb-2">Full Name</label>
-          <input id="full_name" autocomplete="off"
-            class="w-full p-4 bg-gray-800 rounded-lg" required />
+          <input id="full_name" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
         <div>
           <label class="block text-sm mb-2">Email Address</label>
-          <input id="email" type="email" autocomplete="off"
-            class="w-full p-4 bg-gray-800 rounded-lg" required />
+          <input id="email" type="email" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
-        <!-- LOGO UPLOAD -->
         <div>
           <label class="block text-sm mb-2">Logo / Profile Image</label>
-          <input id="logo" type="file" accept="image/*"
-            class="w-full bg-gray-800 p-3 rounded-lg" />
+          <input id="logo" type="file" accept="image/*" class="w-full bg-gray-800 p-3 rounded-lg">
         </div>
 
         <div>
           <label class="block text-sm mb-2">Company</label>
-          <input id="company" autocomplete="off"
-            class="w-full p-4 bg-gray-800 rounded-lg" required />
+          <input id="company" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
         <div>
@@ -87,36 +77,34 @@
           <select id="industry_role" class="w-full p-4 bg-gray-800 rounded-lg" required>
             <option value="">Select role</option>
             <option value="producer">Music Producer</option>
-            <option value="label">Record Label</option>
-            <option value="manager">Manager</option>
-            <option value="publisher">Publisher</option>
-            <option value="distributor">Distributor</option>
+            <option value="publisher">Music Publisher</option>
             <option value="supervisor">Music Supervisor</option>
+            <option value="distributor">Music Distributor</option>
           </select>
         </div>
 
         <div class="relative">
           <label class="block text-sm mb-2">Password</label>
           <input id="password" type="password" autocomplete="new-password"
-            class="w-full p-4 bg-gray-800 rounded-lg" required />
+            class="w-full p-4 bg-gray-800 rounded-lg" required>
           <span class="password-toggle" onclick="togglePassword('password')">👁️</span>
         </div>
 
         <div class="relative">
           <label class="block text-sm mb-2">Confirm Password</label>
           <input id="confirm_password" type="password" autocomplete="new-password"
-            class="w-full p-4 bg-gray-800 rounded-lg" required />
+            class="w-full p-4 bg-gray-800 rounded-lg" required>
           <span class="password-toggle" onclick="togglePassword('confirm_password')">👁️</span>
         </div>
 
-        <button type="button" onclick="handleSignup()"
+        <button type="submit"
           class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-bold text-xl">
           Create Account
         </button>
 
         <p class="text-center mt-4">
           Already have an account?
-          <a href="industry-login.html" class="text-emerald-400 font-semibold">Sign in here</a>
+          <a href="industry-login.html" class="text-emerald-400 font-bold">Sign in here</a>
         </p>
 
       </form>
@@ -124,7 +112,6 @@
   </div>
 </main>
 
-<!-- SCRIPT -->
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -157,11 +144,7 @@ window.handleSignup = async () => {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password
-  });
-
+  const { data, error } = await supabase.auth.signUp({ email, password });
   if (error) {
     alert(error.message);
     return;
@@ -175,24 +158,18 @@ window.handleSignup = async () => {
     logoUrl = supabase.storage.from('industry-logos').getPublicUrl(path).data.publicUrl;
   }
 
-  const { error: profileError } = await supabase.from('profiles').insert({
-    id: data.user.id,
-    email,
+  await supabase.from('profiles').update({
     name: fullName,
+    email,
+    subdomain,
     role: 'industry',
     industry_role: industryRole,
     industry_company: company,
-    subdomain,
     industry_logo_url: logoUrl,
     plan: 'industry'
-  });
+  }).eq('id', data.user.id);
 
-  if (profileError) {
-    alert(profileError.message);
-    return;
-  }
-
-  window.location.href = 'industry-dashboard.html';
+  window.location.href = 'industry-login.html';
 };
 </script>
 
