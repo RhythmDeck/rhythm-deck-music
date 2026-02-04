@@ -5,10 +5,6 @@
 <title>Messages | Rhythm Deck</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="logo-favicon.png" type="image/png">
-<meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
-<meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
-<meta name="robots" content="index, follow">
-<meta name="author" content="Rhythm Deck Team">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 .msg-item:hover { background: rgba(255,255,255,0.08); }
@@ -19,6 +15,7 @@
 </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen flex flex-col">
+
 <!-- Header -->
 <header class="bg-black/60 border-b border-purple-700/50 py-6 px-6 flex items-center justify-between">
   <div class="flex items-center gap-4">
@@ -127,16 +124,15 @@ async function loadMessages() {
 function renderConversations() {
   const list = document.getElementById('conversationList');
   list.innerHTML = '';
-  const threads = {};
 
-  // Group by root
+  const threads = {};
   messages.forEach(m => {
     const root = m.parent_id || m.id;
     if (!threads[root]) threads[root] = [];
     threads[root].push(m);
   });
 
-  // Sort threads by most recent message
+  // Sort by most recent activity
   const sortedThreads = Object.entries(threads).sort(([,a], [,b]) => {
     const latestA = a.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, a[0]);
     const latestB = b.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, b[0]);
@@ -148,6 +144,7 @@ function renderConversations() {
     const latest = thread.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, thread[0]);
     const isUnread = !root.read_at && root.receiver_id === userId;
     const name = root.sender_id === userId ? root.receiver.name : root.sender.name;
+
     const div = document.createElement('div');
     div.className = `msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${activeRoot === rootId ? 'selected' : ''}`;
     div.onclick = () => openThread(rootId);
@@ -168,13 +165,12 @@ function renderConversations() {
     list.appendChild(div);
   });
 
-  // Only auto-open if no active thread or if active thread no longer exists
-  if (!activeRoot || !messages.some(m => (m.id === activeRoot || m.parent_id === activeRoot))) {
-    const first = sortedThreads[0]?.[0];
-    if (first) openThread(first);
-  } else {
-    // Re-render current thread to reflect new messages
+  // Preserve currently viewed thread if it still exists
+  if (activeRoot && messages.some(m => m.id === activeRoot || m.parent_id === activeRoot)) {
     openThread(activeRoot);
+  } else if (sortedThreads.length > 0) {
+    // Only auto-open first if nothing was active
+    openThread(sortedThreads[0][0]);
   }
 }
 
@@ -184,11 +180,13 @@ async function openThread(rootId) {
     .filter(m => m.id === rootId || m.parent_id === rootId)
     .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
   const root = thread.find(m => !m.parent_id) || thread[0];
+
   if (root.receiver_id === userId && !root.read_at) {
     await supabase.from('collab_requests')
       .update({ read_at: new Date().toISOString() })
       .eq('id', root.id);
   }
+
   const name = root.sender_id === userId ? root.receiver.name : root.sender.name;
   let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${name}</h2>`;
   thread.forEach(m => {
@@ -203,7 +201,6 @@ async function openThread(rootId) {
   html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
   document.getElementById('messageView').innerHTML = html;
   document.getElementById('replyButton')?.addEventListener('click', () => openReply(name));
-  // Scroll to bottom
   document.getElementById('messageView').scrollTop = document.getElementById('messageView').scrollHeight;
 }
 
@@ -243,7 +240,7 @@ async function sendReply() {
     return;
   }
   closeReply();
-  loadMessages(); // Reload everything
+  loadMessages(); // Full reload keeps all threads
 }
 
 async function deleteThread(rootId, e) {
@@ -256,7 +253,7 @@ async function deleteThread(rootId, e) {
   loadMessages();
 }
 
-// Attach sendReply once (modal is static)
+// Attach sendReply listener once (modal is static)
 document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
 </script>
 </body>
