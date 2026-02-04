@@ -16,7 +16,6 @@
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen flex flex-col">
 
-<!-- Header -->
 <header class="bg-black/60 border-b border-purple-700/50 py-6 px-6 flex items-center justify-between">
   <div class="flex items-center gap-4">
     <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="h-12 w-12 rounded-full">
@@ -70,7 +69,6 @@ const supabase = createClient(
 let userId = null;
 let messages = [];
 let activeRoot = null;
-let initialized = false;
 
 async function initAuth() {
   const { data } = await supabase.auth.getSession();
@@ -83,8 +81,7 @@ async function initAuth() {
 }
 
 supabase.auth.onAuthStateChange((_event, session) => {
-  if (!initialized && session?.user) {
-    initialized = true;
+  if (session?.user) {
     userId = session.user.id;
     loadMessages();
   }
@@ -104,7 +101,7 @@ async function loadMessages() {
     .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
     .order('created_at', { ascending: false });
   if (error) {
-    console.error('Load messages error:', error);
+    console.error(error);
     return;
   }
   messages = data || [];
@@ -122,6 +119,7 @@ function renderConversations() {
     threads[root].push(m);
   });
 
+  // Sort by most recent activity
   const sortedThreads = Object.entries(threads).sort(([,a], [,b]) => {
     const latestA = a.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, a[0]);
     const latestB = b.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, b[0]);
@@ -154,6 +152,7 @@ function renderConversations() {
     list.appendChild(div);
   });
 
+  // Keep current thread open if it still exists
   if (activeRoot && messages.some(m => m.id === activeRoot || m.parent_id === activeRoot)) {
     openThread(activeRoot);
   } else if (sortedThreads.length > 0) {
@@ -210,22 +209,14 @@ async function sendReply() {
     return;
   }
   const root = messages.find(m => m.id === activeRoot);
-  if (!root) {
-    alert('No active conversation');
-    return;
-  }
+  if (!root) return alert('No active conversation');
   const receiver = root.sender_id === userId ? root.receiver_id : root.sender_id;
-  const { error } = await supabase.from('collab_requests').insert({
+  await supabase.from('collab_requests').insert({
     parent_id: activeRoot,
     sender_id: userId,
     receiver_id: receiver,
     message: text
   });
-  if (error) {
-    console.error('Reply failed:', error);
-    alert('Failed to send reply: ' + error.message);
-    return;
-  }
   closeReply();
   loadMessages();
 }
