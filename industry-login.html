@@ -54,7 +54,7 @@ body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
         Access your Rhythm Deck dashboard and manage collaborations.
       </p>
 
-      <form class="space-y-6">
+      <form class="space-y-6" onsubmit="event.preventDefault(); handleLogin();">
         <div>
           <label class="block text-gray-300 mb-2">Email *</label>
           <input id="email" type="email" required
@@ -78,7 +78,7 @@ body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
           </button>
         </div>
 
-        <button type="button" onclick="handleLogin()"
+        <button type="submit"
           class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-black text-xl hover:scale-105 transition">
           Log In
         </button>
@@ -115,18 +115,21 @@ window.togglePassword = id => {
 };
 
 window.openForgotPasswordModal = () => {
-  forgotModal.classList.remove('hidden');
+  document.getElementById('forgotModal').classList.remove('hidden');
 };
 
 window.closeForgotModal = () => {
-  forgotModal.classList.add('hidden');
+  document.getElementById('forgotModal').classList.add('hidden');
 };
 
 window.handleLogin = async () => {
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await window.supabase.auth.signInWithPassword({
+    email,
+    password
+  });
 
   if (error) {
     alert(error.message);
@@ -137,12 +140,12 @@ window.handleLogin = async () => {
 };
 
 window.sendResetEmail = async () => {
-  const email = resetEmail.value.trim();
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const email = document.getElementById('resetEmail').value.trim();
+  const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
     redirectTo: 'https://rhythm-deck-music.onrender.com/reset-password.html'
   });
 
-  resetStatus.textContent = error
+  document.getElementById('resetStatus').textContent = error
     ? error.message
     : 'Reset link sent! Check your email.';
 };
@@ -154,16 +157,10 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'YOUR_ANON_KEY_HERE'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
 window.supabase = supabase;
-
-// Session guard
-const { data: { session } } = await supabase.auth.getSession();
-if (session) {
-  window.location.href = 'industry-dashboard.html';
-}
 </script>
 
 </body>
