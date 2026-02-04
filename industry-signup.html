@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Industry Sign Up - Rhythm Deck</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -23,6 +24,7 @@
 
 <body class="min-h-screen font-sans antialiased">
 
+<!-- HEADER -->
 <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-4">
@@ -40,11 +42,14 @@
   </div>
 </header>
 
+<!-- MAIN -->
 <main class="max-w-6xl mx-auto px-6 py-20">
   <div class="grid md:grid-cols-2 gap-14 items-center">
 
-    <img src="industry-collab.jpg" class="rounded-xl shadow-2xl">
+    <!-- LEFT IMAGE -->
+    <img src="industry-collab.jpg" class="rounded-xl shadow-2xl w-full" />
 
+    <!-- FORM -->
     <div class="bg-gray-900/70 rounded-2xl p-10 border border-emerald-600/50">
       <h2 class="text-4xl font-bold text-center text-emerald-400 mb-10">
         Industry Professional Sign Up
@@ -54,22 +59,27 @@
 
         <div>
           <label class="block text-sm mb-2">Full Name</label>
-          <input id="full_name" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="full_name" autocomplete="off"
+            class="w-full p-4 bg-gray-800 rounded-lg" required />
         </div>
 
         <div>
           <label class="block text-sm mb-2">Email Address</label>
-          <input id="email" type="email" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="email" type="email" autocomplete="off"
+            class="w-full p-4 bg-gray-800 rounded-lg" required />
         </div>
 
+        <!-- LOGO UPLOAD -->
         <div>
           <label class="block text-sm mb-2">Logo / Profile Image</label>
-          <input id="logo" type="file" accept="image/*" class="w-full bg-gray-800 p-3 rounded-lg">
+          <input id="logo" type="file" accept="image/*"
+            class="w-full bg-gray-800 p-3 rounded-lg" />
         </div>
 
         <div>
           <label class="block text-sm mb-2">Company</label>
-          <input id="company" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="company" autocomplete="off"
+            class="w-full p-4 bg-gray-800 rounded-lg" required />
         </div>
 
         <div>
@@ -77,8 +87,10 @@
           <select id="industry_role" class="w-full p-4 bg-gray-800 rounded-lg" required>
             <option value="">Select role</option>
             <option value="producer">Music Producer</option>
-            <option value="distributor">Music Distributor</option>
-            <option value="publisher">Music Publisher</option>
+            <option value="label">Record Label</option>
+            <option value="manager">Manager</option>
+            <option value="publisher">Publisher</option>
+            <option value="distributor">Distributor</option>
             <option value="supervisor">Music Supervisor</option>
           </select>
         </div>
@@ -86,14 +98,14 @@
         <div class="relative">
           <label class="block text-sm mb-2">Password</label>
           <input id="password" type="password" autocomplete="new-password"
-            class="w-full p-4 bg-gray-800 rounded-lg" required>
+            class="w-full p-4 bg-gray-800 rounded-lg" required />
           <span class="password-toggle" onclick="togglePassword('password')">👁️</span>
         </div>
 
         <div class="relative">
           <label class="block text-sm mb-2">Confirm Password</label>
           <input id="confirm_password" type="password" autocomplete="new-password"
-            class="w-full p-4 bg-gray-800 rounded-lg" required>
+            class="w-full p-4 bg-gray-800 rounded-lg" required />
           <span class="password-toggle" onclick="togglePassword('confirm_password')">👁️</span>
         </div>
 
@@ -103,8 +115,8 @@
         </button>
 
         <p class="text-center mt-4">
-          <strong>Already have an account?</strong>
-          <a href="industry-login.html" class="text-emerald-400 font-bold">Sign in here</a>
+          Already have an account?
+          <a href="industry-login.html" class="text-emerald-400 font-semibold">Sign in here</a>
         </p>
 
       </form>
@@ -112,6 +124,7 @@
   </div>
 </main>
 
+<!-- SCRIPT -->
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -120,19 +133,19 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
-window.togglePassword = id => {
+window.togglePassword = (id) => {
   const el = document.getElementById(id);
   el.type = el.type === 'password' ? 'text' : 'password';
 };
 
 window.handleSignup = async () => {
-  const fullName = full_name.value.trim();
-  const email = emailInput?.value?.trim() || email.value.trim();
-  const company = companyInput?.value?.trim() || company.value.trim();
-  const industryRole = industry_role.value;
-  const password = password.value;
-  const confirm = confirm_password.value;
-  const logoFile = logo.files[0];
+  const fullName = document.getElementById('full_name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const company = document.getElementById('company').value.trim();
+  const industryRole = document.getElementById('industry_role').value;
+  const password = document.getElementById('password').value;
+  const confirm = document.getElementById('confirm_password').value;
+  const logoFile = document.getElementById('logo').files[0];
 
   if (password !== confirm) {
     alert('Passwords do not match');
@@ -144,27 +157,26 @@ window.handleSignup = async () => {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
 
   if (error) {
     alert(error.message);
     return;
   }
 
-  const userId = data.user.id;
-
   let logoUrl = null;
 
-  const { data: sessionData } = await supabase.auth.getSession();
-
-  if (sessionData.session && logoFile) {
-    const path = `${userId}/logo.${logoFile.name.split('.').pop()}`;
+  if (logoFile) {
+    const path = `${data.user.id}/logo.${logoFile.name.split('.').pop()}`;
     await supabase.storage.from('industry-logos').upload(path, logoFile, { upsert: true });
     logoUrl = supabase.storage.from('industry-logos').getPublicUrl(path).data.publicUrl;
   }
 
-  const { error: profileError } = await supabase.from('profiles').upsert({
-    id: userId,
+  const { error: profileError } = await supabase.from('profiles').insert({
+    id: data.user.id,
     email,
     name: fullName,
     role: 'industry',
