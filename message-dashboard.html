@@ -165,11 +165,11 @@ function renderConversations() {
     list.appendChild(div);
   });
 
-  // Preserve currently viewed thread if it still exists
+  // Keep the currently viewed thread open if it still exists
   if (activeRoot && messages.some(m => m.id === activeRoot || m.parent_id === activeRoot)) {
     openThread(activeRoot);
   } else if (sortedThreads.length > 0) {
-    // Only auto-open first if nothing was active
+    // Only auto-open first thread on initial load
     openThread(sortedThreads[0][0]);
   }
 }
@@ -240,7 +240,7 @@ async function sendReply() {
     return;
   }
   closeReply();
-  loadMessages(); // Full reload keeps all threads
+  loadMessages(); // Full reload keeps all threads visible
 }
 
 async function deleteThread(rootId, e) {
@@ -253,7 +253,7 @@ async function deleteThread(rootId, e) {
   loadMessages();
 }
 
-// Attach sendReply listener once (modal is static)
+// Attach sendReply once (modal is static)
 document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
 </script>
 </body>
