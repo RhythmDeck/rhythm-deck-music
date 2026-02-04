@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Industry Sign Up - Rhythm Deck</title>
+  <title>Industry Sign Up - Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -54,27 +54,22 @@
 
         <div>
           <label class="block text-sm mb-2">Full Name</label>
-          <input id="full_name" autocomplete="off"
-            class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="full_name" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
         <div>
           <label class="block text-sm mb-2">Email Address</label>
-          <input id="email" type="email" autocomplete="off"
-            class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="email" type="email" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
-        <!-- IMAGE UPLOAD (RESTORED) -->
         <div>
           <label class="block text-sm mb-2">Logo / Profile Image</label>
-          <input id="logo" type="file" accept="image/*"
-            class="w-full bg-gray-800 p-3 rounded-lg">
+          <input id="logo" type="file" accept="image/*" class="w-full bg-gray-800 p-3 rounded-lg">
         </div>
 
         <div>
           <label class="block text-sm mb-2">Company</label>
-          <input id="company" autocomplete="off"
-            class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="company" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
         <div>
@@ -106,8 +101,12 @@
           class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-bold text-xl">
           Create Account
         </button>
-        <br>
-<p><strong>Already have an account? </strong><a href="industry-login.html" target-"_blank"><strong>Sign in here</strong></a></p>
+
+        <p class="text-center mt-4">
+          <strong>Already have an account?</strong>
+          <a href="industry-login.html" class="text-emerald-400 font-bold">Sign in here</a>
+        </p>
+
       </form>
     </div>
   </div>
@@ -121,19 +120,19 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
-window.togglePassword = (id) => {
+window.togglePassword = id => {
   const el = document.getElementById(id);
   el.type = el.type === 'password' ? 'text' : 'password';
 };
 
 window.handleSignup = async () => {
-  const fullName = document.getElementById('full_name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const company = document.getElementById('company').value.trim();
-  const industryRole = document.getElementById('industry_role').value;
-  const password = document.getElementById('password').value;
-  const confirm = document.getElementById('confirm_password').value;
-  const logoFile = document.getElementById('logo').files[0];
+  const fullName = full_name.value.trim();
+  const email = emailInput?.value?.trim() || email.value.trim();
+  const company = companyInput?.value?.trim() || company.value.trim();
+  const industryRole = industry_role.value;
+  const password = password.value;
+  const confirm = confirm_password.value;
+  const logoFile = logo.files[0];
 
   if (password !== confirm) {
     alert('Passwords do not match');
@@ -145,31 +144,27 @@ window.handleSignup = async () => {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password
-  });
+  const { data, error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
     alert(error.message);
     return;
   }
 
+  const userId = data.user.id;
+
   let logoUrl = null;
 
-  if (logoFile) {
-    const path = `${data.user.id}/logo.${logoFile.name.split('.').pop()}`;
-    await supabase.storage
-      .from('industry-logos')
-      .upload(path, logoFile, { upsert: true });
+  const { data: sessionData } = await supabase.auth.getSession();
 
-    logoUrl = supabase.storage
-      .from('industry-logos')
-      .getPublicUrl(path).data.publicUrl;
+  if (sessionData.session && logoFile) {
+    const path = `${userId}/logo.${logoFile.name.split('.').pop()}`;
+    await supabase.storage.from('industry-logos').upload(path, logoFile, { upsert: true });
+    logoUrl = supabase.storage.from('industry-logos').getPublicUrl(path).data.publicUrl;
   }
 
-  const { error: profileError } = await supabase.from('profiles').insert({
-    id: data.user.id,
+  const { error: profileError } = await supabase.from('profiles').upsert({
+    id: userId,
     email,
     name: fullName,
     role: 'industry',
