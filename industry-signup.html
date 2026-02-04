@@ -19,7 +19,6 @@
 
 <body class="min-h-screen font-sans antialiased">
 
-<!-- HEADER -->
 <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-4">
@@ -49,31 +48,26 @@
 
       <form class="space-y-6">
 
-        <!-- NAME -->
         <div>
           <label class="block text-sm mb-2">Full Name</label>
           <input id="full_name" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
-        <!-- EMAIL -->
         <div>
           <label class="block text-sm mb-2">Email Address</label>
           <input id="email" type="email" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
-        <!-- COMPANY -->
         <div>
           <label class="block text-sm mb-2">Company</label>
           <input id="company" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
-        <!-- SUBDOMAIN -->
         <div>
           <label class="block text-sm mb-2">Public Subdomain</label>
           <input id="subdomain" class="w-full p-4 bg-gray-800 rounded-lg" placeholder="your-company-name" required>
         </div>
 
-        <!-- ROLE -->
         <div>
           <label class="block text-sm mb-2">Industry Role</label>
           <select id="industry_role" class="w-full p-4 bg-gray-800 rounded-lg" required>
@@ -85,46 +79,34 @@
           </select>
         </div>
 
-        <!-- LOGO -->
         <div>
           <label class="block text-sm mb-2">Logo / Profile Image</label>
           <input id="logo" type="file" accept="image/*" class="w-full bg-gray-800 p-3 rounded-lg">
-          <p class="text-xs text-gray-400 mt-1">
-            Displayed publicly in the Industry Directory.
-          </p>
         </div>
 
-        <!-- PASSWORD -->
         <div class="relative">
           <label class="block text-sm mb-2">Password</label>
           <input id="password" type="password" class="w-full p-4 bg-gray-800 rounded-lg" required>
           <span class="password-toggle" onclick="togglePassword('password')">👁️</span>
         </div>
 
-        <!-- CONFIRM -->
         <div class="relative">
           <label class="block text-sm mb-2">Confirm Password</label>
           <input id="confirm_password" type="password" class="w-full p-4 bg-gray-800 rounded-lg" required>
           <span class="password-toggle" onclick="togglePassword('confirm_password')">👁️</span>
         </div>
 
-        <!-- TERMS -->
-        <label class="flex items-center gap-3 text-sm">
-          <input type="checkbox" id="terms" required>
-          I agree to the platform terms
-        </label>
-
-        <!-- BUTTON -->
         <button
           type="button"
           onclick="handleSignup()"
-          class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-bold text-xl hover:scale-[1.02] transition">
+          class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-bold text-xl">
           Create Account
         </button>
 
       </form>
     </div>
   </div>
+
 </main>
 
 <script type="module">
@@ -136,26 +118,30 @@ const supabase = createClient(
 );
 
 window.togglePassword = (id) => {
-  const input = document.getElementById(id);
-  input.type = input.type === 'password' ? 'text' : 'password';
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
 };
 
 window.handleSignup = async () => {
-  const fullName = full_name.value.trim();
-  const email = email.value.trim();
-  const company = company.value.trim();
-  const subdomain = subdomain.value.trim().toLowerCase();
-  const industryRole = industry_role.value;
-  const password = password.value;
-  const confirm = confirm_password.value;
-  const logoFile = logo.files[0];
+  const fullName = document.getElementById('full_name').value.trim();
+  const emailVal = document.getElementById('email').value.trim();
+  const companyVal = document.getElementById('company').value.trim();
+  const subdomainVal = document.getElementById('subdomain').value.trim().toLowerCase();
+  const roleVal = document.getElementById('industry_role').value;
+  const passwordVal = document.getElementById('password').value;
+  const confirmVal = document.getElementById('confirm_password').value;
+  const logoFile = document.getElementById('logo').files[0];
 
-  if (password !== confirm) {
+  if (passwordVal !== confirmVal) {
     alert('Passwords do not match');
     return;
   }
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email: emailVal,
+    password: passwordVal
+  });
+
   if (error) {
     alert(error.message);
     return;
@@ -172,9 +158,9 @@ window.handleSignup = async () => {
   await supabase.from('profiles').insert({
     id: data.user.id,
     name: fullName,
-    company,
-    industry_role: industryRole,
-    subdomain,
+    company: companyVal,
+    industry_role: roleVal,
+    subdomain: subdomainVal,
     industry_logo_url: logoUrl
   });
 
