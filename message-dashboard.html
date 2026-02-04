@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Messages | Rhythm Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="logo-favicon.png" type="image/png">
   <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
   <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
@@ -60,7 +61,7 @@ Messages
       Reply to <span id="replyName"></span>
     </h2>
     <textarea id="replyText" rows="6" class="w-full bg-black/50 border border-emerald-500 rounded-lg p-4 text-white"></textarea>
-    <button onclick="sendReply()" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-black">
+    <button id="sendReplyBtn" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-black">
       Send Reply
     </button>
   </div>
@@ -192,7 +193,7 @@ async function openThread(rootId) {
   html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
   document.getElementById('messageView').innerHTML = html;
 
-  // Attach event listener after HTML is inserted
+  // Attach event listener to Reply button after HTML is inserted
   document.getElementById('replyButton')?.addEventListener('click', () => openReply(name));
 }
 
@@ -249,6 +250,9 @@ async function deleteThread(rootId, e) {
   }
   loadMessages();
 }
+
+// Attach sendReply listener once on page load (since modal is static)
+document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
 </script>
 </body>
 </html>
