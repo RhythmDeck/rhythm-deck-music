@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Industry Dashboard - Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
+    .artist-box {
+      background: linear-gradient(to bottom right, #1f2937, #111827);
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 4px 0 0 #10b981;
+      transition: transform 0.3s;
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .artist-box:hover { transform: translateY(-3px); }
+    .logo-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #10b981; }
+    .media-list { max-height: 120px; overflow-y: auto; font-size: 0.85rem; }
+    .media-item { padding: 0.4rem; background: #374151; border-radius: 0.5rem; margin-bottom: 0.3rem; cursor: pointer; }
     .msg-item:hover { background: rgba(255,255,255,0.08); }
-    .selected { background: rgba(255,255,255,0.12) !important; }
     .reply-indent { margin-left: 2.5rem; border-left: 3px solid #10b981; padding-left: 1.25rem; }
     .status-pending { background:#f59e0b;color:white }
     .status-read { background:#6b7280;color:white }
@@ -27,55 +41,61 @@
         <p class="text-sm text-gray-300">Unleash Your Beat</p>
       </div>
     </div>
-    <a href="profile-admin-pro.html" class="bg-emerald-600 hover:bg-emerald-700 px-6 py-2 rounded-lg font-bold">
-      Back to Dashboard
+    <a href="index.html" class="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg font-bold">
+      Back to Home
     </a>
   </div>
 </header>
 
 <main class="max-w-7xl mx-auto px-6 py-16">
 
-<section class="bg-black/40 rounded-2xl p-8">
+<section class="mt-16 bg-black/40 rounded-2xl p-8">
   <h2 class="text-3xl font-bold text-center text-emerald-400 mb-6">My Messages</h2>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[75vh]">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
+
     <div class="bg-black/30 rounded-xl overflow-y-auto" id="conversationList"></div>
+
     <div id="messageView" class="lg:col-span-2 bg-black/30 rounded-xl p-6 overflow-y-auto">
       <p class="text-gray-400 text-center mt-24">Select a conversation</p>
     </div>
+
   </div>
 </section>
 </main>
 
+<!-- REPLY MODAL -->
 <div id="replyModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-50">
   <div class="bg-gray-900 rounded-2xl p-8 max-w-lg w-full relative">
-    <button onclick="closeReply()" class="absolute top-4 right-4 text-3xl text-red-400">&times;</button>
-    <h3 class="text-2xl font-bold text-emerald-400 mb-4">Reply</h3>
-    <textarea id="replyText" rows="5" class="w-full p-4 bg-gray-800 rounded-lg"></textarea>
-    <button onclick="sendReply()" class="mt-4 w-full bg-emerald-600 py-3 rounded-lg font-bold">
+    <button id="closeReplyBtn" class="absolute top-4 right-4 text-3xl text-red-400">&times;</button>
+    <h3 class="text-2xl font-bold text-emerald-400 mb-4">
+      Reply to <span id="replyTargetName"></span>
+    </h3>
+    <textarea id="replyMessage" rows="5" class="w-full p-4 bg-gray-800 rounded-lg"></textarea>
+    <button id="sendReplyBtn" class="mt-4 w-full bg-emerald-600 py-3 rounded-lg font-bold">
       Send Reply
     </button>
   </div>
 </div>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
-let currentUser;
+let currentUserId = null;
 let conversations = [];
-let activeThread = null;
+let currentConversation = null;
 
-/* ✅ SAFE AUTH CHECK */
-const { data: { session } } = await supabase.auth.getSession();
-if (!session) {
-  window.location.href = 'industry-login.html';
+async function init() {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return location.href = 'login.html';
+  currentUserId = data.user.id;
+  loadMessages();
 }
-currentUser = session.user.id;
 
 async function loadMessages() {
   const { data, error } = await supabase
@@ -88,10 +108,9 @@ async function loadMessages() {
       message,
       created_at,
       status,
-      sender:sender_id(name),
-      receiver:receiver_id(name)
+      sender:sender_id(name)
     `)
-    .or(`sender_id.eq.${currentUser},receiver_id.eq.${currentUser}`)
+    .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
     .order('created_at',{ascending:true});
 
   if (error) return alert(error.message);
@@ -111,11 +130,15 @@ async function loadMessages() {
 function renderConversationList(){
   const list = document.getElementById('conversationList');
   list.innerHTML = conversations.map(t=>{
-    const other = t.root.sender_id===currentUser ? t.root.receiver : t.root.sender;
+    const other =
+      t.root.sender_id === currentUserId
+        ? t.root.receiver_id
+        : t.root.sender_id;
+
     return `
       <div class="msg-item p-4 border-b border-gray-800 cursor-pointer"
            onclick="openThread('${t.root.id}')">
-        <p class="font-bold">${other?.name || 'User'}</p>
+        <p class="font-bold">${t.root.sender?.name || 'User'}</p>
         <p class="text-sm text-gray-400">${t.root.message.slice(0,80)}</p>
       </div>
     `;
@@ -123,49 +146,63 @@ function renderConversationList(){
 }
 
 window.openThread = function(id){
-  activeThread = conversations.find(t=>t.root.id===id);
-  const other = activeThread.root.sender_id===currentUser
-    ? activeThread.root.receiver
-    : activeThread.root.sender;
+  currentConversation = conversations.find(t=>t.root.id===id);
+
+  const otherName = currentConversation.root.sender?.name || 'User';
 
   document.getElementById('messageView').innerHTML = `
-    <h3 class="text-xl font-bold text-emerald-400 mb-4">${other?.name}</h3>
+    <h3 class="text-xl font-bold text-emerald-400 mb-4">${otherName}</h3>
     <div class="space-y-4">
-      <div class="bg-black/50 p-4 rounded-lg">${activeThread.root.message}</div>
-      ${activeThread.replies.map(r=>`
+      <div class="bg-black/50 p-4 rounded-lg">${currentConversation.root.message}</div>
+      ${currentConversation.replies.map(r=>`
         <div class="reply-indent bg-black/30 p-3 rounded-lg">${r.message}</div>
       `).join('')}
     </div>
-    <button onclick="openReply()" class="mt-6 bg-emerald-600 px-6 py-3 rounded-lg font-bold">
+    <button onclick="openReply('${otherName}')"
+      class="mt-6 bg-emerald-600 px-6 py-3 rounded-lg font-bold">
       Reply
     </button>
   `;
 };
 
-window.openReply = ()=> document.getElementById('replyModal').classList.remove('hidden');
-window.closeReply = ()=> document.getElementById('replyModal').classList.add('hidden');
+window.openReply = function(name){
+  document.getElementById('replyTargetName').textContent = name;
+  document.getElementById('replyModal').classList.remove('hidden');
+};
 
-window.sendReply = async function(){
-  const text = document.getElementById('replyText').value.trim();
+function closeReplyModal(){
+  document.getElementById('replyModal').classList.add('hidden');
+  document.getElementById('replyMessage').value = '';
+}
+
+async function sendReply(){
+  const text = document.getElementById('replyMessage').value.trim();
   if(!text) return;
 
-  const root = activeThread.root;
-  const receiver = root.sender_id===currentUser ? root.receiver_id : root.sender_id;
+  const root = currentConversation.root;
+  const receiver =
+    root.sender_id === currentUserId
+      ? root.receiver_id
+      : root.sender_id;
 
-  await supabase.from('collab_requests').insert({
+  const { error } = await supabase.from('collab_requests').insert({
     parent_id: root.id,
-    sender_id: currentUser,
+    sender_id: currentUserId,
     receiver_id: receiver,
     message: text,
     status: 'pending'
   });
 
-  closeReply();
+  if (error) return alert(error.message);
+
+  closeReplyModal();
   loadMessages();
-};
+}
 
-loadMessages();
+document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
+document.getElementById('closeReplyBtn').addEventListener('click', closeReplyModal);
+
+init();
 </script>
-
 </body>
 </html>
