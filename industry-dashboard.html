@@ -462,6 +462,13 @@
         alert('Failed to send reply: ' + (error.message || 'Unknown error'));
         return;
       }
+      // Mark the parent message as read after reply
+      if (original && original.status !== 'read') {
+        await supabase.from('collab_requests').update({
+          status: 'read',
+          read_at: new Date().toISOString()
+        }).eq('id', currentConversationId);
+      }
       alert('Reply sent!');
       closeReplyModal();
       loadMessages();
@@ -469,6 +476,7 @@
 
     function showThread(originalMsg) {
       currentConversationId = originalMsg.id;
+      // Mark root message as read when opening thread
       if (originalMsg.receiver_id === currentUserId && originalMsg.status !== 'read') {
         supabase.from('collab_requests').update({
           status: 'read',
@@ -502,9 +510,15 @@
       if (replies.length > 0) {
         html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
         replies.forEach(reply => {
+          const replyStatusClass = reply.status === 'pending' ? 'status-pending' : 'status-read';
           html += `
             <div class="reply-indent bg-black/30 rounded-xl p-5">
-              <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
+              <div class="flex justify-between items-center mb-2">
+                <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
+                <span class="inline-block px-3 py-1 text-xs font-bold rounded-full ${replyStatusClass}">
+                  ${reply.status.charAt(0).toUpperCase() + reply.status.slice(1)}
+                </span>
+              </div>
               <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
               <p class="mt-2">${reply.message}</p>
             </div>
@@ -524,7 +538,6 @@
       document.getElementById('messageView').innerHTML = html;
       document.getElementById('messageView').scrollTop = 0;
 
-      // Attach reply button listener after HTML is inserted
       document.getElementById('replyThreadBtn')?.addEventListener('click', () => {
         openReplyModal(originalMsg.id, originalMsg.sender?.name || 'User');
       });
@@ -569,13 +582,18 @@
           conversations[rootId] = {
             root: null,
             messages: [],
-            latest: null
+            latest: null,
+            pendingCount: 0
           };
         }
         conversations[rootId].messages.push(msg);
         if (!msg.parent_id) conversations[rootId].root = msg;
         if (!conversations[rootId].latest || new Date(msg.created_at) > new Date(conversations[rootId].latest.created_at)) {
           conversations[rootId].latest = msg;
+        }
+        // Count pending messages in this thread
+        if (msg.status === 'pending' && msg.receiver_id === currentUserId) {
+          conversations[rootId].pendingCount++;
         }
       });
       const validConversations = Object.values(conversations)
@@ -584,8 +602,8 @@
       list.innerHTML = validConversations.map(conv => {
         const root = conv.root;
         const latest = conv.latest;
-        let badgeText = root.status === 'pending' ? 'Pending' : 'Read';
-        let badgeClass = root.status === 'pending' ? 'status-pending' : 'status-read';
+        let badgeText = conv.pendingCount > 0 ? `${conv.pendingCount} Pending` : 'Read';
+        let badgeClass = conv.pendingCount > 0 ? 'status-pending' : 'status-read';
         if (latest.sender_id !== currentUserId && latest.created_at > (root.read_at || '1970-01-01')) {
           badgeText = 'New Reply';
           badgeClass = 'status-new-reply';
@@ -610,7 +628,6 @@
           </div>
         `;
       }).join('');
-      // Add click listeners after rendering
       document.querySelectorAll('.msg-item').forEach(item => {
         item.addEventListener('click', e => {
           if (e.target.classList.contains('delete-conv-btn')) {
