@@ -50,16 +50,16 @@ Messages
 
 <!-- REPLY MODAL -->
 <div id="replyModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-50">
-<div class="bg-gray-900 rounded-2xl p-8 max-w-lg w-full relative">
-<button onclick="closeReply()" class="absolute top-4 right-4 text-3xl font-black text-red-500">×</button>
-<h2 class="text-3xl font-black text-emerald-400 mb-4">
-Reply to <span id="replyName"></span>
-</h2>
-<textarea id="replyText" rows="6" class="w-full bg-black/50 border border-emerald-500 rounded-lg p-4"></textarea>
-<button onclick="sendReply()" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-black">
-Send Reply
-</button>
-</div>
+  <div class="bg-gray-900 rounded-2xl p-8 max-w-lg w-full relative">
+    <button onclick="closeReply()" class="absolute top-4 right-4 text-3xl font-black text-red-500">×</button>
+    <h2 class="text-3xl font-black text-emerald-400 mb-4">
+      Reply to <span id="replyName"></span>
+    </h2>
+    <textarea id="replyText" rows="6" class="w-full bg-black/50 border border-emerald-500 rounded-lg p-4 text-white"></textarea>
+    <button onclick="sendReply()" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-black">
+      Send Reply
+    </button>
+  </div>
 </div>
 
 <script type="module">
@@ -75,10 +75,12 @@ const supabase = createClient(
     }
   }
 );
+
 let userId = null;
 let messages = [];
 let activeRoot = null;
 let initialized = false;
+
 /* ───────────────────────── AUTH SAFE INIT ───────────────────────── */
 async function initAuth() {
   const { data } = await supabase.auth.getSession();
@@ -89,6 +91,7 @@ async function initAuth() {
   userId = data.session.user.id;
   loadMessages();
 }
+
 supabase.auth.onAuthStateChange((_event, session) => {
   if (!initialized && session?.user) {
     initialized = true;
@@ -96,7 +99,9 @@ supabase.auth.onAuthStateChange((_event, session) => {
     loadMessages();
   }
 });
+
 initAuth();
+
 /* ───────────────────────── MESSAGES ───────────────────────── */
 async function loadMessages() {
   if (!userId) return;
@@ -110,12 +115,13 @@ async function loadMessages() {
     .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
     .order('created_at', { ascending: false });
   if (error) {
-    console.error(error);
+    console.error('Load messages error:', error);
     return;
   }
   messages = data || [];
   renderConversations();
 }
+
 function renderConversations() {
   const list = document.getElementById('conversationList');
   list.innerHTML = '';
@@ -125,6 +131,7 @@ function renderConversations() {
     if (!threads[root]) threads[root] = [];
     threads[root].push(m);
   });
+
   Object.entries(threads).forEach(([rootId, thread]) => {
     const root = thread.find(m => !m.parent_id);
     if (!root) return;
@@ -150,9 +157,11 @@ function renderConversations() {
     `;
     list.appendChild(div);
   });
+
   const first = Object.keys(threads)[0];
   if (first) openThread(first);
 }
+
 async function openThread(rootId) {
   activeRoot = rootId;
   const thread = messages
@@ -178,34 +187,51 @@ async function openThread(rootId) {
   html += `<button onclick="openReply('${name}')" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
   document.getElementById('messageView').innerHTML = html;
 }
+
 function openReply(name) {
   document.getElementById('replyName').innerText = name;
   document.getElementById('replyModal').classList.remove('hidden');
   document.getElementById('replyModal').classList.add('flex');
 }
+
 function closeReply() {
+  document.getElementById('replyModal').classList.remove('flex');
   document.getElementById('replyModal').classList.add('hidden');
   document.getElementById('replyText').value = '';
 }
+
 async function sendReply() {
   const text = document.getElementById('replyText').value.trim();
-  if (!text) return;
+  if (!text) {
+    alert('Please type a message');
+    return;
+  }
+
   const root = messages.find(m => m.id === activeRoot);
+  if (!root) {
+    alert('No active conversation');
+    return;
+  }
+
   const receiver = root.sender_id === userId ? root.receiver_id : root.sender_id;
+
   const { error } = await supabase.from('collab_requests').insert({
     parent_id: activeRoot,
     sender_id: userId,
     receiver_id: receiver,
     message: text
   });
+
   if (error) {
     console.error('Reply failed:', error);
     alert('Failed to send reply: ' + error.message);
     return;
   }
+
   closeReply();
-  loadMessages(); // Reload to show the new reply
+  loadMessages(); // Reload to show new reply
 }
+
 async function deleteThread(rootId, e) {
   e.stopPropagation();
   if (!confirm('Delete this conversation?')) return;
