@@ -7,15 +7,22 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
-    .password-toggle { cursor: pointer; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+    .password-toggle {
+      cursor: pointer;
+      position: absolute;
+      right: 1rem;
+      top: 3.2rem;
+      color: #9ca3af;
+    }
   </style>
 </head>
+
 <body class="min-h-screen font-sans antialiased">
 
-<!-- HEADER (unchanged) -->
+<!-- HEADER -->
 <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
-    <div class="flex items-center gap-3 sm:gap-4">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
       <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-emerald-500" />
       <div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
@@ -30,59 +37,88 @@
   </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 py-20">
-  <div class="grid md:grid-cols-2 gap-12 items-center">
+<main class="max-w-6xl mx-auto px-6 py-20">
+  <div class="grid md:grid-cols-2 gap-14 items-center">
 
     <img src="industry-collab.jpg" class="rounded-xl shadow-2xl">
 
     <div class="bg-gray-900/70 rounded-2xl p-10 border border-emerald-600/50">
-      <h2 class="text-4xl font-bold text-center text-emerald-400 mb-6">
-        Join as an Industry Professional
+      <h2 class="text-4xl font-bold text-center text-emerald-400 mb-10">
+        Industry Professional Sign Up
       </h2>
 
-      <form id="signupForm" class="space-y-6">
+      <form class="space-y-6">
 
-        <!-- BASIC INFO (unchanged) -->
-        <input id="full_name" placeholder="Full Name" class="w-full p-4 bg-gray-800 rounded-lg" required>
-        <input id="email" type="email" placeholder="Email" class="w-full p-4 bg-gray-800 rounded-lg" required>
-        <input id="company" placeholder="Company" class="w-full p-4 bg-gray-800 rounded-lg" required>
-        <input id="subdomain" placeholder="your-company-name" class="w-full p-4 bg-gray-800 rounded-lg" required>
-
-        <select id="role" class="w-full p-4 bg-gray-800 rounded-lg" required>
-          <option value="" disabled selected>Select Role</option>
-          <option value="producer">Music Producer</option>
-          <option value="distributor">Music Distributor</option>
-          <option value="publisher">Music Publisher</option>
-          <option value="supervisor">Music Supervisor</option>
-        </select>
-
-        <!-- ✅ NEW: LOGO UPLOAD -->
+        <!-- NAME -->
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">
-            Upload Logo or Profile Image
-          </label>
-          <input
-            type="file"
-            id="logo"
-            accept="image/png,image/jpeg,image/webp"
-            class="w-full bg-gray-800 p-3 rounded-lg text-gray-300"
-          >
+          <label class="block text-sm mb-2">Full Name</label>
+          <input id="full_name" class="w-full p-4 bg-gray-800 rounded-lg" required>
+        </div>
+
+        <!-- EMAIL -->
+        <div>
+          <label class="block text-sm mb-2">Email Address</label>
+          <input id="email" type="email" class="w-full p-4 bg-gray-800 rounded-lg" required>
+        </div>
+
+        <!-- COMPANY -->
+        <div>
+          <label class="block text-sm mb-2">Company</label>
+          <input id="company" class="w-full p-4 bg-gray-800 rounded-lg" required>
+        </div>
+
+        <!-- SUBDOMAIN -->
+        <div>
+          <label class="block text-sm mb-2">Public Subdomain</label>
+          <input id="subdomain" class="w-full p-4 bg-gray-800 rounded-lg" placeholder="your-company-name" required>
+        </div>
+
+        <!-- ROLE -->
+        <div>
+          <label class="block text-sm mb-2">Industry Role</label>
+          <select id="industry_role" class="w-full p-4 bg-gray-800 rounded-lg" required>
+            <option value="">Select role</option>
+            <option value="producer">Music Producer</option>
+            <option value="distributor">Music Distributor</option>
+            <option value="publisher">Music Publisher</option>
+            <option value="supervisor">Music Supervisor</option>
+          </select>
+        </div>
+
+        <!-- LOGO -->
+        <div>
+          <label class="block text-sm mb-2">Logo / Profile Image</label>
+          <input id="logo" type="file" accept="image/*" class="w-full bg-gray-800 p-3 rounded-lg">
           <p class="text-xs text-gray-400 mt-1">
-            This image will appear in the Industry Directory.
+            Displayed publicly in the Industry Directory.
           </p>
         </div>
 
-        <!-- PASSWORDS -->
-        <input id="password" type="password" placeholder="Password" class="w-full p-4 bg-gray-800 rounded-lg" required>
-        <input id="confirm_password" type="password" placeholder="Confirm Password" class="w-full p-4 bg-gray-800 rounded-lg" required>
+        <!-- PASSWORD -->
+        <div class="relative">
+          <label class="block text-sm mb-2">Password</label>
+          <input id="password" type="password" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <span class="password-toggle" onclick="togglePassword('password')">👁️</span>
+        </div>
 
+        <!-- CONFIRM -->
+        <div class="relative">
+          <label class="block text-sm mb-2">Confirm Password</label>
+          <input id="confirm_password" type="password" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <span class="password-toggle" onclick="togglePassword('confirm_password')">👁️</span>
+        </div>
+
+        <!-- TERMS -->
         <label class="flex items-center gap-3 text-sm">
           <input type="checkbox" id="terms" required>
-          I agree to the terms
+          I agree to the platform terms
         </label>
 
-        <button type="button" onclick="handleSignup()"
-          class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-bold text-xl">
+        <!-- BUTTON -->
+        <button
+          type="button"
+          onclick="handleSignup()"
+          class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-bold text-xl hover:scale-[1.02] transition">
           Create Account
         </button>
 
@@ -96,57 +132,53 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  'YOUR_ANON_KEY_HERE'
 );
 
-window.handleSignup = async function () {
+window.togglePassword = (id) => {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+};
+
+window.handleSignup = async () => {
   const fullName = full_name.value.trim();
   const email = email.value.trim();
   const company = company.value.trim();
   const subdomain = subdomain.value.trim().toLowerCase();
-  const role = role.value;
+  const industryRole = industry_role.value;
   const password = password.value;
   const confirm = confirm_password.value;
-  const logoFile = document.getElementById('logo').files[0];
+  const logoFile = logo.files[0];
 
-  if (password !== confirm) return alert('Passwords do not match');
+  if (password !== confirm) {
+    alert('Passwords do not match');
+    return;
+  }
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password
-  });
-
-  if (error) return alert(error.message);
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
   let logoUrl = null;
 
   if (logoFile) {
-    const filePath = `${data.user.id}/logo.${logoFile.name.split('.').pop()}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('industry-logos')
-      .upload(filePath, logoFile, { upsert: true });
-
-    if (!uploadError) {
-      const { data: publicUrl } = supabase.storage
-        .from('industry-logos')
-        .getPublicUrl(filePath);
-
-      logoUrl = publicUrl.publicUrl;
-    }
+    const path = `${data.user.id}/logo.${logoFile.name.split('.').pop()}`;
+    await supabase.storage.from('industry-logos').upload(path, logoFile, { upsert: true });
+    logoUrl = supabase.storage.from('industry-logos').getPublicUrl(path).data.publicUrl;
   }
 
-  await supabase.from('profiles').upsert({
+  await supabase.from('profiles').insert({
     id: data.user.id,
     name: fullName,
     company,
-    role: 'industry',
-    industry_role: role,
+    industry_role: industryRole,
     subdomain,
     industry_logo_url: logoUrl
   });
 
-  alert('Account created! Please log in.');
+  alert('Account created successfully. Please log in.');
   location.href = 'login.html';
 };
 </script>
