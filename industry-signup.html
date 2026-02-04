@@ -46,31 +46,31 @@
         Industry Professional Sign Up
       </h2>
 
-      <form class="space-y-6">
+      <form class="space-y-6" autocomplete="off">
 
         <div>
           <label class="block text-sm mb-2">Full Name</label>
-          <input id="full_name" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="full_name" autocomplete="name" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
         <div>
           <label class="block text-sm mb-2">Email Address</label>
-          <input id="email" type="email" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="email" type="email" autocomplete="email" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
         <div>
           <label class="block text-sm mb-2">Company</label>
-          <input id="company" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="company" autocomplete="organization" class="w-full p-4 bg-gray-800 rounded-lg" required>
         </div>
 
         <div>
           <label class="block text-sm mb-2">Public Subdomain</label>
-          <input id="subdomain" class="w-full p-4 bg-gray-800 rounded-lg" placeholder="your-company-name" required>
+          <input id="subdomain" autocomplete="off" class="w-full p-4 bg-gray-800 rounded-lg" placeholder="your-company-name" required>
         </div>
 
         <div>
           <label class="block text-sm mb-2">Industry Role</label>
-          <select id="industry_role" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <select id="industry_role" autocomplete="off" class="w-full p-4 bg-gray-800 rounded-lg" required>
             <option value="">Select role</option>
             <option value="producer">Music Producer</option>
             <option value="distributor">Music Distributor</option>
@@ -81,18 +81,18 @@
 
         <div>
           <label class="block text-sm mb-2">Logo / Profile Image</label>
-          <input id="logo" type="file" accept="image/*" class="w-full bg-gray-800 p-3 rounded-lg">
+          <input id="logo" type="file" accept="image/*" autocomplete="off" class="w-full bg-gray-800 p-3 rounded-lg">
         </div>
 
         <div class="relative">
           <label class="block text-sm mb-2">Password</label>
-          <input id="password" type="password" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="password" type="password" autocomplete="new-password" class="w-full p-4 bg-gray-800 rounded-lg" required>
           <span class="password-toggle" onclick="togglePassword('password')">👁️</span>
         </div>
 
         <div class="relative">
           <label class="block text-sm mb-2">Confirm Password</label>
-          <input id="confirm_password" type="password" class="w-full p-4 bg-gray-800 rounded-lg" required>
+          <input id="confirm_password" type="password" autocomplete="new-password" class="w-full p-4 bg-gray-800 rounded-lg" required>
           <span class="password-toggle" onclick="togglePassword('confirm_password')">👁️</span>
         </div>
 
@@ -106,7 +106,6 @@
       </form>
     </div>
   </div>
-
 </main>
 
 <script type="module">
@@ -114,7 +113,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  'YOUR_PUBLIC_ANON_KEY'
 );
 
 window.togglePassword = (id) => {
@@ -122,15 +121,20 @@ window.togglePassword = (id) => {
   el.type = el.type === 'password' ? 'text' : 'password';
 };
 
+// Hard reset autofill on load (Chrome-safe)
+window.addEventListener('load', () => {
+  document.querySelectorAll('input').forEach(i => i.value = '');
+});
+
 window.handleSignup = async () => {
-  const fullName = document.getElementById('full_name').value.trim();
-  const emailVal = document.getElementById('email').value.trim();
-  const companyVal = document.getElementById('company').value.trim();
-  const subdomainVal = document.getElementById('subdomain').value.trim().toLowerCase();
-  const roleVal = document.getElementById('industry_role').value;
-  const passwordVal = document.getElementById('password').value;
-  const confirmVal = document.getElementById('confirm_password').value;
-  const logoFile = document.getElementById('logo').files[0];
+  const fullName = full_name.value.trim();
+  const emailVal = email.value.trim();
+  const companyVal = company.value.trim();
+  const subdomainVal = subdomain.value.trim().toLowerCase();
+  const roleVal = industry_role.value;
+  const passwordVal = password.value;
+  const confirmVal = confirm_password.value;
+  const logoFile = logo.files[0];
 
   if (passwordVal !== confirmVal) {
     alert('Passwords do not match');
