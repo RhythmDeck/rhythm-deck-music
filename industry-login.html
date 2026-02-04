@@ -5,17 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Industry Login - Rhythm Deck</title>
 <script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  body {
+    background: linear-gradient(to bottom, #000000, #0f172a);
+    color: white;
+  }
+</style>
 </head>
 
-<body class="min-h-screen bg-gradient-to-b from-black to-slate-900 text-white">
+<body class="min-h-screen flex flex-col font-sans antialiased">
 
-<main class="max-w-md mx-auto px-6 py-32">
+<!-- HEADER -->
+<header class="bg-black/90 border-b border-gray-800/60 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
+    <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-emerald-500">
+    <div>
+      <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+        Rhythm Deck
+      </h1>
+      <p class="text-sm text-gray-300">Unleash Your Beat</p>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="flex-grow max-w-md mx-auto px-6 py-32">
   <div class="bg-gray-900/80 border border-emerald-600/50 rounded-2xl p-12 shadow-2xl">
     <h1 class="text-4xl font-black text-center text-emerald-400 mb-8">
       Industry Login
     </h1>
 
     <form class="space-y-6" onsubmit="event.preventDefault(); handleLogin();">
+
       <input id="email" type="email" placeholder="Email"
         class="w-full p-4 bg-gray-800 rounded-lg" required>
 
@@ -27,23 +49,35 @@
         Log In
       </button>
 
+      <p class="text-center text-sm text-gray-400">
+        <a href="#" class="hover:text-emerald-400">Forgot password?</a>
+      </p>
+
       <p id="status" class="text-center text-sm mt-4"></p>
     </form>
   </div>
 </main>
 
+<!-- FOOTER -->
+<footer class="bg-black/80 border-t border-gray-800/60 text-center py-6 text-sm text-gray-400">
+  © 2026 Rhythm Deck. All rights reserved.
+</footer>
+
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
+/* ✅ CORRECT ANON KEY */
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
 window.handleLogin = async () => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const status = document.getElementById('status');
+
+  status.textContent = '';
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -56,25 +90,7 @@ window.handleLogin = async () => {
     return;
   }
 
-  const userId = data.user.id;
-
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .single();
-
-  if (profileError || !profile) {
-    status.textContent = 'Profile not found';
-    status.className = 'text-red-400 text-center';
-    return;
-  }
-
-  if (profile.role === 'industry') {
-    window.location.href = 'industry-dashboard.html';
-  } else {
-    window.location.href = 'profile-admin.html';
-  }
+  window.location.href = 'industry-dashboard.html';
 };
 </script>
 
