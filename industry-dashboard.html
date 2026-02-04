@@ -1,156 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Industry Dashboard - Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
-    .artist-box { background: linear-gradient(to bottom right, #1f2937, #111827); border-radius: 1rem; padding: 1rem; box-shadow: inset 4px 0 0 #10b981; }
-    .logo-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #10b981; }
-    .media-item { padding: .4rem; background: #374151; border-radius: .5rem; margin-bottom: .3rem; cursor: pointer; }
-    .media-item:hover { background: #4b5563; }
+    body {
+      background: linear-gradient(to bottom, #000000, #0f172a);
+      color: white;
+    }
     .msg-item:hover { background: rgba(255,255,255,0.08); }
     .selected { background: rgba(255,255,255,0.12) !important; }
-    .reply-indent { margin-left: 2.5rem; border-left: 3px solid #10b981; padding-left: 1.25rem; }
-    #replyModal.hidden { display: none; }
-    .status-pending { background:#f59e0b }
-    .status-accepted { background:#10b981 }
-    .status-declined { background:#ef4444 }
-    .status-read { background:#6b7280 }
-    .status-new-reply { background:#8b5cf6; font-weight:bold }
+    .reply-indent {
+      margin-left: 2.5rem;
+      border-left: 3px solid #10b981;
+      padding-left: 1.25rem;
+    }
   </style>
 </head>
 
-<body class="min-h-screen">
+<body class="min-h-screen font-sans antialiased">
 
-<header class="bg-black border-b border-gray-800 p-4 flex items-center gap-4">
-  <img src="logo-1-sm.jpg" class="logo-img">
-  <div>
-    <h1 class="text-xl font-bold text-emerald-400">Rhythm Deck</h1>
-    <p class="text-sm text-gray-400">Unleash Your Beat</p>
+<!-- HEADER -->
+<header class="sticky top-0 z-10 bg-black/90 border-b border-gray-800">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-emerald-500"/>
+      <div>
+        <h1 class="text-2xl font-bold text-emerald-400">Rhythm Deck</h1>
+        <p class="text-sm text-gray-300">Unleash Your Beat</p>
+      </div>
+    </div>
+    <button id="logoutBtn"
+      class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold">
+      Logout
+    </button>
   </div>
 </header>
 
-<main class="max-w-7xl mx-auto p-6">
+<main class="max-w-7xl mx-auto px-6 py-16">
 
-<section class="mt-16 bg-black/40 rounded-2xl p-8">
-<h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
+<section class="bg-black/40 rounded-2xl p-8">
+  <h2 class="text-3xl font-bold text-center text-emerald-400 mb-6">
+    My Messages
+  </h2>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
-  <div class="bg-black/30 rounded-2xl overflow-y-auto" id="conversationList"></div>
-  <div id="messageView" class="lg:col-span-2 bg-black/30 rounded-2xl p-8 overflow-y-auto">
-    <p class="text-gray-400 text-center mt-20">Select a conversation</p>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[75vh]">
+
+    <!-- CONVERSATION LIST -->
+    <div id="conversationList"
+         class="bg-black/30 rounded-xl overflow-y-auto">
+    </div>
+
+    <!-- MESSAGE VIEW -->
+    <div id="messageView"
+         class="lg:col-span-2 bg-black/30 rounded-xl p-6 overflow-y-auto">
+      <p class="text-gray-400 text-center mt-24">
+        Select a conversation
+      </p>
+    </div>
+
   </div>
-</div>
 </section>
 
 </main>
 
-<!-- Reply Modal -->
-<div id="replyModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-50">
-  <div class="bg-gray-900 rounded-xl p-8 max-w-lg w-full relative">
-    <button id="closeReplyBtn" class="absolute top-3 right-4 text-3xl text-red-500">×</button>
-    <h2 class="text-2xl font-bold text-emerald-400 mb-4">
-      Reply to <span id="replyTargetName"></span>
-    </h2>
-    <textarea id="replyMessage" rows="6" class="w-full p-4 bg-gray-800 rounded-lg"></textarea>
-    <button id="sendReplyBtn" class="w-full mt-6 bg-emerald-600 py-3 rounded-lg font-bold">
+<!-- REPLY MODAL -->
+<div id="replyModal"
+     class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-50">
+  <div class="bg-gray-900 rounded-2xl p-8 max-w-lg w-full relative">
+    <button id="closeReplyBtn"
+      class="absolute top-4 right-4 text-3xl text-red-400">
+      &times;
+    </button>
+    <h3 class="text-2xl font-bold text-emerald-400 mb-4">
+      Reply
+    </h3>
+    <textarea id="replyMessage"
+      rows="5"
+      class="w-full p-4 bg-gray-800 rounded-lg"></textarea>
+
+    <button id="sendReplyBtn"
+      class="mt-4 w-full bg-emerald-600 py-3 rounded-lg font-bold">
       Send Reply
     </button>
   </div>
 </div>
 
-<footer class="text-center text-sm text-gray-400 mt-12 border-t border-gray-800 p-6">
-  © 2026 Rhythm Deck
-</footer>
-
 <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'YOUR_PUBLIC_ANON_KEY'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
 let currentUserId = null;
-let currentMessages = [];
+let conversations = [];
 let currentConversationId = null;
-let currentReplyTargetId = null;
+let currentMessages = [];
 
+/* ---------- AUTH INIT (FIXED) ---------- */
 async function init() {
-  const { data:{ user } } = await supabase.auth.getUser();
-  if (!user) location.href = 'login.html';
-  currentUserId = user.id;
-  loadMessages();
-}
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (!session || !session.user) {
+      window.location.href = 'login.html';
+      return;
+    }
 
-async function loadMessages() {
-  const { data } = await supabase
-    .from('collab_requests')
-    .select('*, sender:sender_id(name)')
-    .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
-    .order('created_at',{ascending:false});
-
-  currentMessages = data || [];
-  renderConversations();
-}
-
-function renderConversations() {
-  const roots = currentMessages.filter(m=>!m.parent_id);
-  document.getElementById('conversationList').innerHTML = roots.map(m=>`
-    <div class="msg-item p-4 cursor-pointer" data-id="${m.id}">
-      <p class="font-bold">${m.sender?.name||'User'}</p>
-      <p class="text-sm text-gray-400">${new Date(m.created_at).toLocaleString()}</p>
-      <p class="text-gray-300 truncate">${m.message}</p>
-    </div>
-  `).join('');
-
-  document.querySelectorAll('.msg-item').forEach(el=>{
-    el.onclick=()=>openThread(el.dataset.id);
+    currentUserId = session.user.id;
+    loadMessages();
   });
 }
 
-function openThread(id){
-  currentConversationId=id;
-  const root=currentMessages.find(m=>m.id===id);
-  const replies=currentMessages.filter(m=>m.parent_id===id);
+/* ---------- LOAD MESSAGES ---------- */
+async function loadMessages() {
+  const { data, error } = await supabase
+    .from('collab_requests')
+    .select(`
+      id,
+      parent_id,
+      sender_id,
+      receiver_id,
+      message,
+      created_at,
+      sender:sender_id(name),
+      receiver:receiver_id(name)
+    `)
+    .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
+    .order('created_at', { ascending: true });
 
-  currentReplyTargetId = root.sender_id === currentUserId ? root.receiver_id : root.sender_id;
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
-  document.getElementById('messageView').innerHTML=`
-    <h2 class="text-xl font-bold text-emerald-400 mb-4">${root.sender?.name}</h2>
-    <p>${root.message}</p>
-    <hr class="my-6 border-gray-700">
-    ${replies.map(r=>`<div class="reply-indent">${r.message}</div>`).join('')}
-    <button id="replyThreadBtn" class="mt-6 bg-emerald-600 px-6 py-3 rounded-lg font-bold">
+  currentMessages = data;
+
+  const threads = {};
+  data.forEach(m => {
+    const root = m.parent_id || m.id;
+    if (!threads[root]) threads[root] = { root: null, replies: [] };
+    if (!m.parent_id) threads[root].root = m;
+    else threads[root].replies.push(m);
+  });
+
+  conversations = Object.values(threads).filter(t => t.root);
+  renderConversationList();
+}
+
+/* ---------- RENDER CONVERSATIONS ---------- */
+function renderConversationList() {
+  const list = document.getElementById('conversationList');
+  list.innerHTML = conversations.map(t => {
+    const other =
+      t.root.sender_id === currentUserId
+        ? t.root.receiver
+        : t.root.sender;
+
+    return `
+      <div class="msg-item p-4 border-b border-gray-800 cursor-pointer"
+           onclick="openThread('${t.root.id}')">
+        <p class="font-bold">${other?.name || 'User'}</p>
+        <p class="text-sm text-gray-400">
+          ${t.root.message.slice(0, 80)}
+        </p>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------- OPEN THREAD ---------- */
+window.openThread = function(id) {
+  currentConversationId = id;
+  const thread = conversations.find(t => t.root.id === id);
+  if (!thread) return;
+
+  const other =
+    thread.root.sender_id === currentUserId
+      ? thread.root.receiver
+      : thread.root.sender;
+
+  document.getElementById('messageView').innerHTML = `
+    <h3 class="text-xl font-bold text-emerald-400 mb-4">
+      ${other?.name || 'User'}
+    </h3>
+
+    <div class="space-y-4">
+      <div class="bg-black/50 p-4 rounded-lg">
+        ${thread.root.message}
+      </div>
+
+      ${thread.replies.map(r => `
+        <div class="reply-indent bg-black/30 p-3 rounded-lg">
+          ${r.message}
+        </div>
+      `).join('')}
+    </div>
+
+    <button onclick="openReplyModal()"
+      class="mt-6 bg-emerald-600 px-6 py-3 rounded-lg font-bold">
       Reply
     </button>
   `;
+};
 
-  document.getElementById('replyThreadBtn').onclick=()=>{
-    document.getElementById('replyTargetName').textContent=root.sender?.name;
-    document.getElementById('replyModal').classList.remove('hidden');
-  };
+/* ---------- REPLY MODAL ---------- */
+function openReplyModal() {
+  document.getElementById('replyModal').classList.remove('hidden');
 }
 
-document.getElementById('closeReplyBtn').onclick=()=>replyModal.classList.add('hidden');
+function closeReplyModal() {
+  document.getElementById('replyModal').classList.add('hidden');
+  document.getElementById('replyMessage').value = '';
+}
 
-document.getElementById('sendReplyBtn').onclick=async()=>{
-  const msg=replyMessage.value.trim();
-  if(!msg) return;
-  await supabase.from('collab_requests').insert({
-    parent_id:currentConversationId,
-    sender_id:currentUserId,
-    receiver_id:currentReplyTargetId,
-    message:msg
+/* ---------- SEND REPLY (FIXED) ---------- */
+async function sendReply() {
+  const message = document.getElementById('replyMessage').value.trim();
+  if (!message) return alert('Please write a reply.');
+
+  const original = currentMessages.find(m => m.id === currentConversationId);
+  if (!original) return alert('Original message not found.');
+
+  const receiverId =
+    original.sender_id === currentUserId
+      ? original.receiver_id
+      : original.sender_id;
+
+  const { error } = await supabase.from('collab_requests').insert({
+    parent_id: currentConversationId,
+    sender_id: currentUserId,
+    receiver_id: receiverId,
+    message,
+    status: 'pending'
   });
-  replyMessage.value='';
-  replyModal.classList.add('hidden');
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  closeReplyModal();
   loadMessages();
-};
+}
+
+/* ---------- LOGOUT ---------- */
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  window.location.href = 'login.html';
+});
+
+/* ---------- BUTTON WIRES ---------- */
+document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
+document.getElementById('closeReplyBtn').addEventListener('click', closeReplyModal);
 
 init();
 </script>
