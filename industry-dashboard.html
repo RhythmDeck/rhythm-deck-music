@@ -51,7 +51,7 @@
     .grid-container { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
     .msg-item:hover { background: rgba(255,255,255,0.08); }
     .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .selected { background: rgba(255,255,255,0.1) !important; }
+    .selected { background: rgba(255,255,255,0.1)!important; }
     .badge-unread { background: #8b5cf6; color: white; font-weight: 800; }
     .badge-read { background: #6b7280; color: white; }
   </style>
@@ -60,28 +60,24 @@
 
   <!-- Header -->
   <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
-    <div class="flex items-center gap-3 sm:gap-4">
-      <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
-      <div>
-        <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-          Rhythm Deck
-        </h1>
-        <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            Rhythm Deck
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <div id="welcomeUser" class="text-lg font-bold text-emerald-400 hidden"></div>
+        <button onclick="logout()" class="bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold px-8 py-3 rounded-full shadow-xl transition transform hover:scale-105">
+          Logout
+        </button>
       </div>
     </div>
-
-    <div class="flex items-center gap-6">
-      <!-- Welcome message -->
-      <div id="welcomeUser" class="text-lg font-bold text-emerald-400 hidden"></div>
-
-      <!-- Shiny gold Logout button with working function -->
-      <button onclick="logout()" class="bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold px-8 py-3 rounded-full shadow-xl transition transform hover:scale-105">
-        Logout
-      </button>
-    </div>
-  </div>
-</header>
+  </header>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
     <h2 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-emerald-400">
@@ -172,13 +168,13 @@
     <!-- Artists Grid -->
     <div id="artistGrid" class="grid grid-container gap-6"></div>
 
-    <!-- Email-Style Messages Section -->
-    <section class="mt-16 bg-black/40 rounded-2xl p-8">
+    <!-- Email-Style Messages Section – now responsive -->
+    <section class="mt-16 bg-black/40 rounded-2xl p-6 sm:p-8">
       <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[80vh]">
-        <!-- Sidebar: Folders & Conversations -->
-        <div class="bg-black/30 rounded-2xl flex flex-col overflow-hidden lg:col-span-1 border border-purple-700/30">
-          <div class="p-6 border-b border-purple-600 font-bold text-2xl text-emerald-400">
+      <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 lg:gap-8 h-[70vh] sm:h-[80vh]">
+        <!-- LEFT: Folders & Conversations (narrower on large screens) -->
+        <div class="bg-black/30 rounded-2xl flex flex-col overflow-hidden md:col-span-1 lg:col-span-1 border border-purple-700/30">
+          <div class="p-5 sm:p-6 border-b border-purple-600 font-bold text-xl sm:text-2xl text-emerald-400">
             Folders
           </div>
           <div class="p-4 border-b border-gray-700">
@@ -192,12 +188,14 @@
               Trash
             </button>
           </div>
-          <div id="conversationList" class="flex-1 overflow-y-auto p-4"></div>
+          <div id="conversationList" class="flex-1 overflow-y-auto p-4 sm:p-6"></div>
         </div>
 
-        <!-- Main Message View -->
-        <div id="messageView" class="lg:col-span-3 bg-black/30 rounded-2xl p-8 overflow-y-auto border border-purple-700/30">
-          <p class="text-gray-400 text-center mt-20 text-xl">Select a conversation to view messages</p>
+        <!-- RIGHT: Message View (takes most space) -->
+        <div id="messageView" class="md:col-span-3 lg:col-span-4 bg-black/30 rounded-2xl p-6 sm:p-8 lg:p-10 overflow-y-auto border border-purple-700/30">
+          <p class="text-gray-400 text-center mt-16 sm:mt-32 text-lg sm:text-xl font-medium">
+            Select a conversation to view messages
+          </p>
         </div>
       </div>
     </section>
@@ -218,7 +216,7 @@
     </div>
   </div>
 
-  <!-- Contact Modal (New Message to Artist) -->
+  <!-- Contact Modal -->
   <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
     <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
       <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
@@ -258,42 +256,41 @@
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
- <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-  const supabase = createClient(
-    'https://bxoqhmfnseskwqkywppg.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-  );
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
 
-  let currentUserId = null;
-  let currentUserName = '';
-  let messageArtistId = null;
-  let artists = [];
-  let currentFolder = 'inbox';
-  let activeMessageId = null;
-  let messages = [];
+    let currentUserId = null;
+    let currentUserName = '';
+    let messageArtistId = null;
+    let artists = [];
+    let currentFolder = 'inbox';
+    let activeMessageId = null;
+    let messages = [];
 
-  async function init() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      alert('Please log in to access the dashboard.');
-      window.location.href = 'login.html';
-      return;
-    }
-    currentUserId = user.id;
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('Please log in to access the dashboard.');
+        window.location.href = 'login.html';
+        return;
+      }
+      currentUserId = user.id;
 
-    // Fetch correct name for currently logged-in user
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('name')
-      .eq('id', currentUserId)
-      .single();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('name')
+        .eq('id', currentUserId)
+        .single();
 
-    currentUserName = profile?.name || 'Industry Pro';
-    document.getElementById('welcomeUser').textContent = `Welcome, ${currentUserName}`;
-    document.getElementById('welcomeUser').classList.remove('hidden');
+      currentUserName = profile?.name || 'Industry Pro';
+      document.getElementById('welcomeUser').textContent = `Welcome, ${currentUserName}`;
+      document.getElementById('welcomeUser').classList.remove('hidden');
 
-    loadArtists();
+          loadArtists();
     loadFolder('inbox');
   }
 
@@ -307,7 +304,6 @@
       console.error('Error loading artists:', error);
       return;
     }
-
     artists = fetchedArtists;
     renderArtists(artists);
   }
@@ -315,6 +311,11 @@
   function renderArtists(filteredArtists) {
     const artistGrid = document.getElementById('artistGrid');
     artistGrid.innerHTML = filteredArtists.map(artist => {
+      // Safely escape quotes for onclick attribute
+      const safeName = artist.name
+        .replace(/'/g, "\\'")   // escape single quotes
+        .replace(/"/g, '\\"');  // escape double quotes
+
       return `
         <div class="artist-box">
           <div class="flex items-start gap-3 mb-2">
@@ -329,7 +330,7 @@
             <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
               View Profile
             </a>
-            <button onclick="openMessageModal('${artist.id}', '${artist.name.replace(/'/g, "\\'")}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs">
+            <button onclick="openMessageModal('${artist.id}', '${safeName}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs">
               Contact
             </button>
           </div>
@@ -344,8 +345,8 @@
     const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
     const filtered = artists.filter(artist => {
       const nameMatch = artist.name.toLowerCase().includes(searchName);
-      const genreMatch = !filterGenre || artist.genre?.toLowerCase().includes(filterGenre);
-      const songMatch = !searchSong || artist.videos?.some(v => v.title?.toLowerCase().includes(searchSong));
+      const genreMatch = !filterGenre || (artist.genre && artist.genre.toLowerCase().includes(filterGenre));
+      const songMatch = !searchSong || (artist.videos && artist.videos.some(v => v.title && v.title.toLowerCase().includes(searchSong)));
       return nameMatch && genreMatch && songMatch;
     });
     renderArtists(filtered);
@@ -437,7 +438,6 @@
     messages = data || [];
     renderConversationList();
 
-    // Update Inbox unread count
     const unreadCount = messages.filter(m => !m.read_at && m.receiver_id === currentUserId).length;
     document.getElementById('inboxCount').textContent = unreadCount || '';
     document.getElementById('inboxCount').classList.toggle('hidden', unreadCount === 0);
@@ -456,7 +456,8 @@
     const conversations = {};
     messages.forEach(m => {
       const partnerId = m.sender_id === currentUserId ? m.receiver_id : m.sender_id;
-      const partnerName = m.sender_id === currentUserId ? m.receiver.name : m.sender.name;
+      const partnerName = m.sender_id === currentUserId ? m.receiver?.name : m.sender?.name;
+      if (!partnerName) return; // skip invalid rows
       if (!conversations[partnerId]) conversations[partnerId] = { name: partnerName, messages: [] };
       conversations[partnerId].messages.push(m);
     });
@@ -486,15 +487,15 @@
     activeMessageId = messageId;
     const conversation = messages.filter(m => m.id === messageId || m.parent_id === messageId);
     const root = conversation.find(m => !m.parent_id) || conversation[0];
-    const partnerName = root.sender_id === currentUserId ? root.receiver.name : root.sender.name;
+    const partnerName = root.sender_id === currentUserId ? root.receiver?.name : root.sender?.name;
 
     if (root.receiver_id === currentUserId && !root.read_at) {
       await supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', root.id);
     }
 
-    let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${partnerName}</h2>`;
+    let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${partnerName || 'Unknown'}</h2>`;
     conversation.forEach(m => {
-      const who = m.sender_id === currentUserId ? 'You' : partnerName;
+      const who = m.sender_id === currentUserId ? 'You' : partnerName || 'Unknown';
       const isUnread = !m.read_at && m.receiver_id === currentUserId;
       html += `
         <div class="mb-4 p-4 rounded-xl ${isUnread ? 'bg-purple-900/30' : 'bg-black/30'}">
@@ -512,7 +513,7 @@
   }
 
   function openReply(name, subject) {
-    document.getElementById('replyTargetName').textContent = name;
+    document.getElementById('replyTargetName').textContent = name || 'User';
     document.getElementById('replySubject').value = subject ? `Re: ${subject}` : '';
     document.getElementById('replyMessage').value = '';
     document.getElementById('replyModal').classList.remove('hidden');
@@ -552,7 +553,6 @@
     loadFolder(currentFolder);
   }
 
-  // Logout function - defined here so the button works
   function logout() {
     supabase.auth.signOut()
       .then(() => {
@@ -564,10 +564,8 @@
       });
   }
 
-  // Initialize everything
   init();
 
-  // Attach modal button listeners
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
     document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
