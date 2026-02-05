@@ -258,7 +258,7 @@
     <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
-  <script type="module">
+ <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
@@ -269,8 +269,9 @@
   let currentUserName = '';
   let messageArtistId = null;
   let artists = [];
-  let currentConversationId = null;
-  let currentMessages = [];
+  let currentFolder = 'inbox';
+  let activeMessageId = null;
+  let messages = [];
 
   async function init() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -281,25 +282,19 @@
     }
     currentUserId = user.id;
 
-    // Fetch the correct name for THIS logged-in user
-    const { data: profile, error } = await supabase
+    // Fetch correct name for the current logged-in user
+    const { data: profile } = await supabase
       .from('profiles')
       .select('name')
       .eq('id', currentUserId)
       .single();
 
-    if (error) {
-      console.error('Profile fetch error:', error);
-      currentUserName = 'Industry User';
-    } else {
-      currentUserName = profile?.name || 'Industry User';
-    }
-
+    currentUserName = profile?.name || 'Industry Pro';
     document.getElementById('welcomeUser').textContent = `Welcome, ${currentUserName}`;
     document.getElementById('welcomeUser').classList.remove('hidden');
 
     loadArtists();
-    loadMessages();
+    loadFolder('inbox');
   }
 
   async function loadArtists() {
@@ -310,16 +305,14 @@
       .order('name', { ascending: true });
     if (artistError) {
       console.error('Error loading artists:', artistError);
-      alert('Failed to load artists: ' + artistError.message);
       return;
     }
 
     const artistIds = fetchedArtists.map(a => a.id);
-    const { data: media, error: mediaError } = await supabase
+    const { data: media } = await supabase
       .from('user_videos')
       .select('id, user_id, title, video_url, thumbnail_url, type')
       .in('user_id', artistIds);
-    if (mediaError) console.error('Media load error:', mediaError);
 
     const processedMedia = media?.map(item => {
       const { data: publicData } = supabase.storage.from('media').getPublicUrl(item.video_url);
@@ -332,34 +325,9 @@
       mediaByArtist[item.user_id].push(item);
     });
 
-    let totalLikesByArtist = {};
-    let totalCommentsByArtist = {};
-    if (media && media.length > 0) {
-      const videoIds = media.map(v => v.id);
-      const { data: likes } = await supabase
-        .from('video_likes')
-        .select('video_id')
-        .in('video_id', videoIds);
-      likes?.forEach(l => {
-        const artistId = media.find(v => v.id === l.video_id)?.user_id;
-        if (artistId) totalLikesByArtist[artistId] = (totalLikesByArtist[artistId] || 0) + 1;
-      });
-
-      const { data: comments } = await supabase
-        .from('video_comments')
-        .select('video_id')
-        .in('video_id', videoIds);
-      comments?.forEach(c => {
-        const artistId = media.find(v => v.id === c.video_id)?.user_id;
-        if (artistId) totalCommentsByArtist[artistId] = (totalCommentsByArtist[artistId] || 0) + 1;
-      });
-    }
-
     artists = fetchedArtists.map(artist => ({
       ...artist,
-      videos: mediaByArtist[artist.id] || [],
-      totalHearts: totalLikesByArtist[artist.id] || 0,
-      totalComments: totalCommentsByArtist[artist.id] || 0
+      videos: mediaByArtist[artist.id] || []
     }));
 
     renderArtists(artists);
@@ -384,14 +352,6 @@
             </div>
           </div>
           <p class="bio text-xs text-gray-300 mb-2">${artist.bio || 'No bio available'}</p>
-          <div class="stat flex gap-2 mb-2">
-            <span class="stat-badge">❤️ ${artist.totalHearts}</span>
-            <span class="stat-badge">💬 ${artist.totalComments}</span>
-          </div>
-          <div class="media-list">
-            <h4 class="text-xs font-medium text-gray-400 mb-1">Videos / MP3s</h4>
-            ${mediaList || '<p class="text-gray-500 text-xs">No media uploaded</p>'}
-          </div>
           <div class="flex gap-2 mt-3">
             <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
               View Profile
@@ -429,10 +389,7 @@
     source.src = url;
     video.load();
     modal.classList.remove('hidden');
-    video.play().catch(e => {
-      console.error('Video play failed:', e);
-      alert('Could not play video — URL may be invalid or private.');
-    });
+    video.play().catch(e => console.error('Video play failed:', e));
   };
 
   window.closeVideoModal = function() {
@@ -445,266 +402,181 @@
 
   window.playMP3 = function(url) {
     const audio = new Audio(url);
-    audio.play().catch(e => {
-      console.error('MP3 play failed:', e);
-      alert('Could not play MP3 — URL may be invalid or private.');
-    });
+    audio.play().catch(e => console.error('MP3 play failed:', e));
     alert('Playing MP3... (close alert to stop)');
   };
 
   window.openMessageModal = function(artistId, artistName) {
     messageArtistId = artistId;
     document.getElementById('messageArtistName').textContent = artistName;
+    document.getElementById('messageSubject').value = '';
+    document.getElementById('messageContent').value = '';
     document.getElementById('messageModal').classList.remove('hidden');
   };
 
   window.closeMessageModal = function() {
     document.getElementById('messageModal').classList.add('hidden');
-    document.getElementById('messageContent').value = '';
   };
 
   window.sendMessage = async function() {
+    const subject = document.getElementById('messageSubject').value.trim() || '(No subject)';
     const message = document.getElementById('messageContent').value.trim();
     if (!message) return alert('Please type a message.');
-    const { error } = await supabase.from('collab_requests').insert({
+
+    const { error } = await supabase.from('messages').insert({
       sender_id: currentUserId,
       receiver_id: messageArtistId,
-      message: message,
-      created_at: new Date().toISOString(),
-      status: 'pending'
+      subject,
+      body: message,
+      owner_id: currentUserId,
+      folder: 'sent'
     });
+
     if (error) {
-      console.error('Send message error:', error);
       alert('Failed to send message: ' + error.message);
-    } else {
-      alert('Message sent successfully!');
-      closeMessageModal();
-      loadMessages();
+      return;
     }
+
+    alert('Message sent successfully!');
+    closeMessageModal();
+    loadFolder('sent');
   };
 
-  function openReplyModal(targetId, name) {
-    currentConversationId = targetId;
-    document.getElementById('replyTargetName').textContent = name || 'User';
+  async function loadFolder(folder) {
+    currentFolder = folder;
+    const { data, error } = await supabase
+      .from('messages')
+      .select(`
+        id, sender_id, receiver_id, subject, body, created_at, read_at,
+        sender:sender_id(name),
+        receiver:receiver_id(name)
+      `)
+      .eq('owner_id', currentUserId)
+      .eq('folder', folder)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Load messages error:', error);
+      document.getElementById('messageView').innerHTML = '<p class="text-red-400 text-center py-10">Error loading messages</p>';
+      return;
+    }
+
+    messages = data || [];
+    renderConversationList();
+
+    // Update Inbox unread count
+    const unreadCount = messages.filter(m => !m.read_at && m.receiver_id === currentUserId).length;
+    document.getElementById('inboxCount').textContent = unreadCount || '';
+    document.getElementById('inboxCount').classList.toggle('hidden', unreadCount === 0);
+
+    if (messages.length > 0) {
+      openConversation(messages[0].id);
+    } else {
+      document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20 text-xl">No messages in this folder</p>';
+    }
+  }
+
+  function renderConversationList() {
+    const list = document.getElementById('conversationList');
+    list.innerHTML = '';
+
+    const conversations = {};
+    messages.forEach(m => {
+      const partnerId = m.sender_id === currentUserId ? m.receiver_id : m.sender_id;
+      const partnerName = m.sender_id === currentUserId ? m.receiver.name : m.sender.name;
+      if (!conversations[partnerId]) conversations[partnerId] = { name: partnerName, messages: [] };
+      conversations[partnerId].messages.push(m);
+    });
+
+    Object.entries(conversations).forEach(([partnerId, conv]) => {
+      const latest = conv.messages.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
+      const unreadCount = conv.messages.filter(m => !m.read_at && m.receiver_id === currentUserId).length;
+      const div = document.createElement('div');
+      div.className = `msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${activeMessageId === latest.id ? 'selected' : ''}`;
+      div.onclick = () => openConversation(latest.id);
+      div.innerHTML = `
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="font-bold ${unreadCount > 0 ? 'text-white' : 'text-gray-400'}">${conv.name}</p>
+            <p class="msg-preview text-gray-300">${latest.subject || '(No subject)'}</p>
+          </div>
+          <div class="flex items-center gap-3">
+            ${unreadCount > 0 ? `<span class="badge-unread px-2 py-1 text-xs rounded-full">${unreadCount}</span>` : ''}
+          </div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  async function openConversation(messageId) {
+    activeMessageId = messageId;
+    const conversation = messages.filter(m => m.id === messageId || m.parent_id === messageId);
+    const root = conversation.find(m => !m.parent_id) || conversation[0];
+    const partnerName = root.sender_id === currentUserId ? root.receiver.name : root.sender.name;
+
+    if (root.receiver_id === currentUserId && !root.read_at) {
+      await supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', root.id);
+    }
+
+    let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${partnerName}</h2>`;
+    conversation.forEach(m => {
+      const who = m.sender_id === currentUserId ? 'You' : partnerName;
+      const isUnread = !m.read_at && m.receiver_id === currentUserId;
+      html += `
+        <div class="mb-4 p-4 rounded-xl ${isUnread ? 'bg-purple-900/30' : 'bg-black/30'}">
+          <p class="font-bold text-emerald-300">${who} - ${m.subject || '(No subject)'}</p>
+          <p class="text-xs text-gray-500">${new Date(m.created_at).toLocaleString()}</p>
+          <p class="mt-2">${m.body}</p>
+        </div>
+      `;
+    });
+    html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
+    document.getElementById('messageView').innerHTML = html;
+
+    document.getElementById('replyButton')?.addEventListener('click', () => openReply(partnerName, root.subject));
+    document.getElementById('messageView').scrollTop = document.getElementById('messageView').scrollHeight;
+  }
+
+  function openReply(name, subject) {
+    document.getElementById('replyTargetName').textContent = name;
+    document.getElementById('replySubject').value = subject ? `Re: ${subject}` : '';
+    document.getElementById('replyMessage').value = '';
     document.getElementById('replyModal').classList.remove('hidden');
-    document.getElementById('replyMessage').focus();
   }
 
   function closeReplyModal() {
     document.getElementById('replyModal').classList.add('hidden');
-    document.getElementById('replyMessage').value = '';
   }
 
   async function sendReply() {
+    const subject = document.getElementById('replySubject').value.trim() || '(No subject)';
     const message = document.getElementById('replyMessage').value.trim();
     if (!message) return alert('Please write a reply!');
-    const original = currentMessages.find(m => m.id === currentConversationId);
-    const receiverId = original?.sender_id || currentUserId;
-    const { error } = await supabase.from('collab_requests').insert({
-      parent_id: currentConversationId,
+
+    const root = messages.find(m => m.id === activeMessageId);
+    if (!root) return alert('No active conversation');
+
+    const receiverId = root.sender_id === currentUserId ? root.receiver_id : root.sender_id;
+
+    const { error } = await supabase.from('messages').insert({
       sender_id: currentUserId,
       receiver_id: receiverId,
-      message: message,
-      created_at: new Date().toISOString(),
-      status: 'read'
+      subject,
+      body: message,
+      parent_id: activeMessageId,
+      owner_id: currentUserId,
+      folder: 'sent'
     });
+
     if (error) {
-      console.error('Send reply error:', error);
-      alert('Failed to send reply: ' + (error.message || 'Unknown error'));
+      alert('Failed to send reply: ' + error.message);
       return;
     }
-    if (original && original.status !== 'read') {
-      await supabase.from('collab_requests').update({
-        status: 'read',
-        read_at: new Date().toISOString()
-      }).eq('id', currentConversationId);
-    }
+
     alert('Reply sent!');
     closeReplyModal();
-    loadMessages();
-  }
-
-  function showThread(originalMsg) {
-    currentConversationId = originalMsg.id;
-    if (originalMsg.receiver_id === currentUserId && originalMsg.status !== 'read') {
-      supabase.from('collab_requests').update({
-        status: 'read',
-        read_at: new Date().toISOString()
-      }).eq('id', originalMsg.id);
-    }
-    const replies = currentMessages
-      .filter(m => m.parent_id === originalMsg.id)
-      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    let statusHtml = '';
-    if (originalMsg.status) {
-      const statusClass = originalMsg.status === 'pending' ? 'status-pending' :
-                         originalMsg.status === 'read' ? 'status-read' : '';
-      statusHtml = `<span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${statusClass}">
-        ${originalMsg.status.charAt(0).toUpperCase() + originalMsg.status.slice(1)}
-      </span>`;
-    }
-    let html = `
-      <div class="flex-1 overflow-y-auto pr-4 space-y-6">
-        <div class="bg-black/40 rounded-2xl p-6 border-l-4 border-emerald-500">
-          <div class="flex justify-between items-center mb-4">
-            <div>
-              <h2 class="text-2xl font-black text-emerald-400">${originalMsg.sender?.name || 'User'}</h2>
-              <p class="text-sm text-gray-400 mt-1">${new Date(originalMsg.created_at).toLocaleString()}</p>
-            </div>
-            ${statusHtml}
-          </div>
-          <p class="text-lg whitespace-pre-line">${originalMsg.message}</p>
-        </div>
-    `;
-    if (replies.length > 0) {
-      html += `<h3 class="text-xl font-bold mt-6 mb-4">Replies</h3>`;
-      replies.forEach(reply => {
-        const replyStatusClass = reply.status === 'pending' ? 'status-pending' : 'status-read';
-        html += `
-          <div class="reply-indent bg-black/30 rounded-xl p-5">
-            <div class="flex justify-between items-center mb-2">
-              <p class="font-semibold text-emerald-300">${reply.sender?.name || 'User'}</p>
-              <span class="inline-block px-3 py-1 text-xs font-bold rounded-full ${replyStatusClass}">
-                ${reply.status.charAt(0).toUpperCase() + reply.status.slice(1)}
-              </span>
-            </div>
-            <p class="text-xs text-gray-500">${new Date(reply.created_at).toLocaleString()}</p>
-            <p class="mt-2">${reply.message}</p>
-          </div>
-        `;
-      });
-    } else {
-      html += `<p class="text-gray-400 italic mt-6">No replies yet</p>`;
-    }
-    html += `
-      </div>
-      <div class="mt-8 flex justify-end">
-        <button id="replyThreadBtn" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-10 py-4 rounded-xl text-xl transition transform hover:scale-105 shadow-xl">
-          Reply to this thread
-        </button>
-      </div>
-    `;
-    document.getElementById('messageView').innerHTML = html;
-    document.getElementById('messageView').scrollTop = 0;
-    document.getElementById('replyThreadBtn')?.addEventListener('click', () => {
-      openReplyModal(originalMsg.id, originalMsg.sender?.name || 'User');
-    });
-  }
-
-  async function loadMessages() {
-    const list = document.getElementById('conversationList');
-    if (!list) return;
-    list.innerHTML = '<p class="text-center text-gray-500 py-10">Loading...</p>';
-    const { data: messages, error } = await supabase
-      .from('collab_requests')
-      .select(`
-        id,
-        parent_id,
-        sender_id,
-        receiver_id,
-        message,
-        created_at,
-        read_at,
-        status,
-        sender:fk_collab_sender (name)
-      `)
-      .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.error('Load messages error:', error);
-      list.innerHTML = `<p class="text-red-400 text-center py-10">Error loading messages: ${error.message || 'Unknown error'}</p>`;
-      document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
-      return;
-    }
-    currentMessages = messages || [];
-    if (!currentMessages.length) {
-      list.innerHTML = '<p class="text-gray-400 text-center py-10">No messages yet</p>';
-      document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20">No conversations found</p>';
-      return;
-    }
-    const conversations = {};
-    currentMessages.forEach(msg => {
-      const rootId = msg.parent_id || msg.id;
-      if (!conversations[rootId]) {
-        conversations[rootId] = {
-          root: null,
-          messages: [],
-          latest: null,
-          pendingCount: 0
-        };
-      }
-      conversations[rootId].messages.push(msg);
-      if (!msg.parent_id) conversations[rootId].root = msg;
-      if (!conversations[rootId].latest || new Date(msg.created_at) > new Date(conversations[rootId].latest.created_at)) {
-        conversations[rootId].latest = msg;
-      }
-      if (msg.status === 'pending' && msg.receiver_id === currentUserId) {
-        conversations[rootId].pendingCount++;
-      }
-    });
-    const validConversations = Object.values(conversations)
-      .filter(conv => conv.root)
-      .sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at));
-    list.innerHTML = validConversations.map(conv => {
-      const root = conv.root;
-      const latest = conv.latest;
-      let badgeText = conv.pendingCount > 0 ? `${conv.pendingCount} Pending` : 'Read';
-      let badgeClass = conv.pendingCount > 0 ? 'status-pending' : 'status-read';
-      if (latest.sender_id !== currentUserId && latest.created_at > (root.read_at || '1970-01-01')) {
-        badgeText = 'New Reply';
-        badgeClass = 'status-new-reply';
-      }
-      return `
-        <div data-id="${root.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5">
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="font-bold">${root.sender?.name || 'Unknown'}</p>
-              <p class="text-sm text-gray-400">${new Date(latest.created_at).toLocaleString()}</p>
-              <p class="msg-preview text-gray-300">${latest.message.substring(0, 80)}${latest.message.length > 80 ? '...' : ''}</p>
-            </div>
-            <div class="flex items-center gap-4">
-              <span class="inline-block px-3 py-1 text-sm font-bold rounded-full ${badgeClass}">
-                ${badgeText}
-              </span>
-              <button class="delete-conv-btn text-red-400 hover:text-red-300 text-xl" title="Delete entire conversation" data-root-id="${root.id}">
-                🗑️
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
-    document.querySelectorAll('.msg-item').forEach(item => {
-      item.addEventListener('click', e => {
-        if (e.target.classList.contains('delete-conv-btn')) {
-          e.stopPropagation();
-          const rootId = e.target.dataset.rootId;
-          deleteConversation(rootId);
-        } else {
-          const rootId = item.dataset.id;
-          const rootMsg = currentMessages.find(m => m.id === rootId);
-          if (rootMsg) showThread(rootMsg);
-        }
-      });
-    });
-    if (validConversations.length > 0) {
-      showThread(validConversations[0].root);
-    }
-  }
-
-  async function deleteConversation(rootId) {
-    if (!confirm('Delete this entire conversation? All messages and replies will be permanently removed.')) return;
-    const threadMessages = currentMessages.filter(m => m.id === rootId || m.parent_id === rootId);
-    for (const msg of threadMessages) {
-      const { error } = await supabase.from('collab_requests').delete().eq('id', msg.id);
-      if (error) {
-        console.error('Delete error for message', msg.id, error);
-        alert('Failed to delete some messages: ' + error.message);
-        return;
-      }
-    }
-    alert('Conversation deleted');
-    loadMessages();
+    loadFolder(currentFolder);
   }
 
   // Logout function - now defined and working
@@ -719,7 +591,7 @@
       });
   }
 
-  // Initialize on load
+  // Initialize on page load
   init();
 
   // Attach modal listeners
