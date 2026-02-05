@@ -14,7 +14,6 @@
     }
     .msg-item:hover { background: rgba(255,255,255,0.08); }
     .msg-unread { font-weight: 800; }
-    .msg-selected { background: rgba(255,255,255,0.15); }
     .msg-preview {
       overflow: hidden;
       display: -webkit-box;
@@ -58,13 +57,10 @@
 
       <div class="p-4 space-y-2 border-b border-gray-700">
         <button onclick="loadFolder('inbox')" class="w-full text-left py-3 px-4 rounded-lg font-bold hover:bg-white/10">
-          Inbox
+          Inbox <span id="inboxCount" class="ml-2 text-sm text-emerald-400"></span>
         </button>
         <button onclick="loadFolder('sent')" class="w-full text-left py-3 px-4 rounded-lg font-bold hover:bg-white/10">
           Sent
-        </button>
-        <button onclick="loadFolder('trash')" class="w-full text-left py-3 px-4 rounded-lg font-bold hover:bg-white/10 text-red-400">
-          Trash
         </button>
       </div>
 
@@ -81,10 +77,6 @@
 
   </div>
 </main>
-
-<footer class="bg-black/80 border-t border-purple-700/30 py-6 text-center text-gray-400 text-sm">
-  © 2026 Rhythm Deck
-</footer>
 
 <!-- REPLY MODAL -->
 <div id="replyModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
@@ -109,8 +101,8 @@ const supabase = createClient(
 );
 
 let userId;
-let currentFolder = 'inbox';
 let threads = [];
+let currentFolder = 'inbox';
 let activeRootId = null;
 
 /* INIT */
@@ -126,26 +118,22 @@ async function loadFolder(folder) {
   currentFolder = folder;
   activeRootId = null;
 
-  const list = document.getElementById('conversationList');
-  list.innerHTML = '<p class="text-center text-gray-400 mt-6">Loading…</p>';
+  let query = supabase.from('messages').select('*');
 
-  const { data, error } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('owner_id', userId)
-    .eq('folder', folder)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    list.innerHTML = '<p class="text-red-400 p-4">Failed to load messages</p>';
-    return;
+  if (folder === 'inbox') {
+    query = query.eq('receiver_id', userId);
+  } else {
+    query = query.eq('sender_id', userId);
   }
 
-  buildThreads(data);
+  const { data } = await query.order('created_at', { ascending: false });
+
+  buildThreads(data || []);
   renderConversationList();
+  updateInboxCount(data || []);
 }
 
-/* BUILD THREADS */
+/* THREADS */
 function buildThreads(messages) {
   const map = {};
   messages.forEach(m => {
@@ -158,19 +146,12 @@ function buildThreads(messages) {
     msgs.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
     return { rootId, messages: msgs, latest: msgs.at(-1) };
   });
-
-  threads.sort((a,b)=>new Date(b.latest.created_at)-new Date(a.latest.created_at));
 }
 
-/* RENDER LIST */
+/* LIST */
 function renderConversationList() {
   const list = document.getElementById('conversationList');
-  list.innerHTML = '';
-
-  if (!threads.length) {
-    list.innerHTML = '<p class="text-center text-gray-400 mt-6">No messages</p>';
-    return;
-  }
+  list.innerHTML = threads.length ? '' : '<p class="text-center text-gray-400 mt-6">No messages</p>';
 
   threads.forEach(t => {
     const unread = t.latest.receiver_id === userId && !t.latest.read_at;
@@ -185,7 +166,7 @@ function renderConversationList() {
   });
 }
 
-/* OPEN CONVO */
+/* OPEN */
 async function openConversation(rootId) {
   activeRootId = rootId;
   const thread = threads.find(t => t.rootId === rootId);
@@ -195,32 +176,33 @@ async function openConversation(rootId) {
     .from('messages')
     .update({ read_at: new Date().toISOString() })
     .eq('receiver_id', userId)
-    .eq('parent_id', rootId)
-    .is('read_at', null);
+    .eq('parent_id', rootId);
 
-  let html = '';
-  thread.messages.forEach(m => {
-    html += `
-      <div class="mb-4 p-4 rounded-xl bg-black/30">
-        <p class="font-bold ${m.sender_id===userId?'text-emerald-400':'text-purple-400'}">
-          ${m.sender_id===userId?'You':'Them'}
-        </p>
-        <p>${m.body}</p>
-      </div>`;
-  });
-
-  html += `
+  document.getElementById('messageView').innerHTML = thread.messages.map(m => `
+    <div class="mb-4 p-4 rounded-xl bg-black/30">
+      <p class="font-bold ${m.sender_id===userId?'text-emerald-400':'text-purple-400'}">
+        ${m.sender_id===userId?'You':'Them'}
+      </p>
+      <p>${m.body}</p>
+    </div>
+  `).join('') + `
     <button onclick="openReply()" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">
       Reply
-    </button>`;
+    </button>
+  `;
 
-  document.getElementById('messageView').innerHTML = html;
   loadFolder(currentFolder);
 }
 
+/* COUNTS */
+function updateInboxCount(msgs) {
+  const unread = msgs.filter(m => m.receiver_id === userId && !m.read_at).length;
+  document.getElementById('inboxCount').textContent = unread ? `(${unread})` : '';
+}
+
 /* REPLY */
-function openReply(){document.getElementById('replyModal').classList.remove('hidden');document.getElementById('replyModal').classList.add('flex')}
-function closeReply(){document.getElementById('replyModal').classList.add('hidden');}
+function openReply(){replyModal.classList.remove('hidden');replyModal.classList.add('flex')}
+function closeReply(){replyModal.classList.add('hidden')}
 
 async function sendReply() {
   const text = replyText.value.trim();
@@ -228,12 +210,14 @@ async function sendReply() {
 
   const thread = threads.find(t=>t.rootId===activeRootId);
   const root = thread.messages[0];
-  const receiver = root.sender_id===userId?root.receiver_id:root.sender_id;
+  const receiver = root.sender_id === userId ? root.receiver_id : root.sender_id;
 
-  await supabase.from('messages').insert([
-    { parent_id:activeRootId,sender_id:userId,receiver_id:receiver,owner_id:userId,folder:'sent',body:text },
-    { parent_id:activeRootId,sender_id:userId,receiver_id:receiver,owner_id:receiver,folder:'inbox',body:text }
-  ]);
+  await supabase.from('messages').insert({
+    parent_id: activeRootId,
+    sender_id: userId,
+    receiver_id: receiver,
+    body: text
+  });
 
   closeReply();
   loadFolder(currentFolder);
