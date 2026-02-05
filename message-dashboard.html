@@ -102,7 +102,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'YOUR_ANON_KEY'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
 let userId;
@@ -110,17 +110,26 @@ let currentFolder = 'inbox';
 let activeRootId = null;
 let threads = [];
 
+/* =========================
+   INIT
+========================= */
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return location.replace('login.html');
+
   userId = session.user.id;
   loadFolder('inbox');
 }
 
+/* =========================
+   LOAD FOLDER
+========================= */
 async function loadFolder(folder) {
   currentFolder = folder;
-  document.getElementById('conversationList').innerHTML = 'Loading...';
   activeRootId = null;
+
+  const list = document.getElementById('conversationList');
+  list.innerHTML = 'Loading…';
 
   const { data, error } = await supabase
     .from('messages')
@@ -129,14 +138,22 @@ async function loadFolder(folder) {
     .eq('folder', folder)
     .order('created_at', { ascending: false });
 
-  if (error) return console.error(error);
+  if (error) {
+    console.error(error);
+    list.innerHTML = '<p class="text-red-400">Error loading messages</p>';
+    return;
+  }
 
   buildThreads(data);
   renderConversationList();
 }
 
+/* =========================
+   THREAD BUILDING
+========================= */
 function buildThreads(data) {
   const map = {};
+
   data.forEach(m => {
     const root = m.parent_id || m.id;
     if (!map[root]) map[root] = [];
@@ -144,7 +161,7 @@ function buildThreads(data) {
   });
 
   threads = Object.entries(map).map(([rootId, msgs]) => {
-    msgs.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+    msgs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     return {
       rootId,
       messages: msgs,
@@ -152,63 +169,83 @@ function buildThreads(data) {
     };
   });
 
-  threads.sort((a,b)=>new Date(b.latest.created_at)-new Date(a.latest.created_at));
+  threads.sort((a, b) =>
+    new Date(b.latest.created_at) - new Date(a.latest.created_at)
+  );
 }
 
+/* =========================
+   RENDER LIST
+========================= */
 function renderConversationList() {
   const list = document.getElementById('conversationList');
   list.innerHTML = '';
 
   if (!threads.length) {
-    list.innerHTML = `<p class="text-gray-400 text-center mt-6">No messages</p>`;
+    list.innerHTML = '<p class="text-gray-400 text-center mt-6">No messages</p>';
     return;
   }
 
   threads.forEach(t => {
     const unread = t.latest.receiver_id === userId && !t.latest.read_at;
+
     const div = document.createElement('div');
-    div.className = `msg-item p-4 border-b border-gray-800 cursor-pointer ${unread?'msg-unread':''}`;
+    div.className =
+      `msg-item p-4 border-b border-gray-800 cursor-pointer ${unread ? 'msg-unread' : ''}`;
+
     div.onclick = () => openConversation(t.rootId);
 
     div.innerHTML = `
       <p class="font-bold">${t.latest.subject || 'Conversation'}</p>
       <p class="msg-preview text-gray-400">${t.latest.body}</p>
     `;
+
     list.appendChild(div);
   });
 }
 
+/* =========================
+   OPEN CONVERSATION
+========================= */
 async function openConversation(rootId) {
   activeRootId = rootId;
   const thread = threads.find(t => t.rootId === rootId);
   if (!thread) return;
 
-  // mark as read
   await supabase
     .from('messages')
     .update({ read_at: new Date().toISOString() })
-    .eq('parent_id', rootId)
     .eq('receiver_id', userId)
+    .eq('parent_id', rootId)
     .is('read_at', null);
 
   let html = '';
+
   thread.messages.forEach(m => {
     html += `
       <div class="mb-4 p-4 rounded-xl bg-black/30">
-        <p class="font-bold ${m.sender_id===userId?'text-emerald-400':'text-purple-400'}">
-          ${m.sender_id===userId?'You':'Them'}
+        <p class="font-bold ${m.sender_id === userId ? 'text-emerald-400' : 'text-purple-400'}">
+          ${m.sender_id === userId ? 'You' : 'Them'}
         </p>
         <p>${m.body}</p>
       </div>
     `;
   });
 
-  html += `<button onclick="openReply()" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
-  document.getElementById('messageView').innerHTML = html;
+  html += `
+    <button onclick="openReply()"
+      class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">
+      Reply
+    </button>
+  `;
 
+  document.getElementById('messageView').innerHTML = html;
   loadFolder(currentFolder);
 }
 
+/* =========================
+   REPLY
+========================= */
 function openReply() {
   document.getElementById('replyModal').classList.remove('hidden');
   document.getElementById('replyModal').classList.add('flex');
@@ -223,9 +260,9 @@ async function sendReply() {
   const text = document.getElementById('replyText').value.trim();
   if (!text || !activeRootId) return;
 
-  const rootThread = threads.find(t => t.rootId === activeRootId);
-  const rootMsg = rootThread.messages[0];
-  const receiver = rootMsg.sender_id === userId ? rootMsg.receiver_id : rootMsg.sender_id;
+  const thread = threads.find(t => t.rootId === activeRootId);
+  const root = thread.messages[0];
+  const receiver = root.sender_id === userId ? root.receiver_id : root.sender_id;
 
   await supabase.from('messages').insert([
     {
@@ -250,8 +287,16 @@ async function sendReply() {
   loadFolder(currentFolder);
 }
 
+/* =========================
+   MAKE FUNCTIONS GLOBAL
+========================= */
+window.loadFolder = loadFolder;
+window.openConversation = openConversation;
+window.openReply = openReply;
+window.closeReply = closeReply;
+window.sendReply = sendReply;
+
 init();
 </script>
-
 </body>
 </html>
