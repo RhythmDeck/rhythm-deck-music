@@ -6,271 +6,205 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     .msg-item:hover { background: rgba(255,255,255,0.08); }
-    .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .selected { background: rgba(255,255,255,0.12) !important; }
-    .badge-new { background:#8b5cf6; color:white; font-weight:800; }
-    .badge-read { background:#6b7280; color:white; }
+    .selected { background: rgba(255,255,255,0.15) !important; }
+    .reply-indent {
+      margin-left: 2rem;
+      border-left: 3px solid #10b981;
+      padding-left: 1rem;
+    }
   </style>
 </head>
+
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen flex flex-col">
 
-  <!-- Header -->
-  !-- Header -->
-<header class="bg-black/60 border-b border-purple-700/50 py-6 px-4 sm:px-6 flex items-center justify-between">
+<!-- Header -->
+<header class="bg-black/60 border-b border-purple-700/50 py-6 px-6 flex items-center justify-between">
   <div class="flex items-center gap-4">
-    <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="h-10 sm:h-12 w-10 sm:w-12 rounded-full">
+    <img src="logo-1-sm.jpg" class="h-12 w-12 rounded-full">
     <div>
-      <h1 class="text-2xl sm:text-3xl font-black text-emerald-400">RHYTHM DECK</h1>
+      <h1 class="text-3xl font-black text-emerald-400">RHYTHM DECK</h1>
       <p class="text-sm text-purple-300">Unleash Your Beat</p>
     </div>
   </div>
 
-  <!-- Back to Dashboard button on the right -->
-  <div>
-    <a href="platinum-admin-pro.html" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold px-8 py-3 rounded-full shadow-xl transition transform hover:scale-105">
-      Back to Dashboard
-    </a>
-  </div>
+  <a href="platinum-pro-admin.html"
+     class="bg-gradient-to-r from-yellow-400 to-amber-500 px-8 py-3 rounded-full font-black text-black shadow-xl hover:scale-105 transition">
+    Back to Dashboard
+  </a>
 </header>
 
-  <div class="flex-1 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <h1 class="text-4xl sm:text-5xl font-black mb-6 sm:mb-8 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent text-center lg:text-left">
-      Messages
-    </h1>
+<main class="flex-1 max-w-7xl mx-auto p-6">
+  <h1 class="text-4xl font-black mb-8 text-emerald-400">Messages</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 lg:gap-8 h-[70vh] sm:h-[80vh]">
-      <!-- LEFT: Folders & Conversations -->
-      <div class="bg-black/40 rounded-2xl flex flex-col overflow-hidden md:col-span-1 lg:col-span-1 border border-purple-700/30 shadow-xl">
-        <div class="p-5 sm:p-6 border-b border-purple-600 font-bold text-xl sm:text-2xl text-emerald-400">
-          Folders
-        </div>
-        <div class="p-4 border-b border-gray-700 space-y-2">
-          <button onclick="loadFolder('inbox')" class="w-full text-left py-3 px-4 hover:bg-white/10 rounded-lg font-bold flex justify-between items-center">
-            Inbox <span id="inboxCount" class="badge-new px-2 py-1 text-xs rounded-full hidden">0</span>
-          </button>
-          <button onclick="loadFolder('sent')" class="w-full text-left py-3 px-4 hover:bg-white/10 rounded-lg font-bold">
-            Sent
-          </button>
-          <button onclick="loadFolder('trash')" class="w-full text-left py-3 px-4 hover:bg-white/10 rounded-lg font-bold">
-            Trash
-          </button>
-        </div>
-        <div id="conversationList" class="flex-1 overflow-y-auto p-4 sm:p-6"></div>
-      </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[75vh]">
 
-      <!-- RIGHT: Message View -->
-      <div id="messageView" class="md:col-span-3 lg:col-span-4 bg-black/40 rounded-2xl p-6 sm:p-8 lg:p-10 overflow-y-auto border border-purple-700/30 shadow-xl">
-        <p class="text-gray-400 text-center mt-16 sm:mt-32 text-lg sm:text-xl font-medium">
-          Select a folder or conversation to view messages
-        </p>
-      </div>
+    <!-- Conversation List -->
+    <div id="conversationList"
+         class="bg-black/40 rounded-2xl p-4 overflow-y-auto border border-purple-700/30">
     </div>
-  </div>
 
-  <!-- Footer -->
-  <footer class="bg-black/80 border-t border-purple-700/30 py-6 text-center text-gray-400 text-sm">
-    © 2026 Rhythm Deck Music
-  </footer>
-
-  <!-- Reply Modal -->
-  <div id="replyModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-50">
-    <div class="bg-gray-900 rounded-2xl p-6 sm:p-8 max-w-lg w-[90%] sm:w-full mx-4 relative">
-      <button onclick="closeReply()" class="absolute top-4 right-4 text-3xl font-black text-red-500">×</button>
-      <h2 class="text-2xl sm:text-3xl font-black text-emerald-400 mb-4 text-center">
-        Reply to <span id="replyName"></span>
-      </h2>
-      <textarea id="replyText" rows="6" class="w-full bg-black/50 border border-emerald-500 rounded-lg p-4 text-white text-base"></textarea>
-      <button id="sendReplyBtn" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 py-3 sm:py-4 rounded-xl font-black text-lg sm:text-xl">
-        Send Reply
-      </button>
+    <!-- Message View -->
+    <div id="messageView"
+         class="md:col-span-2 bg-black/40 rounded-2xl p-6 overflow-y-auto border border-purple-700/30">
+      <p class="text-gray-400 text-center mt-24">
+        Select a conversation
+      </p>
     </div>
+
   </div>
+</main>
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+<!-- Reply Modal -->
+<div id="replyModal"
+     class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
+  <div class="bg-gray-900 rounded-2xl p-8 max-w-lg w-full relative">
+    <button id="closeReplyBtn"
+            class="absolute top-4 right-4 text-3xl text-red-500">&times;</button>
 
-    const supabase = createClient(
-      'https://bxoqhmfnseskwqkywppg.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-    );
+    <h2 class="text-2xl font-black text-emerald-400 mb-4">Reply</h2>
 
-    let userId = null;
-    let currentFolder = 'inbox';
-    let messages = [];
-    let activeConversationId = null;
+    <textarea id="replyText"
+              rows="6"
+              class="w-full bg-black/60 border border-emerald-500 rounded-lg p-4"></textarea>
 
-    async function init() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        location.replace('login.html');
-        return;
-      }
-      userId = session.user.id;
-      loadFolder('inbox');
-    }
+    <button id="sendReplyBtn"
+            class="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-black">
+      Send Reply
+    </button>
+  </div>
+</div>
 
-    supabase.auth.onAuthStateChange((_, session) => {
-      if (session?.user) {
-        userId = session.user.id;
-        loadFolder(currentFolder);
-      }
-    });
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    init();
+const supabase = createClient(
+  'https://bxoqhmfnseskwqkywppg.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+);
 
-    async function loadFolder(folder) {
-      currentFolder = folder;
-      document.getElementById('conversationList').innerHTML = '<p class="text-gray-400 text-center py-10">Loading...</p>';
+let userId = null;
+let threads = [];
+let activeThread = null;
 
-      const { data, error } = await supabase
-        .from('messages')
-        .select('id, parent_id, sender_id, receiver_id, subject, body, created_at, read_at, folder')
-        .eq('owner_id', userId)
-        .eq('folder', folder)
-        .order('created_at', { ascending: false });
+/* INIT */
+supabase.auth.onAuthStateChange(async (_, session) => {
+  if (!session?.user) {
+    location.href = 'login.html';
+    return;
+  }
+  userId = session.user.id;
+  loadThreads();
+});
 
-      if (error) {
-        console.error('Load messages error:', error);
-        document.getElementById('messageView').innerHTML = `<p class="text-red-400 text-center py-10">Error: ${error.message}</p>`;
-        return;
-      }
+/* LOAD THREADS */
+async function loadThreads() {
+  const { data, error } = await supabase
+    .from('collab_requests')
+    .select(`
+      id,
+      parent_id,
+      sender_id,
+      receiver_id,
+      message,
+      created_at
+    `)
+    .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+    .order('created_at', { ascending: true });
 
-      messages = data || [];
-      renderConversationList();
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
-      // Update unread count for Inbox
-      if (folder === 'inbox') {
-        const unread = messages.filter(m => !m.read_at && m.receiver_id === userId).length;
-        const countEl = document.getElementById('inboxCount');
-        countEl.textContent = unread || '';
-        countEl.classList.toggle('hidden', unread === 0);
-      }
+  const map = {};
+  data.forEach(m => {
+    const root = m.parent_id || m.id;
+    if (!map[root]) map[root] = { root: null, replies: [] };
+    if (!m.parent_id) map[root].root = m;
+    else map[root].replies.push(m);
+  });
 
-      if (messages.length > 0) {
-        openConversation(messages[0].id);
-      } else {
-        document.getElementById('messageView').innerHTML = `<p class="text-gray-400 text-center mt-20 text-xl">No messages in ${folder}</p>`;
-      }
-    }
+  threads = Object.values(map).filter(t => t.root);
+  renderThreadList();
+}
 
-    function renderConversationList() {
-      const list = document.getElementById('conversationList');
-      list.innerHTML = '';
+/* RENDER LIST */
+function renderThreadList() {
+  const list = document.getElementById('conversationList');
+  list.innerHTML = threads.map(t => `
+    <div class="msg-item p-4 border-b border-gray-700 cursor-pointer"
+         onclick="openThread('${t.root.id}')">
+      <p class="font-bold text-white">
+        ${t.root.sender_id === userId ? 'You' : 'Partner'}
+      </p>
+      <p class="text-sm text-gray-400">
+        ${t.root.message.slice(0, 80)}
+      </p>
+    </div>
+  `).join('');
+}
 
-      const conversations = {};
-      messages.forEach(m => {
-        const partnerId = m.sender_id === userId ? m.receiver_id : m.sender_id;
-        if (!conversations[partnerId]) {
-          conversations[partnerId] = {
-            partnerId,
-            messages: [],
-            latest: m,
-            unread: (!m.read_at && m.receiver_id === userId) ? 1 : 0
-          };
-        }
-        conversations[partnerId].messages.push(m);
-        if (new Date(m.created_at) > new Date(conversations[partnerId].latest.created_at)) {
-          conversations[partnerId].latest = m;
-        }
-        if (!m.read_at && m.receiver_id === userId) conversations[partnerId].unread++;
-      });
+/* OPEN THREAD */
+window.openThread = function(id) {
+  activeThread = threads.find(t => t.root.id === id);
+  if (!activeThread) return;
 
-      Object.values(conversations).sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at)).forEach(conv => {
-        const div = document.createElement('div');
-        div.className = `msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${activeConversationId === conv.latest.id ? 'selected' : ''}`;
-        div.onclick = () => openConversation(conv.latest.id);
-        div.innerHTML = `
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="font-bold ${conv.unread > 0 ? 'text-white' : 'text-gray-400'}">Partner ID: ${conv.partnerId}</p>
-              <p class="msg-preview text-gray-300">${conv.latest.subject || conv.latest.body.substring(0, 60) + '...'}</p>
-            </div>
-            <div class="flex items-center gap-3">
-              ${conv.unread > 0 ? `<span class="badge-new px-2 py-1 text-xs rounded-full">${conv.unread}</span>` : ''}
-            </div>
-          </div>
-        `;
-        list.appendChild(div);
-      });
-    }
+  document.getElementById('messageView').innerHTML = `
+    <div class="space-y-4">
+      <div class="bg-black/50 p-4 rounded-xl">
+        ${activeThread.root.message}
+      </div>
+      ${activeThread.replies.map(r => `
+        <div class="reply-indent bg-black/30 p-3 rounded-xl">
+          ${r.message}
+        </div>
+      `).join('')}
+    </div>
 
-    async function openConversation(messageId) {
-      activeConversationId = messageId;
-      const conversation = messages.filter(m => m.id === messageId || m.parent_id === messageId);
-      const root = conversation.find(m => !m.parent_id) || conversation[0];
+    <button onclick="openReply()"
+            class="mt-6 bg-emerald-600 px-6 py-3 rounded-xl font-black">
+      Reply
+    </button>
+  `;
+};
 
-      if (root.receiver_id === userId && !root.read_at) {
-        await supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', root.id);
-        loadFolder(currentFolder); // Refresh unread count
-      }
+/* REPLY */
+function openReply() {
+  document.getElementById('replyModal').classList.remove('hidden');
+  document.getElementById('replyModal').classList.add('flex');
+}
 
-      const partnerId = root.sender_id === userId ? root.receiver_id : root.sender_id;
+function closeReply() {
+  document.getElementById('replyModal').classList.add('hidden');
+}
 
-      let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">Conversation with Partner ID: ${partnerId}</h2>`;
+async function sendReply() {
+  const text = document.getElementById('replyText').value.trim();
+  if (!text) return;
 
-      conversation.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).forEach(m => {
-        const who = m.sender_id === userId ? 'You' : 'Partner';
-        const isUnread = !m.read_at && m.receiver_id === userId;
-        html += `
-          <div class="mb-4 p-4 rounded-xl ${isUnread ? 'bg-purple-900/30 border-l-4 border-purple-500' : 'bg-black/30'}">
-            <p class="font-bold text-emerald-300">${who}</p>
-            <p class="text-xs text-gray-500">${new Date(m.created_at).toLocaleString()}</p>
-            ${m.subject ? `<p class="font-semibold mt-1">Subject: ${m.subject}</p>` : ''}
-            <p class="mt-1">${m.body}</p>
-          </div>
-        `;
-      });
+  const receiver =
+    activeThread.root.sender_id === userId
+      ? activeThread.root.receiver_id
+      : activeThread.root.sender_id;
 
-      html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
+  await supabase.from('collab_requests').insert({
+    parent_id: activeThread.root.id,
+    sender_id: userId,
+    receiver_id: receiver,
+    message: text,
+    status: 'pending'
+  });
 
-      document.getElementById('messageView').innerHTML = html;
-      document.getElementById('replyButton')?.addEventListener('click', () => openReply(partnerId));
-    }
+  closeReply();
+  loadThreads();
+}
 
-    function openReply(partnerId) {
-      document.getElementById('replyName').innerText = 'Partner ID: ' + partnerId;
-      document.getElementById('replyText').value = '';
-      document.getElementById('replyModal').classList.remove('hidden');
-      document.getElementById('replyModal').classList.add('flex');
-    }
+document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
+document.getElementById('closeReplyBtn').addEventListener('click', closeReply);
+</script>
 
-    function closeReply() {
-      document.getElementById('replyModal').classList.remove('flex');
-      document.getElementById('replyModal').classList.add('hidden');
-    }
-
-    async function sendReply() {
-      const text = document.getElementById('replyText').value.trim();
-      if (!text) return alert('Please type a message');
-
-      const root = messages.find(m => m.id === activeConversationId);
-      if (!root) return alert('No active conversation');
-
-      const receiverId = root.sender_id === userId ? root.receiver_id : root.sender_id;
-
-      const { error } = await supabase.from('messages').insert({
-        parent_id: activeConversationId,
-        sender_id: userId,
-        receiver_id: receiverId,
-        subject: 'Re: ' + (root.subject || '(No subject)'),
-        body: text,
-        owner_id: userId,
-        folder: 'sent'
-      });
-
-      if (error) {
-        console.error(error);
-        alert('Failed to send: ' + error.message);
-        return;
-      }
-
-      closeReply();
-      loadFolder(currentFolder);
-    }
-
-    document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
-  </script>
 </body>
 </html>
