@@ -10,8 +10,8 @@
     .msg-item:hover { background: rgba(255,255,255,0.08); }
     .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     .selected { background: rgba(255,255,255,0.12) !important; }
-    .badge-new { background: #8b5cf6; color: white; font-weight: 800; }
-    .badge-read { background: #6b7280; color: white; }
+    .badge-new { background:#8b5cf6; color:white; font-weight:800; }
+    .badge-read { background:#6b7280; color:white; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen flex flex-col">
@@ -41,7 +41,7 @@
         <div id="conversationList" class="flex-1 overflow-y-auto p-4 sm:p-6"></div>
       </div>
 
-      <!-- RIGHT: Message View – takes more space on larger screens -->
+      <!-- RIGHT: Message View -->
       <div id="messageView" class="md:col-span-3 lg:col-span-4 bg-black/40 rounded-2xl p-6 sm:p-8 lg:p-10 overflow-y-auto border border-purple-700/30 shadow-xl">
         <p class="text-gray-400 text-center mt-16 sm:mt-32 text-lg sm:text-xl font-medium">
           Select a conversation to view messages
@@ -111,18 +111,21 @@
     async function loadMessages() {
       if (!userId) return;
       const { data, error } = await supabase
-        .from('collab_requests')
+        .from('messages')
         .select(`
-          id,parent_id,sender_id,receiver_id,message,created_at,read_at,
+          id, parent_id, sender_id, receiver_id, subject, body, created_at, read_at, folder, owner_id,
           sender:sender_id(name),
           receiver:receiver_id(name)
         `)
-        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+        .eq('owner_id', userId)
         .order('created_at', { ascending: false });
+
       if (error) {
         console.error('Load messages error:', error);
+        document.getElementById('messageView').innerHTML = '<p class="text-red-400 text-center py-10">Error loading messages</p>';
         return;
       }
+
       messages = data || [];
       renderConversations();
     }
@@ -130,44 +133,49 @@
     function renderConversations() {
       const list = document.getElementById('conversationList');
       list.innerHTML = '';
+
+      // Group by root message (conversation)
       const threads = {};
       messages.forEach(m => {
-        const root = m.parent_id || m.id;
-        if (!threads[root]) threads[root] = [];
-        threads[root].push(m);
+        const rootId = m.parent_id || m.id;
+        if (!threads[rootId]) threads[rootId] = [];
+        threads[rootId].push(m);
       });
+
       const sortedThreads = Object.entries(threads).sort(([,a], [,b]) => {
         const latestA = a.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, a[0]);
         const latestB = b.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, b[0]);
         return new Date(latestB.created_at) - new Date(latestA.created_at);
       });
+
       sortedThreads.forEach(([rootId, thread]) => {
         const root = thread.find(m => !m.parent_id) || thread[0];
         const latest = thread.reduce((max, m) => new Date(m.created_at) > new Date(max.created_at) ? m : max, thread[0]);
         const isUnread = !root.read_at && root.receiver_id === userId;
-        const name = root.sender_id === userId ? root.receiver.name : root.sender.name;
+        const partnerName = root.sender_id === userId ? root.receiver?.name : root.sender?.name;
+
         const div = document.createElement('div');
         div.className = `msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${activeRoot === rootId ? 'selected' : ''}`;
         div.onclick = () => openThread(rootId);
         div.innerHTML = `
           <div class="flex justify-between items-center">
             <div>
-              <p class="font-bold">${name}</p>
-              <p class="msg-preview text-gray-300">${latest.message}</p>
+              <p class="font-bold">${partnerName || 'Unknown'}</p>
+              <p class="msg-preview text-gray-300">${latest.subject ? latest.subject : latest.body.substring(0, 60) + '...'}</p>
             </div>
             <div class="flex items-center gap-3">
               <span class="px-3 py-1 rounded-full ${isUnread ? 'badge-new' : 'badge-read'}">
                 ${isUnread ? 'New' : 'Read'}
               </span>
-              <button onclick="deleteThread('${rootId}',event)" class="text-red-400 text-xl">🗑️</button>
+              <button onclick="deleteThread('${rootId}', event)" class="text-red-400 text-xl">🗑️</button>
             </div>
           </div>
         `;
         list.appendChild(div);
       });
-      if (activeRoot && messages.some(m => m.id === activeRoot || m.parent_id === activeRoot)) {
-        openThread(activeRoot);
-      } else if (sortedThreads.length > 0) {
+
+      // Auto-open first conversation if exists
+      if (sortedThreads.length > 0 && !activeRoot) {
         openThread(sortedThreads[0][0]);
       }
     }
@@ -177,31 +185,39 @@
       const thread = messages
         .filter(m => m.id === rootId || m.parent_id === rootId)
         .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+
       const root = thread.find(m => !m.parent_id) || thread[0];
       if (root.receiver_id === userId && !root.read_at) {
-        await supabase.from('collab_requests')
+        await supabase.from('messages')
           .update({ read_at: new Date().toISOString() })
           .eq('id', root.id);
       }
-      const name = root.sender_id === userId ? root.receiver.name : root.sender.name;
-      let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${name}</h2>`;
+
+      const partnerName = root.sender_id === userId ? root.receiver?.name : root.sender?.name;
+
+      let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${partnerName || 'Unknown'}</h2>`;
+
       thread.forEach(m => {
-        const who = m.sender_id === userId ? 'You' : name;
+        const who = m.sender_id === userId ? 'You' : partnerName || 'Unknown';
         html += `
           <div class="mb-4 p-4 rounded-xl bg-black/30">
             <p class="font-bold text-emerald-300">${who}</p>
-            <p>${m.message}</p>
+            <p class="text-xs text-gray-500">${new Date(m.created_at).toLocaleString()}</p>
+            <p class="mt-1">${m.subject ? `<strong>Subject:</strong> ${m.subject}<br>` : ''}${m.body}</p>
           </div>
         `;
       });
+
       html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
+
       document.getElementById('messageView').innerHTML = html;
-      document.getElementById('replyButton')?.addEventListener('click', () => openReply(name));
+      document.getElementById('replyButton')?.addEventListener('click', () => openReply(partnerName));
       document.getElementById('messageView').scrollTop = document.getElementById('messageView').scrollHeight;
     }
 
     function openReply(name) {
-      document.getElementById('replyName').innerText = name;
+      document.getElementById('replyName').innerText = name || 'User';
+      document.getElementById('replyText').value = '';
       document.getElementById('replyModal').classList.remove('hidden');
       document.getElementById('replyModal').classList.add('flex');
     }
@@ -209,7 +225,6 @@
     function closeReply() {
       document.getElementById('replyModal').classList.remove('flex');
       document.getElementById('replyModal').classList.add('hidden');
-      document.getElementById('replyText').value = '';
     }
 
     async function sendReply() {
@@ -218,33 +233,42 @@
         alert('Please type a message');
         return;
       }
+
       const root = messages.find(m => m.id === activeRoot);
       if (!root) {
         alert('No active conversation');
         return;
       }
-      const receiver = root.sender_id === userId ? root.receiver_id : root.sender_id;
-      const { error } = await supabase.from('collab_requests').insert({
+
+      const receiverId = root.sender_id === userId ? root.receiver_id : root.sender_id;
+
+      const { error } = await supabase.from('messages').insert({
         parent_id: activeRoot,
         sender_id: userId,
-        receiver_id: receiver,
-        message: text
+        receiver_id: receiverId,
+        subject: 'Re: ' + (root.subject || '(No subject)'),
+        body: text,
+        owner_id: userId,
+        folder: 'sent'
       });
+
       if (error) {
         console.error('Reply failed:', error);
         alert('Failed to send reply: ' + error.message);
         return;
       }
+
       closeReply();
-      loadMessages();
+      loadMessages(); // Refresh list
     }
 
     async function deleteThread(rootId, e) {
       e.stopPropagation();
       if (!confirm('Delete this conversation?')) return;
+
       const toDelete = messages.filter(m => m.id === rootId || m.parent_id === rootId);
       for (const m of toDelete) {
-        await supabase.from('collab_requests').delete().eq('id', m.id);
+        await supabase.from('messages').delete().eq('id', m.id);
       }
       loadMessages();
     }
