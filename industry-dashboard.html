@@ -168,13 +168,13 @@
     <!-- Artists Grid -->
     <div id="artistGrid" class="grid grid-container gap-6"></div>
 
-    <!-- Email-Style Messages Section – now responsive -->
-    <section class="mt-16 bg-black/40 rounded-2xl p-6 sm:p-8">
+    <!-- Messages Section -->
+    <section class="mt-16 bg-black/40 rounded-2xl p-8">
       <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
-      <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 lg:gap-8 h-[70vh] sm:h-[80vh]">
-        <!-- LEFT: Folders & Conversations (narrower on large screens) -->
+      <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 h-[70vh] sm:h-[80vh]">
+        <!-- Left: Folders & Conversations -->
         <div class="bg-black/30 rounded-2xl flex flex-col overflow-hidden md:col-span-1 lg:col-span-1 border border-purple-700/30">
-          <div class="p-5 sm:p-6 border-b border-purple-600 font-bold text-xl sm:text-2xl text-emerald-400">
+          <div class="p-6 border-b border-purple-600 font-bold text-2xl text-emerald-400">
             Folders
           </div>
           <div class="p-4 border-b border-gray-700">
@@ -191,11 +191,9 @@
           <div id="conversationList" class="flex-1 overflow-y-auto p-4 sm:p-6"></div>
         </div>
 
-        <!-- RIGHT: Message View (takes most space) -->
-        <div id="messageView" class="md:col-span-3 lg:col-span-4 bg-black/30 rounded-2xl p-6 sm:p-8 lg:p-10 overflow-y-auto border border-purple-700/30">
-          <p class="text-gray-400 text-center mt-16 sm:mt-32 text-lg sm:text-xl font-medium">
-            Select a conversation to view messages
-          </p>
+        <!-- Right: Message View -->
+        <div id="messageView" class="md:col-span-3 lg:col-span-4 bg-black/30 rounded-2xl p-8 overflow-y-auto border border-purple-700/30">
+          <p class="text-gray-400 text-center mt-20 text-xl">Select a conversation to view messages</p>
         </div>
       </div>
     </section>
@@ -271,6 +269,18 @@
     let activeMessageId = null;
     let messages = [];
 
+    // Logout function defined early so button can call it
+    function logout() {
+      supabase.auth.signOut()
+        .then(() => {
+          location.href = 'login.html';
+        })
+        .catch(err => {
+          console.error('Logout failed:', err);
+          alert('Logout failed. Please try again.');
+        });
+    }
+
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -290,286 +300,275 @@
       document.getElementById('welcomeUser').textContent = `Welcome, ${currentUserName}`;
       document.getElementById('welcomeUser').classList.remove('hidden');
 
-          loadArtists();
-    loadFolder('inbox');
-  }
-
-  async function loadArtists() {
-    const { data: fetchedArtists, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .in('plan', ['pro', 'platinum'])
-      .order('name', { ascending: true });
-    if (error) {
-      console.error('Error loading artists:', error);
-      return;
+      loadArtists();
+      loadFolder('inbox');
     }
-    artists = fetchedArtists;
-    renderArtists(artists);
-  }
 
-  function renderArtists(filteredArtists) {
-    const artistGrid = document.getElementById('artistGrid');
-    artistGrid.innerHTML = filteredArtists.map(artist => {
-      // Safely escape quotes for onclick attribute
-      const safeName = artist.name
-        .replace(/'/g, "\\'")   // escape single quotes
-        .replace(/"/g, '\\"');  // escape double quotes
+    async function loadArtists() {
+      const { data: fetchedArtists, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('plan', ['pro', 'platinum'])
+        .order('name', { ascending: true });
+      if (error) {
+        console.error('Error loading artists:', error);
+        return;
+      }
+      artists = fetchedArtists;
+      renderArtists(artists);
+    }
 
-      return `
-        <div class="artist-box">
-          <div class="flex items-start gap-3 mb-2">
-            <img src="${artist.logo_url || 'logo-placeholder.jpg'}" alt="${artist.name}" class="logo-img">
-            <div class="flex-1">
-              <h3 class="text-base font-bold">${artist.name}</h3>
-              <p class="text-xs text-gray-400">${artist.plan.toUpperCase()} Artist</p>
+    function renderArtists(filteredArtists) {
+      const artistGrid = document.getElementById('artistGrid');
+      artistGrid.innerHTML = filteredArtists.map(artist => {
+        const safeName = artist.name
+          .replace(/'/g, "\\'")
+          .replace(/"/g, '\\"');
+        return `
+          <div class="artist-box">
+            <div class="flex items-start gap-3 mb-2">
+              <img src="${artist.logo_url || 'logo-placeholder.jpg'}" alt="${artist.name}" class="logo-img">
+              <div class="flex-1">
+                <h3 class="text-base font-bold">${artist.name}</h3>
+                <p class="text-xs text-gray-400">${artist.plan.toUpperCase()} Artist</p>
+              </div>
+            </div>
+            <p class="bio text-xs text-gray-300 mb-2">${artist.bio || 'No bio available'}</p>
+            <div class="flex gap-2 mt-3">
+              <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
+                View Profile
+              </a>
+              <button onclick="openMessageModal('${artist.id}', '${safeName}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs">
+                Contact
+              </button>
             </div>
           </div>
-          <p class="bio text-xs text-gray-300 mb-2">${artist.bio || 'No bio available'}</p>
-          <div class="flex gap-2 mt-3">
-            <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
-              View Profile
-            </a>
-            <button onclick="openMessageModal('${artist.id}', '${safeName}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs">
-              Contact
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  function filterArtists() {
-    const searchName = document.getElementById('searchName').value.toLowerCase();
-    const searchSong = document.getElementById('searchSong').value.toLowerCase();
-    const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
-    const filtered = artists.filter(artist => {
-      const nameMatch = artist.name.toLowerCase().includes(searchName);
-      const genreMatch = !filterGenre || (artist.genre && artist.genre.toLowerCase().includes(filterGenre));
-      const songMatch = !searchSong || (artist.videos && artist.videos.some(v => v.title && v.title.toLowerCase().includes(searchSong)));
-      return nameMatch && genreMatch && songMatch;
-    });
-    renderArtists(filtered);
-  }
-
-  document.getElementById('searchName').addEventListener('input', filterArtists);
-  document.getElementById('searchSong').addEventListener('input', filterArtists);
-  document.getElementById('filterGenre').addEventListener('change', filterArtists);
-
-  window.openVideoModal = function(url) {
-    const modal = document.getElementById('videoModal');
-    const video = modal.querySelector('video');
-    const source = video.querySelector('source');
-    source.src = url;
-    video.load();
-    modal.classList.remove('hidden');
-    video.play().catch(e => console.error('Video play failed:', e));
-  };
-
-  window.closeVideoModal = function() {
-    const modal = document.getElementById('videoModal');
-    const video = modal.querySelector('video');
-    video.pause();
-    video.currentTime = 0;
-    modal.classList.add('hidden');
-  };
-
-  window.playMP3 = function(url) {
-    const audio = new Audio(url);
-    audio.play().catch(e => console.error('MP3 play failed:', e));
-    alert('Playing MP3... (close alert to stop)');
-  };
-
-  window.openMessageModal = function(artistId, artistName) {
-    messageArtistId = artistId;
-    document.getElementById('messageArtistName').textContent = artistName;
-    document.getElementById('messageSubject').value = '';
-    document.getElementById('messageContent').value = '';
-    document.getElementById('messageModal').classList.remove('hidden');
-  };
-
-  window.closeMessageModal = function() {
-    document.getElementById('messageModal').classList.add('hidden');
-  };
-
-  window.sendMessage = async function() {
-    const subject = document.getElementById('messageSubject').value.trim() || '(No subject)';
-    const message = document.getElementById('messageContent').value.trim();
-    if (!message) return alert('Please type a message.');
-
-    const { error } = await supabase.from('messages').insert({
-      sender_id: currentUserId,
-      receiver_id: messageArtistId,
-      subject,
-      body: message,
-      owner_id: currentUserId,
-      folder: 'sent'
-    });
-
-    if (error) {
-      alert('Failed to send message: ' + error.message);
-      return;
+        `;
+      }).join('');
     }
 
-    alert('Message sent successfully!');
-    closeMessageModal();
-    loadFolder('sent');
-  };
-
-  async function loadFolder(folder) {
-    currentFolder = folder;
-    const { data, error } = await supabase
-      .from('messages')
-      .select(`
-        id, sender_id, receiver_id, subject, body, created_at, read_at,
-        sender:sender_id(name),
-        receiver:receiver_id(name)
-      `)
-      .eq('owner_id', currentUserId)
-      .eq('folder', folder)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Load messages error:', error);
-      document.getElementById('messageView').innerHTML = '<p class="text-red-400 text-center py-10">Error loading messages</p>';
-      return;
-    }
-
-    messages = data || [];
-    renderConversationList();
-
-    const unreadCount = messages.filter(m => !m.read_at && m.receiver_id === currentUserId).length;
-    document.getElementById('inboxCount').textContent = unreadCount || '';
-    document.getElementById('inboxCount').classList.toggle('hidden', unreadCount === 0);
-
-    if (messages.length > 0) {
-      openConversation(messages[0].id);
-    } else {
-      document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20 text-xl">No messages in this folder</p>';
-    }
-  }
-
-  function renderConversationList() {
-    const list = document.getElementById('conversationList');
-    list.innerHTML = '';
-
-    const conversations = {};
-    messages.forEach(m => {
-      const partnerId = m.sender_id === currentUserId ? m.receiver_id : m.sender_id;
-      const partnerName = m.sender_id === currentUserId ? m.receiver?.name : m.sender?.name;
-      if (!partnerName) return; // skip invalid rows
-      if (!conversations[partnerId]) conversations[partnerId] = { name: partnerName, messages: [] };
-      conversations[partnerId].messages.push(m);
-    });
-
-    Object.entries(conversations).forEach(([partnerId, conv]) => {
-      const latest = conv.messages.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
-      const unreadCount = conv.messages.filter(m => !m.read_at && m.receiver_id === currentUserId).length;
-      const div = document.createElement('div');
-      div.className = `msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${activeMessageId === latest.id ? 'selected' : ''}`;
-      div.onclick = () => openConversation(latest.id);
-      div.innerHTML = `
-        <div class="flex justify-between items-center">
-          <div>
-            <p class="font-bold ${unreadCount > 0 ? 'text-white' : 'text-gray-400'}">${conv.name}</p>
-            <p class="msg-preview text-gray-300">${latest.subject || '(No subject)'}</p>
-          </div>
-          <div class="flex items-center gap-3">
-            ${unreadCount > 0 ? `<span class="badge-unread px-2 py-1 text-xs rounded-full">${unreadCount}</span>` : ''}
-          </div>
-        </div>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  async function openConversation(messageId) {
-    activeMessageId = messageId;
-    const conversation = messages.filter(m => m.id === messageId || m.parent_id === messageId);
-    const root = conversation.find(m => !m.parent_id) || conversation[0];
-    const partnerName = root.sender_id === currentUserId ? root.receiver?.name : root.sender?.name;
-
-    if (root.receiver_id === currentUserId && !root.read_at) {
-      await supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', root.id);
-    }
-
-    let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${partnerName || 'Unknown'}</h2>`;
-    conversation.forEach(m => {
-      const who = m.sender_id === currentUserId ? 'You' : partnerName || 'Unknown';
-      const isUnread = !m.read_at && m.receiver_id === currentUserId;
-      html += `
-        <div class="mb-4 p-4 rounded-xl ${isUnread ? 'bg-purple-900/30' : 'bg-black/30'}">
-          <p class="font-bold text-emerald-300">${who} - ${m.subject || '(No subject)'}</p>
-          <p class="text-xs text-gray-500">${new Date(m.created_at).toLocaleString()}</p>
-          <p class="mt-2">${m.body}</p>
-        </div>
-      `;
-    });
-    html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
-    document.getElementById('messageView').innerHTML = html;
-
-    document.getElementById('replyButton')?.addEventListener('click', () => openReply(partnerName, root.subject));
-    document.getElementById('messageView').scrollTop = document.getElementById('messageView').scrollHeight;
-  }
-
-  function openReply(name, subject) {
-    document.getElementById('replyTargetName').textContent = name || 'User';
-    document.getElementById('replySubject').value = subject ? `Re: ${subject}` : '';
-    document.getElementById('replyMessage').value = '';
-    document.getElementById('replyModal').classList.remove('hidden');
-  }
-
-  function closeReplyModal() {
-    document.getElementById('replyModal').classList.add('hidden');
-  }
-
-  async function sendReply() {
-    const subject = document.getElementById('replySubject').value.trim() || '(No subject)';
-    const message = document.getElementById('replyMessage').value.trim();
-    if (!message) return alert('Please write a reply!');
-
-    const root = messages.find(m => m.id === activeMessageId);
-    if (!root) return alert('No active conversation');
-
-    const receiverId = root.sender_id === currentUserId ? root.receiver_id : root.sender_id;
-
-    const { error } = await supabase.from('messages').insert({
-      sender_id: currentUserId,
-      receiver_id: receiverId,
-      subject,
-      body: message,
-      parent_id: activeMessageId,
-      owner_id: currentUserId,
-      folder: 'sent'
-    });
-
-    if (error) {
-      alert('Failed to send reply: ' + error.message);
-      return;
-    }
-
-    alert('Reply sent!');
-    closeReplyModal();
-    loadFolder(currentFolder);
-  }
-
-  function logout() {
-    supabase.auth.signOut()
-      .then(() => {
-        location.href = 'login.html';
-      })
-      .catch(err => {
-        console.error('Logout failed:', err);
-        alert('Logout failed. Please try again.');
+    function filterArtists() {
+      const searchName = document.getElementById('searchName').value.toLowerCase();
+      const searchSong = document.getElementById('searchSong').value.toLowerCase();
+      const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
+      const filtered = artists.filter(artist => {
+        const nameMatch = artist.name.toLowerCase().includes(searchName);
+        const genreMatch = !filterGenre || (artist.genre && artist.genre.toLowerCase().includes(filterGenre));
+        const songMatch = !searchSong || (artist.videos && artist.videos.some(v => v.title && v.title.toLowerCase().includes(searchSong)));
+        return nameMatch && genreMatch && songMatch;
       });
-  }
+      renderArtists(filtered);
+    }
 
-  init();
+    document.getElementById('searchName').addEventListener('input', filterArtists);
+    document.getElementById('searchSong').addEventListener('input', filterArtists);
+    document.getElementById('filterGenre').addEventListener('change', filterArtists);
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
-    document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
-  });
-</script>
+    window.openVideoModal = function(url) {
+      const modal = document.getElementById('videoModal');
+      const video = modal.querySelector('video');
+      const source = video.querySelector('source');
+      source.src = url;
+      video.load();
+      modal.classList.remove('hidden');
+      video.play().catch(e => console.error('Video play failed:', e));
+    };
+
+    window.closeVideoModal = function() {
+      const modal = document.getElementById('videoModal');
+      const video = modal.querySelector('video');
+      video.pause();
+      video.currentTime = 0;
+      modal.classList.add('hidden');
+    };
+
+    window.playMP3 = function(url) {
+      const audio = new Audio(url);
+      audio.play().catch(e => console.error('MP3 play failed:', e));
+      alert('Playing MP3... (close alert to stop)');
+    };
+
+    window.openMessageModal = function(artistId, artistName) {
+      messageArtistId = artistId;
+      document.getElementById('messageArtistName').textContent = artistName;
+      document.getElementById('messageSubject').value = '';
+      document.getElementById('messageContent').value = '';
+      document.getElementById('messageModal').classList.remove('hidden');
+    };
+
+    window.closeMessageModal = function() {
+      document.getElementById('messageModal').classList.add('hidden');
+    };
+
+    window.sendMessage = async function() {
+      const subject = document.getElementById('messageSubject').value.trim() || '(No subject)';
+      const message = document.getElementById('messageContent').value.trim();
+      if (!message) return alert('Please type a message.');
+
+      const { error } = await supabase.from('messages').insert({
+        sender_id: currentUserId,
+        receiver_id: messageArtistId,
+        subject,
+        body: message,
+        owner_id: currentUserId,
+        folder: 'sent'
+      });
+
+      if (error) {
+        alert('Failed to send message: ' + error.message);
+        return;
+      }
+
+      alert('Message sent successfully!');
+      closeMessageModal();
+      loadFolder('sent');
+    };
+
+    async function loadFolder(folder) {
+      currentFolder = folder;
+      const { data, error } = await supabase
+        .from('messages')
+        .select(`
+          id, sender_id, receiver_id, subject, body, created_at, read_at,
+          sender:sender_id(name),
+          receiver:receiver_id(name)
+        `)
+        .eq('owner_id', currentUserId)
+        .eq('folder', folder)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Load messages error:', error);
+        document.getElementById('messageView').innerHTML = '<p class="text-red-400 text-center py-10">Error loading messages</p>';
+        return;
+      }
+
+      messages = data || [];
+      renderConversationList();
+
+      const unreadCount = messages.filter(m => !m.read_at && m.receiver_id === currentUserId).length;
+      document.getElementById('inboxCount').textContent = unreadCount || '';
+      document.getElementById('inboxCount').classList.toggle('hidden', unreadCount === 0);
+
+      if (messages.length > 0) {
+        openConversation(messages[0].id);
+      } else {
+        document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20 text-xl">No messages in this folder</p>';
+      }
+    }
+
+    function renderConversationList() {
+      const list = document.getElementById('conversationList');
+      list.innerHTML = '';
+
+      const conversations = {};
+      messages.forEach(m => {
+        const partnerId = m.sender_id === currentUserId ? m.receiver_id : m.sender_id;
+        const partnerName = m.sender_id === currentUserId ? m.receiver?.name : m.sender?.name;
+        if (!partnerName) return;
+        if (!conversations[partnerId]) conversations[partnerId] = { name: partnerName, messages: [] };
+        conversations[partnerId].messages.push(m);
+      });
+
+      Object.entries(conversations).forEach(([partnerId, conv]) => {
+        const latest = conv.messages.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
+        const unreadCount = conv.messages.filter(m => !m.read_at && m.receiver_id === currentUserId).length;
+        const div = document.createElement('div');
+        div.className = `msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${activeMessageId === latest.id ? 'selected' : ''}`;
+        div.onclick = () => openConversation(latest.id);
+        div.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-bold ${unreadCount > 0 ? 'text-white' : 'text-gray-400'}">${conv.name}</p>
+              <p class="msg-preview text-gray-300">${latest.subject || '(No subject)'}</p>
+            </div>
+            <div class="flex items-center gap-3">
+              ${unreadCount > 0 ? `<span class="badge-unread px-2 py-1 text-xs rounded-full">${unreadCount}</span>` : ''}
+            </div>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    async function openConversation(messageId) {
+      activeMessageId = messageId;
+      const conversation = messages.filter(m => m.id === messageId || m.parent_id === messageId);
+      const root = conversation.find(m => !m.parent_id) || conversation[0];
+      const partnerName = root.sender_id === currentUserId ? root.receiver?.name : root.sender?.name;
+
+      if (root.receiver_id === currentUserId && !root.read_at) {
+        await supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', root.id);
+      }
+
+      let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${partnerName || 'Unknown'}</h2>`;
+      conversation.forEach(m => {
+        const who = m.sender_id === currentUserId ? 'You' : partnerName || 'Unknown';
+        const isUnread = !m.read_at && m.receiver_id === currentUserId;
+        html += `
+          <div class="mb-4 p-4 rounded-xl ${isUnread ? 'bg-purple-900/30' : 'bg-black/30'}">
+            <p class="font-bold text-emerald-300">${who} - ${m.subject || '(No subject)'}</p>
+            <p class="text-xs text-gray-500">${new Date(m.created_at).toLocaleString()}</p>
+            <p class="mt-2">${m.body}</p>
+          </div>
+        `;
+      });
+      html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
+      document.getElementById('messageView').innerHTML = html;
+
+      document.getElementById('replyButton')?.addEventListener('click', () => openReply(partnerName, root.subject));
+      document.getElementById('messageView').scrollTop = document.getElementById('messageView').scrollHeight;
+    }
+
+    function openReply(name, subject) {
+      document.getElementById('replyTargetName').textContent = name || 'User';
+      document.getElementById('replySubject').value = subject ? `Re: ${subject}` : '';
+      document.getElementById('replyMessage').value = '';
+      document.getElementById('replyModal').classList.remove('hidden');
+    }
+
+    function closeReplyModal() {
+      document.getElementById('replyModal').classList.add('hidden');
+    }
+
+    async function sendReply() {
+      const subject = document.getElementById('replySubject').value.trim() || '(No subject)';
+      const message = document.getElementById('replyMessage').value.trim();
+      if (!message) return alert('Please write a reply!');
+
+      const root = messages.find(m => m.id === activeMessageId);
+      if (!root) return alert('No active conversation');
+
+      const receiverId = root.sender_id === currentUserId ? root.receiver_id : root.sender_id;
+
+      const { error } = await supabase.from('messages').insert({
+        sender_id: currentUserId,
+        receiver_id: receiverId,
+        subject,
+        body: message,
+        parent_id: activeMessageId,
+        owner_id: currentUserId,
+        folder: 'sent'
+      });
+
+      if (error) {
+        alert('Failed to send reply: ' + error.message);
+        return;
+      }
+
+      alert('Reply sent!');
+      closeReplyModal();
+      loadFolder(currentFolder);
+    }
+
+    // Initialize dashboard
+    init();
+
+    // Attach modal listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
+      document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
+    });
+  </script>
 </body>
 </html>
