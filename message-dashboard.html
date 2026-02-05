@@ -62,6 +62,9 @@
         <button onclick="loadFolder('sent')" class="w-full text-left py-3 px-4 rounded-lg font-bold hover:bg-white/10">
           Sent
         </button>
+        <button onclick="loadFolder('trash')" class="w-full text-left py-3 px-4 rounded-lg font-bold hover:bg-white/10 text-red-400">
+          Trash
+        </button>
       </div>
 
       <div id="conversationList" class="flex-1 overflow-y-auto"></div>
@@ -118,19 +121,16 @@ async function loadFolder(folder) {
   currentFolder = folder;
   activeRootId = null;
 
-  let query = supabase.from('messages').select('*');
-
-  if (folder === 'inbox') {
-    query = query.eq('receiver_id', userId);
-  } else {
-    query = query.eq('sender_id', userId);
-  }
-
-  const { data } = await query.order('created_at', { ascending: false });
+  const { data } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('owner_id', userId)
+    .eq('folder', folder)
+    .order('created_at', { ascending: false });
 
   buildThreads(data || []);
   renderConversationList();
-  updateInboxCount(data || []);
+  updateInboxCount();
 }
 
 /* THREADS */
@@ -176,7 +176,8 @@ async function openConversation(rootId) {
     .from('messages')
     .update({ read_at: new Date().toISOString() })
     .eq('receiver_id', userId)
-    .eq('parent_id', rootId);
+    .eq('parent_id', rootId)
+    .is('read_at', null);
 
   document.getElementById('messageView').innerHTML = thread.messages.map(m => `
     <div class="mb-4 p-4 rounded-xl bg-black/30">
@@ -190,14 +191,19 @@ async function openConversation(rootId) {
       Reply
     </button>
   `;
-
-  loadFolder(currentFolder);
 }
 
 /* COUNTS */
-function updateInboxCount(msgs) {
-  const unread = msgs.filter(m => m.receiver_id === userId && !m.read_at).length;
-  document.getElementById('inboxCount').textContent = unread ? `(${unread})` : '';
+async function updateInboxCount() {
+  const { data } = await supabase
+    .from('messages')
+    .select('id')
+    .eq('owner_id', userId)
+    .eq('folder', 'inbox')
+    .is('read_at', null);
+
+  document.getElementById('inboxCount').textContent =
+    data?.length ? `(${data.length})` : '';
 }
 
 /* REPLY */
@@ -212,12 +218,24 @@ async function sendReply() {
   const root = thread.messages[0];
   const receiver = root.sender_id === userId ? root.receiver_id : root.sender_id;
 
-  await supabase.from('messages').insert({
-    parent_id: activeRootId,
-    sender_id: userId,
-    receiver_id: receiver,
-    body: text
-  });
+  await supabase.from('messages').insert([
+    {
+      parent_id: activeRootId,
+      sender_id: userId,
+      receiver_id: receiver,
+      owner_id: userId,
+      folder: 'sent',
+      body: text
+    },
+    {
+      parent_id: activeRootId,
+      sender_id: userId,
+      receiver_id: receiver,
+      owner_id: receiver,
+      folder: 'inbox',
+      body: text
+    }
+  ]);
 
   closeReply();
   loadFolder(currentFolder);
