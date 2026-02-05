@@ -282,7 +282,7 @@
     }
     currentUserId = user.id;
 
-    // Fetch correct name for the current logged-in user
+    // Fetch correct name for currently logged-in user
     const { data: profile } = await supabase
       .from('profiles')
       .select('name')
@@ -298,50 +298,23 @@
   }
 
   async function loadArtists() {
-    const { data: fetchedArtists, error: artistError } = await supabase
+    const { data: fetchedArtists, error } = await supabase
       .from('profiles')
       .select('*')
       .in('plan', ['pro', 'platinum'])
       .order('name', { ascending: true });
-    if (artistError) {
-      console.error('Error loading artists:', artistError);
+    if (error) {
+      console.error('Error loading artists:', error);
       return;
     }
 
-    const artistIds = fetchedArtists.map(a => a.id);
-    const { data: media } = await supabase
-      .from('user_videos')
-      .select('id, user_id, title, video_url, thumbnail_url, type')
-      .in('user_id', artistIds);
-
-    const processedMedia = media?.map(item => {
-      const { data: publicData } = supabase.storage.from('media').getPublicUrl(item.video_url);
-      return { ...item, public_url: publicData.publicUrl };
-    }) || [];
-
-    const mediaByArtist = {};
-    processedMedia.forEach(item => {
-      if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
-      mediaByArtist[item.user_id].push(item);
-    });
-
-    artists = fetchedArtists.map(artist => ({
-      ...artist,
-      videos: mediaByArtist[artist.id] || []
-    }));
-
+    artists = fetchedArtists;
     renderArtists(artists);
   }
 
   function renderArtists(filteredArtists) {
     const artistGrid = document.getElementById('artistGrid');
     artistGrid.innerHTML = filteredArtists.map(artist => {
-      const media = artist.videos || [];
-      const mediaList = media.map(item => `
-        <div class="media-item" onclick="${item.type === 'video' ? `openVideoModal('${item.public_url}')` : `playMP3('${item.public_url}')`}">
-          ${item.title || 'Untitled'} (${item.type.toUpperCase()})
-        </div>
-      `).join('');
       return `
         <div class="artist-box">
           <div class="flex items-start gap-3 mb-2">
@@ -579,7 +552,7 @@
     loadFolder(currentFolder);
   }
 
-  // Logout function - now defined and working
+  // Logout function - defined here so the button works
   function logout() {
     supabase.auth.signOut()
       .then(() => {
@@ -591,10 +564,10 @@
       });
   }
 
-  // Initialize on page load
+  // Initialize everything
   init();
 
-  // Attach modal listeners
+  // Attach modal button listeners
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
     document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
