@@ -1,574 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Industry Dashboard - Rhythm Deck</title>
-  <link rel="icon" href="logo-favicon.png" type="image/png">
-  <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
-  <meta name="keywords" content="music producers, music distributors, music publishers, music supervisors, rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
-  <meta name="robots" content="index, follow">
-  <meta name="author" content="Rhythm Deck Team">
+  <meta charset="UTF-8" />
+  <title>Industry Dashboard | Rhythm Deck</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="logo-favicon.png" type="image/png" />
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
-    .artist-box {
-      background: linear-gradient(to bottom right, #1f2937, #111827);
-      border-radius: 1rem;
-      padding: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 4px 0 0 #10b981;
-      transition: transform 0.3s;
-      position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
+    body {
+      background: linear-gradient(to bottom, #020617, #3b0764, #000000);
+      color: white;
     }
-    .artist-box::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: #10b981;
-      opacity: 0.5;
+    .msg-item:hover { background: rgba(255,255,255,0.06); }
+    .msg-selected { background: rgba(255,255,255,0.1); }
+    .badge {
+      background: #8b5cf6;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
     }
-    .artist-box:hover { transform: translateY(-3px); }
-    .logo-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #10b981; }
-    .media-list { max-height: 120px; overflow-y: auto; font-size: 0.85rem; }
-    .media-item {
-      padding: 0.4rem;
-      background: #374151;
-      border-radius: 0.5rem;
-      margin-bottom: 0.3rem;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .media-item:hover { background: #4b5563; }
-    .stat { font-size: 0.8rem; margin-bottom: 0.5rem; }
-    .bio { font-size: 0.8rem; max-height: 50px; overflow-y: auto; }
-    .instructions { font-size: 0.9rem; margin-bottom: 1.5rem; }
-    .grid-container { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-    .msg-item:hover { background: rgba(255,255,255,0.08); }
-    .msg-preview { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .selected { background: rgba(255,255,255,0.1)!important; }
-    .badge-unread { background: #8b5cf6; color: white; font-weight: 800; }
-    .badge-read { background: #6b7280; color: white; }
   </style>
 </head>
-<body class="min-h-screen font-sans antialiased">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
-      <div class="flex items-center gap-3 sm:gap-4">
-        <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-emerald-500 shadow-md object-cover" />
-        <div>
-          <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-            Rhythm Deck
-          </h1>
-          <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-6">
-        <div id="welcomeUser" class="text-lg font-bold text-emerald-400 hidden"></div>
-        <button onclick="logout()" class="bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold px-8 py-3 rounded-full shadow-xl transition transform hover:scale-105">
-          Logout
-        </button>
-      </div>
-    </div>
-  </header>
+<body class="min-h-screen font-sans">
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-    <h2 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-emerald-400">
-      Industry Dashboard
-    </h2>
-    <p class="text-lg text-gray-300 mb-6 text-center instructions">
-      Browse all Pro and Platinum artists with active accounts. Use the filters to search by genre, song title, or artist's name. Click on videos or MP3s to play them. Use the Contact Artist button to send a message through Rhythm Deck (no direct contact info allowed). Refresh the page to see new artists who have signed up for Pro or Platinum plans.
-    </p>
-
-    <!-- Filters -->
-    <div class="flex flex-col md:flex-row gap-4 mb-8">
-      <input id="searchName" type="text" placeholder="Search by artist's name" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
-      <input id="searchSong" type="text" placeholder="Search by song title" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
-      <select id="filterGenre" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 flex-1">
-        <option value="">Filter by genre</option>
-        <option value="acoustic">Acoustic</option>
-        <option value="afrobeat">Afrobeat</option>
-        <option value="alternative">Alternative</option>
-        <option value="ambient">Ambient</option>
-        <option value="blues">Blues</option>
-        <option value="classical">Classical</option>
-        <option value="country">Country</option>
-        <option value="dance">Dance</option>
-        <option value="disco">Disco</option>
-        <option value="drum and bass">Drum and Bass</option>
-        <option value="dubstep">Dubstep</option>
-        <option value="electronic">Electronic</option>
-        <option value="emo">Emo</option>
-        <option value="folk">Folk</option>
-        <option value="funk">Funk</option>
-        <option value="garage">Garage</option>
-        <option value="grunge">Grunge</option>
-        <option value="hard rock">Hard Rock</option>
-        <option value="heavy metal">Heavy Metal</option>
-        <option value="hip hop">Hip Hop</option>
-        <option value="house">House</option>
-        <option value="indie">Indie</option>
-        <option value="jazz">Jazz</option>
-        <option value="latin">Latin</option>
-        <option value="metal">Metal</option>
-        <option value="new age">New Age</option>
-        <option value="opera">Opera</option>
-        <option value="pop">Pop</option>
-        <option value="progressive rock">Progressive Rock</option>
-        <option value="punk">Punk</option>
-        <option value="r&b">R&B</option>
-        <option value="rap">Rap</option>
-        <option value="reggae">Reggae</option>
-        <option value="rock">Rock</option>
-        <option value="soul">Soul</option>
-        <option value="techno">Techno</option>
-        <option value="trance">Trance</option>
-        <option value="world">World</option>
-        <option value="alternative rock">Alternative Rock</option>
-        <option value="bluegrass">Bluegrass</option>
-        <option value="britpop">Britpop</option>
-        <option value="chillout">Chillout</option>
-        <option value="christian">Christian</option>
-        <option value="classical crossover">Classical Crossover</option>
-        <option value="contemporary r&b">Contemporary R&B</option>
-        <option value="death metal">Death Metal</option>
-        <option value="deep house">Deep House</option>
-        <option value="drumstep">Drumstep</option>
-        <option value="edm">EDM</option>
-        <option value="electropop">Electropop</option>
-        <option value="experimental">Experimental</option>
-        <option value="folk rock">Folk Rock</option>
-        <option value="glam rock">Glam Rock</option>
-        <option value="gospel">Gospel</option>
-        <option value="grime">Grime</option>
-        <option value="hardcore">Hardcore</option>
-        <option value="indie pop">Indie Pop</option>
-        <option value="indie rock">Indie Rock</option>
-        <option value="k-pop">K-Pop</option>
-        <option value="lo-fi">Lo-Fi</option>
-        <option value="nu metal">Nu Metal</option>
-        <option value="orchestral">Orchestral</option>
-        <option value="post-rock">Post-Rock</option>
-        <option value="psychedelic rock">Psychedelic Rock</option>
-        <option value="reggaeton">Reggaeton</option>
-        <option value="shoegaze">Shoegaze</option>
-        <option value="synthpop">Synthpop</option>
-        <option value="trap">Trap</option>
-        <option value="trip hop">Trip Hop</option>
-      </select>
-    </div>
-
-    <!-- Artists Grid -->
-    <div id="artistGrid" class="grid grid-container gap-6"></div>
-
-    <!-- Messages Section -->
-    <section class="mt-16 bg-black/40 rounded-2xl p-8">
-      <h2 class="text-3xl font-bold mb-6 text-center text-emerald-400">My Messages</h2>
-      <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 h-[70vh] sm:h-[80vh]">
-        <!-- Left: Folders & Conversations -->
-        <div class="bg-black/30 rounded-2xl flex flex-col overflow-hidden md:col-span-1 lg:col-span-1 border border-purple-700/30">
-          <div class="p-6 border-b border-purple-600 font-bold text-2xl text-emerald-400">
-            Folders
-          </div>
-          <div class="p-4 border-b border-gray-700">
-            <button onclick="loadFolder('inbox')" class="w-full text-left py-3 px-4 hover:bg-white/10 rounded-lg font-bold flex justify-between items-center">
-              Inbox <span id="inboxCount" class="badge-unread px-2 py-1 text-xs rounded-full hidden">0</span>
-            </button>
-            <button onclick="loadFolder('sent')" class="w-full text-left py-3 px-4 hover:bg-white/10 rounded-lg font-bold flex justify-between items-center">
-              Sent
-            </button>
-            <button onclick="loadFolder('trash')" class="w-full text-left py-3 px-4 hover:bg-white/10 rounded-lg font-bold flex justify-between items-center">
-              Trash
-            </button>
-          </div>
-          <div id="conversationList" class="flex-1 overflow-y-auto p-4 sm:p-6"></div>
-        </div>
-
-        <!-- Right: Message View -->
-        <div id="messageView" class="md:col-span-3 lg:col-span-4 bg-black/30 rounded-2xl p-8 overflow-y-auto border border-purple-700/30">
-          <p class="text-gray-400 text-center mt-20 text-xl">Select a conversation to view messages</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Video Play Modal -->
-  <div id="videoModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
-    <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 shadow-2xl w-full max-w-4xl mx-4">
-      <video id="videoPlayer" controls class="w-full h-auto rounded-lg">
-        <source src="" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
-      <div class="text-center pt-4">
-        <button onClick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">
-          Close
-        </button>
-      </div>
+<!-- HEADER -->
+<header class="bg-black/80 border-b border-purple-700/40 px-6 py-5 flex justify-between items-center sticky top-0 z-50">
+  <div class="flex items-center gap-4">
+    <img src="logo-1-sm.jpg" class="h-12 w-12 rounded-full border-2 border-emerald-500">
+    <div>
+      <h1 class="text-2xl font-black text-emerald-400">RHYTHM DECK</h1>
+      <p class="text-sm text-purple-300">Industry Dashboard</p>
     </div>
   </div>
 
-  <!-- Contact Modal -->
-  <div id="messageModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[99999] hidden transition-all duration-300">
-    <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 shadow-2xl w-full max-w-md mx-4">
-      <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
-        Message <span id="messageArtistName"></span>
-      </h3>
-      <input id="messageSubject" type="text" placeholder="Subject" class="w-full p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500">
-      <textarea id="messageContent" rows="5" placeholder="Type your message here... (no email, phone, or external links allowed)" class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"></textarea>
-      <div class="text-center pt-6">
-        <button onClick="sendMessage()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 w-full">
-          Send Message
-        </button>
-        <button onClick="closeMessageModal()" class="mt-4 text-gray-400 hover:underline">Cancel</button>
-      </div>
-    </div>
+  <div class="flex items-center gap-6">
+    <a href="message-dashboard.html"
+       class="relative bg-gradient-to-r from-emerald-400 to-purple-500 text-black font-black px-6 py-3 rounded-full">
+      Inbox
+      <span id="inboxBadge" class="absolute -top-2 -right-2 badge hidden">0</span>
+    </a>
+    <button onclick="logout()" class="text-red-400 font-bold">Logout</button>
   </div>
+</header>
 
-  <!-- Reply Modal -->
-  <div id="replyModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-[99999]">
-    <div class="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 relative">
-      <button id="closeReplyBtn" class="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white text-3xl font-bold z-50 shadow-xl">
-        ×
+<main class="max-w-7xl mx-auto px-6 py-10">
+
+<!-- ================= ARTISTS SECTION ================= -->
+<section>
+  <h2 class="text-4xl font-black mb-6 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
+    Pro & Platinum Artists
+  </h2>
+
+  <div id="artistGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</section>
+
+<!-- ================= MESSAGE CENTER ================= -->
+<section class="mt-20 bg-black/40 border border-purple-700/30 rounded-3xl p-8">
+
+  <h2 class="text-3xl font-black text-emerald-400 mb-6 text-center">
+    My Messages
+  </h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 h-[70vh]">
+
+    <!-- LEFT -->
+    <div class="bg-black/30 rounded-2xl overflow-hidden border border-purple-700/30">
+      <div class="p-5 border-b border-purple-600 font-black text-xl text-emerald-400">
+        Folders
+      </div>
+
+      <button onclick="loadFolder('inbox')" class="w-full text-left px-5 py-4 flex justify-between font-bold">
+        Inbox <span id="inboxCount" class="badge hidden">0</span>
       </button>
-      <div class="p-8 pt-16">
-        <h2 class="text-4xl font-black text-emerald-400 mb-6 text-center">
-          Reply to <span id="replyTargetName"></span>
-        </h2>
-        <input id="replySubject" type="text" class="w-full p-4 mb-4 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 focus:outline-none focus:border-emerald-400">
-        <textarea id="replyMessage" rows="6" placeholder="Write your reply..." class="w-full p-4 rounded-lg bg-white/10 text-white border border-emerald-500 placeholder-gray-400 resize-none focus:outline-none focus:border-emerald-400"></textarea>
-        <button id="sendReplyBtn" class="w-full mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xl py-4 rounded-xl transition shadow-xl transform hover:scale-105">
-          Send Reply
-        </button>
-      </div>
+
+      <button onclick="loadFolder('sent')" class="w-full text-left px-5 py-4 font-bold">
+        Sent
+      </button>
+
+      <div id="conversationList" class="overflow-y-auto"></div>
     </div>
+
+    <!-- RIGHT -->
+    <div id="messageView" class="md:col-span-3 bg-black/30 rounded-2xl p-8 overflow-y-auto border border-purple-700/30">
+      <p class="text-gray-400 text-center mt-20 text-xl">
+        Select a conversation
+      </p>
+    </div>
+
   </div>
+</section>
 
-  <footer class="bg-black text-white mt-16 p-8 text-center text-sm border-t border-gray-800">
-    <p>© 2025 Rhythm Deck Music. All rights reserved.</p>
-  </footer>
+</main>
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-    const supabase = createClient(
-      'https://bxoqhmfnseskwqkywppg.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-    );
+<!-- MESSAGE MODAL -->
+<div id="messageModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
+  <div class="bg-gray-900 rounded-2xl p-8 w-full max-w-lg relative">
+    <button onclick="closeMessageModal()" class="absolute top-4 right-4 text-3xl font-black text-red-500">×</button>
+    <h3 class="text-2xl font-black text-emerald-400 mb-4">Send Message</h3>
+    <input id="msgSubject" class="w-full mb-4 p-3 bg-black/40 border border-emerald-500 rounded-lg">
+    <textarea id="msgBody" rows="6" class="w-full p-4 bg-black/40 border border-emerald-500 rounded-lg"></textarea>
+    <button onclick="sendMessage()" class="mt-6 w-full bg-emerald-600 py-3 rounded-xl font-black">Send</button>
+  </div>
+</div>
 
-    let currentUserId = null;
-    let currentUserName = '';
-    let messageArtistId = null;
-    let artists = [];
-    let currentFolder = 'inbox';
-    let activeMessageId = null;
-    let messages = [];
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-    // Logout function defined early so button can call it
-    function logout() {
-      supabase.auth.signOut()
-        .then(() => {
-          location.href = 'login.html';
-        })
-        .catch(err => {
-          console.error('Logout failed:', err);
-          alert('Logout failed. Please try again.');
-        });
+const supabase = createClient(
+  'https://bxoqhmfnseskwqkywppg.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+);
+
+let userId, messages = [], activeRoot = null, receiverId = null;
+
+/* INIT */
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) location.href = 'login.html';
+  userId = session.user.id;
+  loadArtists();
+  loadFolder('inbox');
+})();
+
+/* ARTISTS */
+async function loadArtists() {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id,name,plan')
+    .in('plan', ['pro','platinum']);
+
+  document.getElementById('artistGrid').innerHTML = data.map(a => `
+    <div class="bg-black/40 border border-purple-700/30 rounded-2xl p-6">
+      <p class="text-xl font-black text-emerald-400">${a.name}</p>
+      <p class="text-sm text-gray-400">${a.plan.toUpperCase()} Artist</p>
+      <button onclick="openMessageModal('${a.id}')"
+        class="mt-4 bg-emerald-600 w-full py-2 rounded-lg font-bold">
+        Contact
+      </button>
+    </div>
+  `).join('');
+}
+
+/* INBOX COUNT */
+async function updateInboxCount() {
+  const { count } = await supabase
+    .from('messages')
+    .select('*', { count: 'exact', head: true })
+    .eq('owner_id', userId)
+    .eq('folder', 'inbox')
+    .is('read_at', null);
+
+  const badge = document.getElementById('inboxCount');
+  const topBadge = document.getElementById('inboxBadge');
+
+  if (count > 0) {
+    badge.textContent = count;
+    topBadge.textContent = count;
+    badge.classList.remove('hidden');
+    topBadge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+    topBadge.classList.add('hidden');
+  }
+}
+
+/* LOAD FOLDER */
+async function loadFolder(folder) {
+  const { data } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('owner_id', userId)
+    .eq('folder', folder)
+    .order('created_at', { ascending: false });
+
+  messages = data;
+  renderConversationList();
+  updateInboxCount();
+}
+
+/* CONVERSATIONS */
+function renderConversationList() {
+  const list = document.getElementById('conversationList');
+  list.innerHTML = '';
+
+  const threads = {};
+  messages.forEach(m => {
+    const root = m.parent_id || m.id;
+    if (!threads[root]) threads[root] = [];
+    threads[root].push(m);
+  });
+
+  Object.entries(threads).forEach(([root, msgs]) => {
+    const latest = msgs[0];
+    const div = document.createElement('div');
+    div.className = `msg-item p-4 cursor-pointer ${activeRoot === root ? 'msg-selected' : ''}`;
+    div.onclick = () => openConversation(root);
+    div.innerHTML = `<p class="font-bold">${latest.subject || '(No subject)'}</p>`;
+    list.appendChild(div);
+  });
+}
+
+/* OPEN CONVO */
+async function openConversation(rootId) {
+  activeRoot = rootId;
+  const convo = messages.filter(m => m.id === rootId || m.parent_id === rootId);
+
+  for (const m of convo) {
+    if (!m.read_at && m.receiver_id === userId) {
+      await supabase.from('messages').update({ read_at: new Date() }).eq('id', m.id);
     }
+  }
 
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        alert('Please log in to access the dashboard.');
-        window.location.href = 'login.html';
-        return;
-      }
-      currentUserId = user.id;
+  document.getElementById('messageView').innerHTML = convo.map(m => `
+    <div class="mb-4 p-4 bg-black/40 rounded-xl">
+      <p class="text-xs text-gray-400">${new Date(m.created_at).toLocaleString()}</p>
+      <p>${m.body}</p>
+    </div>
+  `).join('');
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('name')
-        .eq('id', currentUserId)
-        .single();
+  updateInboxCount();
+}
 
-      currentUserName = profile?.name || 'Industry Pro';
-      document.getElementById('welcomeUser').textContent = `Welcome, ${currentUserName}`;
-      document.getElementById('welcomeUser').classList.remove('hidden');
+/* SEND */
+function openMessageModal(id){ receiverId=id; document.getElementById('messageModal').classList.remove('hidden'); }
+function closeMessageModal(){ document.getElementById('messageModal').classList.add('hidden'); }
 
-      loadArtists();
-      loadFolder('inbox');
-    }
+async function sendMessage() {
+  const subject = document.getElementById('msgSubject').value;
+  const body = document.getElementById('msgBody').value;
+  const root = crypto.randomUUID();
 
-    async function loadArtists() {
-      const { data: fetchedArtists, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('plan', ['pro', 'platinum'])
-        .order('name', { ascending: true });
-      if (error) {
-        console.error('Error loading artists:', error);
-        return;
-      }
-      artists = fetchedArtists;
-      renderArtists(artists);
-    }
+  await supabase.from('messages').insert([
+    { id: root, sender_id: userId, receiver_id: receiverId, owner_id: userId, folder:'sent', subject, body },
+    { parent_id: root, sender_id: userId, receiver_id: receiverId, owner_id: receiverId, folder:'inbox', subject, body }
+  ]);
 
-    function renderArtists(filteredArtists) {
-      const artistGrid = document.getElementById('artistGrid');
-      artistGrid.innerHTML = filteredArtists.map(artist => {
-        const safeName = artist.name
-          .replace(/'/g, "\\'")
-          .replace(/"/g, '\\"');
-        return `
-          <div class="artist-box">
-            <div class="flex items-start gap-3 mb-2">
-              <img src="${artist.logo_url || 'logo-placeholder.jpg'}" alt="${artist.name}" class="logo-img">
-              <div class="flex-1">
-                <h3 class="text-base font-bold">${artist.name}</h3>
-                <p class="text-xs text-gray-400">${artist.plan.toUpperCase()} Artist</p>
-              </div>
-            </div>
-            <p class="bio text-xs text-gray-300 mb-2">${artist.bio || 'No bio available'}</p>
-            <div class="flex gap-2 mt-3">
-              <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
-                View Profile
-              </a>
-              <button onclick="openMessageModal('${artist.id}', '${safeName}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs">
-                Contact
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+  closeMessageModal();
+  loadFolder('sent');
+}
 
-    function filterArtists() {
-      const searchName = document.getElementById('searchName').value.toLowerCase();
-      const searchSong = document.getElementById('searchSong').value.toLowerCase();
-      const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
-      const filtered = artists.filter(artist => {
-        const nameMatch = artist.name.toLowerCase().includes(searchName);
-        const genreMatch = !filterGenre || (artist.genre && artist.genre.toLowerCase().includes(filterGenre));
-        const songMatch = !searchSong || (artist.videos && artist.videos.some(v => v.title && v.title.toLowerCase().includes(searchSong)));
-        return nameMatch && genreMatch && songMatch;
-      });
-      renderArtists(filtered);
-    }
+/* LOGOUT */
+function logout(){ supabase.auth.signOut().then(()=>location.href='login.html'); }
 
-    document.getElementById('searchName').addEventListener('input', filterArtists);
-    document.getElementById('searchSong').addEventListener('input', filterArtists);
-    document.getElementById('filterGenre').addEventListener('change', filterArtists);
+window.logout = logout;
+window.openMessageModal = openMessageModal;
+window.sendMessage = sendMessage;
+</script>
 
-    window.openVideoModal = function(url) {
-      const modal = document.getElementById('videoModal');
-      const video = modal.querySelector('video');
-      const source = video.querySelector('source');
-      source.src = url;
-      video.load();
-      modal.classList.remove('hidden');
-      video.play().catch(e => console.error('Video play failed:', e));
-    };
-
-    window.closeVideoModal = function() {
-      const modal = document.getElementById('videoModal');
-      const video = modal.querySelector('video');
-      video.pause();
-      video.currentTime = 0;
-      modal.classList.add('hidden');
-    };
-
-    window.playMP3 = function(url) {
-      const audio = new Audio(url);
-      audio.play().catch(e => console.error('MP3 play failed:', e));
-      alert('Playing MP3... (close alert to stop)');
-    };
-
-    window.openMessageModal = function(artistId, artistName) {
-      messageArtistId = artistId;
-      document.getElementById('messageArtistName').textContent = artistName;
-      document.getElementById('messageSubject').value = '';
-      document.getElementById('messageContent').value = '';
-      document.getElementById('messageModal').classList.remove('hidden');
-    };
-
-    window.closeMessageModal = function() {
-      document.getElementById('messageModal').classList.add('hidden');
-    };
-
-    window.sendMessage = async function() {
-      const subject = document.getElementById('messageSubject').value.trim() || '(No subject)';
-      const message = document.getElementById('messageContent').value.trim();
-      if (!message) return alert('Please type a message.');
-
-      const { error } = await supabase.from('messages').insert({
-        sender_id: currentUserId,
-        receiver_id: messageArtistId,
-        subject,
-        body: message,
-        owner_id: currentUserId,
-        folder: 'sent'
-      });
-
-      if (error) {
-        alert('Failed to send message: ' + error.message);
-        return;
-      }
-
-      alert('Message sent successfully!');
-      closeMessageModal();
-      loadFolder('sent');
-    };
-
-    async function loadFolder(folder) {
-      currentFolder = folder;
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          id, sender_id, receiver_id, subject, body, created_at, read_at,
-          sender:sender_id(name),
-          receiver:receiver_id(name)
-        `)
-        .eq('owner_id', currentUserId)
-        .eq('folder', folder)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Load messages error:', error);
-        document.getElementById('messageView').innerHTML = '<p class="text-red-400 text-center py-10">Error loading messages</p>';
-        return;
-      }
-
-      messages = data || [];
-      renderConversationList();
-
-      const unreadCount = messages.filter(m => !m.read_at && m.receiver_id === currentUserId).length;
-      document.getElementById('inboxCount').textContent = unreadCount || '';
-      document.getElementById('inboxCount').classList.toggle('hidden', unreadCount === 0);
-
-      if (messages.length > 0) {
-        openConversation(messages[0].id);
-      } else {
-        document.getElementById('messageView').innerHTML = '<p class="text-gray-400 text-center mt-20 text-xl">No messages in this folder</p>';
-      }
-    }
-
-    function renderConversationList() {
-      const list = document.getElementById('conversationList');
-      list.innerHTML = '';
-
-      const conversations = {};
-      messages.forEach(m => {
-        const partnerId = m.sender_id === currentUserId ? m.receiver_id : m.sender_id;
-        const partnerName = m.sender_id === currentUserId ? m.receiver?.name : m.sender?.name;
-        if (!partnerName) return;
-        if (!conversations[partnerId]) conversations[partnerId] = { name: partnerName, messages: [] };
-        conversations[partnerId].messages.push(m);
-      });
-
-      Object.entries(conversations).forEach(([partnerId, conv]) => {
-        const latest = conv.messages.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
-        const unreadCount = conv.messages.filter(m => !m.read_at && m.receiver_id === currentUserId).length;
-        const div = document.createElement('div');
-        div.className = `msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${activeMessageId === latest.id ? 'selected' : ''}`;
-        div.onclick = () => openConversation(latest.id);
-        div.innerHTML = `
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="font-bold ${unreadCount > 0 ? 'text-white' : 'text-gray-400'}">${conv.name}</p>
-              <p class="msg-preview text-gray-300">${latest.subject || '(No subject)'}</p>
-            </div>
-            <div class="flex items-center gap-3">
-              ${unreadCount > 0 ? `<span class="badge-unread px-2 py-1 text-xs rounded-full">${unreadCount}</span>` : ''}
-            </div>
-          </div>
-        `;
-        list.appendChild(div);
-      });
-    }
-
-    async function openConversation(messageId) {
-      activeMessageId = messageId;
-      const conversation = messages.filter(m => m.id === messageId || m.parent_id === messageId);
-      const root = conversation.find(m => !m.parent_id) || conversation[0];
-      const partnerName = root.sender_id === currentUserId ? root.receiver?.name : root.sender?.name;
-
-      if (root.receiver_id === currentUserId && !root.read_at) {
-        await supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', root.id);
-      }
-
-      let html = `<h2 class="text-3xl font-black text-emerald-400 mb-6">${partnerName || 'Unknown'}</h2>`;
-      conversation.forEach(m => {
-        const who = m.sender_id === currentUserId ? 'You' : partnerName || 'Unknown';
-        const isUnread = !m.read_at && m.receiver_id === currentUserId;
-        html += `
-          <div class="mb-4 p-4 rounded-xl ${isUnread ? 'bg-purple-900/30' : 'bg-black/30'}">
-            <p class="font-bold text-emerald-300">${who} - ${m.subject || '(No subject)'}</p>
-            <p class="text-xs text-gray-500">${new Date(m.created_at).toLocaleString()}</p>
-            <p class="mt-2">${m.body}</p>
-          </div>
-        `;
-      });
-      html += `<button id="replyButton" class="mt-6 bg-emerald-600 px-8 py-3 rounded-xl font-black">Reply</button>`;
-      document.getElementById('messageView').innerHTML = html;
-
-      document.getElementById('replyButton')?.addEventListener('click', () => openReply(partnerName, root.subject));
-      document.getElementById('messageView').scrollTop = document.getElementById('messageView').scrollHeight;
-    }
-
-    function openReply(name, subject) {
-      document.getElementById('replyTargetName').textContent = name || 'User';
-      document.getElementById('replySubject').value = subject ? `Re: ${subject}` : '';
-      document.getElementById('replyMessage').value = '';
-      document.getElementById('replyModal').classList.remove('hidden');
-    }
-
-    function closeReplyModal() {
-      document.getElementById('replyModal').classList.add('hidden');
-    }
-
-    async function sendReply() {
-      const subject = document.getElementById('replySubject').value.trim() || '(No subject)';
-      const message = document.getElementById('replyMessage').value.trim();
-      if (!message) return alert('Please write a reply!');
-
-      const root = messages.find(m => m.id === activeMessageId);
-      if (!root) return alert('No active conversation');
-
-      const receiverId = root.sender_id === currentUserId ? root.receiver_id : root.sender_id;
-
-      const { error } = await supabase.from('messages').insert({
-        sender_id: currentUserId,
-        receiver_id: receiverId,
-        subject,
-        body: message,
-        parent_id: activeMessageId,
-        owner_id: currentUserId,
-        folder: 'sent'
-      });
-
-      if (error) {
-        alert('Failed to send reply: ' + error.message);
-        return;
-      }
-
-      alert('Reply sent!');
-      closeReplyModal();
-      loadFolder(currentFolder);
-    }
-
-    // Initialize dashboard
-    init();
-
-    // Attach modal listeners
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('closeReplyBtn')?.addEventListener('click', closeReplyModal);
-      document.getElementById('sendReplyBtn')?.addEventListener('click', sendReply);
-    });
-  </script>
 </body>
 </html>
