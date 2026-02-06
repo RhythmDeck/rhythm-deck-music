@@ -35,7 +35,6 @@
   <h1 class="text-4xl font-black mb-6 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent text-center md:text-left">
     Industry Messages
   </h1>
-
   <div class="h-[80vh] grid gap-4" style="grid-template-columns: 260px 420px 1fr;">
     <aside class="bg-black/40 rounded-xl overflow-hidden flex flex-col">
       <div class="p-4 font-black border-b border-purple-600 text-emerald-400">Folders</div>
@@ -45,12 +44,10 @@
       <button onclick="loadFolder('sent')" id="folder-sent" class="text-left px-5 py-3 font-bold hover:bg-white/10">📤 Sent</button>
       <button onclick="loadFolder('trash')" id="folder-trash" class="text-left px-5 py-3 font-bold hover:bg-white/10 text-red-400">🧹 Trash</button>
     </aside>
-
     <aside class="bg-black/40 rounded-xl overflow-hidden flex flex-col">
       <div id="folderTitle" class="p-4 font-bold border-b border-purple-600">Inbox</div>
       <div id="conversationList" class="flex-1 overflow-y-auto"></div>
     </aside>
-
     <section id="messageView" class="bg-black/40 rounded-xl p-6 overflow-y-auto">
       <div class="text-gray-400 text-center mt-32">Select a conversation</div>
     </section>
@@ -74,7 +71,6 @@
 
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
@@ -201,7 +197,8 @@
       await supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', rootId);
     }
 
-    const replies = currentMessages.filter(m => m.parent_id === rootId).sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    const replies = currentMessages.filter(m => m.parent_id === rootId)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
     let html = `
       <div class="space-y-6">
@@ -275,29 +272,34 @@
       read_at: null
     };
 
-    // Sender's Sent copy
-    let { error: err1 } = await supabase.from('messages').insert({
+    // 1. Save in sender's Sent folder
+    const { error: sentError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: currentUserId,
       folder: 'sent'
     });
 
-    if (err1) {
-      alert('Failed to save sent copy: ' + err1.message);
+    if (sentError) {
+      alert('Failed to save reply to your Sent folder: ' + sentError.message);
       return;
     }
 
-    // Receiver's Inbox copy
-    let { error: err2 } = await supabase.from('messages').insert({
+    // 2. Save in receiver's Inbox folder (so they see it immediately)
+    const { error: inboxError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: receiverId,
       folder: 'inbox'
     });
 
-    if (err2) console.warn('Failed to deliver to recipient inbox:', err2);
+    if (inboxError) {
+      console.warn('Reply saved to Sent, but failed to deliver to recipient inbox:', inboxError);
+      // Still success for the sender
+    }
 
-    alert('Reply sent!');
+    alert('Reply sent successfully!');
     closeReplyModal();
+
+    // Refresh inbox list and thread view
     await loadConversations();
     showThread(currentConversationId);
   };
