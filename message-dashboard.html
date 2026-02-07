@@ -118,8 +118,8 @@
         created_at,
         read_at,
         folder,
-        owner_id,
-        sender:profiles (name)   <!-- FIXED: removed !sender_id -->
+        owner_id
+        -- NO JOIN for now (this removes the 400 error)
       `)
       .eq('owner_id', currentUserId)
       .eq('folder', currentFolder)
@@ -127,7 +127,7 @@
 
     if (error) {
       listEl.innerHTML = `<div class="text-red-400 text-center py-10">Error: ${error.message}</div>`;
-      console.error("Load conversations error:", error);
+      console.error("Load error:", error);
       return;
     }
 
@@ -160,7 +160,7 @@
         <div data-id="${conv.root.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${isUnread ? 'unread-conv' : ''}">
           <div class="flex justify-between items-start">
             <div class="flex-1">
-              <p class="font-bold">${conv.root.sender?.name || 'Unknown'}</p>
+              <p class="font-bold">${conv.root.sender_id || 'Unknown'}</p>   <!-- temporary - shows ID instead of name -->
               <p class="text-sm text-gray-400">${new Date(latest.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
               <p class="msg-preview text-gray-300 mt-1">${latest.subject ? latest.subject + ' — ' : ''}${latest.body.substring(0, 80)}${latest.body.length > 80 ? '...' : ''}</p>
             </div>
@@ -189,7 +189,7 @@
         <div class="bg-gray-800/40 p-5 rounded-xl border-l-4 border-emerald-500">
           <div class="flex justify-between items-start mb-3">
             <div>
-              <p class="font-bold text-lg">${rootMsg.sender?.name || 'Unknown'}</p>
+              <p class="font-bold text-lg">${rootMsg.sender_id || 'Unknown'}</p>
               <p class="text-sm text-gray-400">${new Date(rootMsg.created_at).toLocaleString()}</p>
             </div>
             <span class="text-xs px-2 py-1 rounded-full ${rootMsg.read_at ? 'bg-emerald-600' : 'bg-amber-600'}">
@@ -206,7 +206,7 @@
         html += `
           <div class="pl-6 bg-black/30 p-4 rounded-xl">
             <div class="flex justify-between items-start mb-2">
-              <p class="font-semibold text-emerald-300">${r.sender?.name || 'Unknown'}</p>
+              <p class="font-semibold text-emerald-300">${r.sender_id || 'Unknown'}</p>
               <span class="text-xs text-gray-500">${new Date(r.created_at).toLocaleString([], {hour:'2-digit', minute:'2-digit'})}</span>
             </div>
             <p class="whitespace-pre-wrap">${r.body}</p>
