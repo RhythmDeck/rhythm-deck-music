@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login | Rhythm Deck</title>
-  <base href="/" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -43,19 +42,23 @@
       color: #94a3b8;
       user-select: none;
     }
-  .style1 {color: #00CC00}
+    .style1 { color: #00CC00; }
   </style>
 </head>
 <body class="flex flex-col min-h-screen">
-<header class="bg-black text-white p-5 flex justify-between items-center shadow-lg">
-  <div class="flex items-center space-x-4">
-    <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-green-500">
+
+<!-- Header -->
+<header class="bg-black/90 border-b border-purple-700/50 px-6 py-4 flex items-center justify-between">
+  <div class="flex items-center gap-4">
+    <img src="logo-1-sm.jpg" class="h-12 w-12 rounded-full">
     <div>
-      <h1 class="text-3xl font-black">RHYTHM DECK</h1>
-      <p class="text-sm text-green-400">Unleash Your Beat</p>
+      <div class="text-2xl font-black text-emerald-400">RHYTHM DECK</div>
+      <div class="text-sm text-purple-300">Unleash Your Beat</div>
     </div>
   </div>
 </header>
+
+<!-- Main content -->
 <div class="flex-1 flex items-center justify-center p-6">
   <div class="card">
     <div class="text-center mb-8">
@@ -63,65 +66,119 @@
       <h1 class="text-4xl font-black text-emerald-400">Welcome Back</h1>
       <p class="text-gray-400 mt-2">Log in to your dashboard</p>
     </div>
+
     <form id="loginForm">
       <div class="input-group">
-        <input type="email" id="loginEmail" placeholder="Email address" required
-          class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl text-lg">
+        <input 
+          type="email" 
+          id="loginEmail" 
+          placeholder="Email address" 
+          required
+          class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl text-lg focus:outline-none focus:border-emerald-500"
+        >
       </div>
       <div class="input-group">
-        <input type="password" id="loginPassword" placeholder="Password" required
-          class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl pr-14 text-lg">
+        <input 
+          type="password" 
+          id="loginPassword" 
+          placeholder="Password" 
+          required
+          class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl pr-14 text-lg focus:outline-none focus:border-emerald-500"
+        >
         <span class="eye" id="toggleEye">Show</span>
       </div>
-      <button type="submit"
-        class="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-xl font-black rounded-xl mt-6">
+      <button 
+        type="submit"
+        class="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-xl font-black rounded-xl mt-6 transition"
+      >
         LOGIN
       </button>
     </form>
+
     <p id="errorMessage" class="text-red-400 text-center mt-4 hidden"></p>
-    <div align="center"><br>
-        <a href=".html" class="style1">Forgot my password?</a>      </div>
+
+    <div class="text-center mt-6">
+      <a href="#" class="style1 hover:underline">Forgot my password?</a>
+    </div>
   </div>
 </div>
+
+<!-- Footer -->
+<footer class="bg-black/80 border-t border-purple-700/30 py-4 text-center text-sm text-gray-400">
+  © 2026 Rhythm Deck Music
+</footer>
+
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
-  // Show / hide password
+
+  // Check if already logged in (prevents logout on refresh)
+  async function checkSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      // Already logged in — redirect based on profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan, role, industry_role')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      let redirect = 'profile-admin.html';
+      if (profile?.industry_role) redirect = 'industry-dashboard.html';
+      else if (profile?.plan === 'platinum') redirect = 'platinum-pro-admin.html';
+      else if (profile?.plan === 'pro') redirect = 'profile-admin-pro.html';
+
+      window.location.href = redirect;
+    }
+  }
+
+  // Run check on page load
+  checkSession();
+
+  // Password visibility toggle
   const passwordInput = document.getElementById('loginPassword');
   const toggleEye = document.getElementById('toggleEye');
   toggleEye.onclick = () => {
     passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
     toggleEye.textContent = passwordInput.type === 'password' ? 'Show' : 'Hide';
   };
+
+  // Login form submit
   document.getElementById('loginForm').onsubmit = async (e) => {
     e.preventDefault();
-    const email = loginEmail.value.trim();
-    const password = loginPassword.value;
-    const error = document.getElementById('errorMessage');
-    error.classList.add('hidden');
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('errorMessage');
+    errorEl.classList.add('hidden');
+    errorEl.textContent = '';
+
     const { data, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password
     });
+
     if (authError) {
-      error.textContent = authError.message;
-      error.classList.remove('hidden');
+      errorEl.textContent = authError.message || 'Login failed. Please check your credentials.';
+      errorEl.classList.remove('hidden');
       return;
     }
-    // Fetch profile safely
+
+    // Fetch profile for redirect
     const { data: profile } = await supabase
       .from('profiles')
       .select('plan, role, industry_role')
       .eq('id', data.user.id)
       .maybeSingle();
-    // Redirect logic
+
+    // Redirect based on role/plan
     let redirect = 'profile-admin.html';
     if (profile?.industry_role) redirect = 'industry-dashboard.html';
     else if (profile?.plan === 'platinum') redirect = 'platinum-pro-admin.html';
     else if (profile?.plan === 'pro') redirect = 'profile-admin-pro.html';
+
     window.location.href = redirect;
   };
 </script>
