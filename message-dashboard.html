@@ -119,7 +119,7 @@
         read_at,
         folder,
         owner_id,
-        sender:profiles (name)  // FIXED: removed !sender_id to use existing FK automatically
+        sender:profiles (name)   <!-- FIXED: removed !sender_id -->
       `)
       .eq('owner_id', currentUserId)
       .eq('folder', currentFolder)
@@ -184,7 +184,6 @@
     }
     const replies = currentMessages.filter(m => m.parent_id === rootId)
       .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
     let html = `
       <div class="space-y-6">
         <div class="bg-gray-800/40 p-5 rounded-xl border-l-4 border-emerald-500">
@@ -201,7 +200,6 @@
           <p class="whitespace-pre-wrap">${rootMsg.body}</p>
         </div>
     `;
-
     if (replies.length > 0) {
       html += `<h3 class="text-lg font-bold mt-6 mb-3 border-b border-gray-700 pb-2">Replies</h3>`;
       replies.forEach(r => {
@@ -216,7 +214,6 @@
         `;
       });
     }
-
     html += `
       </div>
       <div class="mt-8 flex justify-end">
@@ -225,7 +222,6 @@
         </button>
       </div>
     `;
-
     document.getElementById('messageView').innerHTML = html;
     await loadConversations();
   }
@@ -253,7 +249,6 @@
       body: text,
       read_at: null
     };
-    // 1. Save in sender's Sent folder
     const { error: sentError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: currentUserId,
@@ -263,7 +258,6 @@
       alert('Failed to save reply to your Sent folder: ' + sentError.message);
       return;
     }
-    // 2. Save in receiver's Inbox folder (so they see it immediately)
     const { error: inboxError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: receiverId,
