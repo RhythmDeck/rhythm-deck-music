@@ -70,28 +70,16 @@
 
     <form id="loginForm">
       <div class="input-group">
-        <input 
-          type="email" 
-          id="loginEmail" 
-          placeholder="Email address" 
-          required
-          class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl text-lg focus:outline-none focus:border-emerald-500"
-        >
+        <input type="email" id="loginEmail" placeholder="Email address" required
+          class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl text-lg">
       </div>
       <div class="input-group">
-        <input 
-          type="password" 
-          id="loginPassword" 
-          placeholder="Password" 
-          required
-          class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl pr-14 text-lg focus:outline-none focus:border-emerald-500"
-        >
+        <input type="password" id="loginPassword" placeholder="Password" required
+          class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl pr-14 text-lg">
         <span class="eye" id="toggleEye">Show</span>
       </div>
-      <button 
-        type="submit"
-        class="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-xl font-black rounded-xl mt-6 transition"
-      >
+      <button type="submit"
+        class="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-xl font-black rounded-xl mt-6 transition">
         LOGIN
       </button>
     </form>
@@ -100,6 +88,17 @@
 
     <div class="text-center mt-6">
       <a href="#" class="style1 hover:underline">Forgot my password?</a>
+    </div>
+
+    <!-- Industry user warning messages -->
+    <div id="industryWarning" class="hidden mt-8 text-center text-sm space-y-3">
+      <p class="text-amber-400">
+        If you have an active account go to <a href="https://rhythm-deck-music.onrender.com/industry-login.html" class="underline hover:text-white">industry login</a> to access your dashboard.
+      </p>
+      <p class="text-gray-400">
+        If you do not have an active account sign up here: 
+        <a href="https://rhythm-deck-music.onrender.com/producers-distributors.html" class="underline hover:text-white">Producer / Distributor Signup</a>
+      </p>
     </div>
   </div>
 </div>
@@ -116,30 +115,35 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
 
-  // Check if already logged in (prevents logout on refresh)
+  const warningDiv = document.getElementById('industryWarning');
+
+  // Check session on load
   async function checkSession() {
     const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      // Already logged in — redirect based on profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('plan, role, industry_role')
-        .eq('id', session.user.id)
-        .maybeSingle();
+    if (!session?.user) return;
 
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('industry_role')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    if (profile?.industry_role) {
+      // Industry user on artist login page → show warning, do NOT redirect
+      warningDiv.classList.remove('hidden');
+      await supabase.auth.signOut();   // force logout
+    } else {
+      // Artist user → auto-redirect to correct dashboard
       let redirect = 'profile-admin.html';
-      if (profile?.industry_role) redirect = 'industry-dashboard.html';
-      else if (profile?.plan === 'platinum') redirect = 'platinum-pro-admin.html';
+      if (profile?.plan === 'platinum') redirect = 'platinum-pro-admin.html';
       else if (profile?.plan === 'pro') redirect = 'profile-admin-pro.html';
-
       window.location.href = redirect;
     }
   }
 
-  // Run check on page load
   checkSession();
 
-  // Password visibility toggle
+  // Password toggle
   const passwordInput = document.getElementById('loginPassword');
   const toggleEye = document.getElementById('toggleEye');
   toggleEye.onclick = () => {
@@ -147,37 +151,30 @@
     toggleEye.textContent = passwordInput.type === 'password' ? 'Show' : 'Hide';
   };
 
-  // Login form submit
+  // Login form
   document.getElementById('loginForm').onsubmit = async (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     const errorEl = document.getElementById('errorMessage');
     errorEl.classList.add('hidden');
-    errorEl.textContent = '';
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
-      errorEl.textContent = authError.message || 'Login failed. Please check your credentials.';
+      errorEl.textContent = authError.message || 'Login failed.';
       errorEl.classList.remove('hidden');
       return;
     }
 
-    // Fetch profile for redirect
+    // Redirect artist to correct dashboard
     const { data: profile } = await supabase
       .from('profiles')
-      .select('plan, role, industry_role')
+      .select('plan')
       .eq('id', data.user.id)
       .maybeSingle();
 
-    // Redirect based on role/plan
     let redirect = 'profile-admin.html';
-    if (profile?.industry_role) redirect = 'industry-dashboard.html';
-    else if (profile?.plan === 'platinum') redirect = 'platinum-pro-admin.html';
+    if (profile?.plan === 'platinum') redirect = 'platinum-pro-admin.html';
     else if (profile?.plan === 'pro') redirect = 'profile-admin-pro.html';
 
     window.location.href = redirect;
