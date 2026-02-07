@@ -1,98 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Industry Login - Rhythm Deck</title>
-<script src="https://cdn.tailwindcss.com"></script>
-
-<style>
-  body {
-    background: linear-gradient(to bottom, #000000, #0f172a);
-    color: white;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Industry Login - Rhythm Deck</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="logo-favicon.png" type="image/png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    .card {
+      background: rgba(30, 30, 30, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid #10b981;
+      border-radius: 20px;
+      padding: 48px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 25px 50px rgba(16, 185, 129, 0.25);
+    }
+    .logo-big {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 4px solid #10b981;
+      padding: 6px;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .eye {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #94a3b8;
+      user-select: none;
+    }
+  </style>
 </head>
+<body class="flex flex-col min-h-screen">
 
-<body class="min-h-screen flex flex-col font-sans antialiased">
-
-<!-- HEADER -->
-<header class="bg-black/90 border-b border-gray-800/60 backdrop-blur-md">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
-    <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full border-2 border-emerald-500">
+<!-- Header -->
+<header class="bg-black/90 border-b border-purple-700/50 px-6 py-4 flex items-center justify-between">
+  <div class="flex items-center gap-4">
+    <img src="logo-1-sm.jpg" class="h-12 w-12 rounded-full">
     <div>
-      <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-        Rhythm Deck
-      </h1>
-      <p class="text-sm text-gray-300">Unleash Your Beat</p>
+      <div class="text-2xl font-black text-emerald-400">RHYTHM DECK</div>
+      <div class="text-sm text-purple-300">Unleash Your Beat</div>
     </div>
   </div>
 </header>
 
-<!-- MAIN -->
-<main class="flex-grow max-w-md mx-auto px-6 py-32">
-  <div class="bg-gray-900/80 border border-emerald-600/50 rounded-2xl p-12 shadow-2xl">
-    <h1 class="text-4xl font-black text-center text-emerald-400 mb-8">
-      Industry Login
-    </h1>
+<!-- Main content -->
+<main class="flex-grow flex items-center justify-center p-6">
+  <div class="card">
+    <div class="text-center mb-8">
+      <img src="logo-1-sm.jpg" class="logo-big mx-auto mb-4">
+      <h1 class="text-4xl font-black text-emerald-400">Industry Login</h1>
+      <p class="text-gray-400 mt-2">Access your dashboard</p>
+    </div>
 
-    <form class="space-y-6" onsubmit="event.preventDefault(); handleLogin();">
-
-      <input id="email" type="email" placeholder="Email"
-        class="w-full p-4 bg-gray-800 rounded-lg" required>
-
-      <input id="password" type="password" placeholder="Password"
-        class="w-full p-4 bg-gray-800 rounded-lg" required>
-
-      <button type="submit"
-        class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-black text-xl hover:scale-105 transition">
+    <form id="loginForm" class="space-y-6">
+      <input 
+        type="email" 
+        id="email" 
+        placeholder="Email address" 
+        required
+        class="w-full p-4 bg-gray-800 border border-gray-700 rounded-xl text-lg focus:outline-none focus:border-emerald-500"
+      >
+      <div class="input-group">
+        <input 
+          type="password" 
+          id="password" 
+          placeholder="Password" 
+          required
+          class="w-full p-4 bg-gray-800 border border-gray-700 rounded-xl pr-14 text-lg focus:outline-none focus:border-emerald-500"
+        >
+        <span class="eye" id="toggleEye">Show</span>
+      </div>
+      <button 
+        type="submit"
+        class="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full font-black text-xl hover:scale-105 transition"
+      >
         Log In
       </button>
-
       <p class="text-center text-sm text-gray-400">
         <a href="#" class="hover:text-emerald-400">Forgot password?</a>
       </p>
-
-      <p id="status" class="text-center text-sm mt-4"></p>
+      <p id="status" class="text-center text-sm mt-4 text-red-400"></p>
     </form>
   </div>
 </main>
 
-<!-- FOOTER -->
-<footer class="bg-black/80 border-t border-gray-800/60 text-center py-6 text-sm text-gray-400">
-  © 2026 Rhythm Deck. All rights reserved.
+<!-- Footer -->
+<footer class="bg-black/80 border-t border-purple-700/30 py-4 text-center text-sm text-gray-400">
+  © 2026 Rhythm Deck Music
 </footer>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  const supabase = createClient(
+    'https://bxoqhmfnseskwqkywppg.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  );
 
-/* ✅ CORRECT ANON KEY */
-const supabase = createClient(
-  'https://bxoqhmfnseskwqkywppg.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-);
-
-window.handleLogin = async () => {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const status = document.getElementById('status');
-
-  status.textContent = '';
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    status.textContent = error.message;
-    status.className = 'text-red-400 text-center';
-    return;
+  // Check for active session on page load (prevents logout on refresh)
+  async function checkSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      // Already logged in → redirect to dashboard
+      window.location.href = 'industry-dashboard.html';
+    }
   }
 
-  window.location.href = 'industry-dashboard.html';
-};
-</script>
+  // Run session check immediately
+  checkSession();
 
+  // Password visibility toggle
+  const passwordInput = document.getElementById('password');
+  const toggleEye = document.getElementById('toggleEye');
+  toggleEye.onclick = () => {
+    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+    toggleEye.textContent = passwordInput.type === 'password' ? 'Show' : 'Hide';
+  };
+
+  // Login form handler
+  document.getElementById('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const status = document.getElementById('status');
+
+    status.textContent = 'Logging in...';
+    status.className = 'text-center text-sm mt-4 text-gray-300';
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      status.textContent = error.message || 'Login failed. Please check your credentials.';
+      status.className = 'text-center text-sm mt-4 text-red-400';
+      return;
+    }
+
+    // Successful login → redirect to dashboard
+    status.textContent = 'Login successful! Redirecting...';
+    status.className = 'text-center text-sm mt-4 text-emerald-400';
+    window.location.href = 'industry-dashboard.html';
+  };
+</script>
 </body>
 </html>
