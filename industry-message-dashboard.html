@@ -85,13 +85,13 @@
       return;
     }
     currentUserId = user.id;
-    console.log("Producer logged in as:", currentUserId); // debug
+    console.log("Logged in as:", currentUserId);
     await loadFolder('inbox');
   }
 
   window.loadFolder = async function(folder) {
     currentFolder = folder;
-    console.log("Switched to folder:", folder); // debug
+    console.log("Folder switched to:", folder);
     document.getElementById('folderTitle').textContent = folder.charAt(0).toUpperCase() + folder.slice(1);
     document.querySelectorAll('[id^="folder-"]').forEach(btn => {
       btn.classList.toggle('folder-active', btn.id === `folder-${folder}`);
@@ -105,7 +105,7 @@
     const listEl = document.getElementById('conversationList');
     listEl.innerHTML = '<div class="text-center py-10 text-gray-500">Loading...</div>';
 
-    console.log("Loading conversations for folder:", currentFolder, "user:", currentUserId);
+    console.log("Querying folder:", currentFolder, "for user:", currentUserId);
 
     const { data: messages, error } = await supabase
       .from('messages')
@@ -126,12 +126,12 @@
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Query failed:", error);
+      console.error("Query error:", error);
       listEl.innerHTML = `<div class="text-red-400 text-center py-10">Error: ${error.message}</div>`;
       return;
     }
 
-    console.log(`Loaded ${messages?.length || 0} messages for ${currentFolder}:`, messages);
+    console.log(`Found ${messages.length} messages in ${currentFolder}:`, messages);
 
     currentMessages = messages || [];
 
@@ -179,7 +179,117 @@
     updateInboxCount();
   }
 
-  // ... (rest of your script remains unchanged - updateInboxCount, showThread, openReplyModal, closeReplyModal, sendReply, init())
+  async function updateInboxCount() {
+    const { data } = await supabase
+      .from('messages')
+      .select('id', { count: 'exact' })
+      .eq('owner_id', currentUserId)
+      .eq('folder', 'inbox')
+      .is('read_at', null);
+    document.getElementById('inboxCount').textContent = data?.length ? `(${data.length})` : '';
+  }
+
+  async function showThread(rootId) {
+    currentConversationId = rootId;
+    const rootMsg = currentMessages.find(m => m.id === rootId);
+    if (!rootMsg) return;
+    if (!rootMsg.read_at && rootMsg.sender_id !== currentUserId) {
+      await supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', rootId);
+    }
+    const replies = currentMessages.filter(m => m.parent_id === rootId)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    let html = `
+      <div class="space-y-6">
+        <div class="bg-gray-800/40 p-5 rounded-xl border-l-4 border-emerald-500">
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <p class="font-bold text-lg">${rootMsg.sender_id || 'Unknown Sender'}</p>
+              <p class="text-sm text-gray-400">${new Date(rootMsg.created_at).toLocaleString()}</p>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full ${rootMsg.read_at ? 'bg-emerald-600' : 'bg-amber-600'}">
+              ${rootMsg.read_at ? 'Read' : 'Unread'}
+            </span>
+          </div>
+          <p class="font-semibold mb-2">${rootMsg.subject || '(No subject)'}</p>
+          <p class="whitespace-pre-wrap">${rootMsg.body}</p>
+        </div>
+    `;
+    if (replies.length > 0) {
+      html += `<h3 class="text-lg font-bold mt-6 mb-3 border-b border-gray-700 pb-2">Replies</h3>`;
+      replies.forEach(r => {
+        html += `
+          <div class="pl-6 bg-black/30 p-4 rounded-xl">
+            <div class="flex justify-between items-start mb-2">
+              <p class="font-semibold text-emerald-300">${r.sender_id || 'Unknown Sender'}</p>
+              <span class="text-xs text-gray-500">${new Date(r.created_at).toLocaleString([], {hour:'2-digit', minute:'2-digit'})}</span>
+            </div>
+            <p class="whitespace-pre-wrap">${r.body}</p>
+          </div>
+        `;
+      });
+    }
+    html += `
+      </div>
+      <div class="mt-8 flex justify-end">
+        <button onclick="openReplyModal()" class="bg-emerald-600 hover:bg-emerald-700 px-8 py-3 rounded-xl font-bold">
+          Reply
+        </button>
+      </div>
+    `;
+    document.getElementById('messageView').innerHTML = html;
+    await loadConversations();
+  }
+
+  window.openReplyModal = function() {
+    document.getElementById('replySubject').value = '';
+    document.getElementById('replyText').value = '';
+    document.getElementById('replyModal').classList.remove('hidden');
+  };
+
+  window.closeReplyModal = function() {
+    document.getElementById('replyModal').classList.add('hidden');
+  };
+
+  window.sendReply = async function() {
+    const subject = document.getElementById('replySubject').value.trim();
+    const text = document.getElementById('replyText').value.trim();
+    if (!subject) return alert('Please enter a subject.');
+    if (!text) return alert('Please write a reply.');
+    const original = currentMessages.find(m => m.id === currentConversationId);
+    if (!original) return alert('No conversation selected.');
+    const receiverId = original.sender_id === currentUserId ? original.receiver_id : original.sender_id;
+    const messageData = {
+      parent_id: currentConversationId,
+      sender_id: currentUserId,
+      receiver_id: receiverId,
+      subject: subject || (original.subject ? `Re: ${original.subject}` : 'Re: Message'),
+      body: text,
+      read_at: null
+    };
+    const { error: sentError } = await supabase.from('messages').insert({
+      ...messageData,
+      owner_id: currentUserId,
+      folder: 'sent'
+    });
+    if (sentError) {
+      alert('Failed to save reply to your Sent folder: ' + sentError.message);
+      return;
+    }
+    const { error: inboxError } = await supabase.from('messages').insert({
+      ...messageData,
+      owner_id: receiverId,
+      folder: 'inbox'
+    });
+    if (inboxError) {
+      console.warn('Reply saved to Sent, but failed to deliver to recipient inbox:', inboxError);
+    }
+    alert('Reply sent successfully!');
+    closeReplyModal();
+    await loadConversations();
+    showThread(currentConversationId);
+  };
+
+  init();
 </script>
 </body>
 </html>
