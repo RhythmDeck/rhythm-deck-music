@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Industry Sign Up - Rhythm Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo-favicon.png" type="image/png">
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
@@ -63,8 +64,15 @@
         </div>
 
         <div>
-          <label class="block text-sm mb-2">Logo / Profile Image</label>
-          <input id="logo" type="file" accept="image/*" class="w-full bg-gray-800 p-3 rounded-lg">
+          <label class="block text-sm mb-2 text-emerald-400 font-bold">
+            Logo / Profile Image (required)
+          </label>
+          <input
+            id="logo"
+            type="file"
+            accept="image/*"
+            required
+            class="w-full bg-gray-800 p-3 rounded-lg">
         </div>
 
         <div>
@@ -97,7 +105,8 @@
           <span class="password-toggle" onclick="togglePassword('confirm_password')">👁️</span>
         </div>
 
-        <button type="submit"
+        <button
+          type="submit"
           class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-full font-bold text-xl">
           Create Account
         </button>
@@ -113,7 +122,7 @@
 </main>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
@@ -126,48 +135,56 @@ window.togglePassword = (id) => {
 };
 
 window.handleSignup = async () => {
-  const fullName = document.getElementById('full_name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const company = document.getElementById('company').value.trim();
-  const industryRole = document.getElementById('industry_role').value;
-  const password = document.getElementById('password').value;
-  const confirm = document.getElementById('confirm_password').value;
-  const logoFile = document.getElementById('logo').files[0];
+  const fullName = full_name.value.trim();
+  const email = email.value.trim();
+  const company = company.value.trim();
+  const industryRole = industry_role.value;
+  const password = password.value;
+  const confirm = confirm_password.value;
+  const logoFile = logo.files[0];
+
+  if (!logoFile) {
+    alert('Profile image is required.');
+    return;
+  }
 
   if (password !== confirm) {
-    alert('Passwords do not match');
+    alert('Passwords do not match.');
     return;
   }
-
-  const subdomain = company
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
 
   const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) {
-    alert(error.message);
-    return;
-  }
+  if (error) return alert(error.message);
 
-  let logoUrl = null;
+  const ext = logoFile.name.split('.').pop();
+  const filePath = `${data.user.id}/avatar.${ext}`;
 
-  if (logoFile) {
-    const path = `${data.user.id}/logo.${logoFile.name.split('.').pop()}`;
-    await supabase.storage.from('industry-logos').upload(path, logoFile, { upsert: true });
-    logoUrl = supabase.storage.from('industry-logos').getPublicUrl(path).data.publicUrl;
-  }
+  const { error: uploadError } = await supabase.storage
+    .from('industry-avatars')
+    .upload(filePath, logoFile, { upsert: true, contentType: logoFile.type });
 
-  await supabase.from('profiles').update({
-    name: fullName,
-    email,
-    subdomain,
-    role: 'industry',
-    industry_role: industryRole,
-    industry_company: company,
-    industry_logo_url: logoUrl,
-    plan: 'industry'
-  }).eq('id', data.user.id);
+  if (uploadError) return alert(uploadError.message);
+
+  const avatarUrl = supabase
+    .storage
+    .from('industry-avatars')
+    .getPublicUrl(filePath)
+    .data.publicUrl;
+
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({
+      name: fullName,
+      email,
+      role: 'industry',
+      industry_role: industryRole,
+      industry_company: company,
+      industry_avatar_url: avatarUrl,
+      plan: 'industry'
+    })
+    .eq('id', data.user.id);
+
+  if (profileError) return alert(profileError.message);
 
   window.location.href = 'industry-login.html';
 };
