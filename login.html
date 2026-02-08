@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     body {
       background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
@@ -46,22 +47,20 @@
     .style1 { color: #00CC00; }
   </style>
 </head>
+
 <body class="flex flex-col min-h-screen">
 
-<!-- Header -->
-<header class="bg-black/90 border-b border-purple-700/50 px-6 py-4 flex items-center justify-between">
-  <div class="flex items-center gap-4">
-    <img src="logo-1-sm.jpg" class="h-12 w-12 rounded-full">
-    <div>
-      <div class="text-2xl font-black text-emerald-400">RHYTHM DECK</div>
-      <div class="text-sm text-purple-300">Unleash Your Beat</div>
-    </div>
+<header class="bg-black/90 border-b border-purple-700/50 px-6 py-4 flex items-center gap-4">
+  <img src="logo-1-sm.jpg" class="h-12 w-12 rounded-full">
+  <div>
+    <div class="text-2xl font-black text-emerald-400">RHYTHM DECK</div>
+    <div class="text-sm text-purple-300">Unleash Your Beat</div>
   </div>
 </header>
 
-<!-- Main content -->
 <div class="flex-1 flex items-center justify-center p-6">
   <div class="card">
+
     <div class="text-center mb-8">
       <img src="logo-1-sm.jpg" class="logo-big mx-auto mb-4">
       <h1 class="text-4xl font-black text-emerald-400">Welcome Back</h1>
@@ -70,14 +69,18 @@
 
     <form id="loginForm">
       <div class="input-group">
-        <input type="email" id="loginEmail" placeholder="Email address" required
+        <input type="email" id="loginEmail" required
+          placeholder="Email address"
           class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl text-lg">
       </div>
+
       <div class="input-group">
-        <input type="password" id="loginPassword" placeholder="Password" required
+        <input type="password" id="loginPassword" required
+          placeholder="Password"
           class="w-full px-5 py-4 bg-gray-800 border border-gray-700 rounded-xl pr-14 text-lg">
         <span class="eye" id="toggleEye">Show</span>
       </div>
+
       <button type="submit"
         class="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-xl font-black rounded-xl mt-6 transition">
         LOGIN
@@ -86,99 +89,91 @@
 
     <p id="errorMessage" class="text-red-400 text-center mt-4 hidden"></p>
 
-    <div class="text-center mt-6">
-      <a href="#" class="style1 hover:underline">Forgot my password?</a>
-    </div>
-
-    <!-- Industry user warning messages -->
     <div id="industryWarning" class="hidden mt-8 text-center text-sm space-y-3">
       <p class="text-amber-400">
-        If you have an active account as a producer, distributor, publisher or supervisor, go to <a href="https://rhythm-deck-music.onrender.com/industry-login.html" class="underline hover:text-white">industry login</a> to access your dashboard.
-      </p>
-      <p class="text-gray-400">
-        If you do not have an active producer, distributor, publisher or supervisor account sign up here: 
-        <a href="https://rhythm-deck-music.onrender.com/producers-distributors.html" class="underline hover:text-white">Producer / Distributor Signup</a>
+        This login is for active artists only.<br>
+        Industry members must use the
+        <a href="industry-login.html" class="underline hover:text-white">Industry Login</a>.
       </p>
     </div>
+
   </div>
 </div>
 
-<!-- Footer -->
 <footer class="bg-black/80 border-t border-purple-700/30 py-4 text-center text-sm text-gray-400">
   © 2026 Rhythm Deck Music
 </footer>
 
 <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-  const supabase = createClient(
-    'https://bxoqhmfnseskwqkywppg.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-  );
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-  const warningDiv = document.getElementById('industryWarning');
+const supabase = createClient(
+  'https://bxoqhmfnseskwqkywppg.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+);
 
-  // Check session on load
-  async function checkSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return;
+const errorEl = document.getElementById('errorMessage');
+const warningEl = document.getElementById('industryWarning');
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('industry_role')
-      .eq('id', session.user.id)
-      .maybeSingle();
+/* Password toggle */
+const passwordInput = document.getElementById('loginPassword');
+document.getElementById('toggleEye').onclick = () => {
+  passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+};
 
-    if (profile?.industry_role) {
-      // Industry user on artist login page → show warning, do NOT redirect
-      warningDiv.classList.remove('hidden');
-      await supabase.auth.signOut();   // force logout
-    } else {
-      // Artist user → auto-redirect to correct dashboard
-      let redirect = 'profile-admin.html';
-      if (profile?.plan === 'platinum') redirect = 'platinum-pro-admin.html';
-      else if (profile?.plan === 'pro') redirect = 'profile-admin-pro.html';
-      window.location.href = redirect;
-    }
+/* Login submit */
+document.getElementById('loginForm').onsubmit = async (e) => {
+  e.preventDefault();
+  errorEl.classList.add('hidden');
+  warningEl.classList.add('hidden');
+
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    errorEl.textContent = error.message;
+    errorEl.classList.remove('hidden');
+    return;
   }
 
-  checkSession();
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', data.user.id)
+    .single();
 
-  // Password toggle
-  const passwordInput = document.getElementById('loginPassword');
-  const toggleEye = document.getElementById('toggleEye');
-  toggleEye.onclick = () => {
-    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-    toggleEye.textContent = passwordInput.type === 'password' ? 'Show' : 'Hide';
-  };
+  if (profileError || !profile?.plan) {
+    await supabase.auth.signOut();
+    errorEl.textContent = 'Account not active.';
+    errorEl.classList.remove('hidden');
+    return;
+  }
 
-  // Login form
-  document.getElementById('loginForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    const errorEl = document.getElementById('errorMessage');
-    errorEl.classList.add('hidden');
+  /* HARD GATE */
+  if (profile.plan === 'industry') {
+    await supabase.auth.signOut();
+    warningEl.classList.remove('hidden');
+    return;
+  }
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
-    if (authError) {
-      errorEl.textContent = authError.message || 'Login failed.';
-      errorEl.classList.remove('hidden');
-      return;
-    }
+  if (profile.plan === 'pro') {
+    window.location.href = 'profile-admin-pro.html';
+    return;
+  }
 
-    // Redirect artist to correct dashboard
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('plan')
-      .eq('id', data.user.id)
-      .maybeSingle();
+  if (profile.plan === 'platinum') {
+    window.location.href = 'platinum-pro-admin.html';
+    return;
+  }
 
-    let redirect = 'profile-admin.html';
-    if (profile?.plan === 'platinum') redirect = 'platinum-pro-admin.html';
-    else if (profile?.plan === 'pro') redirect = 'profile-admin-pro.html';
-
-    window.location.href = redirect;
-  };
+  /* Everything else blocked */
+  await supabase.auth.signOut();
+  errorEl.textContent = 'This login is for active artists only.';
+  errorEl.classList.remove('hidden');
+};
 </script>
+
 </body>
 </html>
