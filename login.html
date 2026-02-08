@@ -5,9 +5,9 @@
   <title>Login | Rhythm Deck</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="logo-favicon.png" type="image/png">
-<script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<style>
+  <style>
     body {
       background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
       color: white;
@@ -85,14 +85,28 @@
         class="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-xl font-black rounded-xl mt-6 transition">
         LOGIN
       </button>
-    </form><br>
-<p class="text-amber-400">
-      <p>Forgot your password?</p>
+    </form>
+
+    <!-- FORGOT PASSWORD (OPTION A CONTEXT) -->
+    <p class="text-center text-amber-400 mt-4">
+      <a href="forgot-password.html?from=login" class="underline hover:text-white">
+        Forgot your password?
+      </a>
+    </p>
 
     <p id="errorMessage" class="text-red-400 text-center mt-4 hidden"></p>
-      <div id="industryWarning" class="hidden mt-8 text-center text-sm space-y-3">
-        <span class="style1">This login is for active artists only. Industry members must use the</span> <a href="industry-login.html" class="underline hover:text-white">Industry Login</a>.      </p>
-      <p><span class="style1">If you do not have an industry profession account you can</span> <a href="producers-distributors.html" class="underline hover:text-white">Sign up here</a>.    </div>
+
+    <div id="industryWarning" class="hidden mt-8 text-center text-sm space-y-3">
+      <p class="style1">
+        This login is for active artists only.<br>
+        Industry members must use the
+        <a href="industry-login.html" class="underline hover:text-white">Industry Login</a>.
+      </p>
+      <p class="style1">
+        If you do not have an industry profession account you can
+        <a href="producers-distributors.html" class="underline hover:text-white">Sign up here</a>.
+      </p>
+    </div>
 
   </div>
 </div>
@@ -148,7 +162,6 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     return;
   }
 
-  /* HARD GATE */
   if (profile.plan === 'industry') {
     await supabase.auth.signOut();
     warningEl.classList.remove('hidden');
@@ -165,7 +178,6 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     return;
   }
 
-  /* Everything else blocked */
   await supabase.auth.signOut();
   errorEl.textContent = 'This login is for active artists only.';
   errorEl.classList.remove('hidden');
