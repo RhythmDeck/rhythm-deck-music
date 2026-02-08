@@ -90,8 +90,16 @@
         Log In
       </button>
 
+      <!-- FORGOT PASSWORD (OPTION A CONTEXT) -->
+      <p class="text-center text-amber-400 mt-4">
+        <a href="forgot-password.html?from=industry" class="underline hover:text-white">
+          Forgot your password?
+        </a>
+      </p>
+
       <p id="status" class="text-center text-sm mt-4 text-red-400 hidden"></p>
     </form>
+
   </div>
 </main>
 
@@ -110,14 +118,17 @@ const supabase = createClient(
 const form = document.getElementById('loginForm');
 const status = document.getElementById('status');
 
+/* Password toggle */
+const passwordInput = document.getElementById('password');
+document.getElementById('toggleEye').onclick = () => {
+  passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+};
+
 form.onsubmit = async (e) => {
   e.preventDefault();
 
-  const emailInput = document.getElementById('email');   // 🔥 FIX
-  const passwordInput = document.getElementById('password');
-
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
 
   status.textContent = 'Logging in…';
   status.className = 'text-center text-sm mt-4 text-gray-300';
@@ -146,5 +157,6 @@ form.onsubmit = async (e) => {
   location.href = 'industry-dashboard.html';
 };
 </script>
+
 </body>
 </html>
