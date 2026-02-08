@@ -67,7 +67,6 @@
     </div>
 
     <form id="loginForm">
-
       <input
         type="email"
         id="email"
@@ -85,32 +84,20 @@
         <span class="eye" id="toggleEye">Show</span>
       </div>
 
-      <!-- MANDATORY IMAGE UPLOAD -->
-      <div class="mt-6 text-left">
-        <label class="block text-sm font-bold mb-2 text-emerald-400">
-          Upload Logo / Photo (required)
-        </label>
-        <input
-          type="file"
-          id="industryAvatar"
-          accept="image/*"
-          required
-          class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-sm">
-      </div>
-
       <button
         type="submit"
-        class="w-full mt-8 py-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full font-black text-xl hover:scale-105 transition">
+        class="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full font-black text-xl hover:scale-105 transition">
         Log In
       </button>
 
+      <!-- FORGOT PASSWORD (OPTION A CONTEXT) -->
       <p class="text-center text-amber-400 mt-4">
         <a href="forgot-password.html?from=industry" class="underline hover:text-white">
           Forgot your password?
         </a>
       </p>
 
-      <p id="status" class="text-center text-sm mt-4 hidden"></p>
+      <p id="status" class="text-center text-sm mt-4 text-red-400 hidden"></p>
     </form>
 
   </div>
@@ -130,7 +117,6 @@ const supabase = createClient(
 
 const form = document.getElementById('loginForm');
 const status = document.getElementById('status');
-const avatarInput = document.getElementById('industryAvatar');
 
 /* Password toggle */
 const passwordInput = document.getElementById('password');
@@ -141,37 +127,11 @@ document.getElementById('toggleEye').onclick = () => {
 form.onsubmit = async (e) => {
   e.preventDefault();
 
-  if (!avatarInput.files.length) {
-    status.textContent = 'Please upload a logo or photo.';
-    status.className = 'text-center text-sm mt-4 text-red-400';
-    status.classList.remove('hidden');
-    return;
-  }
-
-  status.textContent = 'Uploading image…';
-  status.className = 'text-center text-sm mt-4 text-gray-300';
-  status.classList.remove('hidden');
-
-  const file = avatarInput.files[0];
-
-  const { error: uploadError } = await supabase
-    .storage
-    .from('industry-avatars')
-    .upload('test/alex-rivera.jpg', file, {
-      upsert: true,
-      contentType: file.type
-    });
-
-  if (uploadError) {
-    status.textContent = uploadError.message;
-    status.className = 'text-center text-sm mt-4 text-red-400';
-    return;
-  }
-
-  status.textContent = 'Logging in…';
-
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
+
+  status.textContent = 'Logging in…';
+  status.className = 'text-center text-sm mt-4 text-gray-300';
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -194,7 +154,7 @@ form.onsubmit = async (e) => {
     return;
   }
 
-  location.href = 'industry-directory.html';
+  location.href = 'industry-dashboard.html';
 };
 </script>
 
