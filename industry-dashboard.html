@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Industry Dashboard - Rhythm Deck</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background: linear-gradient(to bottom, #000000, #0f172a); color: white; }
@@ -212,7 +214,6 @@
     }
     currentUserId = user.id;
     loadArtists();
-    // loadMessages(); // ← commented out – this page has no inbox UI
   }
 
   async function loadArtists() {
@@ -238,7 +239,9 @@
     if (mediaError) console.error('Media load error:', mediaError);
 
     const processedMedia = media?.map(item => {
-      const { data: publicData } = supabase.storage.from('media').getPublicUrl(item.video_url);
+      const { data: publicData } = supabase.storage
+        .from('media')
+        .getPublicUrl(item.video_url);
       return { ...item, public_url: publicData.publicUrl };
     }) || [];
 
@@ -253,13 +256,22 @@
 
     if (media && media.length > 0) {
       const videoIds = media.map(v => v.id);
-      const { data: likes } = await supabase.from('video_likes').select('video_id').in('video_id', videoIds);
+
+      const { data: likes } = await supabase
+        .from('video_likes')
+        .select('video_id')
+        .in('video_id', videoIds);
+
       likes?.forEach(l => {
         const artistId = media.find(v => v.id === l.video_id)?.user_id;
         if (artistId) totalLikesByArtist[artistId] = (totalLikesByArtist[artistId] || 0) + 1;
       });
 
-      const { data: comments } = await supabase.from('video_comments').select('video_id').in('video_id', videoIds);
+      const { data: comments } = await supabase
+        .from('video_comments')
+        .select('video_id')
+        .in('video_id', videoIds);
+
       comments?.forEach(c => {
         const artistId = media.find(v => v.id === c.video_id)?.user_id;
         if (artistId) totalCommentsByArtist[artistId] = (totalCommentsByArtist[artistId] || 0) + 1;
@@ -280,34 +292,53 @@
     const artistGrid = document.getElementById('artistGrid');
     artistGrid.innerHTML = filteredArtists.map(artist => {
       const media = artist.videos || [];
+
       const mediaList = media.map(item => `
-        <div class="media-item" onclick="${item.type === 'video' ? `openVideoModal('${item.public_url}')` : `playMP3('${item.public_url}')`}">
+        <div class="media-item"
+             onclick="${item.type === 'video'
+               ? `openVideoModal('${item.public_url}')`
+               : `playMP3('${item.public_url}')`}">
           ${item.title || 'Untitled'} (${item.type.toUpperCase()})
         </div>
       `).join('');
+
       return `
         <div class="artist-box">
           <div class="flex items-start gap-3 mb-2">
-            <img src="${artist.logo_url || 'logo-1-sm.jpg'}" alt="${artist.name}" class="logo-img">
+            <img src="${artist.logo_url || 'logo-1-sm.jpg'}"
+                 alt="${artist.name}"
+                 class="logo-img">
             <div class="flex-1">
               <h3 class="text-base font-bold">${artist.name}</h3>
               <p class="text-xs text-gray-400">${artist.plan.toUpperCase()} Artist</p>
             </div>
           </div>
-          <p class="bio text-xs text-gray-300 mb-2">${artist.bio || 'No bio available'}</p>
+
+          <p class="bio text-xs text-gray-300 mb-2">
+            ${artist.bio || 'No bio available'}
+          </p>
+
           <div class="stat flex gap-2 mb-2">
             <span class="stat-badge">❤️ ${artist.totalHearts}</span>
             <span class="stat-badge">💬 ${artist.totalComments}</span>
           </div>
+
           <div class="media-list">
             <h4 class="text-xs font-medium text-gray-400 mb-1">Videos / MP3s</h4>
             ${mediaList || '<p class="text-gray-500 text-xs">No media uploaded</p>'}
           </div>
+
           <div class="flex gap-2 mt-3">
-            <a href="public-profile.html?id=${artist.id}" target="_blank" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
+            <a href="public-profile.html?id=${artist.id}"
+               target="_blank"
+               class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
               View Profile
             </a>
-            <button onclick="openMessageModal('${artist.id}', '${artist.name.replace(/'/g, "\\'")}')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs">
+
+            <button
+              class="contact-btn flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs"
+              data-artist-id="${artist.id}"
+              data-artist-name="${artist.name}">
               Contact
             </button>
           </div>
@@ -320,18 +351,32 @@
     const searchName = document.getElementById('searchName').value.toLowerCase();
     const searchSong = document.getElementById('searchSong').value.toLowerCase();
     const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
+
     const filtered = artists.filter(artist => {
       const nameMatch = artist.name.toLowerCase().includes(searchName);
       const genreMatch = !filterGenre || artist.genre?.toLowerCase().includes(filterGenre);
-      const songMatch = !searchSong || artist.videos?.some(v => v.title?.toLowerCase().includes(searchSong));
+      const songMatch = !searchSong || artist.videos?.some(v =>
+        v.title?.toLowerCase().includes(searchSong)
+      );
       return nameMatch && genreMatch && songMatch;
     });
+
     renderArtists(filtered);
   }
 
   document.getElementById('searchName').addEventListener('input', filterArtists);
   document.getElementById('searchSong').addEventListener('input', filterArtists);
   document.getElementById('filterGenre').addEventListener('change', filterArtists);
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.contact-btn');
+    if (!btn) return;
+
+    openMessageModal(
+      btn.dataset.artistId,
+      btn.dataset.artistName
+    );
+  });
 
   window.openVideoModal = function(url) {
     const modal = document.getElementById('videoModal');
@@ -340,10 +385,7 @@
     source.src = url;
     video.load();
     modal.classList.remove('hidden');
-    video.play().catch(e => {
-      console.error('Video play failed:', e);
-      alert('Could not play video — URL may be invalid or private.');
-    });
+    video.play().catch(() => alert('Could not play video.'));
   };
 
   window.closeVideoModal = function() {
@@ -356,10 +398,7 @@
 
   window.playMP3 = function(url) {
     const audio = new Audio(url);
-    audio.play().catch(e => {
-      console.error('MP3 play failed:', e);
-      alert('Could not play MP3 — URL may be invalid or private.');
-    });
+    audio.play().catch(() => alert('Could not play MP3.'));
     alert('Playing MP3... (close alert to stop)');
   };
 
@@ -382,27 +421,23 @@
     if (!subject) return alert('Please enter a subject.');
     if (!body) return alert('Please type a message.');
 
-    const { error } = await supabase
-      .from('messages')
-      .insert({
-        sender_id:    currentUserId,
-        receiver_id:  messageArtistId,
-        subject:      subject,
-        body:         body,
-        parent_id:    null,             // new conversation
-        owner_id:     currentUserId,    // sender owns the "sent" copy
-        folder:       'sent',           // or null if you prefer
-        read_at:      null
-        // created_at defaults to now() on table → no need to send
-      });
+    const { error } = await supabase.from('messages').insert({
+      sender_id: currentUserId,
+      receiver_id: messageArtistId,
+      subject,
+      body,
+      parent_id: null,
+      owner_id: currentUserId,
+      folder: 'sent',
+      read_at: null
+    });
 
     if (error) {
-      console.error('Send message error:', error);
-      alert('Failed to send message: ' + (error.message || JSON.stringify(error)));
+      console.error(error);
+      alert('Failed to send message.');
     } else {
       alert('Message sent successfully!');
       closeMessageModal();
-      // Optional: refresh inbox if you add preview here later
     }
   };
 
