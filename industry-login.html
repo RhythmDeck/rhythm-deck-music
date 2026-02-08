@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     body {
       background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
@@ -45,118 +46,110 @@
     }
   </style>
 </head>
+
 <body class="flex flex-col min-h-screen">
 
-<!-- Header -->
-<header class="bg-black/90 border-b border-purple-700/50 px-6 py-4 flex items-center justify-between">
-  <div class="flex items-center gap-4">
-    <img src="logo-1-sm.jpg" class="h-12 w-12 rounded-full">
-    <div>
-      <div class="text-2xl font-black text-emerald-400">RHYTHM DECK</div>
-      <div class="text-sm text-purple-300">Unleash Your Beat</div>
-    </div>
+<header class="bg-black/90 border-b border-purple-700/50 px-6 py-4 flex items-center gap-4">
+  <img src="logo-1-sm.jpg" class="h-12 w-12 rounded-full">
+  <div>
+    <div class="text-2xl font-black text-emerald-400">RHYTHM DECK</div>
+    <div class="text-sm text-purple-300">Unleash Your Beat</div>
   </div>
 </header>
 
-<!-- Main content -->
 <main class="flex-grow flex items-center justify-center p-6">
   <div class="card">
+
     <div class="text-center mb-8">
       <img src="logo-1-sm.jpg" class="logo-big mx-auto mb-4">
       <h1 class="text-4xl font-black text-emerald-400">Industry Login</h1>
       <p class="text-gray-400 mt-2">Access your dashboard</p>
     </div>
 
-    <form id="loginForm" class="space-y-6">
-      <input 
-        type="email" 
-        id="email" 
-        placeholder="Email address" 
+    <form id="loginForm">
+      <input
+        type="email"
+        id="email"
         required
-        class="w-full p-4 bg-gray-800 border border-gray-700 rounded-xl text-lg focus:outline-none focus:border-emerald-500"
-      >
+        placeholder="Email address"
+        class="w-full p-4 mb-6 bg-gray-800 border border-gray-700 rounded-xl text-lg">
+
       <div class="input-group">
-        <input 
-          type="password" 
-          id="password" 
-          placeholder="Password" 
+        <input
+          type="password"
+          id="password"
           required
-          class="w-full p-4 bg-gray-800 border border-gray-700 rounded-xl pr-14 text-lg focus:outline-none focus:border-emerald-500"
-        >
+          placeholder="Password"
+          class="w-full p-4 bg-gray-800 border border-gray-700 rounded-xl pr-14 text-lg">
         <span class="eye" id="toggleEye">Show</span>
       </div>
-      <button 
+
+      <button
         type="submit"
-        class="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full font-black text-xl hover:scale-105 transition"
-      >
+        class="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full font-black text-xl hover:scale-105 transition">
         Log In
       </button>
-      <p class="text-center text-sm text-gray-400">
-        <a href="#" class="hover:text-emerald-400">Forgot password?</a>
-      </p>
-      <p id="status" class="text-center text-sm mt-4 text-red-400"></p>
+
+      <p id="status" class="text-center text-sm mt-4 text-red-400 hidden"></p>
     </form>
+
   </div>
 </main>
 
-<!-- Footer -->
 <footer class="bg-black/80 border-t border-purple-700/30 py-4 text-center text-sm text-gray-400">
   © 2026 Rhythm Deck Music
 </footer>
 
 <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-  const supabase = createClient(
-    'https://bxoqhmfnseskwqkywppg.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-  );
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-  // Check for active session on page load (prevents logout on refresh)
-  async function checkSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      // Already logged in → redirect to dashboard
-      window.location.href = 'industry-dashboard.html';
-    }
+const supabase = createClient(
+  'https://bxoqhmfnseskwqkywppg.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+);
+
+const statusEl = document.getElementById('status');
+
+/* Password toggle */
+const passwordInput = document.getElementById('password');
+document.getElementById('toggleEye').onclick = () => {
+  passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+};
+
+/* Login submit */
+document.getElementById('loginForm').onsubmit = async (e) => {
+  e.preventDefault();
+  statusEl.classList.add('hidden');
+
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    statusEl.textContent = error.message;
+    statusEl.classList.remove('hidden');
+    return;
   }
 
-  // Run session check immediately
-  checkSession();
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', data.user.id)
+    .single();
 
-  // Password visibility toggle
-  const passwordInput = document.getElementById('password');
-  const toggleEye = document.getElementById('toggleEye');
-  toggleEye.onclick = () => {
-    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-    toggleEye.textContent = passwordInput.type === 'password' ? 'Show' : 'Hide';
-  };
+  /* HARD GATE */
+  if (profileError || profile?.plan !== 'industry') {
+    await supabase.auth.signOut();
+    statusEl.textContent = 'This login is for industry accounts only.';
+    statusEl.classList.remove('hidden');
+    return;
+  }
 
-  // Login form handler
-  document.getElementById('loginForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const status = document.getElementById('status');
-
-    status.textContent = 'Logging in...';
-    status.className = 'text-center text-sm mt-4 text-gray-300';
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      status.textContent = error.message || 'Login failed. Please check your credentials.';
-      status.className = 'text-center text-sm mt-4 text-red-400';
-      return;
-    }
-
-    // Successful login → redirect to dashboard
-    status.textContent = 'Login successful! Redirecting...';
-    status.className = 'text-center text-sm mt-4 text-emerald-400';
-    window.location.href = 'industry-dashboard.html';
-  };
+  /* Authorized */
+  window.location.href = 'industry-dashboard.html';
+};
 </script>
+
 </body>
 </html>
