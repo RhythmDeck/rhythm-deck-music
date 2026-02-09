@@ -135,6 +135,7 @@
 
     if (currentMessages.length === 0) {
       listEl.innerHTML = '<div class="text-gray-400 text-center py-10">No messages here yet</div>';
+      updateInboxCount();
       return;
     }
 
@@ -231,6 +232,22 @@
     });
 
     updateInboxCount();
+  }
+
+  async function updateInboxCount() {
+    const { count, error } = await supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_id', currentUserId)
+      .eq('folder', 'inbox')
+      .is('read_at', null);
+
+    if (error) {
+      console.error('Inbox count error:', error);
+      return;
+    }
+
+    document.getElementById('inboxCount').textContent = count > 0 ? `(${count})` : '';
   }
 
   async function showThread(rootId) {
