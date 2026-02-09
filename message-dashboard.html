@@ -235,6 +235,9 @@
   }
 
   async function updateInboxCount() {
+    const inboxCountEl = document.getElementById('inboxCount');
+    if (!inboxCountEl) return; // safe guard if element missing
+
     const { count, error } = await supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
@@ -247,7 +250,7 @@
       return;
     }
 
-    document.getElementById('inboxCount').textContent = count > 0 ? `(${count})` : '';
+    inboxCountEl.textContent = count > 0 ? `(${count})` : '';
   }
 
   async function showThread(rootId) {
@@ -340,6 +343,8 @@
     });
     if (inboxError) {
       console.warn('Reply saved to Sent, but failed to deliver to recipient inbox:', inboxError);
+      alert('Reply saved to Sent, but failed to deliver to recipient Inbox: ' + inboxError.message);
+      return;
     }
     alert('Reply sent successfully!');
     closeReplyModal();
