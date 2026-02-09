@@ -90,13 +90,11 @@
       return;
     }
     currentUserId = user.id;
-    console.log("Logged in as:", currentUserId);
     await loadFolder('inbox');
   }
 
   window.loadFolder = async function(folder) {
     currentFolder = folder;
-    console.log("Folder switched to:", folder);
     document.getElementById('folderTitle').textContent = folder.charAt(0).toUpperCase() + folder.slice(1);
     document.querySelectorAll('[id^="folder-"]').forEach(btn => {
       btn.classList.toggle('folder-active', btn.id === `folder-${folder}`);
@@ -109,8 +107,6 @@
   async function loadConversations() {
     const listEl = document.getElementById('conversationList');
     listEl.innerHTML = '<div class="text-center py-10 text-gray-500">Loading...</div>';
-
-    console.log("Querying folder:", currentFolder, "for user:", currentUserId);
 
     const { data: messages, error } = await supabase
       .from('messages')
@@ -132,12 +128,10 @@
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Query error:", error);
       listEl.innerHTML = `<div class="text-red-400 text-center py-10">Error loading messages: ${error.message}</div>`;
+      console.error("Load conversations error:", error);
       return;
     }
-
-    console.log(`Loaded ${messages.length} messages for ${currentFolder}:`, messages);
 
     currentMessages = messages || [];
 
@@ -202,13 +196,11 @@
         const msgItem = btn.closest('.msg-item');
         const msgId = msgItem.dataset.id;
         if (!confirm('Move this message to Trash?')) return;
-
         const { error } = await supabase
           .from('messages')
           .update({ folder: 'trash' })
           .eq('id', msgId)
           .eq('owner_id', currentUserId);
-
         if (error) {
           alert('Failed to move to Trash: ' + error.message);
         } else {
@@ -224,13 +216,11 @@
         const msgItem = btn.closest('.msg-item');
         const msgId = msgItem.dataset.id;
         if (!confirm('Delete this message permanently? This cannot be undone.')) return;
-
         const { error } = await supabase
           .from('messages')
           .delete()
           .eq('id', msgId)
           .eq('owner_id', currentUserId);
-
         if (error) {
           alert('Delete failed: ' + error.message);
         } else {
@@ -243,8 +233,8 @@
   }
 
   async function updateInboxCount() {
-    const inboxCountEl = document.getElementById('inboxCount');
-    if (!inboxCountEl) return; // safe guard if element missing
+    const el = document.getElementById('inboxCount');
+    if (!el) return;
 
     const { count, error } = await supabase
       .from('messages')
@@ -258,7 +248,7 @@
       return;
     }
 
-    inboxCountEl.textContent = count > 0 ? `(${count})` : '';
+    el.textContent = count > 0 ? `(${count})` : '';
   }
 
   async function showThread(rootId) {
@@ -338,7 +328,6 @@
       body: text,
       read_at: null
     };
-
     const { error: sentError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: currentUserId,
@@ -346,10 +335,8 @@
     });
     if (sentError) {
       alert('Failed to save reply to your Sent folder: ' + sentError.message);
-      console.error('Sent insert failed:', sentError);
       return;
     }
-
     const { error: inboxError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: receiverId,
@@ -360,7 +347,6 @@
       alert('Reply saved to your Sent, but failed to deliver to recipient inbox: ' + inboxError.message);
       return;
     }
-
     alert('Reply sent successfully!');
     closeReplyModal();
     await loadConversations();
