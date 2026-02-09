@@ -401,6 +401,7 @@ window.sendMessage = async function() {
 
   const senderId = user.id;
 
+  // Lookup recipient UUID from profiles by name
   const { data: recipient, error: lookupError } = await supabase
     .from('profiles')
     .select('id')
@@ -408,7 +409,7 @@ window.sendMessage = async function() {
     .single();
 
   if (lookupError || !recipient) {
-    alert('Could not find recipient profile. Make sure the name matches exactly in the profiles table.');
+    alert('Could not find recipient. Check name match in profiles table.');
     return;
   }
 
@@ -422,6 +423,7 @@ window.sendMessage = async function() {
     read_at: null
   };
 
+  // Sent row (artist's Sent folder)
   const { error: sentError } = await supabase.from('messages').insert({
     ...messageData,
     owner_id: senderId,
@@ -429,10 +431,11 @@ window.sendMessage = async function() {
   });
 
   if (sentError) {
-    alert('Failed to save to your Sent folder: ' + sentError.message);
+    alert('Failed to save to Sent: ' + sentError.message);
     return;
   }
 
+  // Inbox row (producer's Inbox folder)
   const { error: inboxError } = await supabase.from('messages').insert({
     ...messageData,
     owner_id: receiverId,
@@ -440,7 +443,7 @@ window.sendMessage = async function() {
   });
 
   if (inboxError) {
-    alert('Message saved to Sent, but failed to deliver to recipient inbox: ' + inboxError.message);
+    alert('Failed to deliver to Inbox: ' + inboxError.message);
     return;
   }
 
