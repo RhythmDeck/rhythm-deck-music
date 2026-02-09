@@ -143,6 +143,7 @@
 
     if (currentMessages.length === 0) {
       listEl.innerHTML = '<div class="text-gray-400 text-center py-10">No messages here yet</div>';
+      updateInboxCount();
       return;
     }
 
@@ -242,13 +243,22 @@
   }
 
   async function updateInboxCount() {
-    const { data } = await supabase
+    const inboxCountEl = document.getElementById('inboxCount');
+    if (!inboxCountEl) return; // safe guard if element missing
+
+    const { count, error } = await supabase
       .from('messages')
-      .select('id', { count: 'exact' })
+      .select('id', { count: 'exact', head: true })
       .eq('owner_id', currentUserId)
       .eq('folder', 'inbox')
       .is('read_at', null);
-    document.getElementById('inboxCount').textContent = data?.length ? `(${data.length})` : '';
+
+    if (error) {
+      console.error('Inbox count error:', error);
+      return;
+    }
+
+    inboxCountEl.textContent = count > 0 ? `(${count})` : '';
   }
 
   async function showThread(rootId) {
@@ -328,6 +338,7 @@
       body: text,
       read_at: null
     };
+
     const { error: sentError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: currentUserId,
@@ -335,8 +346,10 @@
     });
     if (sentError) {
       alert('Failed to save reply to your Sent folder: ' + sentError.message);
+      console.error('Sent insert failed:', sentError);
       return;
     }
+
     const { error: inboxError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: receiverId,
@@ -347,6 +360,7 @@
       alert('Reply saved to your Sent, but failed to deliver to recipient inbox: ' + inboxError.message);
       return;
     }
+
     alert('Reply sent successfully!');
     closeReplyModal();
     await loadConversations();
