@@ -235,8 +235,8 @@
   }
 
   async function updateInboxCount() {
-    const inboxCountEl = document.getElementById('inboxCount');
-    if (!inboxCountEl) return; // safe guard if element missing
+    const el = document.getElementById('inboxCount');
+    if (!el) return; // prevent null error
 
     const { count, error } = await supabase
       .from('messages')
@@ -250,7 +250,7 @@
       return;
     }
 
-    inboxCountEl.textContent = count > 0 ? `(${count})` : '';
+    el.textContent = count > 0 ? `(${count})` : '';
   }
 
   async function showThread(rootId) {
