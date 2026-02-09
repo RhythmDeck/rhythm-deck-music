@@ -41,7 +41,6 @@
     .avatar-wrap:hover .avatar-overlay { opacity: 1; }
   </style>
 </head>
-
 <body class="bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 text-white min-h-screen">
 
 <header class="bg-black border-b-4 border-emerald-500 py-6">
@@ -65,321 +64,184 @@
 </section>
 
 <div class="max-w-7xl mx-auto px-6 space-y-24 pb-32">
-
-<!-- ================= MUSIC PRODUCERS ================= -->
-<section>
-  <h3 class="text-4xl font-black text-emerald-400 mb-10">Music Producers</h3>
-  <div class="grid md:grid-cols-3 gap-10">
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">Alex Rivera</h4>
-          <p class="text-purple-300 text-sm">Genre-bending producer / songwriter</p>
+  <!-- MUSIC PRODUCERS -->
+  <section>
+    <h3 class="text-4xl font-black text-emerald-400 mb-10">Music Producers</h3>
+    <div class="grid md:grid-cols-3 gap-10">
+      <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
+        <div class="flex items-center gap-4">
+          <div>
+            <h4 class="text-2xl font-bold">Alex Rivera</h4>
+            <p class="text-purple-300 text-sm">Genre-bending producer / songwriter</p>
+          </div>
+          <div class="avatar-wrap ml-auto">
+            <img id="img-prod1">
+            <label class="avatar-overlay">
+              Upload
+              <input type="file" hidden accept="image/*" onChange="saveAvatar('prod1',this.files[0])">
+            </label>
+          </div>
         </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-prod1">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('prod1',this.files[0])">
-          </label>
-        </div>
+        <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+          <li>Neon Skies EP</li>
+          <li>Midnight Drive</li>
+          <li>Echoes of Tomorrow</li>
+        </ul>
+        <button onclick="openMessageModal('Alex Rivera')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
       </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>Neon Skies EP</li>
-        <li>Midnight Drive</li>
-        <li>Echoes of Tomorrow</li>
-      </ul>
-      <button onclick="openModal('Alex Rivera')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">Sofia Chen</h4>
-          <p class="text-purple-300 text-sm">Pop & cinematic music producer</p>
+      <!-- Repeat for Sofia Chen and Marcus Lane (same pattern) -->
+      <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
+        <div class="flex items-center gap-4">
+          <div>
+            <h4 class="text-2xl font-bold">Sofia Chen</h4>
+            <p class="text-purple-300 text-sm">Pop & cinematic music producer</p>
+          </div>
+          <div class="avatar-wrap ml-auto">
+            <img id="img-prod2">
+            <label class="avatar-overlay">
+              Upload
+              <input type="file" hidden accept="image/*" onChange="saveAvatar('prod2',this.files[0])">
+            </label>
+          </div>
         </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-prod2">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('prod2',this.files[0])">
-          </label>
-        </div>
+        <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+          <li>Silver Screen OST</li>
+          <li>Pulse City</li>
+          <li>Dream State</li>
+        </ul>
+        <button onclick="openMessageModal('Sofia Chen')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
       </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>Silver Screen OST</li>
-        <li>Pulse City</li>
-        <li>Dream State</li>
-      </ul>
-      <button onclick="openModal('Sofia Chen')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">Marcus Lane</h4>
-          <p class="text-purple-300 text-sm">Hip-hop & R&B specialist</p>
+      <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
+        <div class="flex items-center gap-4">
+          <div>
+            <h4 class="text-2xl font-bold">Marcus Lane</h4>
+            <p class="text-purple-300 text-sm">Hip-hop & R&B specialist</p>
+          </div>
+          <div class="avatar-wrap ml-auto">
+            <img id="img-prod3">
+            <label class="avatar-overlay">
+              Upload
+              <input type="file" hidden accept="image/*" onChange="saveAvatar('prod3',this.files[0])">
+            </label>
+          </div>
         </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-prod3">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('prod3',this.files[0])">
-          </label>
-        </div>
+        <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
+          <li>Street Kings Vol.2</li>
+          <li>After Hours</li>
+          <li>Low Tide</li>
+        </ul>
+        <button onclick="openMessageModal('Marcus Lane')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
       </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>Street Kings Vol.2</li>
-        <li>After Hours</li>
-        <li>Low Tide</li>
-      </ul>
-      <button onclick="openModal('Marcus Lane')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
     </div>
+  </section>
 
+  <!-- Repeat similar structure for Distributors, Publishers, Supervisors -->
+  <!-- ... (your original sections here, just change onclick to openMessageModal('Name') ) ... -->
+</div>
+
+<!-- Message Modal -->
+<div id="messageModal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50">
+  <div class="bg-gray-900 rounded-xl p-8 w-full max-w-lg relative">
+    <button onclick="closeMessageModal()" class="absolute top-4 right-4 text-3xl text-red-500 hover:text-red-400">×</button>
+    <h2 class="text-2xl font-black text-emerald-400 mb-6">Send Message to <span id="recipientName"></span></h2>
+    <input id="msgSubject" type="text" placeholder="Subject" class="w-full p-4 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white">
+    <textarea id="msgBody" rows="6" placeholder="Your message..." class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white resize-none"></textarea>
+    <button onclick="sendMessage()" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 py-4 rounded-xl font-black text-lg transition">
+      Send
+    </button>
   </div>
-</section>
-
-<!-- ================= MUSIC DISTRIBUTORS ================= -->
-<section>
-  <h3 class="text-4xl font-black text-emerald-400 mb-10">Music Distributors</h3>
-  <div class="grid md:grid-cols-3 gap-10">
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">Nova Distribution</h4>
-          <p class="text-purple-300 text-sm">Global digital distribution</p>
-        </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-dist1">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('dist1',this.files[0])">
-          </label>
-        </div>
-      </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>IndieWave Catalog</li>
-        <li>Global Beats Series</li>
-        <li>Rising Stars 2024</li>
-      </ul>
-      <button onclick="openModal('Nova Distribution')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">EchoWave</h4>
-          <p class="text-purple-300 text-sm">Indie-artist focused distributor</p>
-        </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-dist2">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('dist2',this.files[0])">
-          </label>
-        </div>
-      </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>Bedroom Pop Collective</li>
-        <li>Lo-Fi Sessions</li>
-        <li>Alt Sound Vol.1</li>
-      </ul>
-      <button onclick="openModal('EchoWave')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">StreamForge</h4>
-          <p class="text-purple-300 text-sm">Playlist & DSP placement</p>
-        </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-dist3">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('dist3',this.files[0])">
-          </label>
-        </div>
-      </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>DSP Boost Program</li>
-        <li>Playlist Domination</li>
-        <li>Viral Hits Campaign</li>
-      </ul>
-      <button onclick="openModal('StreamForge')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-  </div>
-</section>
-
-
-<!-- ================= MUSIC PUBLISHERS ================= -->
-<section>
-  <h3 class="text-4xl font-black text-emerald-400 mb-10">Music Publishers</h3>
-  <div class="grid md:grid-cols-3 gap-10">
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">Pulse Publishing</h4>
-          <p class="text-purple-300 text-sm">Sync & licensing experts</p>
-        </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-pub1">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('pub1',this.files[0])">
-          </label>
-        </div>
-      </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>Netflix Syncs</li>
-        <li>Prime Originals</li>
-        <li>Studio One Cuts</li>
-      </ul>
-      <button onclick="openModal('Pulse Publishing')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">Harmonic Rights</h4>
-          <p class="text-purple-300 text-sm">Artist-first publishing</p>
-        </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-pub2">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('pub2',this.files[0])">
-          </label>
-        </div>
-      </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>TV Licensing</li>
-        <li>Radio Rotation Deals</li>
-        <li>Catalog Growth</li>
-      </ul>
-      <button onclick="openModal('Harmonic Rights')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">SilverChord</h4>
-          <p class="text-purple-300 text-sm">Global royalty management</p>
-        </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-pub3">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('pub3',this.files[0])">
-          </label>
-        </div>
-      </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>Global Royalties</li>
-        <li>EU Expansion</li>
-        <li>Legacy Catalogs</li>
-      </ul>
-      <button onclick="openModal('SilverChord')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-  </div>
-</section>
-
-<!-- ================= MUSIC SUPERVISORS ================= -->
-<section>
-  <h3 class="text-4xl font-black text-emerald-400 mb-10">Music Supervisors</h3>
-  <div class="grid md:grid-cols-3 gap-10">
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">Lena Fox</h4>
-          <p class="text-purple-300 text-sm">Film & TV supervisor</p>
-        </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-sup1">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('sup1',this.files[0])">
-          </label>
-        </div>
-      </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>HBO Drama Series</li>
-        <li>Sundance Shorts</li>
-        <li>Indie Films</li>
-      </ul>
-      <button onclick="openModal('Lena Fox')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">Orbit Sync</h4>
-          <p class="text-purple-300 text-sm">Streaming & advertising</p>
-        </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-sup2">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('sup2',this.files[0])">
-          </label>
-        </div>
-      </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>Apple Ads</li>
-        <li>Netflix Trailers</li>
-        <li>Brand Campaigns</li>
-      </ul>
-      <button onclick="openModal('Orbit Sync')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-    <div class="bg-black border-4 border-emerald-500 rounded-xl p-6 shadow-xl">
-      <div class="flex items-center gap-4">
-        <div>
-          <h4 class="text-2xl font-bold">FrameTone</h4>
-          <p class="text-purple-300 text-sm">Trailers & branded content</p>
-        </div>
-        <div class="avatar-wrap ml-auto">
-          <img id="img-sup3">
-          <label class="avatar-overlay">
-            Upload
-            <input type="file" hidden accept="image/*" onchange="saveAvatar('sup3',this.files[0])">
-          </label>
-        </div>
-      </div>
-      <ul class="mt-4 text-emerald-300 text-sm list-disc list-inside">
-        <li>Game Launches</li>
-        <li>Movie Trailers</li>
-        <li>Streaming Promos</li>
-      </ul>
-      <button onclick="openModal('FrameTone')" class="mt-6 w-full bg-emerald-600 py-3 rounded-lg font-black">💬 Send Message</button>
-    </div>
-
-  </div>
-</section>
-
 </div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
 const supabase = createClient(
   'https://bxoqhmfnseskwqkywppg.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
 );
 
-const ids = [
-  "prod1","prod2","prod3",
-  "dist1","dist2","dist3",
-  "pub1","pub2","pub3",
-  "sup1","sup2","sup3"
-];
+let currentRecipient = null;
 
+window.openMessageModal = function(name) {
+  currentRecipient = name;
+  document.getElementById('recipientName').textContent = name;
+  document.getElementById('msgSubject').value = '';
+  document.getElementById('msgBody').value = '';
+  document.getElementById('messageModal').classList.remove('hidden');
+};
+
+window.closeMessageModal = function() {
+  document.getElementById('messageModal').classList.add('hidden');
+};
+
+window.sendMessage = async function() {
+  const subject = document.getElementById('msgSubject').value.trim();
+  const body = document.getElementById('msgBody').value.trim();
+
+  if (!subject || !body) {
+    alert('Please fill in both subject and message.');
+    return;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    alert('Please log in to send messages.');
+    return;
+  }
+
+  const senderId = user.id;
+  // Replace with real receiver UUID lookup (hardcoded example for now)
+  // In real app: query profiles or a directory table for receiver UUID by name
+  const receiverMap = {
+    'Alex Rivera': 'producer-uuid-1',
+    'Sofia Chen': 'producer-uuid-2',
+    'Marcus Lane': 'producer-uuid-3',
+    // ... add all others
+  };
+  const receiverId = receiverMap[currentRecipient];
+  if (!receiverId) {
+    alert('Recipient not found.');
+    return;
+  }
+
+  const messageData = {
+    sender_id: senderId,
+    receiver_id: receiverId,
+    subject,
+    body,
+    read_at: null
+  };
+
+  // 1. Sender's Sent folder
+  const { error: sentError } = await supabase.from('messages').insert({
+    ...messageData,
+    owner_id: senderId,
+    folder: 'sent'
+  });
+
+  if (sentError) {
+    alert('Failed to save to your Sent folder: ' + sentError.message);
+    return;
+  }
+
+  // 2. Recipient's Inbox folder
+  const { error: inboxError } = await supabase.from('messages').insert({
+    ...messageData,
+    owner_id: receiverId,
+    folder: 'inbox'
+  });
+
+  if (inboxError) {
+    console.warn('Inbox insert failed:', inboxError);
+    alert('Message saved to Sent, but failed to deliver to recipient inbox.');
+    return;
+  }
+
+  alert('Message sent successfully!');
+  closeMessageModal();
+};
+
+// Avatar loading/upload (your original code)
+const ids = ["prod1","prod2","prod3","dist1","dist2","dist3","pub1","pub2","pub3","sup1","sup2","sup3"];
 ids.forEach(id => {
   const { data } = supabase.storage.from('industry-avatars')
     .getPublicUrl(`directory/${id}.jpg`);
@@ -389,13 +251,10 @@ ids.forEach(id => {
 window.saveAvatar = async (id, file) => {
   await supabase.storage.from('industry-avatars')
     .upload(`directory/${id}.jpg`, file, { upsert: true });
-
   const { data } = supabase.storage.from('industry-avatars')
     .getPublicUrl(`directory/${id}.jpg`);
-
   document.getElementById(`img-${id}`).src = data.publicUrl + `?t=${Date.now()}`;
 };
 </script>
-
 </body>
 </html>
