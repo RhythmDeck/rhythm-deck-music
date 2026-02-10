@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Industry Dashboard - Rhythm Deck</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -49,8 +48,6 @@
   </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-
-<!-- Header -->
 <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800/50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
     <div class="flex items-center gap-3 sm:gap-4">
@@ -62,12 +59,16 @@
         <p class="text-xs sm:text-sm text-gray-300 font-medium">Unleash Your Beat</p>
       </div>
     </div>
-    <a href="industry-message-dashboard.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-lg font-bold shadow">
-      Go to Inbox
-    </a>
+    <div class="flex items-center gap-4">
+      <a href="industry-message-dashboard.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-lg font-bold shadow">
+        Go to Inbox
+      </a>
+      <button id="logoutBtn" class="bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 hover:from-purple-700 hover:via-pink-600 hover:to-blue-700 text-white px-5 py-3 rounded-lg font-bold shadow-lg transition transform hover:scale-105">
+        Log Out
+      </button>
+    </div>
   </div>
 </header>
-
 <main class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
   <h2 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-emerald-400">
     Industry Dashboard
@@ -75,8 +76,6 @@
   <p class="text-lg text-gray-300 mb-6 text-center instructions">
     Browse all Pro and Platinum artists with active accounts. Use the filters to search by genre, song title, or artist's name. Click on videos or MP3s to play them.
   </p>
-
-  <!-- Filters -->
   <div class="flex flex-col md:flex-row gap-4 mb-8">
     <input id="searchName" type="text" placeholder="Search by artist's name" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white flex-1">
     <input id="searchSong" type="text" placeholder="Search by song title" class="p-3 bg-gray-800 border border-gray-700 rounded-lg text-white flex-1">
@@ -153,26 +152,20 @@
       <option value="trip hop">Trip Hop</option>
     </select>
   </div>
-
-  <!-- Artist Grid -->
   <div id="artistGrid" class="grid grid-container gap-6"></div>
 </main>
-
-<!-- Video Modal -->
 <div id="videoModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-[99999]">
   <div class="bg-gray-900 rounded-2xl p-4 border border-emerald-600/50 w-full max-w-4xl">
     <video id="videoPlayer" controls class="w-full rounded-lg">
       <source src="" type="video/mp4">
     </video>
     <div class="text-center pt-4">
-      <button onclick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold">
+      <button onClick="closeVideoModal()" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold">
         ✕ Close
       </button>
     </div>
   </div>
 </div>
-
-<!-- Message Modal – added subject field -->
 <div id="messageModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-[99999]">
   <div class="bg-gray-900 rounded-2xl p-8 border border-emerald-600/50 w-full max-w-md">
     <h3 class="text-2xl font-bold mb-6 text-center text-emerald-400">
@@ -180,31 +173,26 @@
     </h3>
     <input id="messageSubject" type="text" placeholder="Subject" class="w-full p-3 mb-4 bg-gray-800 border border-gray-700 rounded-lg text-white">
     <textarea id="messageContent" rows="6" placeholder="Your message..." class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white"></textarea>
-    <button onclick="sendMessage()" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-bold">
+    <button onClick="sendMessage()" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg font-bold">
       Send Message
     </button>
-    <button onclick="closeMessageModal()" class="mt-4 text-gray-400 block mx-auto">
+    <button onClick="closeMessageModal()" class="mt-4 text-gray-400 block mx-auto">
       Cancel
     </button>
   </div>
 </div>
-
 <footer class="bg-black border-t border-gray-800 p-6 text-center text-sm text-gray-400">
   © 2025 Rhythm Deck Music
 </footer>
-
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
   const supabase = createClient(
     'https://bxoqhmfnseskwqkywppg.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
   );
-
   let currentUserId = null;
   let messageArtistId = null;
   let artists = [];
-
   async function init() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -215,84 +203,67 @@
     currentUserId = user.id;
     loadArtists();
   }
-
   async function loadArtists() {
     const { data: fetchedArtists, error: artistError } = await supabase
       .from('profiles')
       .select('*')
       .in('plan', ['pro', 'platinum'])
       .order('name', { ascending: true });
-
     if (artistError) {
       console.error('Error loading artists:', artistError);
       alert('Failed to load artists: ' + artistError.message);
       return;
     }
-
     const artistIds = fetchedArtists.map(a => a.id);
-
     const { data: media, error: mediaError } = await supabase
       .from('user_videos')
       .select('id, user_id, title, video_url, thumbnail_url, type')
       .in('user_id', artistIds);
-
     if (mediaError) console.error('Media load error:', mediaError);
-
     const processedMedia = media?.map(item => {
       const { data: publicData } = supabase.storage
         .from('media')
         .getPublicUrl(item.video_url);
       return { ...item, public_url: publicData.publicUrl };
     }) || [];
-
     const mediaByArtist = {};
     processedMedia.forEach(item => {
       if (!mediaByArtist[item.user_id]) mediaByArtist[item.user_id] = [];
       mediaByArtist[item.user_id].push(item);
     });
-
     let totalLikesByArtist = {};
     let totalCommentsByArtist = {};
-
     if (media && media.length > 0) {
       const videoIds = media.map(v => v.id);
-
       const { data: likes } = await supabase
         .from('video_likes')
         .select('video_id')
         .in('video_id', videoIds);
-
       likes?.forEach(l => {
         const artistId = media.find(v => v.id === l.video_id)?.user_id;
         if (artistId) totalLikesByArtist[artistId] = (totalLikesByArtist[artistId] || 0) + 1;
       });
-
       const { data: comments } = await supabase
         .from('video_comments')
         .select('video_id')
         .in('video_id', videoIds);
-
       comments?.forEach(c => {
         const artistId = media.find(v => v.id === c.video_id)?.user_id;
         if (artistId) totalCommentsByArtist[artistId] = (totalCommentsByArtist[artistId] || 0) + 1;
       });
     }
-
     artists = fetchedArtists.map(artist => ({
       ...artist,
       videos: mediaByArtist[artist.id] || [],
       totalHearts: totalLikesByArtist[artist.id] || 0,
       totalComments: totalCommentsByArtist[artist.id] || 0
     }));
-
     renderArtists(artists);
   }
-
   function renderArtists(filteredArtists) {
     const artistGrid = document.getElementById('artistGrid');
     artistGrid.innerHTML = filteredArtists.map(artist => {
       const media = artist.videos || [];
-
       const mediaList = media.map(item => `
         <div class="media-item"
              onclick="${item.type === 'video'
@@ -301,7 +272,6 @@
           ${item.title || 'Untitled'} (${item.type.toUpperCase()})
         </div>
       `).join('');
-
       return `
         <div class="artist-box">
           <div class="flex items-start gap-3 mb-2">
@@ -313,28 +283,23 @@
               <p class="text-xs text-gray-400">${artist.plan.toUpperCase()} Artist</p>
             </div>
           </div>
-
           <p class="bio text-xs text-gray-300 mb-2">
             ${artist.bio || 'No bio available'}
           </p>
-
           <div class="stat flex gap-2 mb-2">
             <span class="stat-badge">❤️ ${artist.totalHearts}</span>
             <span class="stat-badge">💬 ${artist.totalComments}</span>
           </div>
-
           <div class="media-list">
             <h4 class="text-xs font-medium text-gray-400 mb-1">Videos / MP3s</h4>
             ${mediaList || '<p class="text-gray-500 text-xs">No media uploaded</p>'}
           </div>
-
           <div class="flex gap-2 mt-3">
             <a href="public-profile.html?id=${artist.id}"
                target="_blank"
                class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg text-center text-xs">
               View Profile
             </a>
-
             <button
               class="contact-btn flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-center text-xs"
               data-artist-id="${artist.id}"
@@ -346,12 +311,10 @@
       `;
     }).join('');
   }
-
   function filterArtists() {
     const searchName = document.getElementById('searchName').value.toLowerCase();
     const searchSong = document.getElementById('searchSong').value.toLowerCase();
     const filterGenre = document.getElementById('filterGenre').value.toLowerCase();
-
     const filtered = artists.filter(artist => {
       const nameMatch = artist.name.toLowerCase().includes(searchName);
       const genreMatch = !filterGenre || artist.genre?.toLowerCase().includes(filterGenre);
@@ -360,24 +323,19 @@
       );
       return nameMatch && genreMatch && songMatch;
     });
-
     renderArtists(filtered);
   }
-
   document.getElementById('searchName').addEventListener('input', filterArtists);
   document.getElementById('searchSong').addEventListener('input', filterArtists);
   document.getElementById('filterGenre').addEventListener('change', filterArtists);
-
   document.addEventListener('click', e => {
     const btn = e.target.closest('.contact-btn');
     if (!btn) return;
-
     openMessageModal(
       btn.dataset.artistId,
       btn.dataset.artistName
     );
   });
-
   window.openVideoModal = function(url) {
     const modal = document.getElementById('videoModal');
     const video = modal.querySelector('video');
@@ -387,7 +345,6 @@
     modal.classList.remove('hidden');
     video.play().catch(() => alert('Could not play video.'));
   };
-
   window.closeVideoModal = function() {
     const modal = document.getElementById('videoModal');
     const video = modal.querySelector('video');
@@ -395,13 +352,11 @@
     video.currentTime = 0;
     modal.classList.add('hidden');
   };
-
   window.playMP3 = function(url) {
     const audio = new Audio(url);
     audio.play().catch(() => alert('Could not play MP3.'));
     alert('Playing MP3... (close alert to stop)');
   };
-
   window.openMessageModal = function(artistId, artistName) {
     messageArtistId = artistId;
     document.getElementById('messageArtistName').textContent = artistName;
@@ -409,18 +364,14 @@
     document.getElementById('messageContent').value = '';
     document.getElementById('messageModal').classList.remove('hidden');
   };
-
   window.closeMessageModal = function() {
     document.getElementById('messageModal').classList.add('hidden');
   };
-
   window.sendMessage = async function() {
     const subject = document.getElementById('messageSubject').value.trim();
     const body = document.getElementById('messageContent').value.trim();
-
     if (!subject) return alert('Please enter a subject.');
     if (!body) return alert('Please type a message.');
-
     const { error } = await supabase.from('messages').insert({
       sender_id: currentUserId,
       receiver_id: messageArtistId,
@@ -431,7 +382,6 @@
       folder: 'sent',
       read_at: null
     });
-
     if (error) {
       console.error(error);
       alert('Failed to send message.');
@@ -440,7 +390,10 @@
       closeMessageModal();
     }
   };
-
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'industry-login.html';
+  });
   init();
 </script>
 </body>
