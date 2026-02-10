@@ -9,15 +9,21 @@
   <style>
     body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e5e5e5; }
     .timeline { background: #111111; border: 1px solid #222; border-radius: 1.5rem; overflow: hidden; }
-    .track { background: #1a1a1a; border-bottom: 1px solid #333; min-height: 120px; }
-    .clip { height: 32px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    .track { background: #1a1a1a; border-bottom: 1px solid #333; padding: 1.5rem; }
+    .track-name { font-weight: bold; font-size: 1.125rem; min-width: 140px; }
+    .bar-container { height: 8px; background: #2a2a2a; border-radius: 4px; overflow: hidden; position: relative; flex: 1; min-width: 200px; }
+    .bar { position: absolute; inset: 0; background-size: 200% 100%; animation: wave 6s linear infinite; }
+    @keyframes wave {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .instruction { font-size: 0.875rem; line-height: 1.4; color: #a5f3fc; margin-top: 0.75rem; }
     .rack { background: #18181b; border: 1px solid #27272a; }
     .knob { width: 48px; height: 48px; background: conic-gradient(#10b981 0% 65%, #27272a 65%); border-radius: 9999px; position: relative; }
     .knob::after { content: ''; position: absolute; top: 6px; left: 50%; width: 3px; height: 18px; background: white; transform: rotate(45deg); transform-origin: bottom center; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-  <!-- Header -->
   <header class="bg-zinc-950 border-b border-zinc-800 px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
     <div class="flex items-center gap-4">
       <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-12 h-12 rounded-2xl shadow-xl object-cover">
@@ -37,7 +43,6 @@
     </div>
   </header>
 
-  <!-- Transport Bar -->
   <div class="bg-zinc-900 border-b border-zinc-800 px-6 py-5 flex flex-wrap items-center justify-center sm:justify-between gap-6">
     <div class="flex items-center gap-6">
       <button onclick="togglePlay()" class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500 hover:bg-emerald-400 rounded-3xl text-5xl sm:text-6xl flex items-center justify-center transition shadow-xl">▶</button>
@@ -52,9 +57,7 @@
     </div>
   </div>
 
-  <!-- Main Studio Area -->
   <div class="flex flex-1 overflow-hidden flex-col lg:flex-row">
-    <!-- Left Sidebar: Mixer & Controls -->
     <div class="w-full lg:w-80 bg-zinc-900 border-b lg:border-r lg:border-b-0 border-zinc-800 p-6 lg:p-8 overflow-auto">
       <h3 class="uppercase text-xs tracking-widest text-zinc-500 mb-6">Mixer & Routing</h3>
       <div class="space-y-8">
@@ -91,45 +94,46 @@
       </div>
     </div>
 
-    <!-- Timeline (Center) – Redesigned with clips to the right -->
     <div class="flex-1 overflow-auto p-6 lg:p-10 bg-zinc-950">
       <div class="timeline">
-        <!-- Track 1 - Guitar Loop -->
-        <div class="track p-6 flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6">
-          <div class="w-full lg:w-40 font-bold text-lg text-emerald-400">Guitar Loop</div>
-          <div class="flex-1 h-12 bg-gradient-to-r from-emerald-800/30 to-emerald-600/30 relative min-w-0">
-            <div class="clip absolute left-0 w-3/4 top-2 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+        <div class="track flex flex-col gap-3">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-emerald-400">Guitar Loop</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #10b981, #34d399, #10b981);"></div>
+            </div>
           </div>
-          <div class="w-full lg:w-96 text-sm text-emerald-300 font-mono leading-relaxed mt-3 lg:mt-0">
+          <div class="instruction">
             Record your guitar here → create loops → layer effects like distortion, reverb, or amp sims
           </div>
         </div>
 
-        <!-- Track 2 - Drums -->
-        <div class="track p-6 flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6">
-          <div class="w-full lg:w-40 font-bold text-lg text-amber-400">Drums</div>
-          <div class="flex-1 h-12 bg-gradient-to-r from-amber-800/30 to-amber-600/30 relative min-w-0">
-            <div class="clip absolute left-0 w-2/3 top-2 bg-gradient-to-r from-amber-500 to-yellow-400"></div>
+        <div class="track flex flex-col gap-3">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-amber-400">Drums</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);"></div>
+            </div>
           </div>
-          <div class="w-full lg:w-96 text-sm text-amber-300 font-mono leading-relaxed mt-3 lg:mt-0">
+          <div class="instruction">
             Choose a drum kit → program beats or record live → layer kicks, snares, hats for full rhythm section
           </div>
         </div>
 
-        <!-- Track 3 - Piano Pad -->
-        <div class="track p-6 flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6">
-          <div class="w-full lg:w-40 font-bold text-lg text-purple-400">Piano Pad</div>
-          <div class="flex-1 h-12 bg-gradient-to-r from-purple-800/30 to-purple-600/30 relative min-w-0">
-            <div class="clip absolute left-0 w-full top-2 bg-gradient-to-r from-purple-500 to-indigo-400"></div>
+        <div class="track flex flex-col gap-3">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-purple-400">Piano Pad</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #a855f7, #c084fc, #a855f7);"></div>
+            </div>
           </div>
-          <div class="w-full lg:w-96 text-sm text-purple-300 font-mono leading-relaxed mt-3 lg:mt-0">
+          <div class="instruction">
             Add melodic layers → play chords or leads → apply reverb, delay, or modulation for atmosphere
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Sidebar - Smaller instrument cards (2×2 grid) -->
     <div class="w-full lg:w-96 bg-zinc-900 border-t lg:border-l lg:border-t-0 border-zinc-800 p-6 lg:p-8 overflow-auto">
       <h3 class="uppercase text-xs tracking-widest text-zinc-500 mb-6">Instruments & Sounds</h3>
       <div class="grid grid-cols-2 gap-5 mb-12">
