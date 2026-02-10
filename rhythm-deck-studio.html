@@ -21,55 +21,16 @@
     .knob-container { position: relative; width: 56px; height: 56px; margin: 0 auto; cursor: grab; }
     .knob { width: 100%; height: 100%; background: conic-gradient(#10b981 0% 50%, #27272a 50%); border-radius: 9999px; }
     .knob-indicator { position: absolute; top: 6px; left: 50%; width: 4px; height: 22px; background: white; transform-origin: bottom center; border-radius: 2px; pointer-events: none; }
-    
-    /* Improved realistic piano keyboard styling */
-    .piano-key { 
-      height: 180px; 
-      width: 38px; 
-      background: white; 
-      border: 1px solid #222; 
-      border-radius: 0 0 6px 6px; 
-      position: relative; 
-      box-shadow: inset 0 -8px 12px rgba(0,0,0,0.15), 0 2px 5px rgba(0,0,0,0.4);
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .piano-key.black { 
-      background: #111; 
-      height: 110px; 
-      width: 26px; 
-      margin-left: -13px; 
-      margin-right: -13px; 
-      z-index: 10; 
-      border-radius: 0 0 4px 4px; 
-      box-shadow: inset 0 -6px 10px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.5);
-    }
-    .piano-key:active, .piano-key.active { 
-      background: #f0f0f0; 
-      filter: brightness(0.92); 
-      box-shadow: inset 0 -4px 8px rgba(0,0,0,0.3);
-    }
-    .piano-key.black:active, .piano-key.black.active { 
-      background: #222; 
-      filter: brightness(0.85);
-    }
+    .piano-key { height: 180px; width: 38px; background: white; border: 1px solid #222; border-radius: 0 0 6px 6px; position: relative; box-shadow: inset 0 -8px 12px rgba(0,0,0,0.15), 0 2px 5px rgba(0,0,0,0.4); cursor: pointer; flex-shrink: 0; }
+    .piano-key.black { background: #111; height: 110px; width: 26px; margin-left: -13px; margin-right: -13px; z-index: 10; border-radius: 0 0 4px 4px; box-shadow: inset 0 -6px 10px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.5); }
+    .piano-key:active, .piano-key.active { background: #f0f0f0; filter: brightness(0.92); box-shadow: inset 0 -4px 8px rgba(0,0,0,0.3); }
+    .piano-key.black:active, .piano-key.black.active { background: #222; filter: brightness(0.85); }
     .master-meter { height: 140px; background: #222; border-radius: 9999px; overflow: hidden; position: relative; width: 32px; }
     .meter-bar { position: absolute; bottom: 0; width: 100%; background: linear-gradient(#10b981, #34d399); transition: height 0.15s; }
     .record-arm { width: 20px; height: 20px; background: #4a0000; border-radius: 9999px; cursor: pointer; border: 2px solid #ff0000; }
     .record-arm.active { background: #ff0000; }
-
-    /* Piano roll canvas styling */
-    #pianoRollContainer { 
-      margin-top: 2rem; 
-      background: #111; 
-      border-radius: 1rem; 
-      overflow: hidden; 
-      border: 1px solid #333; 
-    }
-    #pianoRollCanvas { 
-      display: block; 
-      background: #0f0f0f; 
-    }
+    #pianoRollContainer { margin-top: 2rem; background: #111; border-radius: 1rem; overflow: hidden; border: 1px solid #333; }
+    #pianoRollCanvas { display: block; background: #0f0f0f; cursor: crosshair; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -192,6 +153,7 @@
         <div class="effect-item flex items-center gap-4">
           <span class="effect-label w-24">Distortion</span>
           <input type="range" min="0" max="100" value="30" class="flex-1" oninput="this.nextElementSibling.textContent = this.value + '%'">
+
           <span class="effect-value w-16">30%</span>
         </div>
         <div class="effect-item flex items-center gap-4">
@@ -292,10 +254,11 @@
           <div class="instruction">Add synth pads/leads/arps → modulate/filter → layer textures or create futuristic vibes</div>
         </div>
       </div>
-
-      <!-- Basic Interactive Piano Roll added here -->
       <div id="pianoRollContainer" class="mt-10 p-4">
-        <h3 class="text-lg font-bold text-purple-400 mb-4">Piano Roll Editor (Click to add notes)</h3>
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-purple-400">Piano Roll Editor</h3>
+          <button id="clearPianoRoll" class="bg-red-700 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium transition">Clear All Notes</button>
+        </div>
         <div class="flex">
           <canvas id="pianoRollKeys" width="60" height="400" class="bg-zinc-900"></canvas>
           <div class="flex-1 overflow-x-auto">
@@ -303,7 +266,7 @@
           </div>
         </div>
         <div class="mt-3 text-sm text-zinc-400 text-center">
-          Click grid to place notes • Preview plays instantly • Scroll horizontally to extend pattern
+          Click to add note • Drag note to move • Right-click (or long-press) to delete • Scroll horizontally
         </div>
       </div>
     </div>
@@ -331,42 +294,33 @@
       </div>
     </div>
   </div>
-
   <script>
-    // === Web Audio API for piano sound (from previous improved version) ===
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
     function playNote(freq, velocity = 0.8) {
       const now = audioCtx.currentTime;
-
       const osc = audioCtx.createOscillator();
       osc.type = 'sawtooth';
       osc.frequency.value = freq;
-
       const osc2 = audioCtx.createOscillator();
       osc2.type = 'square';
       osc2.frequency.value = freq * 1.002;
       const osc2Gain = audioCtx.createGain();
       osc2Gain.gain.value = 0.18 * velocity;
       osc2.connect(osc2Gain);
-
       const filter = audioCtx.createBiquadFilter();
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(8000, now);
       filter.frequency.exponentialRampToValueAtTime(1200, now + 1.2);
       filter.Q.value = 1;
-
       const gain = audioCtx.createGain();
       gain.gain.setValueAtTime(0, now);
       gain.gain.linearRampToValueAtTime(velocity * 0.9, now + 0.008);
       gain.gain.exponentialRampToValueAtTime(velocity * 0.35, now + 0.4);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
-
       osc.connect(filter);
       osc2Gain.connect(filter);
       filter.connect(gain);
       gain.connect(audioCtx.destination);
-
       const noise = audioCtx.createBufferSource();
       const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.02, audioCtx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -381,7 +335,6 @@
       noise.connect(noiseFilter);
       noiseFilter.connect(noiseGain);
       noiseGain.connect(gain);
-
       osc.start(now);
       osc2.start(now);
       noise.start(now);
@@ -389,11 +342,8 @@
       osc2.stop(now + 4);
       noise.stop(now + 0.1);
     }
-
-    const baseFreq = 261.63; // C4
+    const baseFreq = 261.63;
     const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-
-    // BPM Tap Tempo
     let tapTimes = [];
     function tapTempo() {
       const now = Date.now();
@@ -405,7 +355,7 @@
         const avg = sum / (tapTimes.length - 1);
         const bpm = Math.round(60000 / avg);
         document.getElementById('bpmInput').value = bpm;
-        drawPianoRoll(); // Redraw grid on BPM change
+        drawPianoRoll();
       }
     }
     function updateBPM() {
@@ -415,27 +365,21 @@
       const btn = document.getElementById('metronomeBtn');
       btn.textContent = btn.textContent === "Metronome OFF" ? "Metronome ON" : "Metronome OFF";
     }
-
-    // Virtual MIDI Keyboard
     function createKeyboard() {
       const container = document.getElementById('midiKeyboard');
       container.innerHTML = '';
-
       notes.forEach((noteName, i) => {
         const key = document.createElement('div');
         const isBlack = noteName.includes('#');
         key.className = `piano-key ${isBlack ? 'black' : ''}`;
-
         key.addEventListener('mousedown', () => {
           const semitone = i;
           const freq = baseFreq * Math.pow(2, semitone / 12);
           playNote(freq);
           key.classList.add('active');
         });
-
         key.addEventListener('mouseup', () => key.classList.remove('active'));
         key.addEventListener('mouseleave', () => key.classList.remove('active'));
-
         key.addEventListener('touchstart', (e) => {
           e.preventDefault();
           const semitone = i;
@@ -444,12 +388,9 @@
           key.classList.add('active');
         });
         key.addEventListener('touchend', () => key.classList.remove('active'));
-
         container.appendChild(key);
       });
     }
-
-    // Pan knob drag interaction
     const panIndicator = document.getElementById('pan-indicator');
     const panLabel = document.getElementById('pan-label');
     let isDraggingPan = false;
@@ -479,7 +420,6 @@
       else if (rot > 30) text = 'Right';
       panLabel.textContent = text;
     }
-
     function togglePlay() { alert("Transport Playing (demo mode)"); }
     function stop() { alert("Transport Stopped"); }
     function exportMix() { alert("Exporting full mix + stems (demo)"); }
@@ -488,46 +428,34 @@
     function demoPiano() { alert("Keyboard: Play chords or melodies → add sustain, reverb, delay → create atmospheric pads or leads"); }
     function demoBass() { alert("Bass: Lay down groovy lines → lock with drums → use compression to make it punchy and sit perfectly in the mix"); }
     function demoGuitarToKeyboard() { alert("Demo: Guitar recorded → looped → transformed into lush keyboard pad using pitch/formant shift (real version coming soon)"); }
-
-    // === Basic Piano Roll Implementation ===
     const pianoRollCanvas = document.getElementById('pianoRollCanvas');
     const pianoRollKeys = document.getElementById('pianoRollKeys');
     const ctx = pianoRollCanvas.getContext('2d');
     const keyCtx = pianoRollKeys.getContext('2d');
-
-    let notesData = []; // {x: beat, y: noteIndex, duration: beats}
-
+    let notesData = [];
     const noteHeight = 25;
-    const beatWidth = 60; // pixels per beat
-    const visibleBeats = pianoRollCanvas.width / beatWidth;
+    const beatWidth = 60;
     let scrollX = 0;
-
+    let draggingNote = null;
     function drawPianoKeys() {
       keyCtx.clearRect(0, 0, pianoRollKeys.width, pianoRollKeys.height);
-      for (let i = 0; i < 16; i++) { // C4 to B5 for simplicity
+      for (let i = 0; i < 16; i++) {
         const y = (15 - i) * noteHeight;
         const isBlack = notes[i % 12].includes('#');
         keyCtx.fillStyle = isBlack ? '#111' : '#eee';
-
         keyCtx.fillRect(0, y, pianoRollKeys.width, noteHeight - 1);
         keyCtx.strokeStyle = '#444';
         keyCtx.strokeRect(0, y, pianoRollKeys.width, noteHeight - 1);
         keyCtx.fillStyle = isBlack ? '#aaa' : '#222';
         keyCtx.font = '10px Arial';
-        keyCtx.fillText(notes[i % 12] + '4', 8, y + 16);
+        keyCtx.fillText(notes[i % 12] + (4 + Math.floor(i / 12)), 8, y + 16);
       }
     }
-
     function drawPianoRoll() {
       ctx.clearRect(0, 0, pianoRollCanvas.width, pianoRollCanvas.height);
-
-      const bpm = parseInt(document.getElementById('bpmInput').value) || 128;
       const pixelsPerBeat = beatWidth;
-
-      // Grid lines (beats)
       ctx.strokeStyle = '#222';
-      ctx.lineWidth = 1;
-      for (let beat = 0; beat <= visibleBeats + 5; beat++) {
+      for (let beat = 0; beat <= (pianoRollCanvas.width + scrollX) / pixelsPerBeat + 1; beat++) {
         const x = beat * pixelsPerBeat - scrollX;
         if (x >= 0 && x <= pianoRollCanvas.width) {
           ctx.beginPath();
@@ -536,8 +464,6 @@
           ctx.stroke();
         }
       }
-
-      // Horizontal lines (octaves)
       ctx.strokeStyle = '#333';
       for (let i = 0; i <= 16; i++) {
         const y = i * noteHeight;
@@ -546,58 +472,115 @@
         ctx.lineTo(pianoRollCanvas.width, y);
         ctx.stroke();
       }
-
-      // Draw placed notes
-      ctx.fillStyle = '#a855f7';
-      notesData.forEach(note => {
+      notesData.forEach((note, index) => {
         const x = note.x * pixelsPerBeat - scrollX;
-        const y = (15 - note.y) * noteHeight; // Invert y so higher notes at top
+        const y = (15 - note.y) * noteHeight;
         const w = note.duration * pixelsPerBeat;
+        ctx.fillStyle = draggingNote === index ? '#c084fc' : '#a855f7';
         ctx.fillRect(x, y, w, noteHeight - 2);
         ctx.strokeStyle = '#c084fc';
         ctx.strokeRect(x, y, w, noteHeight - 2);
       });
     }
-
     function getBeatFromX(x) {
-      const bpm = parseInt(document.getElementById('bpmInput').value) || 128;
-      return Math.round((x + scrollX) / beatWidth * 4) / 4; // snap to 1/16
+      return Math.round((x + scrollX) / beatWidth * 4) / 4;
     }
-
     function getNoteIndexFromY(y) {
-      return Math.floor(15 - (y / noteHeight)); // 0 = C4, 11 = B4, etc.
+      return Math.max(0, Math.min(15, Math.floor(15 - (y / noteHeight))));
     }
-
+    function findNoteAt(x, y) {
+      const beat = getBeatFromX(x);
+      const noteIdx = getNoteIndexFromY(y);
+      for (let i = notesData.length - 1; i >= 0; i--) {
+        const n = notesData[i];
+        if (beat >= n.x && beat < n.x + n.duration && noteIdx === n.y) {
+          return i;
+        }
+      }
+      return -1;
+    }
     pianoRollCanvas.addEventListener('click', (e) => {
+      if (draggingNote !== null) return;
       const rect = pianoRollCanvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
       const beat = getBeatFromX(mouseX);
       const noteIdx = getNoteIndexFromY(mouseY);
-
-      if (noteIdx >= 0 && noteIdx < 12) { // Limit to one octave for simplicity
+      if (noteIdx >= 0 && noteIdx < 16) {
         const freq = baseFreq * Math.pow(2, noteIdx / 12);
         playNote(freq);
-
-        // Add note (1 beat duration default)
         notesData.push({ x: beat, y: noteIdx, duration: 1 });
         drawPianoRoll();
       }
     });
-
-    // Horizontal scroll with mouse wheel
+    pianoRollCanvas.addEventListener('mousedown', (e) => {
+      const rect = pianoRollCanvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const idx = findNoteAt(mouseX, mouseY);
+      if (idx !== -1) {
+        draggingNote = idx;
+        pianoRollCanvas.style.cursor = 'grabbing';
+        e.preventDefault();
+      }
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (draggingNote !== null) {
+        const rect = pianoRollCanvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        notesData[draggingNote].x = getBeatFromX(mouseX);
+        notesData[draggingNote].y = getNoteIndexFromY(mouseY);
+        drawPianoRoll();
+      }
+    });
+    document.addEventListener('mouseup', () => {
+      if (draggingNote !== null) {
+        draggingNote = null;
+        pianoRollCanvas.style.cursor = 'crosshair';
+        drawPianoRoll();
+      }
+    });
+    pianoRollCanvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const rect = pianoRollCanvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const idx = findNoteAt(mouseX, mouseY);
+      if (idx !== -1) {
+        notesData.splice(idx, 1);
+        drawPianoRoll();
+      }
+    });
+    let touchTimer;
+    pianoRollCanvas.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      const rect = pianoRollCanvas.getBoundingClientRect();
+      const mouseX = touch.clientX - rect.left;
+      const mouseY = touch.clientY - rect.top;
+      touchTimer = setTimeout(() => {
+        const idx = findNoteAt(mouseX, mouseY);
+        if (idx !== -1) {
+          notesData.splice(idx, 1);
+          drawPianoRoll();
+        }
+      }, 500);
+    });
+    pianoRollCanvas.addEventListener('touchend', () => clearTimeout(touchTimer));
+    pianoRollCanvas.addEventListener('touchmove', () => clearTimeout(touchTimer));
+    document.getElementById('clearPianoRoll').addEventListener('click', () => {
+      if (confirm("Clear all notes in the piano roll?")) {
+        notesData = [];
+        drawPianoRoll();
+      }
+    });
     pianoRollCanvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       scrollX = Math.max(0, scrollX + e.deltaY * 0.5);
       drawPianoRoll();
     });
-
-    // Initial draw
     drawPianoKeys();
     drawPianoRoll();
-
-    // Initialize
     createKeyboard();
   </script>
 </body>
