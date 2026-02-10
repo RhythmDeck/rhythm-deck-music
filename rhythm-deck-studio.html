@@ -18,7 +18,10 @@
       100% { background-position: 200% 50%; }
     }
     .instruction { font-size: 0.875rem; line-height: 1.4; color: #a5f3fc; margin-top: 0.75rem; }
-    .rack { background: #18181b; border: 1px solid #27272a; }
+    .rack { background: #18181b; border: 1px solid #27272a; border-radius: 1rem; padding: 1.25rem; }
+    .effect-item { display: flex; align-items: center; gap: 1rem; }
+    .effect-label { width: 80px; font-size: 0.875rem; font-weight: 500; }
+    .effect-value { width: 50px; text-align: right; font-size: 0.875rem; color: #34d399; }
     .knob { width: 48px; height: 48px; background: conic-gradient(#10b981 0% 65%, #27272a 65%); border-radius: 9999px; position: relative; }
     .knob::after { content: ''; position: absolute; top: 6px; left: 50%; width: 3px; height: 18px; background: white; transform: rotate(45deg); transform-origin: bottom center; }
   </style>
@@ -62,29 +65,39 @@
       <h3 class="uppercase text-xs tracking-widest text-zinc-500 mb-6">Mixer & Routing</h3>
       <div class="space-y-8">
         <div class="flex items-center gap-4">
-          <span class="w-20 text-sm font-medium text-emerald-400">Guitar</span>
-          <input type="range" min="0" max="100" value="85" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer">
-          <span class="w-12 text-sm text-right">–3.2 dB</span>
-        </div>
-        <div class="flex items-center gap-4">
-          <span class="w-20 text-sm font-medium text-amber-400">Drums</span>
-          <input type="range" min="0" max="100" value="92" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer">
+          <span class="w-20 text-sm font-medium text-emerald-400">Rhythm Guitar</span>
+          <input type="range" min="0" max="100" value="82" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer" oninput="this.nextElementSibling.textContent = '–' + (100 - this.value / 10).toFixed(1) + ' dB'">
           <span class="w-12 text-sm text-right">–1.8 dB</span>
         </div>
         <div class="flex items-center gap-4">
-          <span class="w-20 text-sm font-medium text-purple-400">Piano</span>
-          <input type="range" min="0" max="100" value="78" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer">
-          <span class="w-12 text-sm text-right">–5.1 dB</span>
+          <span class="w-20 text-sm font-medium text-teal-400">Lead Guitar</span>
+          <input type="range" min="0" max="100" value="78" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer" oninput="this.nextElementSibling.textContent = '–' + (100 - this.value / 10).toFixed(1) + ' dB'">
+          <span class="w-12 text-sm text-right">–2.2 dB</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="w-20 text-sm font-medium text-amber-400">Drums</span>
+          <input type="range" min="0" max="100" value="92" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer" oninput="this.nextElementSibling.textContent = '–' + (100 - this.value / 10).toFixed(1) + ' dB'">
+          <span class="w-12 text-sm text-right">–1.8 dB</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="w-20 text-sm font-medium text-purple-400">Piano Pad</span>
+          <input type="range" min="0" max="100" value="75" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer" oninput="this.nextElementSibling.textContent = '–' + (100 - this.value / 10).toFixed(1) + ' dB'">
+          <span class="w-12 text-sm text-right">–2.5 dB</span>
         </div>
         <div class="flex items-center gap-4">
           <span class="w-20 text-sm font-medium text-sky-400">Bass</span>
-          <input type="range" min="0" max="100" value="80" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer">
-          <span class="w-12 text-sm text-right">–4.5 dB</span>
+          <input type="range" min="0" max="100" value="80" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer" oninput="this.nextElementSibling.textContent = '–' + (100 - this.value / 10).toFixed(1) + ' dB'">
+          <span class="w-12 text-sm text-right">–2.0 dB</span>
         </div>
         <div class="flex items-center gap-4">
           <span class="w-20 text-sm font-medium text-pink-400">Vocal</span>
-          <input type="range" min="0" max="100" value="75" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer">
-          <span class="w-12 text-sm text-right">–6.0 dB</span>
+          <input type="range" min="0" max="100" value="70" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer" oninput="this.nextElementSibling.textContent = '–' + (100 - this.value / 10).toFixed(1) + ' dB'">
+          <span class="w-12 text-sm text-right">–3.0 dB</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="w-20 text-sm font-medium text-cyan-400">Synth</span>
+          <input type="range" min="0" max="100" value="72" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer" oninput="this.nextElementSibling.textContent = '–' + (100 - this.value / 10).toFixed(1) + ' dB'">
+          <span class="w-12 text-sm text-right">–2.8 dB</span>
         </div>
         <div class="flex items-center gap-4">
           <span class="w-20 text-sm font-medium">Pan</span>
@@ -98,8 +111,47 @@
         </div>
         <div class="flex items-center gap-4">
           <span class="w-20 text-sm font-medium">Reverb Send</span>
-          <input type="range" min="0" max="100" value="45" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer">
+          <input type="range" min="0" max="100" value="45" class="flex-1 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer" oninput="this.nextElementSibling.textContent = this.value + '%'">
           <span class="w-12 text-sm text-center">45%</span>
+        </div>
+      </div>
+
+      <h3 class="uppercase text-xs tracking-widest text-zinc-500 mt-10 mb-6">Effects Rack</h3>
+      <div class="rack space-y-6">
+        <div class="effect-item">
+          <span class="effect-label">EQ</span>
+          <div class="flex-1 h-2 bg-zinc-700 rounded-full relative overflow-hidden">
+            <div class="absolute h-full bg-gradient-to-r from-cyan-400 to-emerald-400 w-3/5 animate-pulse"></div>
+          </div>
+          <span class="effect-value">+3 dB</span>
+        </div>
+        <div class="effect-item">
+          <span class="effect-label">Compression</span>
+          <div class="flex-1 h-2 bg-zinc-700 rounded-full relative overflow-hidden">
+            <div class="absolute h-full bg-amber-400 w-1/2 animate-pulse"></div>
+          </div>
+          <span class="effect-value">-12 dB</span>
+        </div>
+        <div class="effect-item">
+          <span class="effect-label">Distortion</span>
+          <div class="flex-1 h-2 bg-zinc-700 rounded-full relative overflow-hidden">
+            <div class="absolute h-full bg-red-500 w-1/3 animate-pulse"></div>
+          </div>
+          <span class="effect-value">ON</span>
+        </div>
+        <div class="effect-item">
+          <span class="effect-label">Delay</span>
+          <div class="flex-1 h-2 bg-zinc-700 rounded-full relative overflow-hidden">
+            <div class="absolute h-full bg-purple-500 w-2/5 animate-pulse"></div>
+          </div>
+          <span class="effect-value">320 ms</span>
+        </div>
+        <div class="effect-item">
+          <span class="effect-label">Reverb</span>
+          <div class="flex-1 h-2 bg-zinc-700 rounded-full relative overflow-hidden">
+            <div class="absolute h-full bg-sky-400 w-3/4 animate-pulse"></div>
+          </div>
+          <span class="effect-value">78%</span>
         </div>
       </div>
     </div>
@@ -108,13 +160,25 @@
       <div class="timeline">
         <div class="track flex flex-col gap-3">
           <div class="flex items-center gap-6">
-            <div class="track-name text-lg text-emerald-400">Guitar Loop</div>
+            <div class="track-name text-lg text-emerald-400">Rhythm Guitar</div>
             <div class="bar-container">
               <div class="bar" style="background: linear-gradient(90deg, #10b981, #34d399, #10b981);"></div>
             </div>
           </div>
           <div class="instruction">
-            Record your guitar here → create loops → layer effects like distortion, reverb, or amp sims
+            Rhythm guitar parts → chords or strumming patterns → add crunch/distortion for body
+          </div>
+        </div>
+
+        <div class="track flex flex-col gap-3">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-teal-400">Lead Guitar</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #14b8a6, #2dd4bf, #14b8a6);"></div>
+            </div>
+          </div>
+          <div class="instruction">
+            Lead melodies/solos → add delay/reverb → make them cut through the mix
           </div>
         </div>
 
@@ -126,7 +190,7 @@
             </div>
           </div>
           <div class="instruction">
-            Choose a drum kit → program beats or record live → layer kicks, snares, hats for full rhythm section
+            Choose kit → program/record beats → layer kicks/snares/hats for full rhythm foundation
           </div>
         </div>
 
@@ -138,7 +202,7 @@
             </div>
           </div>
           <div class="instruction">
-            Add melodic layers → play chords or leads → apply reverb, delay, or modulation for atmosphere
+            Melodic layers/chords → add reverb/delay/modulation → create atmospheric pads or leads
           </div>
         </div>
 
@@ -150,7 +214,7 @@
             </div>
           </div>
           <div class="instruction">
-            Lay down groovy lines → lock with drums → use compression to make it punchy and sit perfectly in the mix
+            Groovy bass lines → lock with drums → compress for punch → sit perfectly in the mix
           </div>
         </div>
 
@@ -162,7 +226,19 @@
             </div>
           </div>
           <div class="instruction">
-            Record lead or harmony vocals → add pitch correction, reverb, delay → blend into the mix
+            Record lead/harmony vocals → pitch correction → add reverb/delay → blend into the mix
+          </div>
+        </div>
+
+        <div class="track flex flex-col gap-3">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-cyan-400">Synth</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #06b6d4, #22d3ee, #06b6d4);"></div>
+            </div>
+          </div>
+          <div class="instruction">
+            Add synth pads/leads/arps → modulate/filter → layer textures or create futuristic vibes
           </div>
         </div>
       </div>
