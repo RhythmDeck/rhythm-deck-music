@@ -17,7 +17,6 @@
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white flex flex-col min-h-screen">
-
 <header class="bg-black/70 border-b border-purple-700/50 px-6 py-4 flex items-center justify-between gap-4">
   <div class="flex items-center gap-4">
     <img src="logo-1-sm.jpg" class="h-12 w-12 rounded-full">
@@ -26,11 +25,15 @@
       <div class="text-sm text-purple-300">Unleash Your Beat</div>
     </div>
   </div>
-  <a href="industry-dashboard.html" class="bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black px-6 py-3 rounded-full hover:opacity-90">
-    Back to Dashboard
-  </a>
+  <div class="flex items-center gap-4">
+    <a id="backDashboard" href="#" class="bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-black px-6 py-3 rounded-full hover:opacity-90">
+      Back to Dashboard
+    </a>
+    <button id="logoutBtn" class="bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 hover:from-purple-700 hover:via-pink-600 hover:to-blue-700 text-white px-6 py-3 rounded-full font-black shadow-lg transition transform hover:scale-105">
+      Log Out
+    </button>
+  </div>
 </header>
-
 <main class="flex-1 p-4">
   <h1 class="text-4xl font-black mb-6 bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent text-center md:text-left">
     Industry Messages
@@ -53,11 +56,9 @@
     </section>
   </div>
 </main>
-
 <footer class="bg-black/80 border-t border-purple-700/30 py-4 text-center text-sm text-gray-400">
   © 2026 Rhythm Deck Music
 </footer>
-
 <div id="replyModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-50">
   <div class="bg-gray-900 rounded-xl p-6 w-full max-w-xl relative">
     <button onclick="closeReplyModal()" class="absolute top-3 right-4 text-3xl text-red-500 hover:text-red-400">×</button>
@@ -69,7 +70,6 @@
     </button>
   </div>
 </div>
-
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
   const supabase = createClient(
@@ -91,6 +91,29 @@
     }
     currentUserId = user.id;
     await loadFolder('inbox');
+    setBackButton();
+  }
+
+  async function setBackButton() {
+    const backLink = document.getElementById('backDashboard');
+    if (!backLink) return;
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('plan, industry_role')
+      .eq('id', currentUserId)
+      .single();
+
+    let url = 'profile-admin.html';
+    if (profile?.industry_role) {
+      url = 'industry-dashboard.html';
+    } else if (profile?.plan === 'platinum') {
+      url = 'platinum-pro-admin.html';
+    } else if (profile?.plan === 'pro') {
+      url = 'profile-admin-pro.html';
+    }
+
+    backLink.href = url;
   }
 
   window.loadFolder = async function(folder) {
@@ -189,7 +212,6 @@
       });
     });
 
-    // Trash button handler
     document.querySelectorAll('.trash-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -209,7 +231,6 @@
       });
     });
 
-    // Delete Forever button handler (only in Trash)
     document.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -235,19 +256,16 @@
   async function updateInboxCount() {
     const el = document.getElementById('inboxCount');
     if (!el) return;
-
     const { count, error } = await supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
       .eq('owner_id', currentUserId)
       .eq('folder', 'inbox')
       .is('read_at', null);
-
     if (error) {
       console.error('Inbox count error:', error);
       return;
     }
-
     el.textContent = count > 0 ? `(${count})` : '';
   }
 
@@ -328,6 +346,7 @@
       body: text,
       read_at: null
     };
+
     const { error: sentError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: currentUserId,
@@ -335,23 +354,31 @@
     });
     if (sentError) {
       alert('Failed to save reply to your Sent folder: ' + sentError.message);
+      console.error('Sent error:', sentError);
       return;
     }
+
     const { error: inboxError } = await supabase.from('messages').insert({
       ...messageData,
       owner_id: receiverId,
       folder: 'inbox'
     });
     if (inboxError) {
-      console.error('Inbox insert failed:', inboxError);
-      alert('Reply saved to your Sent, but failed to deliver to recipient inbox: ' + inboxError.message);
+      alert('Reply saved to Sent, but failed to deliver to recipient Inbox: ' + inboxError.message);
+      console.error('Inbox error:', inboxError);
       return;
     }
+
     alert('Reply sent successfully!');
     closeReplyModal();
     await loadConversations();
     showThread(currentConversationId);
   };
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'industry-login.html';
+  });
 
   init();
 </script>
