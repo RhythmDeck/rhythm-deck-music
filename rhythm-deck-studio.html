@@ -57,6 +57,19 @@
     .meter-bar { position: absolute; bottom: 0; width: 100%; background: linear-gradient(#10b981, #34d399); transition: height 0.15s; }
     .record-arm { width: 20px; height: 20px; background: #4a0000; border-radius: 9999px; cursor: pointer; border: 2px solid #ff0000; }
     .record-arm.active { background: #ff0000; }
+
+    /* Piano roll canvas styling */
+    #pianoRollContainer { 
+      margin-top: 2rem; 
+      background: #111; 
+      border-radius: 1rem; 
+      overflow: hidden; 
+      border: 1px solid #333; 
+    }
+    #pianoRollCanvas { 
+      display: block; 
+      background: #0f0f0f; 
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -279,6 +292,20 @@
           <div class="instruction">Add synth pads/leads/arps → modulate/filter → layer textures or create futuristic vibes</div>
         </div>
       </div>
+
+      <!-- Basic Interactive Piano Roll added here -->
+      <div id="pianoRollContainer" class="mt-10 p-4">
+        <h3 class="text-lg font-bold text-purple-400 mb-4">Piano Roll Editor (Click to add notes)</h3>
+        <div class="flex">
+          <canvas id="pianoRollKeys" width="60" height="400" class="bg-zinc-900"></canvas>
+          <div class="flex-1 overflow-x-auto">
+            <canvas id="pianoRollCanvas" width="1200" height="400"></canvas>
+          </div>
+        </div>
+        <div class="mt-3 text-sm text-zinc-400 text-center">
+          Click grid to place notes • Preview plays instantly • Scroll horizontally to extend pattern
+        </div>
+      </div>
     </div>
     <div class="w-full lg:w-96 bg-zinc-900 border-t lg:border-l lg:border-t-0 border-zinc-800 p-6 lg:p-8 overflow-auto">
       <h3 class="uppercase text-xs tracking-widest text-zinc-500 mb-6">Instruments & Sounds</h3>
@@ -306,39 +333,65 @@
   </div>
 
   <script>
-    // === Web Audio API for piano sound ===
+    // === Web Audio API for piano sound (from previous improved version) ===
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function playNote(freq, duration = 0.8) {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
+    function playNote(freq, velocity = 0.8) {
+      const now = audioCtx.currentTime;
 
-      osc.connect(gain);
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.value = freq;
+
+      const osc2 = audioCtx.createOscillator();
+      osc2.type = 'square';
+      osc2.frequency.value = freq * 1.002;
+      const osc2Gain = audioCtx.createGain();
+      osc2Gain.gain.value = 0.18 * velocity;
+      osc2.connect(osc2Gain);
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(8000, now);
+      filter.frequency.exponentialRampToValueAtTime(1200, now + 1.2);
+      filter.Q.value = 1;
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(velocity * 0.9, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(velocity * 0.35, now + 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
+
+      osc.connect(filter);
+      osc2Gain.connect(filter);
+      filter.connect(gain);
       gain.connect(audioCtx.destination);
 
-      // Simple saw + triangle mix for more piano-like tone
-      osc.type = 'sawtooth';
-      const gain2 = audioCtx.createGain();
-      const triOsc = audioCtx.createOscillator();
-      triOsc.type = 'triangle';
-      triOsc.frequency.value = freq;
-      triOsc.connect(gain2);
-      gain2.gain.value = 0.35;
-      gain2.connect(gain);
+      const noise = audioCtx.createBufferSource();
+      const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.02, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      noise.buffer = buffer;
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.12 * velocity, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'bandpass';
+      noiseFilter.frequency.value = 1800;
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(gain);
 
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0, audioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.55, audioCtx.currentTime + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
-      osc.start();
-      triOsc.start();
-      osc.stop(audioCtx.currentTime + duration + 0.2);
-      triOsc.stop(audioCtx.currentTime + duration + 0.2);
+      osc.start(now);
+      osc2.start(now);
+      noise.start(now);
+      osc.stop(now + 4);
+      osc2.stop(now + 4);
+      noise.stop(now + 0.1);
     }
 
     const baseFreq = 261.63; // C4
-    const noteOffsets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
     // BPM Tap Tempo
     let tapTimes = [];
@@ -352,22 +405,21 @@
         const avg = sum / (tapTimes.length - 1);
         const bpm = Math.round(60000 / avg);
         document.getElementById('bpmInput').value = bpm;
+        drawPianoRoll(); // Redraw grid on BPM change
       }
     }
     function updateBPM() {
-      // mock update - in real version would affect playback speed
+      drawPianoRoll();
     }
     function toggleMetronome() {
       const btn = document.getElementById('metronomeBtn');
       btn.textContent = btn.textContent === "Metronome OFF" ? "Metronome ON" : "Metronome OFF";
     }
 
-    // Virtual MIDI Keyboard - now with real sound
+    // Virtual MIDI Keyboard
     function createKeyboard() {
       const container = document.getElementById('midiKeyboard');
       container.innerHTML = '';
-
-      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
       notes.forEach((noteName, i) => {
         const key = document.createElement('div');
@@ -384,7 +436,6 @@
         key.addEventListener('mouseup', () => key.classList.remove('active'));
         key.addEventListener('mouseleave', () => key.classList.remove('active'));
 
-        // Touch support
         key.addEventListener('touchstart', (e) => {
           e.preventDefault();
           const semitone = i;
@@ -437,6 +488,114 @@
     function demoPiano() { alert("Keyboard: Play chords or melodies → add sustain, reverb, delay → create atmospheric pads or leads"); }
     function demoBass() { alert("Bass: Lay down groovy lines → lock with drums → use compression to make it punchy and sit perfectly in the mix"); }
     function demoGuitarToKeyboard() { alert("Demo: Guitar recorded → looped → transformed into lush keyboard pad using pitch/formant shift (real version coming soon)"); }
+
+    // === Basic Piano Roll Implementation ===
+    const pianoRollCanvas = document.getElementById('pianoRollCanvas');
+    const pianoRollKeys = document.getElementById('pianoRollKeys');
+    const ctx = pianoRollCanvas.getContext('2d');
+    const keyCtx = pianoRollKeys.getContext('2d');
+
+    let notesData = []; // {x: beat, y: noteIndex, duration: beats}
+
+    const noteHeight = 25;
+    const beatWidth = 60; // pixels per beat
+    const visibleBeats = pianoRollCanvas.width / beatWidth;
+    let scrollX = 0;
+
+    function drawPianoKeys() {
+      keyCtx.clearRect(0, 0, pianoRollKeys.width, pianoRollKeys.height);
+      for (let i = 0; i < 16; i++) { // C4 to B5 for simplicity
+        const y = (15 - i) * noteHeight;
+        const isBlack = notes[i % 12].includes('#');
+        keyCtx.fillStyle = isBlack ? '#111' : '#eee';
+
+        keyCtx.fillRect(0, y, pianoRollKeys.width, noteHeight - 1);
+        keyCtx.strokeStyle = '#444';
+        keyCtx.strokeRect(0, y, pianoRollKeys.width, noteHeight - 1);
+        keyCtx.fillStyle = isBlack ? '#aaa' : '#222';
+        keyCtx.font = '10px Arial';
+        keyCtx.fillText(notes[i % 12] + '4', 8, y + 16);
+      }
+    }
+
+    function drawPianoRoll() {
+      ctx.clearRect(0, 0, pianoRollCanvas.width, pianoRollCanvas.height);
+
+      const bpm = parseInt(document.getElementById('bpmInput').value) || 128;
+      const pixelsPerBeat = beatWidth;
+
+      // Grid lines (beats)
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 1;
+      for (let beat = 0; beat <= visibleBeats + 5; beat++) {
+        const x = beat * pixelsPerBeat - scrollX;
+        if (x >= 0 && x <= pianoRollCanvas.width) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, pianoRollCanvas.height);
+          ctx.stroke();
+        }
+      }
+
+      // Horizontal lines (octaves)
+      ctx.strokeStyle = '#333';
+      for (let i = 0; i <= 16; i++) {
+        const y = i * noteHeight;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(pianoRollCanvas.width, y);
+        ctx.stroke();
+      }
+
+      // Draw placed notes
+      ctx.fillStyle = '#a855f7';
+      notesData.forEach(note => {
+        const x = note.x * pixelsPerBeat - scrollX;
+        const y = (15 - note.y) * noteHeight; // Invert y so higher notes at top
+        const w = note.duration * pixelsPerBeat;
+        ctx.fillRect(x, y, w, noteHeight - 2);
+        ctx.strokeStyle = '#c084fc';
+        ctx.strokeRect(x, y, w, noteHeight - 2);
+      });
+    }
+
+    function getBeatFromX(x) {
+      const bpm = parseInt(document.getElementById('bpmInput').value) || 128;
+      return Math.round((x + scrollX) / beatWidth * 4) / 4; // snap to 1/16
+    }
+
+    function getNoteIndexFromY(y) {
+      return Math.floor(15 - (y / noteHeight)); // 0 = C4, 11 = B4, etc.
+    }
+
+    pianoRollCanvas.addEventListener('click', (e) => {
+      const rect = pianoRollCanvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const beat = getBeatFromX(mouseX);
+      const noteIdx = getNoteIndexFromY(mouseY);
+
+      if (noteIdx >= 0 && noteIdx < 12) { // Limit to one octave for simplicity
+        const freq = baseFreq * Math.pow(2, noteIdx / 12);
+        playNote(freq);
+
+        // Add note (1 beat duration default)
+        notesData.push({ x: beat, y: noteIdx, duration: 1 });
+        drawPianoRoll();
+      }
+    });
+
+    // Horizontal scroll with mouse wheel
+    pianoRollCanvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      scrollX = Math.max(0, scrollX + e.deltaY * 0.5);
+      drawPianoRoll();
+    });
+
+    // Initial draw
+    drawPianoKeys();
+    drawPianoRoll();
 
     // Initialize
     createKeyboard();
