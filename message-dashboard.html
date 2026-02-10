@@ -114,8 +114,8 @@
       .eq('folder', currentFolder)
       .order('created_at', { ascending: false });
     if (error) {
-      listEl.innerHTML = `<div class="text-red-400 text-center py-10">Error loading messages: ${error.message}</div>`;
-      console.error("Load conversations error:", error);
+      listEl.innerHTML = `<div class="text-red-400 text-center py-10">Error: ${error.message}</div>`;
+      console.error(error);
       return;
     }
     currentMessages = messages || [];
@@ -126,26 +126,36 @@
     }
     const conversations = {};
     currentMessages.forEach(msg => {
-      const rootId = msg.parent_id || msg.id;
-      if (!conversations[rootId]) conversations[rootId] = { root: null, messages: [], latest: null };
+      let rootMsg = msg;
+      const seen = new Set();
+      while (rootMsg.parent_id) {
+        if (seen.has(rootMsg.parent_id)) break;
+        seen.add(rootMsg.parent_id);
+        const parent = currentMessages.find(m => m.id === rootMsg.parent_id);
+        if (!parent) break;
+        rootMsg = parent;
+      }
+      const rootId = rootMsg.id;
+      if (!conversations[rootId]) {
+        conversations[rootId] = { root: rootMsg, messages: [], latest: null };
+      }
       conversations[rootId].messages.push(msg);
-      if (!msg.parent_id) conversations[rootId].root = msg;
       if (!conversations[rootId].latest || new Date(msg.created_at) > new Date(conversations[rootId].latest.created_at)) {
         conversations[rootId].latest = msg;
       }
     });
     const sorted = Object.values(conversations)
-      .filter(c => c.root)
       .sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at));
     listEl.innerHTML = sorted.map(conv => {
       const latest = conv.latest;
+      const root = conv.root;
       const isUnread = !latest.read_at && latest.sender_id !== currentUserId;
       const isTrashFolder = currentFolder === 'trash';
       return `
-        <div data-id="${conv.root.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${isUnread ? 'unread-conv' : ''}">
+        <div data-id="${root.id}" class="msg-item p-4 border-b border-gray-800 cursor-pointer hover:bg-white/5 ${isUnread ? 'unread-conv' : ''}">
           <div class="flex justify-between items-start">
             <div class="flex-1">
-              <p class="font-bold">${conv.root.sender?.name || 'Unknown Sender'}</p>
+              <p class="font-bold">${root.sender?.name || 'Unknown Sender'}</p>
               <p class="text-sm text-gray-400">${new Date(latest.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
               <p class="msg-preview text-gray-300 mt-1">${latest.subject ? latest.subject + ' — ' : ''}${latest.body.substring(0, 80)}${latest.body.length > 80 ? '...' : ''}</p>
             </div>
@@ -209,16 +219,12 @@
   async function updateInboxCount() {
     const el = document.getElementById('inboxCount');
     if (!el) return;
-    const { count, error } = await supabase
+    const { count } = await supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
       .eq('owner_id', currentUserId)
       .eq('folder', 'inbox')
       .is('read_at', null);
-    if (error) {
-      console.error('Inbox count error:', error);
-      return;
-    }
     el.textContent = count > 0 ? `(${count})` : '';
   }
   async function showThread(rootId) {
@@ -307,7 +313,6 @@
       folder: 'inbox'
     });
     if (inboxError) {
-      console.warn('Reply saved to Sent, but failed to deliver to recipient inbox:', inboxError);
       alert('Reply saved to Sent, but failed to deliver to recipient Inbox: ' + inboxError.message);
       return;
     }
