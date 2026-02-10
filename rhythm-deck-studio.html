@@ -9,7 +9,7 @@
   <style>
     body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e5e5e5; }
     .timeline { background: #111111; border: 1px solid #222; border-radius: 1.5rem; overflow: hidden; }
-    .track { background: #1a1a1a; border-bottom: 1px solid #333; }
+    .track { background: #1a1a1a; border-bottom: 1px solid #333; min-height: 100px; }
     .clip { background: linear-gradient(90deg, #10b981, #34d399); height: 52px; border-radius: 8px; cursor: grab; box-shadow: 0 4px 15px rgba(16,185,129,0.4); }
     .rack { background: #18181b; border: 1px solid #27272a; }
     .knob { width: 56px; height: 56px; background: conic-gradient(#10b981 0% 65%, #27272a 65%); border-radius: 9999px; position: relative; }
@@ -91,38 +91,38 @@
       </div>
     </div>
 
-    <!-- Timeline (Center) -->
+    <!-- Timeline (Center) – Fixed layout -->
     <div class="flex-1 overflow-auto p-6 lg:p-10 bg-zinc-950">
       <div class="timeline">
         <!-- Track 1 - Guitar Loop -->
-        <div class="track p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8">
-          <div class="w-full sm:w-56 font-bold text-lg text-emerald-400">Guitar Loop</div>
-          <div class="flex-1 h-20 bg-gradient-to-r from-emerald-600/30 to-transparent relative min-w-0">
+        <div class="track p-6 flex flex-col lg:flex-row items-start lg:items-center gap-6 lg:gap-8">
+          <div class="w-full lg:w-48 font-bold text-lg text-emerald-400">Guitar Loop</div>
+          <div class="flex-1 h-20 bg-gradient-to-r from-emerald-600/30 to-transparent relative min-w-0 overflow-hidden">
             <div class="clip absolute left-0 w-3/4 top-4"></div>
           </div>
-          <div class="w-full sm:w-64 text-sm text-emerald-400 font-mono leading-relaxed mt-2 sm:mt-0">
+          <div class="w-full lg:w-80 text-sm text-emerald-300 font-mono leading-relaxed mt-3 lg:mt-0">
             Record your guitar here → create loops → layer effects like distortion, reverb, or amp sims
           </div>
         </div>
 
         <!-- Track 2 - Drums -->
-        <div class="track p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8">
-          <div class="w-full sm:w-56 font-bold text-lg text-amber-400">Drums</div>
-          <div class="flex-1 h-20 bg-gradient-to-r from-amber-600/30 to-transparent relative min-w-0">
+        <div class="track p-6 flex flex-col lg:flex-row items-start lg:items-center gap-6 lg:gap-8">
+          <div class="w-full lg:w-48 font-bold text-lg text-amber-400">Drums</div>
+          <div class="flex-1 h-20 bg-gradient-to-r from-amber-600/30 to-transparent relative min-w-0 overflow-hidden">
             <div class="clip absolute left-0 w-2/3 top-4"></div>
           </div>
-          <div class="w-full sm:w-64 text-sm text-amber-400 font-mono leading-relaxed mt-2 sm:mt-0">
+          <div class="w-full lg:w-80 text-sm text-amber-300 font-mono leading-relaxed mt-3 lg:mt-0">
             Choose a drum kit → program beats or record live → layer kicks, snares, hats for full rhythm section
           </div>
         </div>
 
         <!-- Track 3 - Piano Pad -->
-        <div class="track p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8">
-          <div class="w-full sm:w-56 font-bold text-lg text-purple-400">Piano Pad</div>
-          <div class="flex-1 h-20 bg-gradient-to-r from-purple-600/30 to-transparent relative min-w-0">
+        <div class="track p-6 flex flex-col lg:flex-row items-start lg:items-center gap-6 lg:gap-8">
+          <div class="w-full lg:w-48 font-bold text-lg text-purple-400">Piano Pad</div>
+          <div class="flex-1 h-20 bg-gradient-to-r from-purple-600/30 to-transparent relative min-w-0 overflow-hidden">
             <div class="clip absolute left-0 w-full top-4"></div>
           </div>
-          <div class="w-full sm:w-64 text-sm text-purple-400 font-mono leading-relaxed mt-2 sm:mt-0">
+          <div class="w-full lg:w-80 text-sm text-purple-300 font-mono leading-relaxed mt-3 lg:mt-0">
             Add melodic layers → play chords or leads → apply reverb, delay, or modulation for atmosphere
           </div>
         </div>
