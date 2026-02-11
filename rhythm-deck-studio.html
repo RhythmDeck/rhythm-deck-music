@@ -372,7 +372,7 @@
   <div id="tourBubble" style="display:none">
     <div id="tourText" class="text-lg font-medium mb-6"></div>
     <div class="flex gap-3">
-      <button onclick="endTour()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-3 rounded-xl text-sm font-medium">Skip Tour</button>
+      <button onclick="endTour()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-3 rounded-xl text-sm font-medium">Stop Tour</button>
       <button onclick="nextTourStep()" id="nextBtn" class="flex-1 bg-emerald-500 hover:bg-emerald-400 py-3 rounded-xl text-sm font-medium">Next</button>
     </div>
   </div>
@@ -788,7 +788,6 @@
       { selector: 'header', text: "Top bar has transport controls, BPM, and export. Use the green button to play." }
     ];
     function startTour() {
-      document.getElementById('tourModal').style.display = 'none';
       document.getElementById('tourOverlay').style.display = 'block';
       currentTourStep = 0;
       showTourStep();
@@ -806,10 +805,8 @@
       bubble.style.left = `${rect.left + rect.width / 2 - 160}px`;
       if (rect.top > window.innerHeight / 2) {
         bubble.style.top = `${rect.top - bubble.offsetHeight - 20}px`;
-        bubble.style.transform = 'translateY(-10px)';
       } else {
         bubble.style.top = `${rect.bottom + 20}px`;
-        bubble.style.transform = 'translateY(10px)';
       }
     }
     function nextTourStep() {
@@ -829,10 +826,6 @@
         const el = document.querySelector(step.selector);
         if (el) el.classList.remove('tour-highlight');
       });
-    }
-    function startTourFromButton() {
-      document.getElementById('tourModal').style.display = 'none';
-      startTour();
     }
     createKeyboard();
   </script>
