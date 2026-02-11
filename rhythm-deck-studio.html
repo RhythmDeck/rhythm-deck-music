@@ -39,10 +39,10 @@
     .loop-card:hover { background: #374151; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
     .preview-btn { background: #10b981; color: white; border-radius: 9999px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s; }
     .preview-btn.playing { background: #ef4444; }
-    .drop-zone { border: 2px dashed #10b981; border-radius: 1rem; padding: 1rem; text-align: center; color: #10b981; font-size: 0.875rem; }
-    .clip { position: absolute; height: 28px; background: #a855f7; border-radius: 4px; color: white; font-size: 10px; display: flex; align-items: center; padding: 0 8px; overflow: hidden; white-space: nowrap; }
-    #tourModal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify-content: center; }
-    .tour-step { max-width: 520px; background: #18181b; border-radius: 1.5rem; padding: 2rem; }
+    .tour-highlight { position: relative; z-index: 50; box-shadow: 0 0 0 6px #10b981; }
+    #tourOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; pointer-events: none; }
+    #tourBubble { position: fixed; background: #18181b; border: 2px solid #10b981; border-radius: 1rem; padding: 1.25rem; max-width: 320px; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+    #tourBubble::after { content: ''; position: absolute; width: 0; height: 0; border: 10px solid transparent; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -365,40 +365,15 @@
     </div>
   </div>
 
-  <!-- Tour Modal -->
-  <div id="tourModal">
-    <div class="tour-step">
-      <div class="flex justify-between items-center mb-8">
-        <div class="text-2xl font-bold text-emerald-400">Welcome to Rhythm Deck Studio</div>
-        <button onclick="closeTour()" class="text-zinc-400 hover:text-white text-3xl">×</button>
-      </div>
-      <div class="space-y-8">
-        <div class="flex gap-6">
-          <div class="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0">1</div>
-          <div>
-            <div class="font-semibold text-lg">Build in the center</div>
-            <div class="text-zinc-400">Use Piano Roll + Drum Sequencer to create your ideas</div>
-          </div>
-        </div>
-        <div class="flex gap-6">
-          <div class="w-10 h-10 bg-purple-500 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0">2</div>
-          <div>
-            <div class="font-semibold text-lg">Mix on the left</div>
-            <div class="text-zinc-400">Adjust levels, pan, and effects in real time</div>
-          </div>
-        </div>
-        <div class="flex gap-6">
-          <div class="w-10 h-10 bg-violet-500 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0">3</div>
-          <div>
-            <div class="font-semibold text-lg">Play & record on the right</div>
-            <div class="text-zinc-400">Virtual keyboard, loops, and instant previews</div>
-          </div>
-        </div>
-      </div>
-      <div class="mt-10 flex gap-4">
-        <button onclick="closeTour()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-4 rounded-2xl font-medium">Maybe later</button>
-        <button onclick="closeTour()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 py-4 rounded-2xl font-medium">Got it, let's go!</button>
-      </div>
+  <!-- Tour Overlay -->
+  <div id="tourOverlay" style="display:none"></div>
+
+  <!-- Tour Bubble -->
+  <div id="tourBubble" style="display:none">
+    <div id="tourText" class="text-lg font-medium mb-6"></div>
+    <div class="flex gap-3">
+      <button onclick="endTour()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-3 rounded-xl text-sm font-medium">Skip Tour</button>
+      <button onclick="nextTourStep()" id="nextBtn" class="flex-1 bg-emerald-500 hover:bg-emerald-400 py-3 rounded-xl text-sm font-medium">Next</button>
     </div>
   </div>
 
@@ -718,6 +693,7 @@
       {name: "Tom", freq: 120, color: "#8b5cf6"},
       {name: "Crash", freq: 8000, color: "#ec4899"}
     ];
+
     let drumPattern = Array(8).fill().map(() => Array(16).fill(false));
     function initDrumGrid() {
       const grid = document.getElementById('drumGrid');
@@ -753,7 +729,8 @@
     const previewPlayers = new Map();
     document.querySelectorAll('.preview-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
-        const url = btn.parentElement.dataset.url;
+        const card = btn.parentElement;
+        const url = card.dataset.url;
         if (!url) return;
         if (previewPlayers.has(url)) {
           previewPlayers.get(url).stop();
@@ -780,7 +757,7 @@
             btn.textContent = '▶';
           };
         } catch (err) {
-          alert('Preview unavailable for this loop');
+          alert('Preview unavailable');
         }
       });
     });
@@ -801,30 +778,61 @@
       e.preventDefault();
       dropZone.style.background = '';
       const loopName = e.dataTransfer.getData('text/plain');
-      const track = document.querySelector('.track');
-      if (track) {
-        const clip = document.createElement('div');
-        clip.className = 'clip';
-        clip.style.left = '20%';
-        clip.style.width = '180px';
-        clip.textContent = loopName;
-        track.style.position = 'relative';
-        track.appendChild(clip);
-        setTimeout(() => clip.remove(), 8000);
-      }
       alert(`"${loopName}" dropped onto timeline!`);
     });
+    let currentTourStep = 0;
+    const tourSteps = [
+      { selector: '#timelineDropZone', text: "This is your workspace. Build melodies in the Piano Roll and beats in the Drum Sequencer." },
+      { selector: '.lg\\:w-80', text: "Left side is your mixer. Adjust volumes, pan, effects, and record-arm tracks here." },
+      { selector: '.lg\\:w-96', text: "Right side has your instruments, virtual keyboard, and loops to drag into your song." },
+      { selector: 'header', text: "Top bar has transport controls, BPM, and export. Use the green button to play." }
+    ];
     function startTour() {
-      document.getElementById('tourModal').style.display = 'flex';
-    }
-    function closeTour() {
       document.getElementById('tourModal').style.display = 'none';
-      localStorage.setItem('tourSeen', 'true');
+      document.getElementById('tourOverlay').style.display = 'block';
+      currentTourStep = 0;
+      showTourStep();
     }
-    if (!localStorage.getItem('tourSeen')) {
-      setTimeout(() => {
-        document.getElementById('tourModal').style.display = 'flex';
-      }, 800);
+    function showTourStep() {
+      const step = tourSteps[currentTourStep];
+      const target = document.querySelector(step.selector);
+      if (!target) return endTour();
+      target.classList.add('tour-highlight');
+      const bubble = document.getElementById('tourBubble');
+      const textEl = document.getElementById('tourText');
+      textEl.textContent = step.text;
+      bubble.style.display = 'block';
+      const rect = target.getBoundingClientRect();
+      bubble.style.left = `${rect.left + rect.width / 2 - 160}px`;
+      if (rect.top > window.innerHeight / 2) {
+        bubble.style.top = `${rect.top - bubble.offsetHeight - 20}px`;
+        bubble.style.transform = 'translateY(-10px)';
+      } else {
+        bubble.style.top = `${rect.bottom + 20}px`;
+        bubble.style.transform = 'translateY(10px)';
+      }
+    }
+    function nextTourStep() {
+      const prevTarget = document.querySelector(tourSteps[currentTourStep].selector);
+      if (prevTarget) prevTarget.classList.remove('tour-highlight');
+      currentTourStep++;
+      if (currentTourStep >= tourSteps.length) {
+        endTour();
+      } else {
+        showTourStep();
+      }
+    }
+    function endTour() {
+      document.getElementById('tourOverlay').style.display = 'none';
+      document.getElementById('tourBubble').style.display = 'none';
+      tourSteps.forEach(step => {
+        const el = document.querySelector(step.selector);
+        if (el) el.classList.remove('tour-highlight');
+      });
+    }
+    function startTourFromButton() {
+      document.getElementById('tourModal').style.display = 'none';
+      startTour();
     }
     createKeyboard();
   </script>
