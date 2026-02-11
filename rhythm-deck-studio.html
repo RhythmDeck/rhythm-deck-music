@@ -35,6 +35,10 @@
     .step-pad.active { background: #fbbf24; box-shadow: 0 0 12px #fbbf24; }
     .step-pad:hover { background: #374151; }
     .drum-label { min-width: 80px; font-size: 0.875rem; color: #9ca3af; }
+    .loop-card { background: #1f2937; border-radius: 0.75rem; padding: 0.75rem; transition: all 0.2s; cursor: grab; }
+    .loop-card:hover { background: #374151; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    .preview-btn { background: #10b981; color: white; border-radius: 9999px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s; }
+    .preview-btn.playing { background: #ef4444; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -257,7 +261,6 @@
           <div class="instruction">Add synth pads/leads/arps → modulate/filter → layer textures or create futuristic vibes</div>
         </div>
       </div>
-
       <div id="pianoRollContainer">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-bold text-purple-400">Piano Roll Editor</h3>
@@ -273,7 +276,6 @@
           Click to add • Drag note to move • Hover right edge + drag to resize duration • Right-click/long-press to delete
         </div>
       </div>
-
       <div id="drumSeqContainer" class="mt-8">
         <h3 class="text-lg font-bold text-amber-400 mb-4">Drum Step Sequencer (16 steps)</h3>
         <div id="drumGrid" class="space-y-3"></div>
@@ -282,7 +284,6 @@
         </div>
       </div>
     </div>
-
     <div class="w-full lg:w-96 bg-zinc-900 border-t lg:border-l lg:border-t-0 border-zinc-800 p-6 lg:p-8 overflow-auto">
       <h3 class="uppercase text-xs tracking-widest text-zinc-500 mb-6">Instruments & Sounds</h3>
       <div class="grid grid-cols-2 gap-5 mb-12">
@@ -304,6 +305,72 @@
         <button onClick="demoGuitarToKeyboard()" class="mt-8 bg-white text-black px-12 lg:px-16 py-5 rounded-3xl font-bold text-lg lg:text-xl hover:bg-emerald-400 transition">
           Try Transformation Demo
         </button>
+      </div>
+
+      <!-- New: Loop Browser & Library at bottom right -->
+      <div class="mt-12">
+        <h3 class="uppercase text-xs tracking-widest text-zinc-500 mb-4">Loop Browser & Library</h3>
+        <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
+          <div class="loop-card flex items-center gap-3 group" draggable="true">
+            <button class="preview-btn text-lg" data-url="https://sampleswap.org/samples-ghost/DRUM LOOPS and BREAKS/110-119bpm/loop_110bpm_kick_snare_hat_01.wav.mp3">▶</button>
+            <div class="flex-1">
+              <div class="font-medium">Classic 110 BPM Drum Loop</div>
+              <div class="text-xs text-zinc-500">Drums • 110 BPM</div>
+            </div>
+          </div>
+          <div class="loop-card flex items-center gap-3 group" draggable="true">
+            <button class="preview-btn text-lg" data-url="https://sampleswap.org/samples-ghost/DRUM LOOPS and BREAKS/breakbeats/break_140bpm_jungle_01.wav.mp3">▶</button>
+            <div class="flex-1">
+              <div class="font-medium">Jungle Break 140 BPM</div>
+              <div class="text-xs text-zinc-500">Drums/Breakbeat • 140 BPM</div>
+            </div>
+          </div>
+          <div class="loop-card flex items-center gap-3 group" draggable="true">
+            <button class="preview-btn text-lg" data-url="https://freesound.org/data/previews/612/612095_5674468-lq.mp3">▶</button>
+            <div class="flex-1">
+              <div class="font-medium">Deep Bass Loop 90 BPM</div>
+              <div class="text-xs text-zinc-500">Bass • 90 BPM (CC0)</div>
+            </div>
+          </div>
+          <div class="loop-card flex items-center gap-3 group" draggable="true">
+            <button class="preview-btn text-lg" data-url="https://sampleswap.org/samples-ghost/MELODIC SAMPLES and LOOPS/synth/loop_synth_arpeggio_120bpm_01.wav.mp3">▶</button>
+            <div class="flex-1">
+              <div class="font-medium">Synth Arp 120 BPM</div>
+              <div class="text-xs text-zinc-500">Melody/Synth • 120 BPM</div>
+            </div>
+          </div>
+          <div class="loop-card flex items-center gap-3 group" draggable="true">
+            <button class="preview-btn text-lg" data-url="https://freesound.org/data/previews/456/456499_5121236-lq.mp3">▶</button>
+            <div class="flex-1">
+              <div class="font-medium">Atmospheric Pad Loop</div>
+              <div class="text-xs text-zinc-500">Pad/Ambient • 100 BPM (CC0)</div>
+            </div>
+          </div>
+          <div class="loop-card flex items-center gap-3 group" draggable="true">
+            <button class="preview-btn text-lg" data-url="https://sampleswap.org/samples-ghost/SFX and UNUSUAL SOUNDS/electro/whoosh_riser_01.wav.mp3">▶</button>
+            <div class="flex-1">
+              <div class="font-medium">Riser FX Sweep</div>
+              <div class="text-xs text-zinc-500">FX • One-shot</div>
+            </div>
+          </div>
+          <div class="loop-card flex items-center gap-3 group" draggable="true">
+            <button class="preview-btn text-lg" data-url="https://freesound.org/data/previews/612/612610_5674468-lq.mp3">▶</button>
+            <div class="flex-1">
+              <div class="font-medium">Trap Hi-Hat Roll</div>
+              <div class="text-xs text-zinc-500">Drums/Perc • 140 BPM (CC0)</div>
+            </div>
+          </div>
+          <div class="loop-card flex items-center gap-3 group" draggable="true">
+            <button class="preview-btn text-lg" data-url="https://sampleswap.org/samples-ghost/MELODIC SAMPLES and LOOPS/bass/loop_bassline_130bpm_01.wav.mp3">▶</button>
+            <div class="flex-1">
+              <div class="font-medium">Bassline Groove 130 BPM</div>
+              <div class="text-xs text-zinc-500">Bass • 130 BPM</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 text-xs text-zinc-500 text-center">
+          Preview loops • Drag to timeline (coming soon) • Royalty-free/CC0 sources
+        </div>
       </div>
     </div>
   </div>
@@ -443,7 +510,7 @@
     function demoBass() { alert("Bass: Lay down groovy lines → lock with drums → use compression to make it punchy and sit perfectly in the mix"); }
     function demoGuitarToKeyboard() { alert("Demo: Guitar recorded → looped → transformed into lush keyboard pad using pitch/formant shift (real version coming soon)"); }
 
-    // === Piano Roll ===
+    // Piano Roll code (unchanged from previous version, omitted for brevity but included in full)
     const pianoRollCanvas = document.getElementById('pianoRollCanvas');
     const pianoRollKeys = document.getElementById('pianoRollKeys');
     const ctx = pianoRollCanvas.getContext('2d');
@@ -454,7 +521,6 @@
     let scrollX = 0;
     let draggingNote = null;
     let resizingNote = null;
-
     function drawPianoKeys() {
       keyCtx.clearRect(0, 0, pianoRollKeys.width, pianoRollKeys.height);
       for (let i = 0; i < 16; i++) {
@@ -469,7 +535,6 @@
         keyCtx.fillText(notes[i % 12] + (4 + Math.floor(i / 12)), 8, y + 16);
       }
     }
-
     function drawPianoRoll() {
       ctx.clearRect(0, 0, pianoRollCanvas.width, pianoRollCanvas.height);
       const pixelsPerBeat = beatWidth;
@@ -501,15 +566,12 @@
         ctx.strokeRect(x, y, w, noteHeight - 2);
       });
     }
-
     function getBeatFromX(x) {
       return Math.round((x + scrollX) / beatWidth * 4) / 4;
     }
-
     function getNoteIndexFromY(y) {
       return Math.max(0, Math.min(15, Math.floor(15 - (y / noteHeight))));
     }
-
     function findNoteAt(x, y, checkResize = false) {
       const beat = getBeatFromX(x);
       const noteIdx = getNoteIndexFromY(y);
@@ -526,7 +588,6 @@
       }
       return null;
     }
-
     pianoRollCanvas.addEventListener('click', (e) => {
       if (draggingNote !== null || resizingNote !== null) return;
       const rect = pianoRollCanvas.getBoundingClientRect();
@@ -541,7 +602,6 @@
         drawPianoRoll();
       }
     });
-
     pianoRollCanvas.addEventListener('mousedown', (e) => {
       const rect = pianoRollCanvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -558,12 +618,10 @@
         e.preventDefault();
       }
     });
-
     document.addEventListener('mousemove', (e) => {
       const rect = pianoRollCanvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
       if (draggingNote !== null) {
         notesData[draggingNote].x = getBeatFromX(mouseX);
         notesData[draggingNote].y = getNoteIndexFromY(mouseY);
@@ -579,14 +637,12 @@
         pianoRollCanvas.style.cursor = hit ? (hit.isResize ? 'ew-resize' : 'move') : 'crosshair';
       }
     });
-
     document.addEventListener('mouseup', () => {
       draggingNote = null;
       resizingNote = null;
       pianoRollCanvas.style.cursor = 'crosshair';
       drawPianoRoll();
     });
-
     pianoRollCanvas.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       const rect = pianoRollCanvas.getBoundingClientRect();
@@ -598,7 +654,6 @@
         drawPianoRoll();
       }
     });
-
     let touchTimer;
     pianoRollCanvas.addEventListener('touchstart', (e) => {
       const touch = e.touches[0];
@@ -615,21 +670,21 @@
     });
     pianoRollCanvas.addEventListener('touchend', () => clearTimeout(touchTimer));
     pianoRollCanvas.addEventListener('touchmove', () => clearTimeout(touchTimer));
-
     document.getElementById('clearPianoRoll').addEventListener('click', () => {
       if (confirm("Clear all notes in the piano roll?")) {
         notesData = [];
         drawPianoRoll();
       }
     });
-
     pianoRollCanvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       scrollX = Math.max(0, scrollX + e.deltaY * 0.5);
       drawPianoRoll();
     });
+    drawPianoKeys();
+    drawPianoRoll();
 
-    // === Drum Step Sequencer ===
+    // Drum Step Sequencer
     const drumSounds = [
       {name: "Kick",   freq: 55,   color: "#ef4444"},
       {name: "Snare",  freq: 220,  color: "#f59e0b"},
@@ -640,9 +695,7 @@
       {name: "Tom",    freq: 120,  color: "#8b5cf6"},
       {name: "Crash",  freq: 8000, color: "#ec4899"}
     ];
-
     let drumPattern = Array(8).fill().map(() => Array(16).fill(false));
-
     function initDrumGrid() {
       const grid = document.getElementById('drumGrid');
       grid.innerHTML = '';
@@ -673,11 +726,50 @@
         grid.appendChild(rowDiv);
       });
     }
-
     initDrumGrid();
 
-    drawPianoKeys();
-    drawPianoRoll();
+    // New: Loop Browser Preview Logic
+    const previewPlayers = new Map(); // url → AudioBufferSourceNode
+    document.querySelectorAll('.preview-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const url = btn.dataset.url;
+        if (!url) return;
+
+        if (previewPlayers.has(url) && previewPlayers.get(url).context.state === 'running') {
+          previewPlayers.get(url).stop();
+          previewPlayers.delete(url);
+          btn.classList.remove('playing');
+          btn.textContent = '▶';
+          return;
+        }
+
+        try {
+          const response = await fetch(url);
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+          const source = audioCtx.createBufferSource();
+          source.buffer = audioBuffer;
+          source.loop = true; // loop the sample
+          source.connect(audioCtx.destination);
+          source.start();
+          previewPlayers.set(url, source);
+
+          btn.classList.add('playing');
+          btn.textContent = '■';
+
+          source.onended = () => {
+            previewPlayers.delete(url);
+            btn.classList.remove('playing');
+            btn.textContent = '▶';
+          };
+        } catch (err) {
+          console.error('Loop preview failed:', err);
+          alert('Could not load preview — try another loop or check connection.');
+        }
+      });
+    });
+
     createKeyboard();
   </script>
 </body>
