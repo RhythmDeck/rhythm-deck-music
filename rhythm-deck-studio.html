@@ -29,8 +29,12 @@
     .meter-bar { position: absolute; bottom: 0; width: 100%; background: linear-gradient(#10b981, #34d399); transition: height 0.15s; }
     .record-arm { width: 20px; height: 20px; background: #4a0000; border-radius: 9999px; cursor: pointer; border: 2px solid #ff0000; }
     .record-arm.active { background: #ff0000; }
-    #pianoRollContainer { margin-top: 2rem; background: #111; border-radius: 1rem; overflow: hidden; border: 1px solid #333; }
+    #pianoRollContainer, #drumSeqContainer { margin-top: 2rem; background: #111; border-radius: 1rem; overflow: hidden; border: 1px solid #333; padding: 1rem; }
     #pianoRollCanvas { display: block; background: #0f0f0f; cursor: crosshair; }
+    .step-pad { width: 2.5rem; height: 2.5rem; background: #1f2937; border-radius: 0.375rem; cursor: pointer; transition: all 0.15s; }
+    .step-pad.active { background: #fbbf24; box-shadow: 0 0 12px #fbbf24; }
+    .step-pad:hover { background: #374151; }
+    .drum-label { min-width: 80px; font-size: 0.875rem; color: #9ca3af; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -153,7 +157,6 @@
         <div class="effect-item flex items-center gap-4">
           <span class="effect-label w-24">Distortion</span>
           <input type="range" min="0" max="100" value="30" class="flex-1" oninput="this.nextElementSibling.textContent = this.value + '%'">
-
           <span class="effect-value w-16">30%</span>
         </div>
         <div class="effect-item flex items-center gap-4">
@@ -254,7 +257,8 @@
           <div class="instruction">Add synth pads/leads/arps → modulate/filter → layer textures or create futuristic vibes</div>
         </div>
       </div>
-      <div id="pianoRollContainer" class="mt-10 p-4">
+
+      <div id="pianoRollContainer">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-bold text-purple-400">Piano Roll Editor</h3>
           <button id="clearPianoRoll" class="bg-red-700 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium transition">Clear All Notes</button>
@@ -266,10 +270,19 @@
           </div>
         </div>
         <div class="mt-3 text-sm text-zinc-400 text-center">
-          Click to add note • Drag note to move • Right-click (or long-press) to delete • Scroll horizontally
+          Click to add • Drag note to move • Hover right edge + drag to resize duration • Right-click/long-press to delete
+        </div>
+      </div>
+
+      <div id="drumSeqContainer" class="mt-8">
+        <h3 class="text-lg font-bold text-amber-400 mb-4">Drum Step Sequencer (16 steps)</h3>
+        <div id="drumGrid" class="space-y-3"></div>
+        <div class="mt-3 text-sm text-zinc-400 text-center">
+          Click pads to toggle • Sounds preview on click • Will sync with transport in future update
         </div>
       </div>
     </div>
+
     <div class="w-full lg:w-96 bg-zinc-900 border-t lg:border-l lg:border-t-0 border-zinc-800 p-6 lg:p-8 overflow-auto">
       <h3 class="uppercase text-xs tracking-widest text-zinc-500 mb-6">Instruments & Sounds</h3>
       <div class="grid grid-cols-2 gap-5 mb-12">
@@ -294,6 +307,7 @@
       </div>
     </div>
   </div>
+
   <script>
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playNote(freq, velocity = 0.8) {
@@ -428,6 +442,8 @@
     function demoPiano() { alert("Keyboard: Play chords or melodies → add sustain, reverb, delay → create atmospheric pads or leads"); }
     function demoBass() { alert("Bass: Lay down groovy lines → lock with drums → use compression to make it punchy and sit perfectly in the mix"); }
     function demoGuitarToKeyboard() { alert("Demo: Guitar recorded → looped → transformed into lush keyboard pad using pitch/formant shift (real version coming soon)"); }
+
+    // === Piano Roll ===
     const pianoRollCanvas = document.getElementById('pianoRollCanvas');
     const pianoRollKeys = document.getElementById('pianoRollKeys');
     const ctx = pianoRollCanvas.getContext('2d');
@@ -437,6 +453,8 @@
     const beatWidth = 60;
     let scrollX = 0;
     let draggingNote = null;
+    let resizingNote = null;
+
     function drawPianoKeys() {
       keyCtx.clearRect(0, 0, pianoRollKeys.width, pianoRollKeys.height);
       for (let i = 0; i < 16; i++) {
@@ -451,11 +469,12 @@
         keyCtx.fillText(notes[i % 12] + (4 + Math.floor(i / 12)), 8, y + 16);
       }
     }
+
     function drawPianoRoll() {
       ctx.clearRect(0, 0, pianoRollCanvas.width, pianoRollCanvas.height);
       const pixelsPerBeat = beatWidth;
       ctx.strokeStyle = '#222';
-      for (let beat = 0; beat <= (pianoRollCanvas.width + scrollX) / pixelsPerBeat + 1; beat++) {
+      for (let beat = 0; beat <= (pianoRollCanvas.width + scrollX) / pixelsPerBeat + 5; beat++) {
         const x = beat * pixelsPerBeat - scrollX;
         if (x >= 0 && x <= pianoRollCanvas.width) {
           ctx.beginPath();
@@ -476,31 +495,40 @@
         const x = note.x * pixelsPerBeat - scrollX;
         const y = (15 - note.y) * noteHeight;
         const w = note.duration * pixelsPerBeat;
-        ctx.fillStyle = draggingNote === index ? '#c084fc' : '#a855f7';
+        ctx.fillStyle = (draggingNote === index || resizingNote === index) ? '#c084fc' : '#a855f7';
         ctx.fillRect(x, y, w, noteHeight - 2);
         ctx.strokeStyle = '#c084fc';
         ctx.strokeRect(x, y, w, noteHeight - 2);
       });
     }
+
     function getBeatFromX(x) {
       return Math.round((x + scrollX) / beatWidth * 4) / 4;
     }
+
     function getNoteIndexFromY(y) {
       return Math.max(0, Math.min(15, Math.floor(15 - (y / noteHeight))));
     }
-    function findNoteAt(x, y) {
+
+    function findNoteAt(x, y, checkResize = false) {
       const beat = getBeatFromX(x);
       const noteIdx = getNoteIndexFromY(y);
       for (let i = notesData.length - 1; i >= 0; i--) {
         const n = notesData[i];
-        if (beat >= n.x && beat < n.x + n.duration && noteIdx === n.y) {
-          return i;
+        if (noteIdx === n.y) {
+          const noteLeft = n.x;
+          const noteRight = n.x + n.duration;
+          if (beat >= noteLeft && beat < noteRight) {
+            if (checkResize && Math.abs(beat - noteRight) < 0.25) return {index: i, isResize: true};
+            return {index: i, isResize: false};
+          }
         }
       }
-      return -1;
+      return null;
     }
+
     pianoRollCanvas.addEventListener('click', (e) => {
-      if (draggingNote !== null) return;
+      if (draggingNote !== null || resizingNote !== null) return;
       const rect = pianoRollCanvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -513,45 +541,64 @@
         drawPianoRoll();
       }
     });
+
     pianoRollCanvas.addEventListener('mousedown', (e) => {
       const rect = pianoRollCanvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-      const idx = findNoteAt(mouseX, mouseY);
-      if (idx !== -1) {
-        draggingNote = idx;
-        pianoRollCanvas.style.cursor = 'grabbing';
+      const hit = findNoteAt(mouseX, mouseY, true);
+      if (hit) {
+        if (hit.isResize) {
+          resizingNote = hit.index;
+          pianoRollCanvas.style.cursor = 'ew-resize';
+        } else {
+          draggingNote = hit.index;
+          pianoRollCanvas.style.cursor = 'grabbing';
+        }
         e.preventDefault();
       }
     });
+
     document.addEventListener('mousemove', (e) => {
+      const rect = pianoRollCanvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
       if (draggingNote !== null) {
-        const rect = pianoRollCanvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
         notesData[draggingNote].x = getBeatFromX(mouseX);
         notesData[draggingNote].y = getNoteIndexFromY(mouseY);
         drawPianoRoll();
-      }
-    });
-    document.addEventListener('mouseup', () => {
-      if (draggingNote !== null) {
-        draggingNote = null;
-        pianoRollCanvas.style.cursor = 'crosshair';
+      } else if (resizingNote !== null) {
+        const beat = getBeatFromX(mouseX);
+        const note = notesData[resizingNote];
+        const newDuration = Math.max(0.25, Math.round((beat - note.x) * 4) / 4);
+        note.duration = newDuration;
         drawPianoRoll();
+      } else {
+        const hit = findNoteAt(mouseX, mouseY, true);
+        pianoRollCanvas.style.cursor = hit ? (hit.isResize ? 'ew-resize' : 'move') : 'crosshair';
       }
     });
+
+    document.addEventListener('mouseup', () => {
+      draggingNote = null;
+      resizingNote = null;
+      pianoRollCanvas.style.cursor = 'crosshair';
+      drawPianoRoll();
+    });
+
     pianoRollCanvas.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       const rect = pianoRollCanvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-      const idx = findNoteAt(mouseX, mouseY);
-      if (idx !== -1) {
-        notesData.splice(idx, 1);
+      const hit = findNoteAt(mouseX, mouseY);
+      if (hit) {
+        notesData.splice(hit.index, 1);
         drawPianoRoll();
       }
     });
+
     let touchTimer;
     pianoRollCanvas.addEventListener('touchstart', (e) => {
       const touch = e.touches[0];
@@ -559,26 +606,76 @@
       const mouseX = touch.clientX - rect.left;
       const mouseY = touch.clientY - rect.top;
       touchTimer = setTimeout(() => {
-        const idx = findNoteAt(mouseX, mouseY);
-        if (idx !== -1) {
-          notesData.splice(idx, 1);
+        const hit = findNoteAt(mouseX, mouseY);
+        if (hit) {
+          notesData.splice(hit.index, 1);
           drawPianoRoll();
         }
       }, 500);
     });
     pianoRollCanvas.addEventListener('touchend', () => clearTimeout(touchTimer));
     pianoRollCanvas.addEventListener('touchmove', () => clearTimeout(touchTimer));
+
     document.getElementById('clearPianoRoll').addEventListener('click', () => {
       if (confirm("Clear all notes in the piano roll?")) {
         notesData = [];
         drawPianoRoll();
       }
     });
+
     pianoRollCanvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       scrollX = Math.max(0, scrollX + e.deltaY * 0.5);
       drawPianoRoll();
     });
+
+    // === Drum Step Sequencer ===
+    const drumSounds = [
+      {name: "Kick",   freq: 55,   color: "#ef4444"},
+      {name: "Snare",  freq: 220,  color: "#f59e0b"},
+      {name: "Clap",   freq: 300,  color: "#eab308"},
+      {name: "Hi-hat", freq: 6000, color: "#10b981"},
+      {name: "Open Hat", freq: 4500, color: "#34d399"},
+      {name: "Rim",    freq: 400,  color: "#3b82f6"},
+      {name: "Tom",    freq: 120,  color: "#8b5cf6"},
+      {name: "Crash",  freq: 8000, color: "#ec4899"}
+    ];
+
+    let drumPattern = Array(8).fill().map(() => Array(16).fill(false));
+
+    function initDrumGrid() {
+      const grid = document.getElementById('drumGrid');
+      grid.innerHTML = '';
+      drumSounds.forEach((sound, row) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'flex items-center gap-3';
+        const label = document.createElement('div');
+        label.className = 'drum-label text-right';
+        label.textContent = sound.name;
+        rowDiv.appendChild(label);
+        for (let step = 0; step < 16; step++) {
+          const pad = document.createElement('div');
+          pad.className = 'step-pad';
+          pad.dataset.row = row;
+          pad.dataset.step = step;
+          if (drumPattern[row][step]) pad.classList.add('active');
+          pad.style.background = drumPattern[row][step] ? sound.color : '#1f2937';
+          pad.addEventListener('click', () => {
+            drumPattern[row][step] = !drumPattern[row][step];
+            pad.classList.toggle('active');
+            pad.style.background = drumPattern[row][step] ? sound.color : '#1f2937';
+            if (drumPattern[row][step]) {
+              playNote(sound.freq, 0.7);
+            }
+          });
+          rowDiv.appendChild(pad);
+        }
+        grid.appendChild(rowDiv);
+      });
+    }
+
+    initDrumGrid();
+
     drawPianoKeys();
     drawPianoRoll();
     createKeyboard();
