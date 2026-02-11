@@ -209,6 +209,9 @@
           <button onclick="this.classList.toggle('bg-emerald-600')" class="flex-1 bg-zinc-800 hover:bg-emerald-600 py-3 rounded-2xl text-sm font-medium transition">Dither ON</button>
         </div>
       </div>
+      <div class="mt-12 border-t border-zinc-700 pt-8">
+        <img src="studio-image-1.jpg" alt="Left Column Image Placeholder" class="w-full h-64 object-cover rounded-2xl border border-emerald-500/40 shadow-[0_8px_32px_rgba(16,185,129,0.2)]">
+      </div>
     </div>
     <div class="flex-1 overflow-auto p-6 lg:p-10 bg-zinc-950" id="timelineDropZone">
       <div class="timeline">
@@ -362,12 +365,13 @@
         </div>
         <div class="mt-4 text-xs text-zinc-500 text-center">Drag any loop onto a track</div>
       </div>
+      <div class="mt-12">
+        <img src="studio-image-2.jpg" alt="Right Column Image Placeholder" class="w-full h-64 object-cover rounded-2xl border border-emerald-500/40 shadow-[0_8px_32px_rgba(16,185,129,0.2)]">
+      </div>
     </div>
   </div>
-
   <!-- Tour Overlay -->
   <div id="tourOverlay" style="display:none"></div>
-
   <!-- Tour Bubble -->
   <div id="tourBubble" style="display:none">
     <div id="tourText" class="text-lg font-medium mb-6"></div>
@@ -376,7 +380,6 @@
       <button onclick="nextTourStep()" id="nextBtn" class="flex-1 bg-emerald-500 hover:bg-emerald-400 py-3 rounded-xl text-sm font-medium">Next</button>
     </div>
   </div>
-
   <script>
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playNote(freq, velocity = 0.8) {
@@ -573,6 +576,7 @@
       return Math.max(0, Math.min(15, Math.floor(15 - (y / noteHeight))));
     }
     function findNoteAt(x, y, checkResize = false) {
+
       const beat = getBeatFromX(x);
       const noteIdx = getNoteIndexFromY(y);
       for (let i = notesData.length - 1; i >= 0; i--) {
@@ -693,7 +697,6 @@
       {name: "Tom", freq: 120, color: "#8b5cf6"},
       {name: "Crash", freq: 8000, color: "#ec4899"}
     ];
-
     let drumPattern = Array(8).fill().map(() => Array(16).fill(false));
     function initDrumGrid() {
       const grid = document.getElementById('drumGrid');
