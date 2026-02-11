@@ -209,8 +209,8 @@
           <button onclick="this.classList.toggle('bg-emerald-600')" class="flex-1 bg-zinc-800 hover:bg-emerald-600 py-3 rounded-2xl text-sm font-medium transition">Dither ON</button>
         </div>
       </div>
-      <div class="mt-12 border-t border-zinc-700 pt-8">
-        <img src="studio-image-1.jpg" alt="Left Column Image Placeholder" class="w-full h-64 object-cover rounded-2xl border border-emerald-500/40 shadow-[0_8px_32px_rgba(16,185,129,0.2)]">
+      <div class="mt-12 border-t border-zinc-700 pt-8 flex-1">
+        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27c1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Professional recording session - vocal tracking" class="w-full h-full object-cover rounded-2xl border border-emerald-500/40 shadow-[0_8px_32px_rgba(16,185,129,0.2)]">
       </div>
     </div>
     <div class="flex-1 overflow-auto p-6 lg:p-10 bg-zinc-950" id="timelineDropZone">
@@ -324,52 +324,14 @@
           Try Transformation Demo
         </button>
       </div>
-      <div class="mt-12">
-        <h3 class="uppercase text-xs tracking-widest text-amber-400 mb-4">Loop Browser & Library</h3>
-        <div class="space-y-3 max-h-96 overflow-y-auto pr-2" id="loopLibrary">
-          <div class="loop-card flex items-center gap-3 group" draggable="true" data-name="Classic 110 BPM Drum Loop" data-url="https://sampleswap.org/samples-ghost/DRUM LOOPS and BREAKS/110-119bpm/loop_110bpm_kick_snare_hat_01.wav.mp3">
-            <button class="preview-btn text-lg">▶</button>
-            <div class="flex-1">
-              <div class="font-medium">Classic 110 BPM Drum Loop</div>
-              <div class="text-xs text-zinc-500">Drums • 110 BPM</div>
-            </div>
-          </div>
-          <div class="loop-card flex items-center gap-3 group" draggable="true" data-name="Jungle Break 140 BPM" data-url="https://sampleswap.org/samples-ghost/DRUM LOOPS and BREAKS/breakbeats/break_140bpm_jungle_01.wav.mp3">
-            <button class="preview-btn text-lg">▶</button>
-            <div class="flex-1">
-              <div class="font-medium">Jungle Break 140 BPM</div>
-              <div class="text-xs text-zinc-500">Drums/Breakbeat • 140 BPM</div>
-            </div>
-          </div>
-          <div class="loop-card flex items-center gap-3 group" draggable="true" data-name="Deep Bass Loop 90 BPM" data-url="https://freesound.org/data/previews/612/612095_5674468-lq.mp3">
-            <button class="preview-btn text-lg">▶</button>
-            <div class="flex-1">
-              <div class="font-medium">Deep Bass Loop 90 BPM</div>
-              <div class="text-xs text-zinc-500">Bass • 90 BPM</div>
-            </div>
-          </div>
-          <div class="loop-card flex items-center gap-3 group" draggable="true" data-name="Synth Arp 120 BPM" data-url="https://sampleswap.org/samples-ghost/MELODIC SAMPLES and LOOPS/synth/loop_synth_arpeggio_120bpm_01.wav.mp3">
-            <button class="preview-btn text-lg">▶</button>
-            <div class="flex-1">
-              <div class="font-medium">Synth Arp 120 BPM</div>
-              <div class="text-xs text-zinc-500">Melody/Synth • 120 BPM</div>
-            </div>
-          </div>
-          <div class="loop-card flex items-center gap-3 group" draggable="true" data-name="Atmospheric Pad Loop" data-url="https://freesound.org/data/previews/456/456499_5121236-lq.mp3">
-            <button class="preview-btn text-lg">▶</button>
-            <div class="flex-1">
-              <div class="font-medium">Atmospheric Pad Loop</div>
-              <div class="text-xs text-zinc-500">Pad/Ambient • 100 BPM</div>
-            </div>
-          </div>
-        </div>
-        <div class="mt-4 text-xs text-zinc-500 text-center">Drag any loop onto a track</div>
-      </div>
-      <div class="mt-12">
-        <img src="studio-image-2.jpg" alt="Right Column Image Placeholder" class="w-full h-64 object-cover rounded-2xl border border-emerald-500/40 shadow-[0_8px_32px_rgba(16,185,129,0.2)]">
+      <div class="mt-12 flex-1">
+        <img src="https://images.unsplash.com/photo-1511379938547-c1da6943098d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Professional musician in recording studio" class="w-full h-full object-cover rounded-2xl border border-emerald-500/40 shadow-[0_8px_32px_rgba(16,185,129,0.2)]">
       </div>
     </div>
   </div>
+  <footer class="bg-zinc-950 border-t border-zinc-800 py-6 text-center text-zinc-500 text-sm">
+    © 2026 Rhythm Deck - Rhythm Deck Studio. All rights reserved.
+  </footer>
   <!-- Tour Overlay -->
   <div id="tourOverlay" style="display:none"></div>
   <!-- Tour Bubble -->
@@ -576,7 +538,6 @@
       return Math.max(0, Math.min(15, Math.floor(15 - (y / noteHeight))));
     }
     function findNoteAt(x, y, checkResize = false) {
-
       const beat = getBeatFromX(x);
       const noteIdx = getNoteIndexFromY(y);
       for (let i = notesData.length - 1; i >= 0; i--) {
