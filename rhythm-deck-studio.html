@@ -21,8 +21,8 @@
     .knob-container { position: relative; width: 56px; height: 56px; margin: 0 auto; cursor: grab; }
     .knob { width: 100%; height: 100%; background: conic-gradient(#10b981 0% 50%, #27272a 50%); border-radius: 9999px; }
     .knob-indicator { position: absolute; top: 6px; left: 50%; width: 4px; height: 22px; background: white; transform-origin: bottom center; border-radius: 2px; pointer-events: none; }
-    .piano-key { height: 180px; width: 34px; background: white; border: 1px solid #222; border-radius: 0 0 6px 6px; position: relative; box-shadow: inset 0 -8px 12px rgba(0,0,0,0.15), 0 2px 5px rgba(0,0,0,0.4); cursor: pointer; flex-shrink: 0; }
-    .piano-key.black { background: #111; height: 110px; width: 24px; margin-left: -12px; margin-right: -12px; z-index: 10; border-radius: 0 0 4px 4px; box-shadow: inset 0 -6px 10px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.5); }
+    .piano-key { height: 180px; width: 38px; background: white; border: 1px solid #222; border-radius: 0 0 6px 6px; position: relative; box-shadow: inset 0 -8px 12px rgba(0,0,0,0.15), 0 2px 5px rgba(0,0,0,0.4); cursor: pointer; flex-shrink: 0; }
+    .piano-key.black { background: #111; height: 110px; width: 26px; margin-left: -13px; margin-right: -13px; z-index: 10; border-radius: 0 0 4px 4px; box-shadow: inset 0 -6px 10px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.5); }
     .piano-key:active, .piano-key.active { background: #f0f0f0; filter: brightness(0.92); box-shadow: inset 0 -4px 8px rgba(0,0,0,0.3); }
     .piano-key.black:active, .piano-key.black.active { background: #222; filter: brightness(0.85); }
     .master-meter { height: 140px; background: #222; border-radius: 9999px; overflow: hidden; position: relative; width: 32px; }
@@ -65,10 +65,11 @@
     </div>
   </header>
 
+  <!-- New banner image space right under header -->
   <div class="w-full">
-    <img
-      src="studio-booth.jpg"
-      alt="Neon-lit colorful recording booth with band in session"
+    <img 
+      src="studio-booth.jpg" 
+      alt="Neon-lit colorful recording booth with band in session" 
       class="w-full h-auto max-h-[420px] object-cover"
     >
   </div>
@@ -225,6 +226,7 @@
     </div>
 
     <div class="flex-1 overflow-auto p-6 lg:p-10 bg-zinc-950" id="timelineDropZone">
+      <!-- Improved colorful title above center section -->
       <h2 class="text-5xl sm:text-6xl font-black tracking-tight mb-10 text-center bg-gradient-to-r from-emerald-400 via-teal-400 via-purple-500 to-pink-500 bg-clip-text text-transparent drop-shadow-2xl animate-pulse">
         TIMELINE & TRACKS
       </h2>
@@ -328,12 +330,10 @@
         <button onclick="demoPiano()" class="bg-zinc-800 hover:bg-purple-600 p-6 rounded-3xl text-center text-4xl transition flex flex-col items-center gap-2">🎹<span class="text-sm font-medium">Keyboard</span><span class="text-xs text-zinc-400">Melodic Layers</span></button>
         <button onclick="demoBass()" class="bg-zinc-800 hover:bg-sky-600 p-6 rounded-3xl text-center text-4xl transition flex flex-col items-center gap-2">🎸<span class="text-sm font-medium">Bass</span><span class="text-xs text-zinc-400">Low-End Groove</span></button>
       </div>
-
       <div class="mt-20 lg:mt-24">
         <div class="text-xs uppercase tracking-widest text-violet-400 mb-4">Virtual MIDI Keyboard</div>
         <div class="flex justify-center bg-black p-6 pb-10 rounded-3xl shadow-2xl mx-auto max-w-full overflow-x-auto" id="midiKeyboard"></div>
       </div>
-
       <div class="mt-12 lg:mt-16 text-center">
         <div class="text-7xl mb-6">🎸 → 🎹</div>
         <div class="font-bold text-2xl text-emerald-400">Guitar → Keyboard Mode</div>
@@ -344,7 +344,6 @@
           Try Transformation Demo
         </button>
       </div>
-
       <div class="mt-12">
         <h3 class="uppercase text-xs tracking-widest text-amber-400 mb-4">Loop Browser & Library</h3>
         <div class="space-y-3 max-h-96 overflow-y-auto pr-2" id="loopLibrary">
@@ -400,7 +399,6 @@
         </div>
         <div class="mt-4 text-xs text-zinc-500 text-center">Drag any loop onto a track</div>
       </div>
-
       <div class="mt-12">
         <img src="studio-image-2.jpg" alt="Right Column Image" class="w-full h-64 object-cover rounded-2xl border border-emerald-500/40 shadow-[0_8px_32px_rgba(16,185,129,0.2)]">
       </div>
@@ -411,7 +409,9 @@
     © 2026 Rhythm Deck - Rhythm Deck Studio. All rights reserved.
   </footer>
 
+  <!-- Tour Overlay -->
   <div id="tourOverlay" style="display:none"></div>
+  <!-- Tour Bubble -->
   <div id="tourBubble" style="display:none">
     <div id="tourText" class="text-lg font-medium mb-6"></div>
     <div class="flex gap-3">
@@ -422,7 +422,6 @@
 
   <script>
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
     function playNote(freq, velocity = 0.8) {
       const now = audioCtx.currentTime;
       const osc = audioCtx.createOscillator();
@@ -469,12 +468,9 @@
       osc2.stop(now + 4);
       noise.stop(now + 0.1);
     }
-
-    const baseFreq = 261.63; // C4
-    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C']; // Full octave + high C
-
+    const baseFreq = 261.63;
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     let tapTimes = [];
-
     function tapTempo() {
       const now = Date.now();
       tapTimes.push(now);
@@ -488,16 +484,13 @@
         drawPianoRoll();
       }
     }
-
     function updateBPM() {
       drawPianoRoll();
     }
-
     function toggleMetronome() {
       const btn = document.getElementById('metronomeBtn');
       btn.textContent = btn.textContent === "Metronome OFF" ? "Metronome ON" : "Metronome OFF";
     }
-
     function createKeyboard() {
       const container = document.getElementById('midiKeyboard');
       container.innerHTML = '';
@@ -524,7 +517,6 @@
         container.appendChild(key);
       });
     }
-
     const panIndicator = document.getElementById('pan-indicator');
     const panLabel = document.getElementById('pan-label');
     let isDraggingPan = false;
@@ -540,7 +532,6 @@
       isDraggingPan = false;
       document.body.style.cursor = 'default';
     });
-
     function updatePan(e) {
       const rect = panIndicator.parentElement.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -555,7 +546,6 @@
       else if (rot > 30) text = 'Right';
       panLabel.textContent = text;
     }
-
     function togglePlay() { alert("Transport Playing (demo mode)"); }
     function stop() { alert("Transport Stopped"); }
     function exportMix() { alert("Exporting full mix + stems (demo)"); }
@@ -564,7 +554,6 @@
     function demoPiano() { alert("Keyboard: Play chords or melodies → add sustain, reverb, delay → create atmospheric pads or leads"); }
     function demoBass() { alert("Bass: Lay down groovy lines → lock with drums → use compression to make it punchy and sit perfectly in the mix"); }
     function demoGuitarToKeyboard() { alert("Demo: Guitar recorded → looped → transformed into lush keyboard pad using pitch/formant shift (real version coming soon)"); }
-
     const pianoRollCanvas = document.getElementById('pianoRollCanvas');
     const pianoRollKeys = document.getElementById('pianoRollKeys');
     const ctx = pianoRollCanvas.getContext('2d');
@@ -575,7 +564,6 @@
     let scrollX = 0;
     let draggingNote = null;
     let resizingNote = null;
-
     function drawPianoKeys() {
       keyCtx.clearRect(0, 0, pianoRollKeys.width, pianoRollKeys.height);
       for (let i = 0; i < 16; i++) {
@@ -590,7 +578,6 @@
         keyCtx.fillText(notes[i % 12] + (4 + Math.floor(i / 12)), 8, y + 16);
       }
     }
-
     function drawPianoRoll() {
       ctx.clearRect(0, 0, pianoRollCanvas.width, pianoRollCanvas.height);
       const pixelsPerBeat = beatWidth;
@@ -622,15 +609,12 @@
         ctx.strokeRect(x, y, w, noteHeight - 2);
       });
     }
-
     function getBeatFromX(x) {
       return Math.round((x + scrollX) / beatWidth * 4) / 4;
     }
-
     function getNoteIndexFromY(y) {
       return Math.max(0, Math.min(15, Math.floor(15 - (y / noteHeight))));
     }
-
     function findNoteAt(x, y, checkResize = false) {
       const beat = getBeatFromX(x);
       const noteIdx = getNoteIndexFromY(y);
@@ -647,7 +631,6 @@
       }
       return null;
     }
-
     pianoRollCanvas.addEventListener('click', (e) => {
       if (draggingNote !== null || resizingNote !== null) return;
       const rect = pianoRollCanvas.getBoundingClientRect();
@@ -662,7 +645,6 @@
         drawPianoRoll();
       }
     });
-
     pianoRollCanvas.addEventListener('mousedown', (e) => {
       const rect = pianoRollCanvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -679,7 +661,6 @@
         e.preventDefault();
       }
     });
-
     document.addEventListener('mousemove', (e) => {
       const rect = pianoRollCanvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -696,17 +677,16 @@
         drawPianoRoll();
       } else {
         const hit = findNoteAt(mouseX, mouseY, true);
+
         pianoRollCanvas.style.cursor = hit ? (hit.isResize ? 'ew-resize' : 'move') : 'crosshair';
       }
     });
-
     document.addEventListener('mouseup', () => {
       draggingNote = null;
       resizingNote = null;
       pianoRollCanvas.style.cursor = 'crosshair';
       drawPianoRoll();
     });
-
     pianoRollCanvas.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       const rect = pianoRollCanvas.getBoundingClientRect();
@@ -718,7 +698,6 @@
         drawPianoRoll();
       }
     });
-
     let touchTimer;
     pianoRollCanvas.addEventListener('touchstart', (e) => {
       const touch = e.touches[0];
@@ -735,23 +714,19 @@
     });
     pianoRollCanvas.addEventListener('touchend', () => clearTimeout(touchTimer));
     pianoRollCanvas.addEventListener('touchmove', () => clearTimeout(touchTimer));
-
     document.getElementById('clearPianoRoll').addEventListener('click', () => {
       if (confirm("Clear all notes in the piano roll?")) {
         notesData = [];
         drawPianoRoll();
       }
     });
-
     pianoRollCanvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       scrollX = Math.max(0, scrollX + e.deltaY * 0.5);
       drawPianoRoll();
     });
-
     drawPianoKeys();
     drawPianoRoll();
-
     const drumSounds = [
       {name: "Kick", freq: 55, color: "#ef4444"},
       {name: "Snare", freq: 220, color: "#f59e0b"},
@@ -762,9 +737,7 @@
       {name: "Tom", freq: 120, color: "#8b5cf6"},
       {name: "Crash", freq: 8000, color: "#ec4899"}
     ];
-
     let drumPattern = Array(8).fill().map(() => Array(16).fill(false));
-
     function initDrumGrid() {
       const grid = document.getElementById('drumGrid');
       grid.innerHTML = '';
@@ -795,11 +768,8 @@
         grid.appendChild(rowDiv);
       });
     }
-
     initDrumGrid();
-
     const previewPlayers = new Map();
-
     document.querySelectorAll('.preview-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const card = btn.parentElement;
@@ -812,6 +782,7 @@
           btn.textContent = '▶';
           return;
         }
+
         try {
           const response = await fetch(url);
           const arrayBuffer = await response.arrayBuffer();
@@ -834,13 +805,11 @@
         }
       });
     });
-
     document.querySelectorAll('.loop-card').forEach(card => {
       card.addEventListener('dragstart', e => {
         e.dataTransfer.setData('text/plain', card.dataset.name);
       });
     });
-
     const dropZone = document.getElementById('timelineDropZone');
     dropZone.addEventListener('dragover', e => {
       e.preventDefault();
@@ -855,7 +824,6 @@
       const loopName = e.dataTransfer.getData('text/plain');
       alert(`"${loopName}" dropped onto timeline!`);
     });
-
     let currentTourStep = 0;
     const tourSteps = [
       { selector: '#timelineDropZone', text: "This is your workspace. Build melodies in the Piano Roll and beats in the Drum Sequencer." },
@@ -863,13 +831,11 @@
       { selector: '.lg\\:w-96', text: "Right side has your instruments, virtual keyboard, and loops to drag into your song." },
       { selector: 'header', text: "Top bar has transport controls, BPM, and export. Use the green button to play." }
     ];
-
     function startTour() {
       document.getElementById('tourOverlay').style.display = 'block';
       currentTourStep = 0;
       showTourStep();
     }
-
     function showTourStep() {
       const step = tourSteps[currentTourStep];
       const target = document.querySelector(step.selector);
@@ -887,7 +853,6 @@
         bubble.style.top = `${rect.bottom + 20}px`;
       }
     }
-
     function nextTourStep() {
       const prevTarget = document.querySelector(tourSteps[currentTourStep].selector);
       if (prevTarget) prevTarget.classList.remove('tour-highlight');
@@ -898,7 +863,6 @@
         showTourStep();
       }
     }
-
     function endTour() {
       document.getElementById('tourOverlay').style.display = 'none';
       document.getElementById('tourBubble').style.display = 'none';
@@ -907,7 +871,6 @@
         if (el) el.classList.remove('tour-highlight');
       });
     }
-
     createKeyboard();
   </script>
 </body>
