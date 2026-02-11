@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Rhythm Deck Studio - Professional Online Recording Studio</title>
+  <link rel="icon" href="logo-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -40,9 +41,46 @@
     .preview-btn { background: #10b981; color: white; border-radius: 9999px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s; }
     .preview-btn.playing { background: #ef4444; }
     .tour-highlight { position: relative; z-index: 50; box-shadow: 0 0 0 6px #10b981; }
-    #tourOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; pointer-events: none; }
-    #tourBubble { position: fixed; background: #18181b; border: 2px solid #10b981; border-radius: 1rem; padding: 1.25rem; max-width: 320px; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-    #tourBubble::after { content: ''; position: absolute; width: 0; height: 0; border: 10px solid transparent; }
+    #tourOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0); z-index: 9998; pointer-events: none; }
+    #tourBubble {
+      position: fixed;
+      background: #18181b;
+      border: 2px solid #10b981;
+      border-radius: 1rem;
+      padding: 1.25rem;
+      max-width: 320px;
+      z-index: 9999;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      pointer-events: auto;
+      overflow-y: auto;
+      max-height: 80vh;
+    }
+    #tourBubble::after {
+      content: '';
+      position: absolute;
+      width: 0; height: 0;
+      border: 10px solid transparent;
+    }
+    #tourBubble.arrow-top::after {
+      bottom: -20px; left: 50%;
+      border-top-color: #10b981;
+      transform: translateX(-50%);
+    }
+    #tourBubble.arrow-bottom::after {
+      top: -20px; left: 50%;
+      border-bottom-color: #10b981;
+      transform: translateX(-50%);
+    }
+    #tourBubble.arrow-left::after {
+      right: -20px; top: 50%;
+      border-left-color: #10b981;
+      transform: translateY(-50%);
+    }
+    #tourBubble.arrow-right::after {
+      left: -20px; top: 50%;
+      border-right-color: #10b981;
+      transform: translateY(-50%);
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -64,17 +102,15 @@
       <button onclick="startTour()" class="bg-white text-black px-6 py-3 rounded-2xl font-bold text-base transition shadow-lg">Take the Tour</button>
     </div>
   </header>
-
   <!-- New banner image space right under header -->
   <div class="w-full">
-    <img 
-      src="studio-booth.jpg" 
-      alt="Neon-lit colorful recording booth with band in session" 
+    <img
+      src="studio-booth.jpg"
+      alt="Neon-lit colorful recording booth with band in session"
       class="w-full h-auto max-h-[420px] object-cover"
     >
   </div>
-
-  <div class="bg-zinc-900 border-b border-zinc-800 px-6 py-5 flex flex-wrap items-center justify-center sm:justify-between gap-8">
+  <div class="bg-zinc-900 border-b border-zinc-800 px-6 py-5 flex flex-wrap items-center justify-center sm:justify-between gap-8" id="transportBar">
     <div class="flex items-center gap-6">
       <button onclick="togglePlay()" class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500 hover:bg-emerald-400 rounded-3xl text-5xl sm:text-6xl flex items-center justify-center transition shadow-xl">▶</button>
       <button onclick="stop()" class="w-16 h-16 sm:w-20 sm:h-20 bg-zinc-800 hover:bg-red-600 rounded-3xl text-5xl sm:text-6xl flex items-center justify-center transition">■</button>
@@ -94,7 +130,6 @@
       </div>
     </div>
   </div>
-
   <div class="flex flex-1 overflow-hidden flex-col lg:flex-row">
     <div class="w-full lg:w-80 bg-zinc-900 border-b lg:border-r lg:border-b-0 border-zinc-800 p-6 lg:p-8 overflow-auto">
       <h3 class="uppercase text-xs tracking-widest text-emerald-400 mb-6">Mixer & Routing</h3>
@@ -224,13 +259,10 @@
         <img src="studio-image-1.jpg" alt="Left Column Image" class="w-full h-64 object-cover rounded-2xl border border-emerald-500/40 shadow-[0_8px_32px_rgba(16,185,129,0.2)]">
       </div>
     </div>
-
     <div class="flex-1 overflow-auto p-6 lg:p-10 bg-zinc-950" id="timelineDropZone">
-      <!-- Improved colorful title above center section -->
       <h2 class="text-5xl sm:text-6xl font-black tracking-tight mb-10 text-center bg-gradient-to-r from-emerald-400 via-teal-400 via-purple-500 to-pink-500 bg-clip-text text-transparent drop-shadow-2xl animate-pulse">
         TIMELINE & TRACKS
       </h2>
-
       <div class="timeline">
         <div class="track flex flex-col gap-3" data-track="0">
           <div class="flex items-center gap-6">
@@ -296,7 +328,6 @@
           <div class="instruction">Add synth pads/leads/arps → modulate/filter → layer textures or create futuristic vibes</div>
         </div>
       </div>
-
       <div id="pianoRollContainer">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-bold text-purple-400">Piano Roll Editor</h3>
@@ -312,7 +343,6 @@
           Click to add • Drag note to move • Hover right edge + drag to resize duration • Right-click/long-press to delete
         </div>
       </div>
-
       <div id="drumSeqContainer" class="mt-8">
         <h3 class="text-lg font-bold text-amber-400 mb-4">Drum Step Sequencer (16 steps)</h3>
         <div id="drumGrid" class="space-y-3"></div>
@@ -321,7 +351,6 @@
         </div>
       </div>
     </div>
-
     <div class="w-full lg:w-96 bg-zinc-900 border-t lg:border-l lg:border-t-0 border-zinc-800 p-6 lg:p-8 overflow-auto">
       <h3 class="uppercase text-xs tracking-widest text-purple-400 mb-6">Instruments & Sounds</h3>
       <div class="grid grid-cols-2 gap-5 mb-12">
@@ -404,11 +433,9 @@
       </div>
     </div>
   </div>
-
   <footer class="bg-zinc-950 border-t border-zinc-800 py-6 text-center text-zinc-500 text-sm">
     © 2026 Rhythm Deck - Rhythm Deck Studio. All rights reserved.
   </footer>
-
   <!-- Tour Overlay -->
   <div id="tourOverlay" style="display:none"></div>
   <!-- Tour Bubble -->
@@ -419,7 +446,6 @@
       <button onclick="nextTourStep()" id="nextBtn" class="flex-1 bg-emerald-500 hover:bg-emerald-400 py-3 rounded-xl text-sm font-medium">Next</button>
     </div>
   </div>
-
   <script>
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playNote(freq, velocity = 0.8) {
@@ -677,7 +703,6 @@
         drawPianoRoll();
       } else {
         const hit = findNoteAt(mouseX, mouseY, true);
-
         pianoRollCanvas.style.cursor = hit ? (hit.isResize ? 'ew-resize' : 'move') : 'crosshair';
       }
     });
@@ -782,7 +807,6 @@
           btn.textContent = '▶';
           return;
         }
-
         try {
           const response = await fetch(url);
           const arrayBuffer = await response.arrayBuffer();
@@ -829,7 +853,7 @@
       { selector: '#timelineDropZone', text: "This is your workspace. Build melodies in the Piano Roll and beats in the Drum Sequencer." },
       { selector: '.lg\\:w-80', text: "Left side is your mixer. Adjust volumes, pan, effects, and record-arm tracks here." },
       { selector: '.lg\\:w-96', text: "Right side has your instruments, virtual keyboard, and loops to drag into your song." },
-      { selector: 'header', text: "Top bar has transport controls, BPM, and export. Use the green button to play." }
+      { selector: '#transportBar', text: "Top bar has transport controls, BPM, and export. Use the green button to play." }
     ];
     function startTour() {
       document.getElementById('tourOverlay').style.display = 'block';
@@ -840,18 +864,79 @@
       const step = tourSteps[currentTourStep];
       const target = document.querySelector(step.selector);
       if (!target) return endTour();
+
+      document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
       target.classList.add('tour-highlight');
+
       const bubble = document.getElementById('tourBubble');
       const textEl = document.getElementById('tourText');
       textEl.textContent = step.text;
       bubble.style.display = 'block';
-      const rect = target.getBoundingClientRect();
-      bubble.style.left = `${rect.left + rect.width / 2 - 160}px`;
-      if (rect.top > window.innerHeight / 2) {
-        bubble.style.top = `${rect.top - bubble.offsetHeight - 20}px`;
-      } else {
-        bubble.style.top = `${rect.bottom + 20}px`;
-      }
+
+      bubble.offsetHeight; // force reflow
+
+      requestAnimationFrame(() => {
+        const rect = target.getBoundingClientRect();
+        const bubbleRect = bubble.getBoundingClientRect();
+        const bubbleHeight = bubbleRect.height || 320;
+        const bubbleWidth = bubbleRect.width || 340;
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        const padding = 40;
+        const safeMargin = 140;
+
+        let topPosition = rect.top - bubbleHeight - padding;
+        let leftPosition = rect.left + (rect.width / 2) - (bubbleWidth / 2);
+        let arrowClass = 'arrow-bottom';
+
+        // For header (last step), prefer placing below or to the side
+        if (currentTourStep === 3) {
+          topPosition = rect.bottom + padding;
+          arrowClass = 'arrow-top';
+          // If still too low, place to the right or left
+          if (topPosition + bubbleHeight > viewportHeight - safeMargin) {
+            topPosition = rect.top + (rect.height / 2) - (bubbleHeight / 2);
+            leftPosition = rect.right + padding;
+            arrowClass = 'arrow-left';
+            if (leftPosition + bubbleWidth > viewportWidth - 20) {
+              leftPosition = rect.left - bubbleWidth - padding;
+              arrowClass = 'arrow-right';
+            }
+          }
+        }
+
+        // Clamp to viewport
+        if (topPosition < 30) {
+          topPosition = 30;
+        }
+        if (topPosition + bubbleHeight > viewportHeight - safeMargin) {
+          topPosition = viewportHeight - bubbleHeight - safeMargin;
+        }
+        if (leftPosition < 20) {
+          leftPosition = 20;
+          arrowClass = 'arrow-left';
+        }
+        if (leftPosition + bubbleWidth > viewportWidth - 20) {
+          leftPosition = viewportWidth - bubbleWidth - 20;
+          arrowClass = 'arrow-right';
+        }
+
+        // Auto-scroll to center the target in viewport
+        const scrollY = window.scrollY;
+        const targetCenterY = rect.top + scrollY + (rect.height / 2);
+        const desiredScrollY = targetCenterY - (viewportHeight / 2);
+        if (Math.abs(scrollY - desiredScrollY) > 50) {
+          window.scrollTo({
+            top: desiredScrollY,
+            behavior: 'smooth'
+          });
+        }
+
+        bubble.style.top = `${topPosition}px`;
+        bubble.style.left = `${leftPosition}px`;
+
+        bubble.className = bubble.className.replace(/arrow-(top|bottom|left|right)/g, '').trim() + ` ${arrowClass}`;
+      });
     }
     function nextTourStep() {
       const prevTarget = document.querySelector(tourSteps[currentTourStep].selector);
@@ -866,10 +951,7 @@
     function endTour() {
       document.getElementById('tourOverlay').style.display = 'none';
       document.getElementById('tourBubble').style.display = 'none';
-      tourSteps.forEach(step => {
-        const el = document.querySelector(step.selector);
-        if (el) el.classList.remove('tour-highlight');
-      });
+      document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
     }
     createKeyboard();
   </script>
