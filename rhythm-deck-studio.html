@@ -43,6 +43,10 @@
     #tourOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; pointer-events: none; }
     #tourBubble { position: fixed; background: #18181b; border: 2px solid #10b981; border-radius: 1rem; padding: 1.25rem; max-width: 320px; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
     #tourBubble::after { content: ''; position: absolute; width: 0; height: 0; border: 10px solid transparent; }
+  .style3 {
+	font-size: 18px;
+	color: #00CC00;
+}
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -213,78 +217,73 @@
         <img src="studio-image-1.jpg" alt="Left Column Image Placeholder" class="w-full h-64 object-cover rounded-2xl border border-emerald-500/40 shadow-[0_8px_32px_rgba(16,185,129,0.2)]">
       </div>
     </div>
-    <<div class="flex-1 overflow-auto p-6 lg:p-10 bg-zinc-950" id="timelineDropZone">
-  <!-- Colorful title added here -->
-  <h2 class="text-4xl sm:text-5xl font-black tracking-tight mb-8 text-center bg-gradient-to-r from-emerald-400 via-teal-400 to-purple-500 bg-clip-text text-transparent drop-shadow-lg animate-pulse">
-    RHYTHM DECK TIMELINE
-  </h2>
-
-  <div class="timeline">
-    <div class="track flex flex-col gap-3" data-track="0">
-      <div class="flex items-center gap-6">
-        <div class="track-name text-lg text-emerald-400">Rhythm Guitar</div>
-        <div class="bar-container">
-          <div class="bar" style="background: linear-gradient(90deg, #10b981, #34d399, #10b981);"></div>
+    <div class="flex-1 overflow-auto p-6 lg:p-10 bg-zinc-950" id="timelineDropZone">
+      <div class="timeline">
+        <div class="track flex flex-col gap-3" data-track="0">
+          <div class="flex items-center gap-6">
+          <p class="style3">TIMELINE & TRACK</p>
+            <div class="track-name text-lg text-emerald-400">Rhythm Guitar</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #10b981, #34d399, #10b981);"></div>
+            </div>
+          </div>
+          <div class="instruction">Rhythm guitar parts → chords or strumming patterns → add crunch/distortion for body</div>
+        </div>
+        <div class="track flex flex-col gap-3" data-track="1">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-teal-400">Lead Guitar</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #14b8a6, #2dd4bf, #14b8a6);"></div>
+            </div>
+          </div>
+          <div class="instruction">Lead melodies/solos → add delay/reverb → make them cut through the mix</div>
+        </div>
+        <div class="track flex flex-col gap-3" data-track="2">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-amber-400">Drums</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);"></div>
+            </div>
+          </div>
+          <div class="instruction">Choose kit → program/record beats → layer kicks/snares/hats for full rhythm foundation</div>
+        </div>
+        <div class="track flex flex-col gap-3" data-track="3">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-purple-400">Piano Pad</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #a855f7, #c084fc, #a855f7);"></div>
+            </div>
+          </div>
+          <div class="instruction">Melodic layers/chords → add reverb/delay/modulation → create atmospheric pads or leads</div>
+        </div>
+        <div class="track flex flex-col gap-3" data-track="4">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-sky-400">Bass</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0ea5e9);"></div>
+            </div>
+          </div>
+          <div class="instruction">Groovy bass lines → lock with drums → compress for punch → sit perfectly in the mix</div>
+        </div>
+        <div class="track flex flex-col gap-3" data-track="5">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-pink-400">Vocal</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #ec4899, #f472b6, #ec4899);"></div>
+            </div>
+          </div>
+          <div class="instruction">Record lead/harmony vocals → pitch correction → add reverb/delay → blend into the mix</div>
+        </div>
+        <div class="track flex flex-col gap-3" data-track="6">
+          <div class="flex items-center gap-6">
+            <div class="track-name text-lg text-cyan-400">Synth</div>
+            <div class="bar-container">
+              <div class="bar" style="background: linear-gradient(90deg, #06b6d4, #22d3ee, #06b6d4);"></div>
+            </div>
+          </div>
+          <div class="instruction">Add synth pads/leads/arps → modulate/filter → layer textures or create futuristic vibes</div>
         </div>
       </div>
-      <div class="instruction">Rhythm guitar parts → chords or strumming patterns → add crunch/distortion for body</div>
-    </div>
-    <div class="track flex flex-col gap-3" data-track="1">
-      <div class="flex items-center gap-6">
-        <div class="track-name text-lg text-teal-400">Lead Guitar</div>
-        <div class="bar-container">
-          <div class="bar" style="background: linear-gradient(90deg, #14b8a6, #2dd4bf, #14b8a6);"></div>
-        </div>
-      </div>
-      <div class="instruction">Lead melodies/solos → add delay/reverb → make them cut through the mix</div>
-    </div>
-    <div class="track flex flex-col gap-3" data-track="2">
-      <div class="flex items-center gap-6">
-        <div class="track-name text-lg text-amber-400">Drums</div>
-        <div class="bar-container">
-          <div class="bar" style="background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);"></div>
-        </div>
-      </div>
-      <div class="instruction">Choose kit → program/record beats → layer kicks/snares/hats for full rhythm foundation</div>
-    </div>
-    <div class="track flex flex-col gap-3" data-track="3">
-      <div class="flex items-center gap-6">
-        <div class="track-name text-lg text-purple-400">Piano Pad</div>
-        <div class="bar-container">
-          <div class="bar" style="background: linear-gradient(90deg, #a855f7, #c084fc, #a855f7);"></div>
-        </div>
-      </div>
-      <div class="instruction">Melodic layers/chords → add reverb/delay/modulation → create atmospheric pads or leads</div>
-    </div>
-    <div class="track flex flex-col gap-3" data-track="4">
-      <div class="flex items-center gap-6">
-        <div class="track-name text-lg text-sky-400">Bass</div>
-        <div class="bar-container">
-          <div class="bar" style="background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0ea5e9);"></div>
-        </div>
-      </div>
-      <div class="instruction">Groovy bass lines → lock with drums → compress for punch → sit perfectly in the mix</div>
-    </div>
-    <div class="track flex flex-col gap-3" data-track="5">
-      <div class="flex items-center gap-6">
-        <div class="track-name text-lg text-pink-400">Vocal</div>
-        <div class="bar-container">
-          <div class="bar" style="background: linear-gradient(90deg, #ec4899, #f472b6, #ec4899);"></div>
-        </div>
-      </div>
-      <div class="instruction">Record lead/harmony vocals → pitch correction → add reverb/delay → blend into the mix</div>
-    </div>
-    <div class="track flex flex-col gap-3" data-track="6">
-      <div class="flex items-center gap-6">
-        <div class="track-name text-lg text-cyan-400">Synth</div>
-        <div class="bar-container">
-          <div class="bar" style="background: linear-gradient(90deg, #06b6d4, #22d3ee, #06b6d4);"></div>
-        </div>
-      </div>
-      <div class="instruction">Add synth pads/leads/arps → modulate/filter → layer textures or create futuristic vibes</div>
-    </div>
-  </div>
-</div>
       <div id="pianoRollContainer">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-bold text-purple-400">Piano Roll Editor</h3>
