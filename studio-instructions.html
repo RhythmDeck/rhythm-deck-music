@@ -11,10 +11,10 @@
     body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e5e5e5; line-height: 1.7; }
     .snapshot { background: #18181b; border: 1px solid #27272a; border-radius: 1rem; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
     .step-number { font-size: 1.1rem; font-weight: 700; color: #10b981; letter-spacing: 3px; }
+    .alt-bg { background: #111111; }
   </style>
 </head>
 <body class="min-h-screen">
-
 <header class="bg-zinc-950 border-b border-zinc-800 px-6 py-5 flex items-center justify-between">
   <div class="flex items-center gap-4">
     <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-2xl shadow-xl">
@@ -34,166 +34,246 @@
     Complete guide to every feature in Rhythm Deck Studio
   </p>
 
-  <!-- STEP 01 -->
+  <!-- STEP 01 - Text left, Image right -->
   <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
     <div class="md:col-span-5">
       <div class="step-number">STEP 01</div>
       <h2 class="text-4xl font-bold mt-3 mb-6">Transport, Tempo & Metronome</h2>
-      <p class="text-zinc-300 text-lg">
-        The large green Play button starts the transport. The Stop button immediately halts playback.
-        Set your project tempo using the BPM box or by clicking TAP TEMPO repeatedly.
-        Enable the Metronome to hear a timing click while recording or composing.
+      <p class="text-zinc-300 text-lg mb-6">
+        This bar controls playback of your entire song. It lets you start/stop, set the speed (BPM), tap in a tempo, and hear a metronome click for perfect timing.
       </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li><strong>Play button (green ▶)</strong> → Starts or pauses playback.</li>
+        <li><strong>Stop button (■)</strong> → Stops playback and returns to the beginning.</li>
+        <li><strong>TAP TEMPO</strong> → Click repeatedly to set BPM by feel.</li>
+        <li><strong>BPM box</strong> → Type any number (40–240) or use arrows.</li>
+        <li><strong>Metronome button</strong> → Turns the click sound on/off.</li>
+      </ul>
     </div>
-    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center text-8xl">
-      ▶ ■ BPM
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center">
+      <img src="1.png" alt="Transport bar" class="max-h-full w-auto">
     </div>
   </div>
 
-  <!-- STEP 02 -->
+  <!-- STEP 02 - Image left, Text right -->
   <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
-    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center text-7xl">
-      🎚️ Record Arm
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center md:order-first">
+      <img src="2.png" alt="Record Arm buttons" class="max-h-full w-auto">
     </div>
-    <div class="md:col-span-5 md:order-first">
+    <div class="md:col-span-5">
       <div class="step-number">STEP 02</div>
       <h2 class="text-4xl font-bold mt-3 mb-6">Track Arming & Recording</h2>
-      <p class="text-zinc-300 text-lg">
-        Each track has a Record Arm button. Click it to prepare that track for recording.
-        Armed tracks indicate readiness before transport playback.
-        This workflow mirrors professional recording studios.
+      <p class="text-zinc-300 text-lg mb-6">
+        Each track has a red Record Arm button. Arming tells the studio "this track is ready to record".
       </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li>Click the red circle on any track to arm it (turns bright red).</li>
+        <li>Press the green Play button from Step 1 to start recording on armed tracks.</li>
+        <li>Press Stop when finished — your performance is now on the timeline.</li>
+        <li>Arm multiple tracks to record several instruments at once.</li>
+      </ul>
     </div>
   </div>
 
-  <!-- STEP 03 -->
+  <!-- STEP 03 - Text left, Image right -->
   <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
     <div class="md:col-span-5">
       <div class="step-number">STEP 03</div>
       <h2 class="text-4xl font-bold mt-3 mb-6">Mixer, Volume, Pan & Routing</h2>
-      <p class="text-zinc-300 text-lg">
-        Adjust track volume using faders with real-time dB feedback.
-        Use the Pan knob to place sounds left or right in the stereo field.
-        Mute silences a track, Solo isolates it.
-        Reverb Send controls how much signal feeds into reverb processing.
+      <p class="text-zinc-300 text-lg mb-6">
+        The left sidebar is your full mixing console. Control volume, stereo position, and send signals to effects.
       </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li>Drag faders up/down to set track volume (shown in dB).</li>
+        <li>Click the Pan knob and drag left/right to position sound in stereo.</li>
+        <li>Click M to mute a track, S to solo it (hear only that track).</li>
+        <li>Reverb Send slider controls how much signal goes to reverb.</li>
+      </ul>
     </div>
-    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center text-7xl">
-      🎚️ Pan • Mute • Solo
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center">
+      <img src="3.png" alt="Mixer faders" class="max-h-full w-auto">
     </div>
   </div>
 
-  <!-- STEP 04 -->
+  <!-- STEP 04 - Image left, Text right -->
   <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
-    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center text-6xl">
-      🎛️ Effects Rack
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center md:order-first">
+      <img src="4.png" alt="Effects Rack" class="max-h-full w-auto">
     </div>
-    <div class="md:col-span-5 md:order-first">
+    <div class="md:col-span-5">
       <div class="step-number">STEP 04</div>
-      <h2 class="text-4xl font-bold mt-3 mb-6">Effects Processing</h2>
-      <p class="text-zinc-300 text-lg">
-        Shape your sound using professional-style effects:
-        EQ, Compression, Distortion, Delay, Reverb, Chorus, Saturation,
-        Phaser, and Auto-Wah.
-        Each slider updates in real time for immediate sonic feedback.
+      <h2 class="text-4xl font-bold mt-3 mb-6">Effects Rack</h2>
+      <p class="text-zinc-300 text-lg mb-6">
+        Shape your sound with professional effects. Every slider updates instantly.
       </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li>EQ → boost or cut frequencies</li>
+        <li>Compression → evens out loud/soft parts</li>
+        <li>Distortion → adds grit and crunch</li>
+        <li>Delay → echoes</li>
+        <li>Reverb → space and depth</li>
+        <li>Chorus, Saturation, Phaser, Auto-Wah → creative movement</li>
+      </ul>
     </div>
   </div>
 
-  <!-- STEP 05 -->
+  <!-- STEP 05 - Text left, Image right -->
   <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
     <div class="md:col-span-5">
       <div class="step-number">STEP 05</div>
-      <h2 class="text-4xl font-bold mt-3 mb-6">Timeline & Track Overview</h2>
-      <p class="text-zinc-300 text-lg">
-        The timeline displays each instrument track with animated visual feedback.
-        Instructions beneath each track explain best practices for recording and layering.
-        This helps guide composition from rhythm to melody.
+      <h2 class="text-4xl font-bold mt-3 mb-6">Timeline & Tracks</h2>
+      <p class="text-zinc-300 text-lg mb-6">
+        The main area where you build your song. Each row is a track (guitar, drums, vocals, etc.).
       </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li>Drag loops from the right panel onto any track.</li>
+        <li>The colored bars are your audio/MIDI clips.</li>
+        <li>Each track shows helpful tips below it.</li>
+        <li>Record-arm a track and hit Play to add new recordings.</li>
+      </ul>
     </div>
-    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center text-6xl">
-      🎼 Timeline
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center">
+      <img src="5.png" alt="Timeline view" class="max-h-full w-auto">
     </div>
   </div>
 
-  <!-- STEP 06 -->
+  <!-- STEP 06 - Image left, Text right -->
   <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
-    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center text-6xl">
-      🎹 Piano Roll
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center md:order-first">
+      <img src="6.png" alt="Piano Roll" class="max-h-full w-auto">
     </div>
-    <div class="md:col-span-5 md:order-first">
+    <div class="md:col-span-5">
       <div class="step-number">STEP 06</div>
       <h2 class="text-4xl font-bold mt-3 mb-6">Piano Roll Editor</h2>
-      <p class="text-zinc-300 text-lg">
-        Click to place notes on the grid.
-        Drag notes to reposition pitch or timing.
-        Resize note ends to change duration.
-        Right-click (or long-press) deletes notes.
-        Scroll horizontally to navigate longer sequences.
+      <p class="text-zinc-300 text-lg mb-6">
+        Draw melodies and chords note-by-note.
       </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li>Click anywhere on the grid to add a note.</li>
+        <li>Drag a note up/down to change pitch.</li>
+        <li>Drag left/right to move timing.</li>
+        <li>Drag the right edge to change note length.</li>
+        <li>Right-click (or long-press) deletes a note.</li>
+      </ul>
     </div>
   </div>
 
-  <!-- STEP 07 -->
+  <!-- STEP 07 - Text left, Image right -->
   <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
     <div class="md:col-span-5">
       <div class="step-number">STEP 07</div>
       <h2 class="text-4xl font-bold mt-3 mb-6">Drum Step Sequencer</h2>
-      <p class="text-zinc-300 text-lg">
-        Program drum patterns using the 16-step sequencer.
-        Each row represents a drum sound.
-        Click pads to toggle steps on or off.
-        Active steps preview their sound instantly.
+      <p class="text-zinc-300 text-lg mb-6">
+        Build beats quickly with 16 steps and 8 drum sounds.
       </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li>Click any pad to turn a drum hit on/off.</li>
+        <li>Each row is a different drum (kick, snare, hi-hat…).</li>
+        <li>Clicking a pad also previews the sound.</li>
+        <li>Play the transport to hear your pattern loop.</li>
+      </ul>
     </div>
-    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center text-6xl">
-      🥁 16-Step Grid
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center">
+      <img src="7.png" alt="Drum sequencer" class="max-h-full w-auto">
     </div>
   </div>
 
-  <!-- STEP 08 -->
+  <!-- STEP 08 - Image left, Text right -->
   <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
-    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center text-6xl">
-      🎼 MIDI Keyboard
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center md:order-first">
+      <img src="8.png" alt="Virtual MIDI keyboard" class="max-h-full w-auto">
     </div>
-    <div class="md:col-span-5 md:order-first">
+    <div class="md:col-span-5">
       <div class="step-number">STEP 08</div>
       <h2 class="text-4xl font-bold mt-3 mb-6">Virtual MIDI Keyboard</h2>
-      <p class="text-zinc-300 text-lg">
-        Use the on-screen keyboard to play notes with your mouse or touch.
-        Ideal for testing melodies, sound design, or recording MIDI ideas
-        without external hardware.
+      <p class="text-zinc-300 text-lg mb-6">
+        Play notes directly with your mouse or touchscreen — no hardware needed.
       </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li>Click white or black keys to hear notes.</li>
+        <li>Hold mouse/touch for sustained notes.</li>
+        <li>Great for testing melodies before recording.</li>
+      </ul>
     </div>
   </div>
 
-  <!-- STEP 09 -->
+  <!-- STEP 09 - Text left, Image right -->
   <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
     <div class="md:col-span-5">
       <div class="step-number">STEP 09</div>
-      <h2 class="text-4xl font-bold mt-3 mb-6">Loop Browser & Preview</h2>
-      <p class="text-zinc-300 text-lg">
-        Browse royalty-free loops by instrument and BPM.
-        Click Preview to audition loops instantly.
-        Loops play continuously until stopped, allowing hands-free comparison.
+      <h2 class="text-4xl font-bold mt-3 mb-6">Loop Browser & Library</h2>
+      <p class="text-zinc-300 text-lg mb-6">
+        Ready-made loops you can drag straight into your song.
       </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li>Click the ▶ button on any loop to preview it.</li>
+        <li>Drag any loop card onto the timeline.</li>
+        <li>Loops automatically match your project BPM.</li>
+      </ul>
     </div>
-    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center text-6xl">
-      🔁 Loop Library
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center">
+      <img src="9.png" alt="Loop browser" class="max-h-full w-auto">
     </div>
   </div>
 
-  <!-- STEP 10 -->
-  <div class="text-center py-20 border-t border-zinc-800">
-    <div class="step-number">FINAL STEP</div>
-    <h2 class="text-4xl font-bold mt-3 mb-6">Export Your Mix</h2>
-    <p class="text-zinc-300 text-xl max-w-md mx-auto">
-      Click Export Final Mix to generate your full master output.
-      Perfect for sharing, collaboration, or final production delivery.
-    </p>
-    <div class="mt-12 text-6xl">📤</div>
+  <!-- STEP 10 - Image left, Text right -->
+  <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center md:order-first">
+      <img src="10.png" alt="Guitar to keyboard transformation" class="max-h-full w-auto">
+    </div>
+    <div class="md:col-span-5">
+      <div class="step-number">STEP 10</div>
+      <h2 class="text-4xl font-bold mt-3 mb-6">Guitar → Keyboard Mode</h2>
+      <p class="text-zinc-300 text-lg mb-6">
+        Record your guitar, then instantly turn it into piano, synth, or keys.
+      </p>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li>Record a guitar loop on any track.</li>
+        <li>Click the big “Guitar → Keyboard Mode” button.</li>
+        <li>Choose piano, synth, or pad sound.</li>
+        <li>Instant layered texture without changing instruments.</li>
+      </ul>
+    </div>
   </div>
-</div>
-
+  
+    <!-- STEP 11 - Text left, Image right -->
+  <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
+    <div class="md:col-span-5">
+      <div class="step-number">STEP 11</div>
+      <h2 class="text-4xl font-bold mt-3 mb-6">Instruments & Sounds Panel</h2>
+      <ul class="text-zinc-300 space-y-3 text-lg">
+        <li><strong>Instrument Buttons (Guitar, Drums, Keyboard, Bass)</strong> → Click any of the four large icons to instantly switch to that instrument's recording/playback mode. Each one loads the appropriate sound engine and interface for fast creation.</li>
+        <li><strong>Guitar - Lead/Rhythm</strong> → Plug in or use mic → record riffs → loop sections → add effects like distortion or reverb</li>
+        <li><strong>Guitar - Bass</strong> → Bass: Lay down groovy lines → lock with drums → use compression to make it punchy and sit perfectly in the mix</li>
+        <li><strong>Drums</strong> → hoose kit → program beats or record live → layer kicks, snares, hats for full rhythm section</li>
+        <li><strong>Keyboard</strong> → Play chords or melodies → add sustain, reverb, delay → create atmospheric pads or leads</li>
+      </ul>
+    </div>
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center">
+      <img src="11.png" alt="Instruments & Sounds panel overview" class="max-h-full w-auto">
+    </div>
+  </div>
+  
+  <!-- FINAL STEP - Image left, Text right -->
+  <div class="grid md:grid-cols-12 gap-12 items-center mb-24">
+    <div class="md:col-span-7 snapshot h-[420px] flex items-center justify-center md:order-first">
+      <img src="12.png" alt="Guitar to keyboard transformation" class="max-h-full w-auto">
+    </div>
+    <div class="md:col-span-5">
+      <div class="step-number">FINAL STEP</div>
+      <h2 class="text-4xl font-bold mt-3 mb-6">Export Your Mix</h2>
+      <p class="text-zinc-300 text-lg mb-6">
+         When your song is finished, click the big green Export Final Mix button in the top right.
+         <br>
+      It creates a professional stereo file ready to share.
+      </p>
+      <div class="mt-12 text-6xl">
+        <div align="center">📤</div>
+      </div>
+    </div>
+  </div>
+  <footer class="bg-zinc-950 border-t border-zinc-800 py-6 text-center text-zinc-500 text-sm">
+    © 2026 Rhythm Deck - Rhythm Deck Studio. All rights reserved.
+  </footer>
 </body>
 </html>
