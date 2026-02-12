@@ -55,32 +55,7 @@
       overflow-y: auto;
       max-height: 80vh;
     }
-    #tourBubble::after {
-      content: '';
-      position: absolute;
-      width: 0; height: 0;
-      border: 10px solid transparent;
-    }
-    #tourBubble.arrow-top::after {
-      bottom: -20px; left: 50%;
-      border-top-color: #10b981;
-      transform: translateX(-50%);
-    }
-    #tourBubble.arrow-bottom::after {
-      top: -20px; left: 50%;
-      border-bottom-color: #10b981;
-      transform: translateX(-50%);
-    }
-    #tourBubble.arrow-left::after {
-      right: -20px; top: 50%;
-      border-left-color: #10b981;
-      transform: translateY(-50%);
-    }
-    #tourBubble.arrow-right::after {
-      left: -20px; top: 50%;
-      border-right-color: #10b981;
-      transform: translateY(-50%);
-    }
+    /* Removed all arrow-related rules completely */
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -701,6 +676,7 @@
         const newDuration = Math.max(0.25, Math.round((beat - note.x) * 4) / 4);
         note.duration = newDuration;
         drawPianoRoll();
+
       } else {
         const hit = findNoteAt(mouseX, mouseY, true);
         pianoRollCanvas.style.cursor = hit ? (hit.isResize ? 'ew-resize' : 'move') : 'crosshair';
@@ -850,10 +826,31 @@
     });
     let currentTourStep = 0;
     const tourSteps = [
-      { selector: '#timelineDropZone', text: "This is your workspace. Build melodies in the Piano Roll and beats in the Drum Sequencer." },
-      { selector: '.lg\\:w-80', text: "Left side is your mixer. Adjust volumes, pan, effects, and record-arm tracks here." },
-      { selector: '.lg\\:w-96', text: "Right side has your instruments, virtual keyboard, and loops to drag into your song." },
-      { selector: '#transportBar', text: "Top bar has transport controls, BPM, and export. Use the green button to play." }
+      { selector: 'header', text: "This is the top header bar. It shows the studio logo on the left and important buttons on the right." },
+      { selector: 'button[onclick="startTour()"]', text: "This white button starts (or restarts) the guided tour you're using right now." },
+      { selector: 'a[href="studio-instructions.html"]', text: "Click here to open the full written Instructions Manual in a new page." },
+      { selector: 'button[onclick="exportMix()"]', text: "When your song is ready, click this button to export the final mix (demo version shows alert)." },
+      { selector: '#transportBar', text: "This is the main transport & control bar — everything you need to play, stop, set tempo and monitor levels." },
+      { selector: 'button[onclick="togglePlay()"]', text: "The big green Play button starts and pauses your song playback." },
+      { selector: 'button[onclick="stop()"]', text: "The black Stop button stops playback and returns the playhead to the beginning." },
+      { selector: 'button[onclick="tapTempo()"]', text: "Tap this button several times in rhythm to quickly set the project BPM (beats per minute)." },
+      { selector: '#bpmInput', text: "This number box shows and lets you manually type or adjust the current BPM." },
+      { selector: '#metronomeBtn', text: "Click here to turn the metronome click on or off to help keep perfect timing." },
+      { selector: '#timeDisplay', text: "This large number shows the current playback time in minutes:seconds.milliseconds format." },
+      { selector: '.master-meter', text: "These vertical bars are the master stereo level meters — watch them to avoid clipping (red)." },
+      { selector: '#timelineDropZone h2', text: "Welcome to the main workspace! This is where all your tracks and timeline live." },
+      { selector: '.timeline', text: "These colored bars represent the tracks. Each one holds guitar, drums, vocals, etc. Drag loops here from the right side." },
+      { selector: '#pianoRollContainer', text: "The Piano Roll is where you create and edit melodies and chords using MIDI notes." },
+      { selector: '#drumSeqContainer', text: "The Drum Step Sequencer lets you program beats by clicking 16-step pads for each drum sound." },
+      { selector: '.lg\\:w-80', text: "This is the left sidebar — your full mixing console with volume faders, effects and master controls." },
+      { selector: 'h3.uppercase.text-emerald-400', text: "Mixer & Routing section: Adjust each track’s volume, record arm it, and soon pan & solo/mute." },
+      { selector: 'h3.uppercase.text-cyan-400', text: "Effects Rack: Apply EQ, compression, distortion, delay, reverb and more to shape your sound." },
+      { selector: 'h3.uppercase.text-violet-400', text: "Master Bus: Final volume control, limiter and dither for polishing the overall mix." },
+      { selector: '.lg\\:w-96', text: "This is the right sidebar — your sound sources, keyboard and loop library." },
+      { selector: 'h3.uppercase.text-purple-400', text: "Instruments & Sounds: Quick buttons to switch to guitar, drums, keyboard or bass recording mode." },
+      { selector: '#midiKeyboard', text: "Virtual MIDI Keyboard: Click or tap keys to play notes — great for testing ideas fast." },
+      { selector: 'h3.uppercase.text-amber-400', text: "Loop Browser & Library: Browse and preview ready-made loops, then drag them to the timeline." },
+      { selector: 'button[onclick="demoGuitarToKeyboard()"]', text: "Special demo button: Shows how recorded guitar can be instantly turned into keyboard/synth sounds." }
     ];
     function startTour() {
       document.getElementById('tourOverlay').style.display = 'block';
@@ -864,17 +861,13 @@
       const step = tourSteps[currentTourStep];
       const target = document.querySelector(step.selector);
       if (!target) return endTour();
-
       document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
       target.classList.add('tour-highlight');
-
       const bubble = document.getElementById('tourBubble');
       const textEl = document.getElementById('tourText');
       textEl.textContent = step.text;
       bubble.style.display = 'block';
-
       bubble.offsetHeight; // force reflow
-
       requestAnimationFrame(() => {
         const rect = target.getBoundingClientRect();
         const bubbleRect = bubble.getBoundingClientRect();
@@ -884,58 +877,32 @@
         const viewportWidth = window.innerWidth;
         const padding = 40;
         const safeMargin = 140;
-
         let topPosition = rect.top - bubbleHeight - padding;
         let leftPosition = rect.left + (rect.width / 2) - (bubbleWidth / 2);
-        let arrowClass = 'arrow-bottom';
-
-        // For header (last step), prefer placing below or to the side
-        if (currentTourStep === 3) {
+        // No arrows anymore — no arrowClass needed
+        // Prefer placing below if there's more space
+        if (rect.bottom + bubbleHeight + padding + safeMargin < viewportHeight) {
           topPosition = rect.bottom + padding;
-          arrowClass = 'arrow-top';
-          // If still too low, place to the right or left
-          if (topPosition + bubbleHeight > viewportHeight - safeMargin) {
-            topPosition = rect.top + (rect.height / 2) - (bubbleHeight / 2);
-            leftPosition = rect.right + padding;
-            arrowClass = 'arrow-left';
-            if (leftPosition + bubbleWidth > viewportWidth - 20) {
-              leftPosition = rect.left - bubbleWidth - padding;
-              arrowClass = 'arrow-right';
-            }
-          }
         }
-
-        // Clamp to viewport
-        if (topPosition < 30) {
-          topPosition = 30;
-        }
+        // Clamp to screen edges
+        if (topPosition < 30) topPosition = 30;
         if (topPosition + bubbleHeight > viewportHeight - safeMargin) {
           topPosition = viewportHeight - bubbleHeight - safeMargin;
         }
-        if (leftPosition < 20) {
-          leftPosition = 20;
-          arrowClass = 'arrow-left';
-        }
+        if (leftPosition < 20) leftPosition = 20;
         if (leftPosition + bubbleWidth > viewportWidth - 20) {
           leftPosition = viewportWidth - bubbleWidth - 20;
-          arrowClass = 'arrow-right';
         }
-
-        // Auto-scroll to center the target in viewport
+        // Smooth scroll to make target + bubble visible
         const scrollY = window.scrollY;
         const targetCenterY = rect.top + scrollY + (rect.height / 2);
         const desiredScrollY = targetCenterY - (viewportHeight / 2);
         if (Math.abs(scrollY - desiredScrollY) > 50) {
-          window.scrollTo({
-            top: desiredScrollY,
-            behavior: 'smooth'
-          });
+          window.scrollTo({ top: desiredScrollY, behavior: 'smooth' });
         }
-
         bubble.style.top = `${topPosition}px`;
         bubble.style.left = `${leftPosition}px`;
-
-        bubble.className = bubble.className.replace(/arrow-(top|bottom|left|right)/g, '').trim() + ` ${arrowClass}`;
+        // Removed arrow class assignment
       });
     }
     function nextTourStep() {
@@ -950,6 +917,7 @@
     }
     function endTour() {
       document.getElementById('tourOverlay').style.display = 'none';
+
       document.getElementById('tourBubble').style.display = 'none';
       document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
     }
