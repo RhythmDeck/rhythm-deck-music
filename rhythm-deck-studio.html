@@ -339,9 +339,9 @@
         <button onclick="demoBass()" class="bg-zinc-800 hover:bg-sky-600 p-6 rounded-3xl text-center text-4xl transition flex flex-col items-center gap-2">🎸<span class="text-sm font-medium">Bass</span><span class="text-xs text-zinc-400">Low-End Groove</span></button>
       </div>
       <div class="mt-20 lg:mt-24">
-        <div class="text-xs uppercase tracking-widest text-violet-400 mb-4">Virtual MIDI Keyboard</div>
-        <div class="flex justify-center bg-black p-6 pb-10 rounded-3xl shadow-2xl mx-auto max-w-full overflow-x-auto" id="midiKeyboard"></div>
-      </div>
+  <div class="text-xs uppercase tracking-widest text-violet-400 mb-4">Virtual MIDI Keyboard</div>
+  <div class="flex justify-center bg-black p-6 pb-10 rounded-3xl shadow-2xl mx-auto max-w-full" id="midiKeyboard"></div>
+</div>
       <div class="mt-12 lg:mt-16 text-center">
         <div class="text-7xl mb-6">🎸 → 🎹</div>
         <div class="font-bold text-2xl text-emerald-400">Guitar → Keyboard Mode</div>
@@ -496,32 +496,48 @@
       const btn = document.getElementById('metronomeBtn');
       btn.textContent = btn.textContent === "Metronome OFF" ? "Metronome ON" : "Metronome OFF";
     }
-    function createKeyboard() {
-      const container = document.getElementById('midiKeyboard');
-      container.innerHTML = '';
-      notes.forEach((noteName, i) => {
-        const key = document.createElement('div');
-        const isBlack = noteName.includes('#');
-        key.className = `piano-key ${isBlack ? 'black' : ''}`;
-        key.addEventListener('mousedown', () => {
-          const semitone = i;
-          const freq = baseFreq * Math.pow(2, semitone / 12);
-          playNote(freq);
-          key.classList.add('active');
-        });
-        key.addEventListener('mouseup', () => key.classList.remove('active'));
-        key.addEventListener('mouseleave', () => key.classList.remove('active'));
-        key.addEventListener('touchstart', (e) => {
-          e.preventDefault();
-          const semitone = i;
-          const freq = baseFreq * Math.pow(2, semitone / 12);
-          playNote(freq);
-          key.classList.add('active');
-        });
-        key.addEventListener('touchend', () => key.classList.remove('active'));
-        container.appendChild(key);
-      });
+   function createKeyboard() {
+  const container = document.getElementById('midiKeyboard');
+  container.innerHTML = '';
+  
+  // 25 keys: C4 to C5 (including high C)
+  const extendedNotes = [...notes, 'C'];
+  const keyWidth = 32; // narrower than before to fit without scrollbar
+  
+  extendedNotes.forEach((noteName, i) => {
+    const key = document.createElement('div');
+    const isBlack = noteName.includes('#');
+    key.className = `piano-key ${isBlack ? 'black' : ''}`;
+    
+    // Apply narrower width
+    key.style.width = `${keyWidth}px`;
+    if (isBlack) {
+      key.style.width = `${keyWidth * 0.65}px`; // black keys proportional
+      key.style.marginLeft = `-${keyWidth * 0.325}px`;
+      key.style.marginRight = `-${keyWidth * 0.325}px`;
     }
+    
+    key.addEventListener('mousedown', () => {
+      const semitone = i;
+      const freq = baseFreq * Math.pow(2, semitone / 12);
+      playNote(freq);
+      key.classList.add('active');
+    });
+    key.addEventListener('mouseup', () => key.classList.remove('active'));
+    key.addEventListener('mouseleave', () => key.classList.remove('active'));
+    
+    key.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const semitone = i;
+      const freq = baseFreq * Math.pow(2, semitone / 12);
+      playNote(freq);
+      key.classList.add('active');
+    });
+    key.addEventListener('touchend', () => key.classList.remove('active'));
+    
+    container.appendChild(key);
+  });
+}
     const panIndicator = document.getElementById('pan-indicator');
     const panLabel = document.getElementById('pan-label');
     let isDraggingPan = false;
