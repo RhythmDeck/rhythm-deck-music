@@ -19,9 +19,31 @@
     input[type="range"] { accent-color: #10b981; }
     input[type="range"]::-webkit-slider-thumb { background: #10b981; border: 3px solid #111; height: 18px; width: 18px; border-radius: 9999px; cursor: grab; }
     input[type="range"]::-moz-range-thumb { background: #10b981; border: 3px solid #111; height: 18px; width: 18px; border-radius: 9999px; cursor: grab; }
-    .knob-container { position: relative; width: 56px; height: 56px; margin: 0 auto; cursor: grab; }
-    .knob { width: 100%; height: 100%; background: conic-gradient(#10b981 0% 50%, #27272a 50%); border-radius: 9999px; }
-    .knob-indicator { position: absolute; top: 6px; left: 50%; width: 4px; height: 22px; background: white; transform-origin: bottom center; border-radius: 2px; pointer-events: none; }
+    .knob-container { 
+      position: relative; 
+      width: 80px; 
+      height: 80px; 
+      margin: 0 auto; 
+      cursor: grab; 
+      user-select: none; 
+    }
+    .knob { 
+      width: 100%; 
+      height: 100%; 
+      background: conic-gradient(#10b981 0% 50%, #27272a 50%); 
+      border-radius: 9999px; 
+    }
+    .knob-indicator { 
+      position: absolute; 
+      top: 8px; 
+      left: 50%; 
+      width: 5px; 
+      height: 32px; 
+      background: white; 
+      transform-origin: bottom center; 
+      border-radius: 3px; 
+      pointer-events: none; 
+    }
     .piano-key { height: 180px; width: 38px; background: white; border: 1px solid #222; border-radius: 0 0 6px 6px; position: relative; box-shadow: inset 0 -8px 12px rgba(0,0,0,0.15), 0 2px 5px rgba(0,0,0,0.4); cursor: pointer; flex-shrink: 0; }
     .piano-key.black { background: #111; height: 110px; width: 26px; margin-left: -13px; margin-right: -13px; z-index: 10; border-radius: 0 0 4px 4px; box-shadow: inset 0 -6px 10px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.5); }
     .piano-key:active, .piano-key.active { background: #f0f0f0; filter: brightness(0.92); box-shadow: inset 0 -4px 8px rgba(0,0,0,0.3); }
@@ -55,7 +77,6 @@
       overflow-y: auto;
       max-height: 80vh;
     }
-    /* Removed all arrow-related rules completely */
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -74,7 +95,7 @@
       </div>
       <a href="studio-instructions.html" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-6 py-3 rounded-2xl font-bold text-base transition shadow-lg">Instructions Manual</a>
       <button onclick="exportMix()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white px-8 py-3 rounded-2xl font-bold text-base transition shadow-lg">Export Final Mix</button>
-      <button onclick="startTour()" 
+      <button onclick="startTour()"
   class="px-6 py-3 rounded-2xl font-bold text-base transition shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
   style="background: linear-gradient(135deg, #ffd700, #ffea80, #ffcc00); color: #1a1a1a;">
   Take the Tour
@@ -161,7 +182,7 @@
             <div class="knob"></div>
             <div class="knob-indicator" id="pan-indicator" style="transform: rotate(0deg);"></div>
           </div>
-          <span id="pan-label" class="w-12 text-sm text-center">Center</span>
+          <span id="pan-label" class="w-24 text-sm text-center font-mono">Center 0%</span>
         </div>
         <div class="flex items-center gap-4">
           <span class="w-28 text-sm font-medium">Mute / Solo</span>
@@ -339,9 +360,9 @@
         <button onclick="demoBass()" class="bg-zinc-800 hover:bg-sky-600 p-6 rounded-3xl text-center text-4xl transition flex flex-col items-center gap-2">🎸<span class="text-sm font-medium">Bass</span><span class="text-xs text-zinc-400">Low-End Groove</span></button>
       </div>
       <div class="mt-20 lg:mt-24">
-  <div class="text-xs uppercase tracking-widest text-violet-400 mb-4">Virtual MIDI Keyboard</div>
-  <div class="flex justify-center bg-black p-6 pb-10 rounded-3xl shadow-2xl mx-auto max-w-full" id="midiKeyboard"></div>
-</div>
+        <div class="text-xs uppercase tracking-widest text-violet-400 mb-4">Virtual MIDI Keyboard</div>
+        <div class="flex justify-center bg-black p-6 pb-10 rounded-3xl shadow-2xl mx-auto max-w-full" id="midiKeyboard"></div>
+      </div>
       <div class="mt-12 lg:mt-16 text-center">
         <div class="text-7xl mb-6">🎸 → 🎹</div>
         <div class="font-bold text-2xl text-emerald-400">Guitar → Keyboard Mode</div>
@@ -488,6 +509,7 @@
         document.getElementById('bpmInput').value = bpm;
         drawPianoRoll();
       }
+
     }
     function updateBPM() {
       drawPianoRoll();
@@ -499,16 +521,14 @@
    function createKeyboard() {
   const container = document.getElementById('midiKeyboard');
   container.innerHTML = '';
-  
   // 25 keys: C4 to C5 (including high C)
   const extendedNotes = [...notes, 'C'];
   const keyWidth = 32; // narrower than before to fit without scrollbar
-  
   extendedNotes.forEach((noteName, i) => {
     const key = document.createElement('div');
     const isBlack = noteName.includes('#');
     key.className = `piano-key ${isBlack ? 'black' : ''}`;
-    
+  
     // Apply narrower width
     key.style.width = `${keyWidth}px`;
     if (isBlack) {
@@ -516,7 +536,7 @@
       key.style.marginLeft = `-${keyWidth * 0.325}px`;
       key.style.marginRight = `-${keyWidth * 0.325}px`;
     }
-    
+  
     key.addEventListener('mousedown', () => {
       const semitone = i;
       const freq = baseFreq * Math.pow(2, semitone / 12);
@@ -525,7 +545,7 @@
     });
     key.addEventListener('mouseup', () => key.classList.remove('active'));
     key.addEventListener('mouseleave', () => key.classList.remove('active'));
-    
+  
     key.addEventListener('touchstart', (e) => {
       e.preventDefault();
       const semitone = i;
@@ -534,39 +554,92 @@
       key.classList.add('active');
     });
     key.addEventListener('touchend', () => key.classList.remove('active'));
-    
+  
     container.appendChild(key);
   });
 }
-    const panIndicator = document.getElementById('pan-indicator');
-    const panLabel = document.getElementById('pan-label');
-    let isDraggingPan = false;
-    panIndicator.addEventListener('mousedown', (e) => {
-      isDraggingPan = true;
-      document.body.style.cursor = 'grabbing';
-      updatePan(e);
+    // ==================== SMOOTH & RELIABLE PAN KNOB ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('pan-knob');
+      const indicator = document.getElementById('pan-indicator');
+      const label = document.getElementById('pan-label');
+
+      if (!container || !indicator || !label) {
+        console.error("Pan knob elements missing");
+        return;
+      }
+
+      let isDragging = false;
+      let rafId = null;
+
+      const startDrag = (e) => {
+        isDragging = true;
+        document.body.style.cursor = 'grabbing';
+        updateFromEvent(e);
+        e.preventDefault();
+      };
+
+      const moveDrag = (e) => {
+        if (!isDragging) return;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => updateFromEvent(e));
+      };
+
+      const endDrag = () => {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+        if (rafId) cancelAnimationFrame(rafId);
+      };
+
+      const updateFromEvent = (e) => {
+        const rect = container.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+        const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+
+        if (clientX === undefined || clientY === undefined) return;
+
+        let angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+        angle = Math.max(-90, Math.min(90, angle));
+
+        indicator.style.transform = `rotate(${angle}deg)`;
+
+        const percent = Math.round((angle / 90) * 100);
+        let text = 'Center';
+        let display = '0%';
+
+        if (angle <= -30) {
+          text = 'Left';
+          display = percent + '%';
+        } else if (angle >= 30) {
+          text = 'Right';
+          display = percent + '%';
+        }
+
+        label.textContent = `${text} ${display}`;
+      };
+
+      // Mouse events on the whole container (much bigger hit area)
+      container.addEventListener('mousedown', startDrag);
+      document.addEventListener('mousemove', moveDrag);
+      document.addEventListener('mouseup', endDrag);
+
+      // Touch events
+      container.addEventListener('touchstart', (e) => {
+        startDrag(e.touches[0]);
+        e.preventDefault();
+      });
+      document.addEventListener('touchmove', (e) => {
+        if (isDragging) {
+          moveDrag(e.touches[0]);
+          e.preventDefault();
+        }
+      });
+      document.addEventListener('touchend', endDrag);
     });
-    document.addEventListener('mousemove', (e) => {
-      if (isDraggingPan) updatePan(e);
-    });
-    document.addEventListener('mouseup', () => {
-      isDraggingPan = false;
-      document.body.style.cursor = 'default';
-    });
-    function updatePan(e) {
-      const rect = panIndicator.parentElement.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
-      const angle = Math.atan2(mouseY - centerY, mouseX - centerX) * (180 / Math.PI);
-      let rot = Math.max(-90, Math.min(90, angle));
-      panIndicator.style.transform = `rotate(${rot}deg)`;
-      let text = 'Center';
-      if (rot < -30) text = 'Left';
-      else if (rot > 30) text = 'Right';
-      panLabel.textContent = text;
-    }
+    // ==================== END SMOOTH PAN KNOB ====================
+
     function togglePlay() { alert("Transport Playing (demo mode)"); }
     function stop() { alert("Transport Stopped"); }
     function exportMix() { alert("Exporting full mix + stems (demo)"); }
@@ -696,7 +769,6 @@
         const newDuration = Math.max(0.25, Math.round((beat - note.x) * 4) / 4);
         note.duration = newDuration;
         drawPianoRoll();
-
       } else {
         const hit = findNoteAt(mouseX, mouseY, true);
         pianoRollCanvas.style.cursor = hit ? (hit.isResize ? 'ew-resize' : 'move') : 'crosshair';
@@ -899,12 +971,9 @@
         const safeMargin = 140;
         let topPosition = rect.top - bubbleHeight - padding;
         let leftPosition = rect.left + (rect.width / 2) - (bubbleWidth / 2);
-        // No arrows anymore — no arrowClass needed
-        // Prefer placing below if there's more space
         if (rect.bottom + bubbleHeight + padding + safeMargin < viewportHeight) {
           topPosition = rect.bottom + padding;
         }
-        // Clamp to screen edges
         if (topPosition < 30) topPosition = 30;
         if (topPosition + bubbleHeight > viewportHeight - safeMargin) {
           topPosition = viewportHeight - bubbleHeight - safeMargin;
@@ -913,7 +982,6 @@
         if (leftPosition + bubbleWidth > viewportWidth - 20) {
           leftPosition = viewportWidth - bubbleWidth - 20;
         }
-        // Smooth scroll to make target + bubble visible
         const scrollY = window.scrollY;
         const targetCenterY = rect.top + scrollY + (rect.height / 2);
         const desiredScrollY = targetCenterY - (viewportHeight / 2);
@@ -922,7 +990,6 @@
         }
         bubble.style.top = `${topPosition}px`;
         bubble.style.left = `${leftPosition}px`;
-        // Removed arrow class assignment
       });
     }
     function nextTourStep() {
@@ -937,7 +1004,6 @@
     }
     function endTour() {
       document.getElementById('tourOverlay').style.display = 'none';
-
       document.getElementById('tourBubble').style.display = 'none';
       document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
     }
