@@ -39,7 +39,7 @@
     <a href="pricing.html" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-lg font-bold hover:from-green-600 hover:to-emerald-700 shadow-lg">
       Upgrade to Pro
     </a>
-    <button onclick="logout()" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300 font-medium">Logout</button>
+    <button onClick="logout()" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300 font-medium">Logout</button>
   </nav>
 </header>
 
@@ -149,7 +149,7 @@
 <div id="successPopup">
   <div class="box">
     <h3 id="successMessage">Saved!</h3>
-    <button onclick="document.getElementById('successPopup').classList.remove('show')" class="mt-6 bg-white text-[#10b981] px-8 py-4 rounded-full font-bold text-xl hover:bg-gray-200">
+    <button onClick="document.getElementById('successPopup').classList.remove('show')" class="mt-6 bg-white text-[#10b981] px-8 py-4 rounded-full font-bold text-xl hover:bg-gray-200">
       OK
     </button>
   </div>
@@ -157,7 +157,7 @@
 
 <!-- Video Modal -->
 <div id="videoModal">
-  <div id="closeModal" onclick="closeModal()">X</div>
+  <div id="closeModal" onClick="closeModal()">X</div>
   <video id="modalVideo" controls autoplay class="shadow-2xl"></video>
 </div>
 
@@ -211,7 +211,7 @@
       }
 
       const subdomain = data.subdomain || currentUser.id;
-      const publicUrl = `https://rhythm-deck-music.onrender.com/public-profile.html?id=${subdomain}`;
+      const publicUrl = `https://rhythmdeck.vercel.app/public-profile.html?id=${subdomain}`;
       document.getElementById('publicUrl').textContent = publicUrl;
       document.getElementById('publicLink').href = publicUrl;
     } catch (err) {
