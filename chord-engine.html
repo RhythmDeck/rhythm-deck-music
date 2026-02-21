@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhythm Deck | Chord Engine</title>
+<link rel="icon" href="logo-favicon.png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+.hero-height { height: 60vh; }
+.brand-gradient {
+  background: linear-gradient(135deg, #00c853, #00bfa5);
+}
+</style>
+</head>
+
+<body class="bg-black text-white">
+
+<!-- HEADER -->
+<header class="bg-black text-white px-6 py-4 flex justify-between items-center border-b border-gray-800">
+  <div class="flex items-center gap-3">
+    <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full">
+    <div>
+      <h1 class="text-2xl font-bold tracking-wider">RHYTHM DECK</h1>
+      <p class="text-xs text-gray-400">Unleash Your Beat</p>
+    </div>
+  </div>
+
+  <!-- HOME BUTTON GOES TO VERCEL -->
+  <a href="https://rhythmdeck.vercel.app/"
+     class="px-5 py-2 rounded-full brand-gradient font-semibold text-black hover:opacity-90 transition">
+     Home
+  </a>
+</header>
+
+<!-- HERO -->
+<section class="hero-height bg-cover bg-center flex items-center justify-center"
+         style="background-image: url('banner-cropped.jpg');">
+  <div class="bg-black/70 backdrop-blur-md p-10 rounded-2xl text-center max-w-3xl shadow-2xl">
+    <h2 class="text-4xl md:text-5xl font-bold mb-4">
+      Rhythm Deck Chord Engine
+    </h2>
+    <p class="text-gray-300 text-lg">
+      AI-powered chord detection built for creators.
+    </p>
+  </div>
+</section>
+
+<!-- ENGINE -->
+<section class="py-20 px-6 max-w-3xl mx-auto">
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 shadow-2xl">
+
+    <h3 class="text-3xl font-bold mb-6 text-center">
+      Analyze Your Track
+    </h3>
+
+    <input id="fileInput" type="file" accept=".mp3"
+      class="w-full mb-6 text-sm bg-zinc-800 border border-zinc-700 rounded-lg p-3 cursor-pointer">
+
+    <button onclick="analyzeFile()"
+      class="w-full brand-gradient text-black font-bold py-4 rounded-xl text-lg hover:opacity-90 transition">
+      Analyze Track
+    </button>
+
+    <div id="progressContainer" class="hidden mt-8">
+      <div class="w-full bg-zinc-800 rounded-full h-4 overflow-hidden">
+        <div id="progressBar"
+          class="brand-gradient h-4 transition-all duration-200"
+          style="width: 5%">
+        </div>
+      </div>
+      <p class="text-center text-sm text-gray-400 mt-2">Processing audio...</p>
+    </div>
+
+    <div id="result" class="mt-8 text-center text-xl font-semibold"></div>
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-black border-t border-gray-800 py-6 text-center text-sm text-gray-500">
+  <nav class="mb-3 space-x-6">
+    <a href="https://rhythmdeck.vercel.app/contact.html" class="hover:text-white">Contact</a>
+    <a href="https://rhythmdeck.vercel.app/privacy.html" class="hover:text-white">Privacy</a>
+    <a href="https://rhythmdeck.vercel.app/terms.html" class="hover:text-white">Terms</a>
+  </nav>
+  <p>© 2026 Rhythm Deck Music. All rights reserved.</p>
+</footer>
+
+<script>
+function analyzeFile() {
+    const fileInput = document.getElementById("fileInput");
+    const resultDiv = document.getElementById("result");
+    const progressContainer = document.getElementById("progressContainer");
+    const progressBar = document.getElementById("progressBar");
+
+    if (!fileInput.files.length) {
+        alert("Please select an MP3 file.");
+        return;
+    }
+
+    resultDiv.innerHTML = "";
+    progressContainer.classList.remove("hidden");
+
+    let progress = 5;
+    progressBar.style.width = progress + "%";
+
+    const interval = setInterval(() => {
+        if (progress < 90) {
+            progress += 3;
+            progressBar.style.width = progress + "%";
+        }
+    }, 200);
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    fetch("https://rhythm-deck-chord-engine.onrender.com/analyze", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        clearInterval(interval);
+        progressBar.style.width = "100%";
+
+        setTimeout(() => {
+            progressContainer.classList.add("hidden");
+
+            if (data.error) {
+                resultDiv.innerHTML =
+                  "<span class='text-red-500'>Error: " + data.error + "</span>";
+            } else {
+                resultDiv.innerHTML =
+                  "<span class='text-green-400 text-2xl'>Estimated Chords:</span><br><br>" +
+                  data.estimated_chords.join(" • ");
+            }
+        }, 500);
+    })
+    .catch(() => {
+        clearInterval(interval);
+        progressContainer.classList.add("hidden");
+        resultDiv.innerHTML =
+          "<span class='text-red-500'>Server error. Please try again.</span>";
+    });
+}
+</script>
+
+</body>
+</html>
