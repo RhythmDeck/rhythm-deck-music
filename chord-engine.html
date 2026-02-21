@@ -105,15 +105,35 @@ function analyzeFile() {
     resultDiv.innerHTML = "";
     progressContainer.classList.remove("hidden");
 
+    // Create percentage + time display
+    const timeDisplay = document.createElement("div");
+    timeDisplay.className = "text-center text-sm text-gray-400 mt-3";
+    progressContainer.appendChild(timeDisplay);
+
     let progress = 5;
+    let secondsElapsed = 0;
+    let estimatedTotal = 40; // estimated avg time (adjustable)
+
     progressBar.style.width = progress + "%";
 
     const interval = setInterval(() => {
-        if (progress < 90) {
-            progress += 3;
+        secondsElapsed++;
+
+        // Smooth fake progress up to 92%
+        if (progress < 92) {
+            progress += 1.5;
             progressBar.style.width = progress + "%";
         }
-    }, 200);
+
+        // Estimate remaining time
+        const remaining = Math.max(estimatedTotal - secondsElapsed, 0);
+
+        timeDisplay.innerHTML =
+            "<strong>" + Math.floor(progress) + "%</strong> &nbsp; | &nbsp; " +
+            "Elapsed: " + secondsElapsed + "s &nbsp; | &nbsp; " +
+            "Est. Remaining: " + remaining + "s";
+
+    }, 1000);
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
@@ -126,9 +146,11 @@ function analyzeFile() {
     .then(data => {
         clearInterval(interval);
         progressBar.style.width = "100%";
+        timeDisplay.innerHTML = "<strong>100%</strong> &nbsp; | &nbsp; Completed";
 
         setTimeout(() => {
             progressContainer.classList.add("hidden");
+            timeDisplay.remove();
 
             if (data.error) {
                 resultDiv.innerHTML =
@@ -138,16 +160,16 @@ function analyzeFile() {
                   "<span class='text-green-400 text-2xl'>Estimated Chords:</span><br><br>" +
                   data.estimated_chords.join(" • ");
             }
-        }, 500);
+        }, 600);
     })
     .catch(() => {
         clearInterval(interval);
         progressContainer.classList.add("hidden");
+        timeDisplay.remove();
         resultDiv.innerHTML =
           "<span class='text-red-500'>Server error. Please try again.</span>";
     });
 }
 </script>
-
 </body>
 </html>
