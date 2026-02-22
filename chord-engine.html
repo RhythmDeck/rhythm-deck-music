@@ -9,15 +9,44 @@
 
 <style>
 .hero-height { height: 60vh; }
+
 .brand-gradient {
   background: linear-gradient(135deg, #00c853, #00bfa5);
+}
+
+.flash-word {
+  transition: all 0.4s ease;
+}
+
+.flash-active {
+  background: linear-gradient(90deg, #ff00ff, #00ffff, #ffff00, #ff0000);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.instrument {
+  position: fixed;
+  font-size: 30px;
+  opacity: 0.2;
+  animation: float 10s infinite ease-in-out alternate;
+}
+
+@keyframes float {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-40px); }
 }
 </style>
 </head>
 
-<body class="bg-black text-white">
+<body class="bg-black text-white overflow-x-hidden">
 
-<!-- HEADER -->
+<!-- Random Instruments -->
+<div class="instrument" style="top:10%; left:5%;">🎹</div>
+<div class="instrument" style="top:30%; right:8%;">🎸</div>
+<div class="instrument" style="bottom:15%; left:10%;">🪕</div>
+<div class="instrument" style="bottom:20%; right:12%;">🎷</div>
+<div class="instrument" style="top:60%; left:2%;">🥁</div>
+
 <header class="bg-black text-white px-6 py-4 flex justify-between items-center border-b border-gray-800">
   <div class="flex items-center gap-3">
     <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full">
@@ -27,19 +56,20 @@
     </div>
   </div>
 
-  <!-- HOME BUTTON GOES TO VERCEL -->
   <a href="https://rhythmdeck.vercel.app/"
      class="px-5 py-2 rounded-full brand-gradient font-semibold text-black hover:opacity-90 transition">
      Home
   </a>
 </header>
 
-<!-- HERO -->
 <section class="hero-height bg-cover bg-center flex items-center justify-center"
          style="background-image: url('banner-cropped.jpg');">
   <div class="bg-black/70 backdrop-blur-md p-10 rounded-2xl text-center max-w-3xl shadow-2xl">
     <h2 class="text-4xl md:text-5xl font-bold mb-4">
-      Rhythm Deck Chord Engine
+      <span id="w1" class="flash-word">Rhythm</span>
+      <span id="w2" class="flash-word">Deck</span>
+      <span id="w3" class="flash-word">Chord</span>
+      <span id="w4" class="flash-word">Engine</span>
     </h2>
     <p class="text-gray-300 text-lg">
       AI-powered chord detection built for creators.
@@ -47,23 +77,34 @@
   </div>
 </section>
 
-<!-- ENGINE -->
 <section class="py-20 px-6 max-w-3xl mx-auto">
-
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 shadow-2xl">
 
     <h3 class="text-3xl font-bold mb-6 text-center">
-      Rhythm Deck Chord Engine<br>
       Analyze Your MP3 Track
     </h3>
 
     <input id="fileInput" type="file" accept=".mp3"
       class="w-full mb-6 text-sm bg-zinc-800 border border-zinc-700 rounded-lg p-3 cursor-pointer">
 
-    <button onClick="analyzeFile()"
-      class="w-full brand-gradient text-black font-bold py-4 rounded-xl text-lg hover:opacity-90 transition">
-      Analyze Track
+    <!-- FULL MODE -->
+    <button onclick="analyzeFile(false)"
+      class="w-full brand-gradient text-black font-bold py-4 rounded-xl text-lg hover:opacity-90 transition mb-4">
+      Full Chord Engine (High Accuracy)
     </button>
+
+    <!-- LITE MODE -->
+    <button onclick="analyzeFile(true)"
+      class="w-full bg-yellow-400 text-black font-bold py-4 rounded-xl text-lg hover:opacity-90 transition">
+      ⚡ Fast Mode (Lightweight)
+    </button>
+
+    <div class="mt-6 text-sm text-gray-400">
+      <p class="font-semibold text-white mb-2">For faster, lighter chord extraction:</p>
+      ✔ Limit analysis to first 45–60 seconds<br>
+      ✔ Force mono<br>
+      ✔ Lower sample rate
+    </div>
 
     <div id="progressContainer" class="hidden mt-8">
       <div class="w-full bg-zinc-800 rounded-full h-4 overflow-hidden">
@@ -72,31 +113,35 @@
           style="width: 5%">
         </div>
       </div>
-      <p class="text-center text-sm text-gray-400 mt-2">Processing audio...</p>
+      <div id="timeDisplay" class="text-center text-sm text-gray-400 mt-3"></div>
     </div>
 
     <div id="result" class="mt-8 text-center text-xl font-semibold"></div>
 
   </div>
-
 </section>
 
-<!-- FOOTER -->
 <footer class="bg-black border-t border-gray-800 py-6 text-center text-sm text-gray-500">
-  <nav class="mb-3 space-x-6">
-    <a href="https://rhythmdeck.vercel.app/contact.html" class="hover:text-white">Contact</a>
-    <a href="https://rhythmdeck.vercel.app/privacy.html" class="hover:text-white">Privacy</a>
-    <a href="https://rhythmdeck.vercel.app/terms.html" class="hover:text-white">Terms</a>
-  </nav>
   <p>© 2026 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
 <script>
-function analyzeFile() {
+let words = ["w1","w2","w3","w4"];
+let current = 0;
+
+setInterval(() => {
+  words.forEach(id => document.getElementById(id).classList.remove("flash-active"));
+  document.getElementById(words[current]).classList.add("flash-active");
+  current = (current + 1) % words.length;
+}, 600);
+
+
+function analyzeFile(liteMode) {
     const fileInput = document.getElementById("fileInput");
     const resultDiv = document.getElementById("result");
     const progressContainer = document.getElementById("progressContainer");
     const progressBar = document.getElementById("progressBar");
+    const timeDisplay = document.getElementById("timeDisplay");
 
     if (!fileInput.files.length) {
         alert("Please select an MP3 file.");
@@ -106,40 +151,30 @@ function analyzeFile() {
     resultDiv.innerHTML = "";
     progressContainer.classList.remove("hidden");
 
-    // Create percentage + time display
-    const timeDisplay = document.createElement("div");
-    timeDisplay.className = "text-center text-sm text-gray-400 mt-3";
-    progressContainer.appendChild(timeDisplay);
-
     let progress = 5;
     let secondsElapsed = 0;
-    let estimatedTotal = 40; // estimated avg time (adjustable)
-
     progressBar.style.width = progress + "%";
 
     const interval = setInterval(() => {
         secondsElapsed++;
-
-        // Smooth fake progress up to 92%
         if (progress < 92) {
             progress += 1.5;
             progressBar.style.width = progress + "%";
         }
 
-        // Estimate remaining time
-        const remaining = Math.max(estimatedTotal - secondsElapsed, 0);
-
         timeDisplay.innerHTML =
-            "<strong>" + Math.floor(progress) + "%</strong> &nbsp; | &nbsp; " +
-            "Elapsed: " + secondsElapsed + "s &nbsp; | &nbsp; " +
-            "Est. Remaining: " + remaining + "s";
-
+            "<strong>" + Math.floor(progress) + "%</strong> | Elapsed: "
+            + secondsElapsed + "s";
     }, 1000);
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
 
-    fetch("https://rhythm-deck-chord-engine.onrender.com/analyze", {
+    const endpoint = liteMode
+        ? "https://rhythm-deck-chord-engine.onrender.com/analyze-lite"
+        : "https://rhythm-deck-chord-engine.onrender.com/analyze";
+
+    fetch(endpoint, {
         method: "POST",
         body: formData
     })
@@ -147,11 +182,10 @@ function analyzeFile() {
     .then(data => {
         clearInterval(interval);
         progressBar.style.width = "100%";
-        timeDisplay.innerHTML = "<strong>100%</strong> &nbsp; | &nbsp; Completed";
+        timeDisplay.innerHTML = "<strong>100%</strong> | Completed";
 
         setTimeout(() => {
             progressContainer.classList.add("hidden");
-            timeDisplay.remove();
 
             if (data.error) {
                 resultDiv.innerHTML =
@@ -166,7 +200,6 @@ function analyzeFile() {
     .catch(() => {
         clearInterval(interval);
         progressContainer.classList.add("hidden");
-        timeDisplay.remove();
         resultDiv.innerHTML =
           "<span class='text-red-500'>Server error. Please try again.</span>";
     });
