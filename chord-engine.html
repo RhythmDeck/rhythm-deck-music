@@ -143,9 +143,7 @@ setInterval(() => {
 
 let audioContext, analyser, sourceNode, gainNode, animationId;
 let lyricLines = [];
-let lastStableChord = "C Major";
-let lastChordChangeTime = 0;
-let songDuration = 180;
+let lastChord = "";
 
 async function analyzeFile() {
     const fileInput = document.getElementById("fileInput");
@@ -189,11 +187,6 @@ async function analyzeFile() {
 
     sourceNode.start();
 
-    songDuration = audioBuffer.duration || 180;
-    const minutes = Math.floor(songDuration / 60);
-    const seconds = Math.floor(songDuration % 60).toString().padStart(2, '0');
-    songDurationEl.textContent = `Song Duration: ${minutes}:${seconds}`;
-
     const volumeSlider = document.getElementById("volumeSlider");
     const volumeValue = document.getElementById("volumeValue");
 
@@ -222,25 +215,15 @@ function detectLoop() {
         chroma[pitchClass] += Math.abs(dataArray[i]);
     }
 
-    const currentChord = detectChord(chroma);
-    document.getElementById("liveChord").innerText = currentChord;
-
-    const now = audioContext.currentTime;
-
-    // Update stable chord only every ~3 seconds
-    if (now - lastChordChangeTime > 3) {
-        lastStableChord = currentChord;
-        lastChordChangeTime = now;
+    const chord = detectChord(chroma);
+    if (chord !== lastChord && chord !== "Unknown") {
+        document.getElementById("liveChord").innerText = chord;
+        const index = Math.floor(Math.random() * lyricLines.length);
+        const chordLine = document.getElementById("chord" + index);
+        chordLine.innerText = chord;
+        lastChord = chord;
     }
-
-    // Place the stable chord above the current lyric line
-    const currentLineIndex = getCurrentLineIndex();
-    if (currentLineIndex >= 0) {
-        const chordLine = document.getElementById("chord" + currentLineIndex);
-        if (chordLine) chordLine.innerText = lastStableChord;
-    }
-
-    requestAnimationFrame(detectLoop);
+    animationId = requestAnimationFrame(detectLoop);
 }
 
 function detectChord(chroma) {
@@ -248,7 +231,7 @@ function detectChord(chroma) {
     const majorTemplate = [1,0,0,0,1,0,0,1,0,0,0,0];
     const minorTemplate = [1,0,0,1,0,0,0,1,0,0,0,0];
     let bestScore = 0;
-    let bestChord = "C Major"; // fallback
+    let bestChord = "Unknown";
     for (let root = 0; root < 12; root++) {
         let majorScore = 0;
         let minorScore = 0;
@@ -267,15 +250,6 @@ function detectChord(chroma) {
         }
     }
     return bestChord;
-}
-
-function getCurrentLineIndex() {
-    if (!sourceNode) return -1;
-    const offset = 1.5;
-    let currentTime = audioContext.currentTime - sourceNode.startTime;
-    currentTime = Math.max(0, currentTime - offset);
-    const progress = Math.min(currentTime / songDuration, 1);
-    return Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
 }
 </script>
 </body>
