@@ -228,24 +228,26 @@ function detectLoop() {
     requestAnimationFrame(detectLoop);
 }
 function detectChord(chroma) {
-    const notes = ["C","D","E","F","G","A","B"];
-    const templates = {
-        "": [1,0,0,0,1,0,0,1,0,0,0,0], // Major
-        "m": [1,0,0,1,0,0,0,1,0,0,0,0] // Minor
-    };
+    const notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    const majorTemplate = [1,0,0,0,1,0,0,1,0,0,0,0];
+    const minorTemplate = [1,0,0,1,0,0,0,1,0,0,0,0];
     let bestScore = 0;
-    let bestChord = "C";
-    for (let root = 0; root < 7; root++) {
-        for (const [type, template] of Object.entries(templates)) {
-            let score = 0;
-            for (let i = 0; i < 12; i++) {
-                const index = (i + root * 2) % 12;
-                score += chroma[index] * template[i];
-            }
-            if (score > bestScore) {
-                bestScore = score;
-                bestChord = notes[root] + type;
-            }
+    let bestChord = "Unknown";
+    for (let root = 0; root < 12; root++) {
+        let majorScore = 0;
+        let minorScore = 0;
+        for (let i = 0; i < 12; i++) {
+            const index = (i + root) % 12;
+            majorScore += chroma[index] * majorTemplate[i];
+            minorScore += chroma[index] * minorTemplate[i];
+        }
+        if (majorScore > bestScore) {
+            bestScore = majorScore;
+            bestChord = notes[root] + " Major";
+        }
+        if (minorScore > bestScore) {
+            bestScore = minorScore;
+            bestChord = notes[root] + " Minor";
         }
     }
     return bestChord;
