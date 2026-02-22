@@ -66,6 +66,10 @@
   background: #00ffcc;
   border-radius: 4px;
 }
+@media (max-width: 640px) {
+  .lyrics-container { max-height: 300px; }
+  .hero-height { height: 50vh; }
+}
 </style>
 </head>
 <body class="bg-black text-white overflow-x-hidden">
@@ -116,7 +120,7 @@
     <textarea id="lyricsInput"
       placeholder="Paste lyrics here... (each line will receive chords above it)"
       class="w-full h-40 mb-6 bg-zinc-800 border border-zinc-700 rounded-lg p-4 text-white resize-none"></textarea>
-    
+   
     <!-- Volume Control -->
     <label class="block text-sm mb-2 text-gray-400">Volume</label>
     <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1"
@@ -129,6 +133,8 @@
     </button>
     <div id="liveChord" class="text-center text-3xl font-bold text-green-400 mb-8"></div>
     <div class="lyrics-container" id="lyricsDisplay" class="text-lg leading-relaxed"></div>
+    <!-- NEW: Song duration display -->
+    <div id="songDuration" class="text-center text-sm text-gray-400 mt-4">Song Duration: --:--</div>
   </div>
 </section>
 <footer class="bg-black border-t border-gray-800 py-6 text-center text-sm text-gray-500">
@@ -151,6 +157,7 @@ async function analyzeFile() {
     const fileInput = document.getElementById("fileInput");
     const lyricsText = document.getElementById("lyricsInput").value.trim();
     const lyricsDisplay = document.getElementById("lyricsDisplay");
+    const songDurationEl = document.getElementById("songDuration");
     if (!fileInput.files.length) {
         alert("Please upload an MP3 file.");
         return;
@@ -186,6 +193,12 @@ async function analyzeFile() {
 
     sourceNode.start();
 
+    // Show actual song duration
+    const duration = audioBuffer.duration || 180;
+    const minutes = Math.floor(duration / 60);
+    const seconds = Math.floor(duration % 60).toString().padStart(2, '0');
+    songDurationEl.textContent = `Song Duration: ${minutes}:${seconds}`;
+
     const volumeSlider = document.getElementById("volumeSlider");
     const volumeValue = document.getElementById("volumeValue");
 
@@ -198,7 +211,7 @@ async function analyzeFile() {
     volumeValue.textContent = "Volume: 100%";
 
     detectLoop();
-    startLyricSync();
+    startLyricSync(duration);
 }
 
 function detectLoop() {
@@ -251,12 +264,12 @@ function detectChord(chroma) {
     return bestChord;
 }
 
-// NEW: Time-based lyric sync & smooth scrolling/highlighting
-function startLyricSync() {
+// Time-based lyric sync with accurate duration
+function startLyricSync(duration) {
   if (!sourceNode || !lyricLines.length) return;
 
-  // Approximate song duration from buffer (fallback to 180s if unknown)
-  const duration = sourceNode.buffer?.duration || 180;
+  // Slight offset so lyrics start highlighting a bit earlier (common in karaoke)
+  const offset = 1.5; // seconds – adjust if needed
 
   sourceNode.onended = () => {
     document.querySelectorAll(".lyric-line").forEach(el => el.classList.remove("active-line"));
@@ -265,11 +278,12 @@ function startLyricSync() {
   const updateLyrics = () => {
     if (!sourceNode || sourceNode.context.state !== 'running') return;
 
-    const currentTime = audioContext.currentTime - sourceNode.startTime;
+    let currentTime = audioContext.currentTime - sourceNode.startTime;
+    currentTime = Math.max(0, currentTime - offset); // apply offset
     const progress = Math.min(currentTime / duration, 1);
-    const lineIndex = Math.floor(progress * lyricLines.length);
+    const lineIndex = Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
 
-    if (lineIndex >= 0 && lineIndex < lyricLines.length) {
+    if (lineIndex >= 0) {
       document.querySelectorAll(".lyric-line").forEach(el => el.classList.remove("active-line"));
 
       const activeLine = document.getElementById(`line${lineIndex}`);
