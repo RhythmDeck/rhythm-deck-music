@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -24,49 +24,54 @@
 
 .instrument {
   position: fixed;
-  font-size: 40px;
-  opacity: 0.7;
-  filter: drop-shadow(0 0 10px #00ffcc);
-  animation: float 8s infinite ease-in-out alternate;
-}
-
-.note {
-  position: fixed;
-  font-size: 28px;
+  font-size: 36px;
   opacity: 0.6;
+  filter: drop-shadow(0 0 8px #00ffcc);
   animation: float 12s infinite ease-in-out alternate;
+  pointer-events: none;
 }
 
 @keyframes float {
   from { transform: translateY(0px); }
-  to { transform: translateY(-50px); }
+  to { transform: translateY(-60px); }
 }
 
-.lyric-line {
-  margin-bottom: 20px;
+#lyricsContainer {
+  height: 300px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  background: #111;
+  padding: 20px;
+  border-radius: 15px;
+  margin-top: 30px;
 }
 
-.chord-line {
-  font-weight: bold;
+.line {
+  margin-bottom: 35px;
+  font-size: 20px;
+}
+
+.chord {
   color: #00ffcc;
-  letter-spacing: 3px;
+  font-weight: bold;
+  display: block;
+  font-size: 16px;
+  margin-bottom: 5px;
 }
 </style>
 </head>
 
 <body class="bg-black text-white overflow-x-hidden">
 
-<!-- Brighter Floating Instruments -->
+<!-- Floating Instruments -->
 <div class="instrument" style="top:10%; left:5%;">🎹</div>
 <div class="instrument" style="top:30%; right:8%;">🎸</div>
 <div class="instrument" style="bottom:15%; left:10%;">🪕</div>
 <div class="instrument" style="bottom:20%; right:12%;">🎷</div>
 <div class="instrument" style="top:60%; left:2%;">🥁</div>
-
-<!-- Random Musical Notes -->
-<div class="note" style="top:15%; right:20%;">🎵</div>
-<div class="note" style="bottom:25%; left:25%;">🎶</div>
-<div class="note" style="top:70%; right:30%;">🎵</div>
+<div class="instrument" style="top:50%; right:20%;">🎼</div>
+<div class="instrument" style="top:70%; left:40%;">🎵</div>
+<div class="instrument" style="top:25%; left:70%;">🎶</div>
 
 <header class="bg-black text-white px-6 py-4 flex justify-between items-center border-b border-gray-800">
   <div class="flex items-center gap-3">
@@ -76,50 +81,31 @@
       <p class="text-xs text-gray-400">Unleash Your Beat</p>
     </div>
   </div>
-
-  <a href="https://rhythmdeck.vercel.app/"
-     class="px-5 py-2 rounded-full brand-gradient font-semibold text-black hover:opacity-90 transition">
-     Home
-  </a>
 </header>
 
-<section class="hero-height bg-cover bg-center flex items-center justify-center"
-         style="background-image: url('banner-cropped.jpg');">
-  <div class="bg-black/70 backdrop-blur-md p-10 rounded-2xl text-center max-w-3xl shadow-2xl">
-    <h2 class="text-4xl md:text-5xl font-bold mb-4">
-      <span id="w1" class="flash-word">Rhythm</span>
-      <span id="w2" class="flash-word">Deck</span>
-      <span id="w3" class="flash-word">Chord</span>
-      <span id="w4" class="flash-word">Engine</span>
-    </h2>
-    <p class="text-gray-300 text-lg">
-      Real-time chord & lyric alignment.
-    </p>
-  </div>
-</section>
-
-<section class="py-20 px-6 max-w-4xl mx-auto">
+<section class="py-20 px-6 max-w-3xl mx-auto">
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 shadow-2xl">
 
     <h3 class="text-3xl font-bold mb-6 text-center">
-      Upload Track + Add Lyrics
+      Analyze Your MP3 Track
     </h3>
 
     <input id="fileInput" type="file" accept=".mp3"
       class="w-full mb-6 text-sm bg-zinc-800 border border-zinc-700 rounded-lg p-3 cursor-pointer">
 
-    <textarea id="lyricsInput"
-      placeholder="Paste lyrics here... (each line will receive chords above it)"
-      class="w-full h-40 mb-6 bg-zinc-800 border border-zinc-700 rounded-lg p-4 text-white resize-none"></textarea>
+    <!-- Volume -->
+    <div class="mb-6">
+      <label class="block mb-2 text-sm text-gray-400">Volume</label>
+      <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1"
+             class="w-full">
+    </div>
 
     <button onclick="analyzeFile()"
-      class="w-full brand-gradient text-black font-bold py-4 rounded-xl text-lg hover:opacity-90 transition mb-6">
-      Start Real-Time Chord Alignment
+      class="w-full brand-gradient text-black font-bold py-4 rounded-xl text-lg hover:opacity-90 transition mb-4">
+      Start Real-Time Analysis
     </button>
 
-    <div id="liveChord" class="text-center text-3xl font-bold text-green-400 mb-8"></div>
-
-    <div id="lyricsDisplay" class="text-lg leading-relaxed"></div>
+    <div id="lyricsContainer"></div>
 
   </div>
 </section>
@@ -129,40 +115,21 @@
 </footer>
 
 <script>
-let words = ["w1","w2","w3","w4"];
-let current = 0;
-
-setInterval(() => {
-  words.forEach(id => document.getElementById(id).classList.remove("flash-active"));
-  document.getElementById(words[current]).classList.add("flash-active");
-  current = (current + 1) % words.length;
-}, 600);
-
-let audioContext, analyser, sourceNode, animationId;
-let lyricLines = [];
+let audioContext;
+let analyser;
+let sourceNode;
+let gainNode;
+let animationId;
+let timeline = [];
 let lastChord = "";
+let startTime;
 
 async function analyzeFile() {
     const fileInput = document.getElementById("fileInput");
-    const lyricsText = document.getElementById("lyricsInput").value.trim();
-    const lyricsDisplay = document.getElementById("lyricsDisplay");
-
     if (!fileInput.files.length) {
-        alert("Please upload an MP3 file.");
+        alert("Please select an MP3 file.");
         return;
     }
-
-    lyricLines = lyricsText.split("\n");
-    lyricsDisplay.innerHTML = "";
-
-    lyricLines.forEach((line, index) => {
-        lyricsDisplay.innerHTML += `
-            <div class="lyric-line" id="line${index}">
-                <div class="chord-line" id="chord${index}">&nbsp;</div>
-                <div>${line}</div>
-            </div>
-        `;
-    });
 
     const file = fileInput.files[0];
     const arrayBuffer = await file.arrayBuffer();
@@ -173,14 +140,31 @@ async function analyzeFile() {
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
 
+    gainNode = audioContext.createGain();
+    gainNode.gain.value = document.getElementById("volumeSlider").value;
+
+    document.getElementById("volumeSlider").oninput = function() {
+        gainNode.gain.value = this.value;
+    };
+
     sourceNode = audioContext.createBufferSource();
     sourceNode.buffer = audioBuffer;
 
     sourceNode.connect(analyser);
-    analyser.connect(audioContext.destination);
+    analyser.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    timeline = [];
+    lastChord = "";
+    startTime = audioContext.currentTime;
 
     sourceNode.start();
     detectLoop();
+    scrollLyrics();
+
+    sourceNode.onended = () => {
+        cancelAnimationFrame(animationId);
+    };
 }
 
 function detectLoop() {
@@ -201,14 +185,14 @@ function detectLoop() {
     }
 
     const chord = detectChord(chroma);
+    const currentTime = audioContext.currentTime - startTime;
 
     if (chord !== lastChord && chord !== "Unknown") {
-        document.getElementById("liveChord").innerText = chord;
-
-        const index = Math.floor(Math.random() * lyricLines.length);
-        const chordLine = document.getElementById("chord" + index);
-        chordLine.innerText = chord;
-
+        timeline.push({
+            time: currentTime.toFixed(1),
+            chord: chord
+        });
+        renderLyrics();
         lastChord = chord;
     }
 
@@ -237,14 +221,41 @@ function detectChord(chroma) {
             bestScore = majorScore;
             bestChord = notes[root] + " Major";
         }
-
         if (minorScore > bestScore) {
             bestScore = minorScore;
             bestChord = notes[root] + " Minor";
         }
     }
-
     return bestChord;
+}
+
+function renderLyrics() {
+    const container = document.getElementById("lyricsContainer");
+    container.innerHTML = "";
+
+    timeline.forEach(entry => {
+        const line = document.createElement("div");
+        line.className = "line";
+
+        const chord = document.createElement("span");
+        chord.className = "chord";
+        chord.innerText = entry.chord;
+
+        const lyric = document.createElement("span");
+        lyric.innerText = "Sample lyric line for this chord progression";
+
+        line.appendChild(chord);
+        line.appendChild(lyric);
+        container.appendChild(line);
+    });
+}
+
+function scrollLyrics() {
+    const container = document.getElementById("lyricsContainer");
+    let scrollInterval = setInterval(() => {
+        container.scrollTop += 1;
+        if (!sourceNode) clearInterval(scrollInterval);
+    }, 50);
 }
 </script>
 
