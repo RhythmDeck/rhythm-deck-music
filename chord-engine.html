@@ -42,13 +42,6 @@
   color: #00ffcc;
   letter-spacing: 3px;
 }
-.active-line {
-  background: rgba(0, 255, 204, 0.2);
-  transform: scale(1.03);
-  padding: 8px 12px;
-  border-left: 5px solid #00ffcc;
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-}
 .lyrics-container {
   max-height: 500px;
   overflow-y: auto;
@@ -230,11 +223,10 @@ function detectLoop() {
     const chord = detectChord(chroma);
     document.getElementById("liveChord").innerText = chord;
 
-    const currentLineIndex = getCurrentLineIndex();
-    if (currentLineIndex >= 0) {
-        const chordLine = document.getElementById("chord" + currentLineIndex);
-        if (chordLine) chordLine.innerText = chord;
-    }
+    // Place chord above a random line (original working behavior)
+    const index = Math.floor(Math.random() * lyricLines.length);
+    const chordLine = document.getElementById("chord" + index);
+    if (chordLine) chordLine.innerText = chord;
 
     requestAnimationFrame(detectLoop);
 }
@@ -262,16 +254,7 @@ function detectChord(chroma) {
             bestChord = notes[root] + " Minor";
         }
     }
-    return bestChord || "C Major";
-}
-
-function getCurrentLineIndex() {
-    if (!sourceNode) return -1;
-    const offset = 1.5;
-    let currentTime = audioContext.currentTime - sourceNode.startTime;
-    currentTime = Math.max(0, currentTime - offset);
-    const progress = Math.min(currentTime / songDuration, 1);
-    return Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
+    return bestChord;
 }
 </script>
 </body>
