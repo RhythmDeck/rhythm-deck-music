@@ -120,13 +120,12 @@
     <textarea id="lyricsInput"
       placeholder="Paste lyrics here... (each line will receive chords above it)"
       class="w-full h-40 mb-6 bg-zinc-800 border border-zinc-700 rounded-lg p-4 text-white resize-none"></textarea>
-  
+ 
     <!-- Volume Control -->
     <label class="block text-sm mb-2 text-gray-400">Volume</label>
     <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1"
       class="w-full mb-6">
     <div id="volumeValue" class="text-center text-gray-400 mb-6">Volume: 100%</div>
-
     <button onclick="analyzeFile()"
       class="w-full brand-gradient text-black font-bold py-4 rounded-xl text-lg hover:opacity-90 transition mb-6">
       Start Real-Time Chord Alignment
@@ -148,13 +147,11 @@ setInterval(() => {
   document.getElementById(words[current]).classList.add("flash-active");
   current = (current + 1) % words.length;
 }, 600);
-
 let audioContext, analyser, sourceNode, gainNode, animationId;
 let lyricLines = [];
 let lastChord = "";
 let lastChordTime = 0;
-let songDuration = 180; // Global
-
+let songDuration = 180;
 async function analyzeFile() {
     const fileInput = document.getElementById("fileInput");
     const lyricsText = document.getElementById("lyricsInput").value.trim();
@@ -174,50 +171,36 @@ async function analyzeFile() {
             </div>
         `;
     });
-
     const file = fileInput.files[0];
     const arrayBuffer = await file.arrayBuffer();
-
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-    // Force resume AudioContext on user gesture (fixes Chrome suspension)
     await audioContext.resume();
-
     gainNode = audioContext.createGain();
     gainNode.gain.value = 1;
-
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 4096;
-
     sourceNode = audioContext.createBufferSource();
     sourceNode.buffer = audioBuffer;
     sourceNode.connect(gainNode);
     gainNode.connect(analyser);
     analyser.connect(audioContext.destination);
-
     sourceNode.start();
-
     songDuration = audioBuffer.duration || 180;
     const minutes = Math.floor(songDuration / 60);
     const seconds = Math.floor(songDuration % 60).toString().padStart(2, '0');
     songDurationEl.textContent = `Song Duration: ${minutes}:${seconds}`;
-
     const volumeSlider = document.getElementById("volumeSlider");
     const volumeValue = document.getElementById("volumeValue");
-
     volumeSlider.addEventListener("input", () => {
       const vol = parseFloat(volumeSlider.value);
       gainNode.gain.value = vol;
       volumeValue.textContent = `Volume: ${Math.round(vol * 100)}%`;
     });
-
     volumeValue.textContent = "Volume: 100%";
-
     detectLoop();
     startLyricSync();
 }
-
 function detectLoop() {
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Float32Array(bufferLength);
@@ -225,17 +208,15 @@ function detectLoop() {
     const chroma = new Array(12).fill(0);
     const sampleRate = audioContext.sampleRate;
     for (let i = 0; i < bufferLength; i++) {
+
         const freq = i * sampleRate / analyser.fftSize;
         if (freq < 60 || freq > 5000) continue;
         const midi = 69 + 12 * Math.log2(freq / 440);
         const pitchClass = ((Math.round(midi) % 12) + 12) % 12;
         chroma[pitchClass] += Math.abs(dataArray[i]);
     }
-
     const chord = detectChord(chroma);
     const now = audioContext.currentTime;
-
-    // Place chord above current line every 2 seconds
     if (now - lastChordTime > 2) {
         const currentLineIndex = getCurrentLineIndex();
         if (currentLineIndex >= 0) {
@@ -244,20 +225,16 @@ function detectLoop() {
         }
         lastChordTime = now;
     }
-
     requestAnimationFrame(detectLoop);
 }
-
 function detectChord(chroma) {
     const notes = ["C","D","E","F","G","A","B"];
     const templates = {
         "": [1,0,0,0,1,0,0,1,0,0,0,0], // Major
         "m": [1,0,0,1,0,0,0,1,0,0,0,0] // Minor
     };
-
     let bestScore = 0;
     let bestChord = "C";
-
     for (let root = 0; root < 7; root++) {
         for (const [type, template] of Object.entries(templates)) {
             let score = 0;
@@ -271,10 +248,8 @@ function detectChord(chroma) {
             }
         }
     }
-
     return bestChord;
 }
-
 function getCurrentLineIndex() {
     if (!sourceNode || sourceNode.context.state !== 'running') return -1;
     const offset = 1.5;
@@ -283,37 +258,28 @@ function getCurrentLineIndex() {
     const progress = Math.min(currentTime / songDuration, 1);
     return Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
 }
-
 function startLyricSync() {
   if (!sourceNode || !lyricLines.length) return;
-
   const offset = 1.5;
-
   sourceNode.onended = () => {
     document.querySelectorAll(".lyric-line").forEach(el => el.classList.remove("active-line"));
   };
-
   const updateLyrics = () => {
     if (!sourceNode || sourceNode.context.state !== 'running') return;
-
     let currentTime = audioContext.currentTime - sourceNode.startTime;
     currentTime = Math.max(0, currentTime - offset);
     const progress = Math.min(currentTime / songDuration, 1);
     const lineIndex = Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
-
     if (lineIndex >= 0) {
       document.querySelectorAll(".lyric-line").forEach(el => el.classList.remove("active-line"));
-
       const activeLine = document.getElementById(`line${lineIndex}`);
       if (activeLine) {
         activeLine.classList.add("active-line");
         activeLine.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
-
     requestAnimationFrame(updateLyrics);
   };
-
   requestAnimationFrame(updateLyrics);
 }
 </script>
