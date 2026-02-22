@@ -367,24 +367,3 @@ function startLyricSync(duration) {
 </script>
 </body>
 </html>
-    const progress = Math.min(currentTime / duration, 1);
-    const lineIndex = Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
-
-    if (lineIndex >= 0) {
-      document.querySelectorAll(".lyric-line").forEach(el => el.classList.remove("active-line"));
-
-      const activeLine = document.getElementById(`line${lineIndex}`);
-      if (activeLine) {
-        activeLine.classList.add("active-line");
-        activeLine.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-
-    requestAnimationFrame(updateLyrics);
-  };
-
-  requestAnimationFrame(updateLyrics);
-}
-</script>
-</body>
-</html>
