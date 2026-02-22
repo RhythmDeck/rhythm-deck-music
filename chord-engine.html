@@ -227,8 +227,8 @@ function detectLoop() {
 
     const now = audioContext.currentTime;
 
-    // Only update stable chord every ~2.5 seconds
-    if (now - lastChordChangeTime > 2.5) {
+    // Update stable chord only every ~3 seconds
+    if (now - lastChordChangeTime > 3) {
         lastStableChord = currentChord;
         lastChordChangeTime = now;
     }
