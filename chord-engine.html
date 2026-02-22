@@ -36,11 +36,35 @@
 }
 .lyric-line {
   margin-bottom: 20px;
+  transition: all 0.4s ease;
 }
 .chord-line {
   font-weight: bold;
   color: #00ffcc;
   letter-spacing: 3px;
+}
+.active-line {
+  background: rgba(0, 255, 204, 0.2);
+  transform: scale(1.03);
+  padding: 8px 12px;
+  border-left: 5px solid #00ffcc;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+}
+.lyrics-container {
+  max-height: 500px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding-right: 10px;
+}
+.lyrics-container::-webkit-scrollbar {
+  width: 8px;
+}
+.lyrics-container::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+.lyrics-container::-webkit-scrollbar-thumb {
+  background: #00ffcc;
+  border-radius: 4px;
 }
 </style>
 </head>
@@ -104,7 +128,7 @@
       Start Real-Time Chord Alignment
     </button>
     <div id="liveChord" class="text-center text-3xl font-bold text-green-400 mb-8"></div>
-    <div id="lyricsDisplay" class="text-lg leading-relaxed"></div>
+    <div class="lyrics-container" id="lyricsDisplay" class="text-lg leading-relaxed"></div>
   </div>
 </section>
 <footer class="bg-black border-t border-gray-800 py-6 text-center text-sm text-gray-500">
@@ -131,12 +155,12 @@ async function analyzeFile() {
         alert("Please upload an MP3 file.");
         return;
     }
-    lyricLines = lyricsText.split("\n");
+    lyricLines = lyricsText.split("\n").filter(line => line.trim() !== "");
     lyricsDisplay.innerHTML = "";
     lyricLines.forEach((line, index) => {
         lyricsDisplay.innerHTML += `
             <div class="lyric-line" id="line${index}">
-                <div class="chord-line" id="chord${index}">&nbsp;</div>
+                <div class="chord-line" id="chord${index}"></div>
                 <div>${line}</div>
             </div>
         `;
@@ -148,9 +172,8 @@ async function analyzeFile() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-    // Create gain node for volume control
     gainNode = audioContext.createGain();
-    gainNode.gain.value = 1; // start at full volume
+    gainNode.gain.value = 1;
 
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
@@ -163,7 +186,6 @@ async function analyzeFile() {
 
     sourceNode.start();
 
-    // Connect volume slider to gain node
     const volumeSlider = document.getElementById("volumeSlider");
     const volumeValue = document.getElementById("volumeValue");
 
@@ -173,10 +195,10 @@ async function analyzeFile() {
       volumeValue.textContent = `Volume: ${Math.round(vol * 100)}%`;
     });
 
-    // Initial volume display
     volumeValue.textContent = "Volume: 100%";
 
     detectLoop();
+    startLyricSync();
 }
 
 function detectLoop() {
@@ -227,6 +249,40 @@ function detectChord(chroma) {
         }
     }
     return bestChord;
+}
+
+// NEW: Time-based lyric sync & smooth scrolling/highlighting
+function startLyricSync() {
+  if (!sourceNode || !lyricLines.length) return;
+
+  // Approximate song duration from buffer (fallback to 180s if unknown)
+  const duration = sourceNode.buffer?.duration || 180;
+
+  sourceNode.onended = () => {
+    document.querySelectorAll(".lyric-line").forEach(el => el.classList.remove("active-line"));
+  };
+
+  const updateLyrics = () => {
+    if (!sourceNode || sourceNode.context.state !== 'running') return;
+
+    const currentTime = audioContext.currentTime - sourceNode.startTime;
+    const progress = Math.min(currentTime / duration, 1);
+    const lineIndex = Math.floor(progress * lyricLines.length);
+
+    if (lineIndex >= 0 && lineIndex < lyricLines.length) {
+      document.querySelectorAll(".lyric-line").forEach(el => el.classList.remove("active-line"));
+
+      const activeLine = document.getElementById(`line${lineIndex}`);
+      if (activeLine) {
+        activeLine.classList.add("active-line");
+        activeLine.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    requestAnimationFrame(updateLyrics);
+  };
+
+  requestAnimationFrame(updateLyrics);
 }
 </script>
 </body>
