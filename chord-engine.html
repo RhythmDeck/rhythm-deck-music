@@ -92,7 +92,7 @@
     <textarea id="lyricsInput"
       placeholder="Paste lyrics here... (each line will receive chords above it)"
       class="w-full h-40 mb-6 bg-zinc-800 border border-zinc-700 rounded-lg p-4 text-white resize-none"></textarea>
-     
+    
     <!-- Volume Control -->
     <label class="block text-sm mb-2 text-gray-400">Volume</label>
     <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1"
@@ -119,10 +119,9 @@ setInterval(() => {
   current = (current + 1) % words.length;
 }, 600);
 
-let audioContext, analyser, sourceNode, animationId;
+let audioContext, analyser, sourceNode, gainNode, animationId;
 let lyricLines = [];
 let lastChord = "";
-let audioElement; // For volume control and timing
 
 async function analyzeFile() {
     const fileInput = document.getElementById("fileInput");
@@ -142,35 +141,39 @@ async function analyzeFile() {
             </div>
         `;
     });
+
     const file = fileInput.files[0];
     const arrayBuffer = await file.arrayBuffer();
+
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    // Create gain node for volume control
+    gainNode = audioContext.createGain();
+    gainNode.gain.value = 1; // start at full volume
+
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
+
     sourceNode = audioContext.createBufferSource();
     sourceNode.buffer = audioBuffer;
-    sourceNode.connect(analyser);
+    sourceNode.connect(gainNode);
+    gainNode.connect(analyser);
     analyser.connect(audioContext.destination);
+
     sourceNode.start();
 
-    // NEW: Volume control setup
+    // Connect volume slider to gain node
     const volumeSlider = document.getElementById("volumeSlider");
     const volumeValue = document.getElementById("volumeValue");
 
-    // Create an audio element for volume control
-    audioElement = new Audio(URL.createObjectURL(file));
-    audioElement.play().catch(err => console.log("Autoplay blocked:", err));
-
-    // Connect volume slider
     volumeSlider.addEventListener("input", () => {
       const vol = parseFloat(volumeSlider.value);
-      audioElement.volume = vol;
+      gainNode.gain.value = vol;
       volumeValue.textContent = `Volume: ${Math.round(vol * 100)}%`;
     });
 
-    // Initial volume
-    audioElement.volume = 1;
+    // Initial volume display
     volumeValue.textContent = "Volume: 100%";
 
     detectLoop();
