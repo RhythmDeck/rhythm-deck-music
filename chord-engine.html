@@ -133,7 +133,7 @@
     </button>
     <div id="liveChord" class="text-center text-3xl font-bold text-green-400 mb-8"></div>
     <div class="lyrics-container" id="lyricsDisplay" class="text-lg leading-relaxed"></div>
-    <!-- Song duration display -->
+    <!-- NEW: Song duration display -->
     <div id="songDuration" class="text-center text-sm text-gray-400 mt-4">Song Duration: --:--</div>
   </div>
 </section>
@@ -183,7 +183,7 @@ async function analyzeFile() {
     gainNode.gain.value = 1;
 
     analyser = audioContext.createAnalyser();
-    analyser.fftSize = 4096; // Increased for slightly better frequency resolution
+    analyser.fftSize = 2048;
 
     sourceNode = audioContext.createBufferSource();
     sourceNode.buffer = audioBuffer;
@@ -193,7 +193,7 @@ async function analyzeFile() {
 
     sourceNode.start();
 
-    // Show accurate song duration
+    // Show actual song duration
     const duration = audioBuffer.duration || 180;
     const minutes = Math.floor(duration / 60);
     const seconds = Math.floor(duration % 60).toString().padStart(2, '0');
@@ -230,12 +230,9 @@ function detectLoop() {
     const chord = detectChord(chroma);
     if (chord !== lastChord && chord !== "Unknown") {
         document.getElementById("liveChord").innerText = chord;
-        // NEW: Put chord above current line instead of random
-        const currentLineIndex = getCurrentLineIndex(duration);
-        if (currentLineIndex >= 0) {
-            const chordLine = document.getElementById("chord" + currentLineIndex);
-            if (chordLine) chordLine.innerText = chord;
-        }
+        const index = Math.floor(Math.random() * lyricLines.length);
+        const chordLine = document.getElementById("chord" + index);
+        chordLine.innerText = chord;
         lastChord = chord;
     }
     animationId = requestAnimationFrame(detectLoop);
@@ -243,49 +240,36 @@ function detectLoop() {
 
 function detectChord(chroma) {
     const notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-    const templates = {
-        "Major": [1,0,0,0,1,0,0,1,0,0,0,0],
-        "Minor": [1,0,0,1,0,0,0,1,0,0,0,0],
-        "7": [1,0,0,0,1,0,1,1,0,0,0,0],
-        "m7": [1,0,0,1,0,0,1,1,0,0,0,0],
-        "dim": [1,0,0,1,0,0,0,0,1,0,0,0],
-        "aug": [1,0,0,0,1,0,0,0,0,1,0,0]
-    };
+    const majorTemplate = [1,0,0,0,1,0,0,1,0,0,0,0];
+    const minorTemplate = [1,0,0,1,0,0,0,1,0,0,0,0];
     let bestScore = 0;
     let bestChord = "Unknown";
     for (let root = 0; root < 12; root++) {
-        for (const [type, template] of Object.entries(templates)) {
-            let score = 0;
-            for (let i = 0; i < 12; i++) {
-                const index = (i + root) % 12;
-                score += chroma[index] * template[i];
-            }
-            if (score > bestScore) {
-                bestScore = score;
-                bestChord = notes[root] + type;
-            }
+        let majorScore = 0;
+        let minorScore = 0;
+        for (let i = 0; i < 12; i++) {
+            const index = (i + root) % 12;
+            majorScore += chroma[index] * majorTemplate[i];
+            minorScore += chroma[index] * minorTemplate[i];
+        }
+        if (majorScore > bestScore) {
+            bestScore = majorScore;
+            bestChord = notes[root] + " Major";
+        }
+        if (minorScore > bestScore) {
+            bestScore = minorScore;
+            bestChord = notes[root] + " Minor";
         }
     }
-    // Add more variety by sometimes showing inversions or sus chords
-    if (Math.random() < 0.3) bestChord += "sus4";
-    if (Math.random() < 0.2) bestChord += "/3";
-    return bestChord || "Unknown";
+    return bestChord;
 }
 
-function getCurrentLineIndex(duration) {
-    if (!sourceNode || sourceNode.context.state !== 'running') return -1;
-    const offset = 1.5; // start lyrics slightly earlier
-    let currentTime = audioContext.currentTime - sourceNode.startTime;
-    currentTime = Math.max(0, currentTime - offset);
-    const progress = Math.min(currentTime / duration, 1);
-    return Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
-}
-
-// Improved lyric sync: accurate duration, smooth scroll, highlight current line
+// Time-based lyric sync with accurate duration
 function startLyricSync(duration) {
   if (!sourceNode || !lyricLines.length) return;
 
-  const offset = 1.5; // lyrics often lead the beat slightly
+  // Slight offset so lyrics start highlighting a bit earlier (common in karaoke)
+  const offset = 1.5; // seconds – adjust if needed
 
   sourceNode.onended = () => {
     document.querySelectorAll(".lyric-line").forEach(el => el.classList.remove("active-line"));
@@ -295,7 +279,7 @@ function startLyricSync(duration) {
     if (!sourceNode || sourceNode.context.state !== 'running') return;
 
     let currentTime = audioContext.currentTime - sourceNode.startTime;
-    currentTime = Math.max(0, currentTime - offset);
+    currentTime = Math.max(0, currentTime - offset); // apply offset
     const progress = Math.min(currentTime / duration, 1);
     const lineIndex = Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
 
