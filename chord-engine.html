@@ -152,8 +152,8 @@ setInterval(() => {
 let audioContext, analyser, sourceNode, gainNode, animationId;
 let lyricLines = [];
 let lastChord = "";
-let lastChordTime = 0; // NEW: to prevent chord spam
-let assumedKey = null; // NEW: simple key memory
+let lastChordTime = 0;
+let assumedKey = null;
 
 async function analyzeFile() {
     const fileInput = document.getElementById("fileInput");
@@ -185,7 +185,7 @@ async function analyzeFile() {
     gainNode.gain.value = 1;
 
     analyser = audioContext.createAnalyser();
-    analyser.fftSize = 4096; // Better resolution
+    analyser.fftSize = 4096;
 
     sourceNode = audioContext.createBufferSource();
     sourceNode.buffer = audioBuffer;
@@ -195,7 +195,6 @@ async function analyzeFile() {
 
     sourceNode.start();
 
-    // Show accurate song duration
     const duration = audioBuffer.duration || 180;
     const minutes = Math.floor(duration / 60);
     const seconds = Math.floor(duration % 60).toString().padStart(2, '0');
@@ -233,9 +232,7 @@ function detectLoop() {
     const chord = detectChord(chroma);
     const now = audioContext.currentTime;
 
-    // Only change chord if it's different and at least 1.5s passed (reduces spam)
-    if (chord !== lastChord && chord !== "Unknown" && now - lastChordTime > 1.5) {
-        document.getElementById("liveChord").innerText = chord;
+    if (chord !== lastChord && chord !== "Unknown" && now - lastChordTime > 2) {
         const currentLineIndex = getCurrentLineIndex(duration);
         if (currentLineIndex >= 0) {
             const chordLine = document.getElementById("chord" + currentLineIndex);
@@ -249,77 +246,30 @@ function detectLoop() {
 }
 
 function detectChord(chroma) {
-    const notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    const notes = ["C","D","E","F","G","A","B"];
     const templates = {
-        "": [1,0,0,0,1,0,0,1,0,0,0,0],      // Major
-        "m": [1,0,0,1,0,0,0,1,0,0,0,0],      // Minor
-        "7": [1,0,0,0,1,0,1,1,0,0,0,0],      // Dominant 7
-        "m7": [1,0,0,1,0,0,1,1,0,0,0,0],     // Minor 7
-        "maj7": [1,0,0,0,1,0,0,1,0,0,1,0],   // Major 7
-        "dim": [1,0,0,1,0,0,0,0,1,0,0,0],    // Diminished
-        "sus4": [1,0,0,0,0,1,0,1,0,0,0,0],   // Sus4
-        "sus2": [1,0,1,0,0,0,0,1,0,0,0,0]    // Sus2
+        "": [1,0,0,0,1,0,0,1,0,0,0,0], // Major
+        "m": [1,0,0,1,0,0,0,1,0,0,0,0] // Minor
     };
 
     let bestScore = 0;
-    let bestChord = "C"; // Default to most common chord
+    let bestChord = "C";
 
-    // Simple key estimation (first strong detection sets assumed key)
-    if (!assumedKey) {
-      let strongestRoot = 0;
-      let maxEnergy = 0;
-      for (let i = 0; i < 12; i++) {
-        if (chroma[i] > maxEnergy) {
-          maxEnergy = chroma[i];
-          strongestRoot = i;
-        }
-      }
-      assumedKey = strongestRoot;
-    }
-
-    // Bias toward diatonic chords in assumed key
-    const diatonicRoots = [
-      assumedKey,
-      (assumedKey + 2) % 12,  // ii
-      (assumedKey + 4) % 12,  // iii
-      (assumedKey + 5) % 12,  // IV
-      (assumedKey + 7) % 12,  // V
-      (assumedKey + 9) % 12,  // vi
-      (assumedKey + 11) % 12  // vii°
-    ];
-
-    for (let root of diatonicRoots) {
-      for (const [type, template] of Object.entries(templates)) {
-        let score = 0;
-        for (let i = 0; i < 12; i++) {
-          const index = (i + root) % 12;
-          score += chroma[index] * template[i];
-        }
-        if (score > bestScore * 1.1) { // Bias toward diatonic
-          bestScore = score;
-          bestChord = notes[root] + type;
-        }
-      }
-    }
-
-    // Fallback to any root if weak signal
-    if (bestScore < 0.1) {
-      for (let root = 0; root < 12; root++) {
+    for (let root = 0; root < 7; root++) { // Only natural notes for simplicity
         for (const [type, template] of Object.entries(templates)) {
-          let score = 0;
-          for (let i = 0; i < 12; i++) {
-            const index = (i + root) % 12;
-            score += chroma[index] * template[i];
-          }
-          if (score > bestScore) {
-            bestScore = score;
-            bestChord = notes[root] + type;
-          }
+            let score = 0;
+            for (let i = 0; i < 12; i++) {
+                const index = (i + root * 2) % 12; // Simplified diatonic mapping
+                score += chroma[index] * template[i];
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                bestChord = notes[root] + type;
+            }
         }
-      }
     }
 
-    return bestChord || "C";
+    return bestChord;
 }
 
 function getCurrentLineIndex(duration) {
@@ -331,7 +281,6 @@ function getCurrentLineIndex(duration) {
     return Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
 }
 
-// Time-based lyric sync
 function startLyricSync(duration) {
   if (!sourceNode || !lyricLines.length) return;
 
@@ -355,6 +304,7 @@ function startLyricSync(duration) {
       const activeLine = document.getElementById(`line${lineIndex}`);
       if (activeLine) {
         activeLine.classList.add("active-line");
+        // Force scroll to center active line
         activeLine.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
