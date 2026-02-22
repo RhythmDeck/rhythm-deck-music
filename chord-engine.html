@@ -154,7 +154,7 @@ let lyricLines = [];
 let lastChord = "";
 let lastChordTime = 0;
 let assumedKey = null;
-let songDuration = 180; // Global duration (set in analyzeFile)
+let songDuration = 180; // Global
 
 async function analyzeFile() {
     const fileInput = document.getElementById("fileInput");
@@ -182,6 +182,9 @@ async function analyzeFile() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
+    // Resume on user gesture (fixes Chrome suspension)
+    await audioContext.resume();
+
     gainNode = audioContext.createGain();
     gainNode.gain.value = 1;
 
@@ -196,7 +199,6 @@ async function analyzeFile() {
 
     sourceNode.start();
 
-    // Set global duration and show it
     songDuration = audioBuffer.duration || 180;
     const minutes = Math.floor(songDuration / 60);
     const seconds = Math.floor(songDuration % 60).toString().padStart(2, '0');
@@ -230,6 +232,7 @@ function detectLoop() {
         const pitchClass = ((Math.round(midi) % 12) + 12) % 12;
         chroma[pitchClass] += Math.abs(dataArray[i]);
     }
+
     const chord = detectChord(chroma);
     const now = audioContext.currentTime;
 
