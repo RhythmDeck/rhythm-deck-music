@@ -143,7 +143,9 @@ setInterval(() => {
 
 let audioContext, analyser, sourceNode, gainNode, animationId;
 let lyricLines = [];
-let lastChord = "";
+let lastStableChord = "C Major";
+let lastChordChangeTime = 0;
+let songDuration = 180;
 
 async function analyzeFile() {
     const fileInput = document.getElementById("fileInput");
@@ -220,13 +222,23 @@ function detectLoop() {
         chroma[pitchClass] += Math.abs(dataArray[i]);
     }
 
-    const chord = detectChord(chroma);
-    document.getElementById("liveChord").innerText = chord;
+    const currentChord = detectChord(chroma);
+    document.getElementById("liveChord").innerText = currentChord;
 
-    // Place chord above a random line (original working behavior)
-    const index = Math.floor(Math.random() * lyricLines.length);
-    const chordLine = document.getElementById("chord" + index);
-    if (chordLine) chordLine.innerText = chord;
+    const now = audioContext.currentTime;
+
+    // Only update stable chord every ~2.5 seconds
+    if (now - lastChordChangeTime > 2.5) {
+        lastStableChord = currentChord;
+        lastChordChangeTime = now;
+    }
+
+    // Place the stable chord above the current lyric line
+    const currentLineIndex = getCurrentLineIndex();
+    if (currentLineIndex >= 0) {
+        const chordLine = document.getElementById("chord" + currentLineIndex);
+        if (chordLine) chordLine.innerText = lastStableChord;
+    }
 
     requestAnimationFrame(detectLoop);
 }
@@ -236,7 +248,7 @@ function detectChord(chroma) {
     const majorTemplate = [1,0,0,0,1,0,0,1,0,0,0,0];
     const minorTemplate = [1,0,0,1,0,0,0,1,0,0,0,0];
     let bestScore = 0;
-    let bestChord = "Unknown";
+    let bestChord = "C Major"; // fallback
     for (let root = 0; root < 12; root++) {
         let majorScore = 0;
         let minorScore = 0;
@@ -255,6 +267,15 @@ function detectChord(chroma) {
         }
     }
     return bestChord;
+}
+
+function getCurrentLineIndex() {
+    if (!sourceNode) return -1;
+    const offset = 1.5;
+    let currentTime = audioContext.currentTime - sourceNode.startTime;
+    currentTime = Math.max(0, currentTime - offset);
+    const progress = Math.min(currentTime / songDuration, 1);
+    return Math.min(Math.floor(progress * lyricLines.length), lyricLines.length - 1);
 }
 </script>
 </body>
