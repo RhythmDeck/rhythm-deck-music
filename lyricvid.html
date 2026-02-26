@@ -53,6 +53,25 @@
   height: 100%;
   pointer-events: none;
 }
+.upload-thumbnail {
+  max-width: 100%;
+  max-height: 200px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+.progress-bar {
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #00c853, #00bfa5);
+  transition: width 0.3s ease;
+}
 .tweak-panel {
   background: #1a1a1a;
   border: 1px solid #00ffcc;
@@ -60,9 +79,10 @@
   padding: 20px;
 }
 .font-preview {
-  font-size: 16px;
-  margin-left: 10px;
+  font-size: 18px;
+  margin-left: 12px;
   color: #00ffcc;
+  white-space: nowrap;
 }
 @media (max-width: 640px) {
   .hero-height { height: 50vh; }
@@ -70,6 +90,8 @@
   .tweak-panel { padding: 12px; }
   .preview-canvas { font-size: 1rem !important; }
   .grid-cols-3 { grid-template-columns: 1fr; gap: 12px; }
+  .font-preview { font-size: 14px; margin-left: 8px; }
+  .upload-thumbnail { max-height: 150px; }
 }
 </style>
 </head>
@@ -99,7 +121,7 @@
   </a>
 </header>
 
-<!-- Banner with flashing title changed to Rhythm Deck LyricVid -->
+<!-- Banner with flashing title -->
 <section class="hero-height bg-cover bg-center flex items-center justify-center"
          style="background-image: url('banner-cropped.jpg');">
   <div class="bg-black/70 backdrop-blur-md p-10 rounded-2xl text-center max-w-3xl shadow-2xl">
@@ -127,9 +149,13 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-10">
       <div>
         <label class="block text-lg mb-3 text-gray-300">1. Upload Your Music Video</label>
-        <div class="border-2 border-dashed border-green-500 rounded-xl p-8 md:p-10 text-center cursor-pointer hover:bg-zinc-800 transition">
+        <div id="uploadArea" class="border-2 border-dashed border-green-500 rounded-xl p-6 md:p-10 text-center cursor-pointer hover:bg-zinc-800 transition relative">
           <p class="text-gray-400 text-sm md:text-base">Drag & drop MP4 or click to browse (max 100MB)</p>
           <input type="file" accept="video/mp4" class="hidden" id="videoUpload">
+          <img id="uploadThumbnail" class="upload-thumbnail hidden mx-auto mt-4" alt="Video thumbnail">
+          <div id="progressBar" class="progress-bar hidden">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
         </div>
       </div>
       <div>
@@ -152,7 +178,7 @@
       <h4 class="text-xl md:text-2xl font-bold mb-6 text-center text-green-400">Preview Your Lyric Video</h4>
       <div class="preview-container mb-8 md:mb-10">
         <video id="previewVideo" controls class="preview-video">
-          <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+          <source src="" type="video/mp4">
           Your browser does not support the video tag.
         </video>
         <canvas id="subtitleCanvas" class="preview-canvas"></canvas>
@@ -187,8 +213,23 @@
               <option value="Pacifico">Pacifico (Cursive Script)</option>
               <option value="Lobster">Lobster (Retro Bold)</option>
               <option value="Playfair Display">Playfair Display (Classy Serif)</option>
+              <option value="Dancing Script">Dancing Script (Elegant Cursive)</option>
+              <option value="Great Vibes">Great Vibes (Romantic Script)</option>
+              <option value="Bebas Neue">Bebas Neue (Bold Display)</option>
             </select>
             <div id="fontPreview" class="mt-2 text-lg font-preview">Sample Text Preview</div>
+          </div>
+          <div>
+            <label class="block text-sm mb-2 text-gray-300">Vertical Position (% from bottom)</label>
+            <input type="range" min="5" max="50" value="15" class="w-full accent-green-500" id="verticalPos">
+          </div>
+          <div>
+            <label class="block text-sm mb-2 text-gray-300">Horizontal Alignment</label>
+            <select class="w-full bg-zinc-800 border border-zinc-700 rounded p-2 text-white text-sm" id="horizontalAlign">
+              <option value="center">Center</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
           </div>
           <div>
             <label class="block text-sm mb-2 text-gray-300">Animation Style</label>
@@ -200,14 +241,28 @@
             </select>
           </div>
         </div>
-        <div class="text-center mt-8">
+
+        <!-- Download Format Choice -->
+        <div class="text-center mt-8 flex flex-col md:flex-row justify-center gap-4">
+          <div>
+            <label class="block text-sm mb-2 text-gray-300">Download Format</label>
+            <select id="downloadFormat" class="w-full md:w-64 mx-auto bg-zinc-800 border border-zinc-700 rounded p-2 text-white">
+              <option value="mp4">MP4 Video (with lyrics overlaid)</option>
+              <option value="wav">WAV Audio (clean, no lyrics)</option>
+              <option value="mp3">MP3 Audio (compressed)</option>
+            </select>
+          </div>
           <button onclick="applyTweaks()"
-            class="px-6 md:px-8 py-3 md:py-4 bg-green-600 text-white font-bold rounded-full hover:bg-green-500 transition mr-2 md:mr-4 text-sm md:text-base">
+            class="px-6 md:px-8 py-3 md:py-4 bg-green-600 text-white font-bold rounded-full hover:bg-green-500 transition text-sm md:text-base">
             Apply Tweaks & Re-Preview
+          </button>
+          <button onclick="exportVTT()"
+            class="px-6 md:px-8 py-3 md:py-4 bg-purple-600 text-white font-bold rounded-full hover:bg-purple-500 transition text-sm md:text-base">
+            Export as .vtt Subtitles
           </button>
           <button onclick="downloadVideo()"
             class="px-6 md:px-8 py-3 md:py-4 bg-teal-600 text-white font-bold rounded-full hover:bg-teal-500 transition text-sm md:text-base">
-            Download Final Video
+            Download
           </button>
         </div>
       </div>
@@ -233,11 +288,61 @@ setInterval(() => {
   current = (current + 1) % words.length;
 }, 600);
 
-// Mock subtitles data
+// Variables
 let subtitles = [];
 let video = null;
 let canvas = null;
 let ctx = null;
+let currentVideoFile = null;
+let progressInterval = null;
+
+// Upload handling
+const uploadArea = document.getElementById("uploadArea");
+const fileInput = document.getElementById("videoUpload");
+const thumbnailImg = document.getElementById("uploadThumbnail");
+
+uploadArea.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", handleFileSelect);
+
+["dragover", "dragenter"].forEach(event => uploadArea.addEventListener(event, e => {
+  e.preventDefault();
+  uploadArea.classList.add("bg-zinc-800");
+}));
+
+["dragleave", "drop"].forEach(event => uploadArea.addEventListener(event, e => {
+  e.preventDefault();
+  uploadArea.classList.remove("bg-zinc-800");
+}));
+
+uploadArea.addEventListener("drop", e => {
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith("video/")) handleFile(file);
+});
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) handleFile(file);
+}
+
+function handleFile(file) {
+  currentVideoFile = file;
+  uploadArea.innerHTML = `<p class="text-green-400 text-sm md:text-base">Video selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)</p>`;
+
+  // Generate thumbnail
+  const url = URL.createObjectURL(file);
+  const tempVideo = document.createElement("video");
+  tempVideo.src = url;
+  tempVideo.preload = "metadata";
+  tempVideo.onloadeddata = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = tempVideo.videoWidth || 640;
+    canvas.height = tempVideo.videoHeight || 360;
+    canvas.getContext("2d").drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
+    thumbnailImg.src = canvas.toDataURL("image/jpeg");
+    thumbnailImg.classList.remove("hidden");
+    URL.revokeObjectURL(url);
+  };
+}
 
 // Generate preview
 function generatePreview() {
@@ -246,11 +351,33 @@ function generatePreview() {
     alert("Please paste some lyrics first!");
     return;
   }
+  if (!currentVideoFile) {
+    alert("Please upload a video first!");
+    return;
+  }
 
   document.getElementById("previewSection").classList.remove("hidden");
 
+  // Show progress bar
+  const progressFill = document.getElementById("progressFill");
+  const progressBar = document.getElementById("progressBar");
+  progressBar.classList.remove("hidden");
+  progressFill.style.width = "0%";
+  let progress = 0;
+  progressInterval = setInterval(() => {
+    progress += 5;
+    progressFill.style.width = progress + "%";
+    if (progress >= 100) {
+      clearInterval(progressInterval);
+      progressBar.classList.add("hidden");
+      finishGenerate();
+    }
+  }, 150); // ~3 seconds total
+}
+
+function finishGenerate() {
   // Mock timed subtitles (3 seconds per line)
-  const lines = lyrics.split("\n").filter(line => line.trim());
+  const lines = document.getElementById("lyricsInput").value.split("\n").filter(line => line.trim());
   subtitles = lines.map((line, index) => ({
     text: line,
     start: index * 3,
@@ -261,15 +388,16 @@ function generatePreview() {
   canvas = document.getElementById("subtitleCanvas");
   ctx = canvas.getContext("2d");
 
-  video.src = "https://www.w3schools.com/html/mov_bbb.mp4"; // Placeholder
+  const url = URL.createObjectURL(currentVideoFile);
+  video.src = url;
   video.load();
-  video.play();
+  // Do NOT auto-play
 
-  // Sync canvas to video
   video.addEventListener("timeupdate", drawSubtitles);
   video.addEventListener("loadedmetadata", () => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+    drawSubtitles();
   });
 }
 
@@ -286,15 +414,16 @@ function drawSubtitles() {
     const fontSize = document.getElementById("fontSize").value + "px";
     const fontFamily = document.getElementById("fontStyle").value;
     const color = document.getElementById("fontColor").value;
+    const verticalPos = document.getElementById("verticalPos").value;
+    const horizontalAlign = document.getElementById("horizontalAlign").value;
     const animation = document.getElementById("animation").value;
 
     ctx.font = `${fontSize} ${fontFamily}`;
     ctx.fillStyle = color;
-    ctx.textAlign = "center";
+    ctx.textAlign = horizontalAlign;
     ctx.shadowColor = "#00ffcc";
     ctx.shadowBlur = 10;
 
-    // Animation effects
     let alpha = 1;
     if (animation === "fade") alpha = 0.3 + Math.sin(currentTime * 10) * 0.7;
     if (animation === "pop") alpha = Math.sin(currentTime * 20) > 0 ? 1 : 0.5;
@@ -302,22 +431,27 @@ function drawSubtitles() {
       const bounce = Math.sin(currentTime * 15) * 5;
       ctx.translate(0, bounce);
     }
+    if (animation === "highlight") {
+      ctx.strokeStyle = "#00ffcc";
+      ctx.lineWidth = 4;
+      ctx.strokeText(currentSubtitle.text, canvas.width / 2, canvas.height * (verticalPos / 100));
+    }
     ctx.globalAlpha = alpha;
 
-    const x = canvas.width / 2;
-    const y = canvas.height * 0.85;
+    const x = horizontalAlign === "left" ? 50 : horizontalAlign === "right" ? canvas.width - 50 : canvas.width / 2;
+    const y = canvas.height * (verticalPos / 100);
     ctx.fillText(currentSubtitle.text, x, y);
   }
 }
 
-// Live font preview in dropdown
+// Live font preview
 document.getElementById("fontStyle").addEventListener("change", function() {
   const preview = document.getElementById("fontPreview");
   preview.style.fontFamily = this.value;
-  preview.textContent = `Sample: ${this.options[this.selectedIndex].text}`;
+  preview.textContent = `Sample Preview in ${this.options[this.selectedIndex].text}`;
 });
 
-// Apply tweaks (restart preview to see changes)
+// Apply tweaks
 function applyTweaks() {
   const offset = parseFloat(document.getElementById("timingOffset").value);
   subtitles = subtitles.map(sub => ({
@@ -328,14 +462,33 @@ function applyTweaks() {
 
   if (video) {
     video.currentTime = 0;
-    video.play();
+    drawSubtitles();
   }
-  drawSubtitles(); // Immediate redraw
+  alert("Tweaks applied! Preview updated. Click play to see changes.");
 }
 
-// Mock download
+// Export as VTT
+function exportVTT() {
+  let vtt = "WEBVTT\n\n";
+  subtitles.forEach(sub => {
+    const start = new Date(sub.start * 1000).toISOString().substr(11, 8);
+    const end = new Date(sub.end * 1000).toISOString().substr(11, 8);
+    vtt += `${start} --> ${end}\n${sub.text}\n\n`;
+  });
+
+  const blob = new Blob([vtt], { type: "text/vtt" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "lyrics.vtt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Download with format choice
 function downloadVideo() {
-  alert("Downloading final lyric video... (In full app, this would download the processed MP4 with embedded lyrics.)");
+  const format = document.getElementById("downloadFormat").value;
+  alert(`Downloading final file as ${format.toUpperCase()}... (In full app, this would download the processed file in your chosen format: MP4 with lyrics, WAV clean audio, or MP3 compressed.)`);
 }
 </script>
 </body>
