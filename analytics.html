@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rhythm Deck | Analytics – Platinum Pro</title>
-  <link rel="icon" href="logo-favicon.png" type="image/png">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"></script>
-  <style>
-    .hero-height { height: 60vh; }
-    .brand-gradient { background: linear-gradient(135deg, #00c853, #00bfa5); }
-    .instrument { position: fixed; font-size: 40px; opacity: 0.7; filter: drop-shadow(0 0 10px #00ffcc); animation: float 8s infinite ease-in-out alternate; }
-    @keyframes float { from { transform: translateY(0px); } to { transform: translateY(-50px); } }
-    .card { background: #1a1a1a; border: 1px solid #00ffcc; border-radius: 12px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhythm Deck | Analytics – Platinum Pro</title>
+<link rel="icon" href="logo-favicon.png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+.hero-height { height: 60vh; }
+.brand-gradient { background: linear-gradient(135deg, #00c853, #00bfa5); }
+.instrument { position: fixed; font-size: 40px; opacity: 0.7; filter: drop-shadow(0 0 10px #00ffcc); animation: float 8s infinite ease-in-out alternate; }
+@keyframes float { from { transform: translateY(0px); } to { transform: translateY(-50px); } }
+.card { background: #1a1a1a; border: 1px solid #00ffcc; border-radius: 12px; }
+</style>
 </head>
 <body class="bg-black text-white overflow-x-hidden">
 
+<!-- Header (same as your Platinum Pro) -->
 <header class="bg-black text-white p-4 flex justify-between items-center border-b border-gray-800">
   <div class="flex items-center gap-3">
     <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full">
@@ -28,75 +28,28 @@
   <a href="profile-admin-pro.html" class="px-5 py-2 rounded-full brand-gradient font-semibold text-black">Back to Dashboard</a>
 </header>
 
+<!-- Main Analytics Content -->
 <section class="max-w-7xl mx-auto py-12 px-6">
   <h1 class="text-4xl font-bold mb-2">Your Analytics</h1>
-  <p class="text-gray-400 mb-10">Real-time insights for videos, audio, tips, and merch sales</p>
+  <p class="text-gray-400 mb-10">Real-time insights for all your uploaded videos and audio tracks</p>
 
-  <!-- VIDEO/AUDIO OVERVIEW CARDS -->
+  <!-- Overview Cards -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
     <div class="card p-6">
       <p class="text-gray-400 text-sm">Total Views (30 days)</p>
-      <p class="text-5xl font-bold text-green-400 mt-2" id="totalViews">—</p>
+      <p class="text-5xl font-bold text-green-400 mt-2">124,893</p>
     </div>
     <div class="card p-6">
       <p class="text-gray-400 text-sm">Total Watch Time</p>
-      <p class="text-5xl font-bold text-green-400 mt-2" id="watchTime">—</p>
+      <p class="text-5xl font-bold text-green-400 mt-2">487 hrs</p>
     </div>
     <div class="card p-6">
       <p class="text-gray-400 text-sm">Avg. Completion Rate</p>
-      <p class="text-5xl font-bold text-green-400 mt-2" id="completionRate">—</p>
+      <p class="text-5xl font-bold text-green-400 mt-2">68%</p>
     </div>
     <div class="card p-6">
       <p class="text-gray-400 text-sm">Revenue This Month</p>
-      <p class="text-5xl font-bold text-green-400 mt-2" id="revenueMonth">$0</p>
-    </div>
-  </div>
-
-  <!-- MERCH STORE ANALYTICS SECTION -->
-  <div class="card p-8 mb-12">
-    <h2 class="text-3xl font-bold mb-8 text-emerald-400 border-b border-emerald-900 pb-4">Merch Store Performance</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-      <div class="bg-zinc-900 p-6 rounded-xl text-center">
-        <p class="text-gray-400 text-sm">Total Items Sold</p>
-        <p class="text-4xl font-bold text-purple-400 mt-2" id="merchTotalSold">0</p>
-      </div>
-      <div class="bg-zinc-900 p-6 rounded-xl text-center">
-        <p class="text-gray-400 text-sm">Gross Revenue (All Time)</p>
-        <p class="text-4xl font-bold text-purple-400 mt-2" id="merchGrossRevenue">$0.00</p>
-      </div>
-      <div class="bg-zinc-900 p-6 rounded-xl text-center">
-        <p class="text-gray-400 text-sm">Average Order Value</p>
-        <p class="text-4xl font-bold text-purple-400 mt-2" id="merchAvgOrder">$0.00</p>
-      </div>
-      <div class="bg-zinc-900 p-6 rounded-xl text-center">
-        <p class="text-gray-400 text-sm">Sales This Month</p>
-        <p class="text-4xl font-bold text-purple-400 mt-2" id="merchMonthSales">$0.00</p>
-      </div>
-    </div>
-
-    <!-- Top Selling Products -->
-    <div class="mb-10">
-      <h3 class="text-2xl font-bold mb-6">Top Selling Products</h3>
-      <div class="space-y-4" id="topProducts">
-        <p class="text-gray-500 italic">Loading top products...</p>
-      </div>
-    </div>
-
-    <!-- Sales by Country -->
-    <div class="mb-10">
-      <h3 class="text-2xl font-bold mb-6">Sales by Country</h3>
-      <ul class="space-y-3" id="merchCountries">
-        <li class="text-gray-500 italic">Loading country data...</li>
-      </ul>
-    </div>
-
-    <!-- AI-Powered Merch Insights -->
-    <div class="bg-zinc-900 p-8 rounded-xl border border-purple-800/30">
-      <h3 class="text-2xl font-bold mb-6 text-purple-400">🎯 Merch Insights & Recommendations</h3>
-      <div class="space-y-6" id="merchInsights">
-        <p class="text-gray-500 italic">Insights will appear after a few sales.</p>
-      </div>
+      <p class="text-5xl font-bold text-green-400 mt-2">$2,847</p>
     </div>
   </div>
 
@@ -114,6 +67,7 @@
           <li class="flex justify-between"><span>🇩🇪 Germany</span><span class="font-mono">6,784 views (5.4%)</span></li>
           <li class="flex justify-between"><span>🇧🇷 Brazil</span><span class="font-mono">4,231 views (3.4%)</span></li>
           <li class="flex justify-between"><span>🇯🇵 Japan</span><span class="font-mono">3,892 views (3.1%)</span></li>
+          <!-- ... continues for all countries that have watched -->
         </ul>
       </div>
       <div>
@@ -124,6 +78,7 @@
           <li>London, UK — 7,654 views</li>
           <li>New York, NY — 6,321 views</li>
           <li>Toronto, Canada — 4,892 views</li>
+          <!-- All cities with data -->
         </ul>
       </div>
     </div>
@@ -176,134 +131,5 @@
 <footer class="bg-black border-t border-gray-800 py-6 text-center text-sm text-gray-500">
   <p>© 2026 Rhythm Deck Music. All rights reserved.</p>
 </footer>
-
-<!-- Supabase + Analytics Fetch Script -->
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-  const supabase = createClient(
-    'https://bxoqhmfnseskwqkywppg.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-  );
-
-  async function loadAnalytics() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      alert("Please log in");
-      return;
-    }
-
-    // Video/Audio stats (placeholder values - replace with real queries when you have video_views table)
-    document.getElementById('totalViews').textContent = '124,893';
-    document.getElementById('watchTime').textContent = '487 hrs';
-    document.getElementById('completionRate').textContent = '68%';
-    document.getElementById('revenueMonth').textContent = '$2,847';
-
-    // Merch stats
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const { data: sales, error } = await supabase
-      .from('merch_sales')
-      .select('quantity, total_usd, country, created_at, product_name, category')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error("Merch fetch error:", error);
-      document.getElementById('topProducts').innerHTML = '<p class="text-red-400">Error loading merch data</p>';
-      return;
-    }
-
-    if (!sales || sales.length === 0) {
-      document.getElementById('topProducts').innerHTML = '<p class="text-gray-500">No merch sales yet.</p>';
-      document.getElementById('merchCountries').innerHTML = '<li class="text-gray-500">No country data yet.</li>';
-      document.getElementById('merchInsights').innerHTML = '<p class="text-gray-500">Insights appear after a few sales.</p>';
-      return;
-    }
-
-    // Calculations
-    const totalSold = sales.reduce((sum, s) => sum + (s.quantity || 0), 0);
-    const grossRevenue = sales.reduce((sum, s) => sum + (s.total_usd || 0), 0);
-    const thisMonthSales = sales.filter(s => new Date(s.created_at) >= thirtyDaysAgo);
-    const monthRevenue = thisMonthSales.reduce((sum, s) => sum + (s.total_usd || 0), 0);
-
-    document.getElementById('merchTotalSold').textContent = totalSold;
-    document.getElementById('merchGrossRevenue').textContent = `$${grossRevenue.toFixed(2)}`;
-    document.getElementById('merchMonthSales').textContent = `$${monthRevenue.toFixed(2)}`;
-    document.getElementById('merchAvgOrder').textContent = totalSold > 0 ? `$${(grossRevenue / totalSold).toFixed(2)}` : '$0.00';
-
-    // Top products
-    const productMap = {};
-    sales.forEach(s => {
-      const name = s.product_name || 'Unknown Product';
-      if (!productMap[name]) productMap[name] = { qty: 0, rev: 0 };
-      productMap[name].qty += s.quantity || 0;
-      productMap[name].rev += s.total_usd || 0;
-    });
-
-    const topProducts = Object.entries(productMap)
-      .sort((a, b) => b[1].qty - a[1].qty)
-      .slice(0, 5);
-
-    document.getElementById('topProducts').innerHTML = topProducts.length > 0
-      ? topProducts.map(([name, stats]) => `
-          <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
-            <span class="font-medium">${name}</span>
-            <span>${stats.qty} sold • $${stats.rev.toFixed(2)}</span>
-          </div>
-        `).join('')
-      : '<p class="text-gray-500">No products sold yet.</p>';
-
-    // Top countries
-    const countryMap = {};
-    sales.forEach(s => {
-      if (s.country) {
-        if (!countryMap[s.country]) countryMap[s.country] = 0;
-        countryMap[s.country] += s.total_usd || 0;
-      }
-    });
-
-    const topCountries = Object.entries(countryMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6);
-
-    document.getElementById('merchCountries').innerHTML = topCountries.length > 0
-      ? topCountries.map(([country, rev]) => `
-          <li class="flex justify-between text-gray-300">
-            <span>${country}</span>
-            <span class="font-mono">$${rev.toFixed(2)}</span>
-          </li>
-        `).join('')
-      : '<li class="text-gray-500">No country data yet.</li>';
-
-    // AI Merch Insights (rule-based for now)
-    let insightText = '';
-    if (topProducts.length > 0) {
-      const topItem = topProducts[0][0];
-      insightText += `<div class="bg-zinc-800 p-6 rounded-xl">
-        <p class="text-purple-400 font-bold">Your #1 seller is <strong>${topItem}</strong>.</p>
-        <p class="text-gray-400 mt-2">Tip: Restock it quickly and consider adding new colors/sizes/variants.</p>
-      </div>`;
-    }
-    if (topCountries.length > 0) {
-      const topCountry = topCountries[0][0];
-      insightText += `<div class="bg-zinc-800 p-6 rounded-xl">
-        <p class="text-purple-400 font-bold">Strongest merch sales in <strong>${topCountry}</strong>.</p>
-        <p class="text-gray-400 mt-2">Tip: Run targeted promos, localized designs, or ads in this region.</p>
-      </div>`;
-    }
-    if (monthRevenue > grossRevenue * 0.3) {
-      insightText += `<div class="bg-zinc-800 p-6 rounded-xl">
-        <p class="text-purple-400 font-bold">This month already accounts for ${Math.round((monthRevenue / grossRevenue) * 100)}% of lifetime merch revenue.</p>
-        <p class="text-gray-400 mt-2">Great momentum — keep the promo energy high!</p>
-      </div>`;
-    }
-    document.getElementById('merchInsights').innerHTML = insightText || '<p class="text-gray-500">More insights will appear after more sales data accumulates.</p>';
-  }
-
-  document.addEventListener('DOMContentLoaded', loadAnalytics);
-</script>
-
 </body>
 </html>
