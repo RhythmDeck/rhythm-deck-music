@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rhythm Deck | Analytics – Platinum Pro</title>
-<link rel="icon" href="logo-favicon.png" type="image/png">
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-.hero-height { height: 60vh; }
-.brand-gradient { background: linear-gradient(135deg, #00c853, #00bfa5); }
-.instrument { position: fixed; font-size: 40px; opacity: 0.7; filter: drop-shadow(0 0 10px #00ffcc); animation: float 8s infinite ease-in-out alternate; }
-@keyframes float { from { transform: translateY(0px); } to { transform: translateY(-50px); } }
-.card { background: #1a1a1a; border: 1px solid #00ffcc; border-radius: 12px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhythm Deck | Analytics – Platinum Pro</title>
+  <link rel="icon" href="logo-favicon.png" type="image/png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .hero-height { height: 60vh; }
+    .brand-gradient { background: linear-gradient(135deg, #00c853, #00bfa5); }
+    .instrument { position: fixed; font-size: 40px; opacity: 0.7; filter: drop-shadow(0 0 10px #00ffcc); animation: float 8s infinite ease-in-out alternate; }
+    @keyframes float { from { transform: translateY(0px); } to { transform: translateY(-50px); } }
+    .card { background: #1a1a1a; border: 1px solid #00ffcc; border-radius: 12px; }
+  </style>
 </head>
 <body class="bg-black text-white overflow-x-hidden">
 
-<!-- Header (same as your Platinum Pro) -->
+<!-- Header -->
 <header class="bg-black text-white p-4 flex justify-between items-center border-b border-gray-800">
   <div class="flex items-center gap-3">
     <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full">
@@ -30,106 +30,205 @@
 
 <!-- Main Analytics Content -->
 <section class="max-w-7xl mx-auto py-12 px-6">
-  <h1 class="text-4xl font-bold mb-2">Your Analytics</h1>
-  <p class="text-gray-400 mb-10">Real-time insights for all your uploaded videos and audio tracks</p>
+  <h1 class="text-4xl font-bold mb-2">Your Analytics Dashboard</h1>
+  <p class="text-gray-400 mb-10">Separate insights for your Video/Audio content and Merch Store sales</p>
 
-  <!-- Overview Cards -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-    <div class="card p-6">
-      <p class="text-gray-400 text-sm">Total Views (30 days)</p>
-      <p class="text-5xl font-bold text-green-400 mt-2">124,893</p>
-    </div>
-    <div class="card p-6">
-      <p class="text-gray-400 text-sm">Total Watch Time</p>
-      <p class="text-5xl font-bold text-green-400 mt-2">487 hrs</p>
-    </div>
-    <div class="card p-6">
-      <p class="text-gray-400 text-sm">Avg. Completion Rate</p>
-      <p class="text-5xl font-bold text-green-400 mt-2">68%</p>
-    </div>
-    <div class="card p-6">
-      <p class="text-gray-400 text-sm">Revenue This Month</p>
-      <p class="text-5xl font-bold text-green-400 mt-2">$2,847</p>
-    </div>
-  </div>
+  <!-- VIDEO & AUDIO ANALYTICS SECTION -->
+  <div class="mb-16">
+    <h2 class="text-3xl font-bold mb-6 text-green-400 border-b border-green-900 pb-4">Video & Audio Analytics</h2>
+    <p class="text-gray-400 mb-8">Performance metrics for all uploaded tracks, videos, and live streams</p>
 
-  <!-- Geographic Breakdown -->
-  <div class="card p-8 mb-12">
-    <h2 class="text-2xl font-bold mb-6">Where Your Audience Is Watching From</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div>
-        <h3 class="font-bold text-lg mb-4">Top Countries (All Views)</h3>
-        <ul class="space-y-4">
-          <li class="flex justify-between"><span>🇺🇸 United States</span><span class="font-mono">48,291 views (38.7%)</span></li>
-          <li class="flex justify-between"><span>🇬🇧 United Kingdom</span><span class="font-mono">19,872 views (15.9%)</span></li>
-          <li class="flex justify-between"><span>🇨🇦 Canada</span><span class="font-mono">12,443 views (10.0%)</span></li>
-          <li class="flex justify-between"><span>🇦🇺 Australia</span><span class="font-mono">8,912 views (7.1%)</span></li>
-          <li class="flex justify-between"><span>🇩🇪 Germany</span><span class="font-mono">6,784 views (5.4%)</span></li>
-          <li class="flex justify-between"><span>🇧🇷 Brazil</span><span class="font-mono">4,231 views (3.4%)</span></li>
-          <li class="flex justify-between"><span>🇯🇵 Japan</span><span class="font-mono">3,892 views (3.1%)</span></li>
-          <!-- ... continues for all countries that have watched -->
-        </ul>
+    <!-- Overview Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+      <div class="card p-6">
+        <p class="text-gray-400 text-sm">Total Views (30 days)</p>
+        <p class="text-5xl font-bold text-green-400 mt-2">124,893</p>
       </div>
-      <div>
-        <h3 class="font-bold text-lg mb-4">Top Cities</h3>
-        <ul class="space-y-3 text-sm">
-          <li>Nashville, TN — 12,443 views</li>
-          <li>Los Angeles, CA — 9,872 views</li>
-          <li>London, UK — 7,654 views</li>
-          <li>New York, NY — 6,321 views</li>
-          <li>Toronto, Canada — 4,892 views</li>
-          <!-- All cities with data -->
-        </ul>
+      <div class="card p-6">
+        <p class="text-gray-400 text-sm">Total Watch Time</p>
+        <p class="text-5xl font-bold text-green-400 mt-2">487 hrs</p>
+      </div>
+      <div class="card p-6">
+        <p class="text-gray-400 text-sm">Avg. Completion Rate</p>
+        <p class="text-5xl font-bold text-green-400 mt-2">68%</p>
+      </div>
+      <div class="card p-6">
+        <p class="text-gray-400 text-sm">Revenue This Month</p>
+        <p class="text-5xl font-bold text-green-400 mt-2">$2,847</p>
       </div>
     </div>
-  </div>
 
-  <!-- Demographics -->
-  <div class="card p-8 mb-12">
-    <h2 class="text-2xl font-bold mb-6">Audience Demographics (Aggregated & Anonymous)</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div>
-        <h3 class="font-bold mb-4">Age Groups</h3>
-        <div class="space-y-4">
-          <div>18–24: 42%</div>
-          <div>25–34: 31%</div>
-          <div>35–44: 18%</div>
-          <div>45+: 9%</div>
+    <!-- Geographic Breakdown -->
+    <div class="card p-8 mb-12">
+      <h2 class="text-2xl font-bold mb-6">Where Your Audience Is Watching From</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="font-bold text-lg mb-4">Top Countries (All Views)</h3>
+          <ul class="space-y-4">
+            <li class="flex justify-between"><span>🇺🇸 United States</span><span class="font-mono">48,291 views (38.7%)</span></li>
+            <li class="flex justify-between"><span>🇬🇧 United Kingdom</span><span class="font-mono">19,872 views (15.9%)</span></li>
+            <li class="flex justify-between"><span>🇨🇦 Canada</span><span class="font-mono">12,443 views (10.0%)</span></li>
+            <li class="flex justify-between"><span>🇦🇺 Australia</span><span class="font-mono">8,912 views (7.1%)</span></li>
+            <li class="flex justify-between"><span>🇩🇪 Germany</span><span class="font-mono">6,784 views (5.4%)</span></li>
+            <li class="flex justify-between"><span>🇧🇷 Brazil</span><span class="font-mono">4,231 views (3.4%)</span></li>
+            <li class="flex justify-between"><span>🇯🇵 Japan</span><span class="font-mono">3,892 views (3.1%)</span></li>
+            <li class="flex justify-between"><span>🇲🇽 Mexico</span><span class="font-mono">3,214 views (2.6%)</span></li>
+            <li class="flex justify-between"><span>🇫🇷 France</span><span class="font-mono">2,987 views (2.4%)</span></li>
+          </ul>
         </div>
-      </div>
-      <div>
-        <h3 class="font-bold mb-4">Gender (Aggregated)</h3>
-        <div class="space-y-4">
-          <div>Female: 54%</div>
-          <div>Male: 43%</div>
-          <div>Non-binary / Prefer not to say: 3%</div>
+        <div>
+          <h3 class="font-bold text-lg mb-4">Top Cities</h3>
+          <ul class="space-y-3 text-sm">
+            <li>Nashville, TN — 12,443 views</li>
+            <li>Los Angeles, CA — 9,872 views</li>
+            <li>London, UK — 7,654 views</li>
+            <li>New York, NY — 6,321 views</li>
+            <li>Toronto, Canada — 4,892 views</li>
+            <li>Mexico City, MX — 3,214 views</li>
+            <li>Berlin, DE — 2,876 views</li>
+            <li>Sydney, AU — 2,543 views</li>
+          </ul>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- AI Insights -->
-  <div class="card p-8">
-    <h2 class="text-2xl font-bold mb-6 text-emerald-400">🎯 AI-Powered Insights & Tips</h2>
-    <div class="space-y-6">
-      <div class="bg-zinc-800 p-6 rounded-xl">
-        <p class="text-emerald-400 font-bold">Your slower songs have 42% higher completion rate.</p>
-        <p class="text-gray-400 mt-2">Tip: Release more ballads or mid-tempo tracks — they keep fans listening longer.</p>
+    <!-- Demographics -->
+    <div class="card p-8 mb-12">
+      <h2 class="text-2xl font-bold mb-6">Audience Demographics (Aggregated & Anonymous)</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="font-bold mb-4">Age Groups</h3>
+          <div class="space-y-4">
+            <div>18–24: 42%</div>
+            <div>25–34: 31%</div>
+            <div>35–44: 18%</div>
+            <div>45+: 9%</div>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-bold mb-4">Gender (Aggregated)</h3>
+          <div class="space-y-4">
+            <div>Female: 54%</div>
+            <div>Male: 43%</div>
+            <div>Non-binary / Prefer not to say: 3%</div>
+          </div>
+        </div>
       </div>
-      <div class="bg-zinc-800 p-6 rounded-xl">
-        <p class="text-emerald-400 font-bold">Videos posted on Tuesday at 7pm get 3× more views.</p>
-        <p class="text-gray-400 mt-2">Tip: Schedule your next release for Tuesday evening.</p>
-      </div>
-      <div class="bg-zinc-800 p-6 rounded-xl">
-        <p class="text-emerald-400 font-bold">Your fans in California and UK are most engaged.</p>
-        <p class="text-gray-400 mt-2">Tip: Consider targeted ads or a tour stop in these regions.</p>
+    </div>
+
+    <!-- AI Insights for Video/Audio -->
+    <div class="card p-8">
+      <h2 class="text-2xl font-bold mb-6 text-green-400">🎯 AI-Powered Insights & Tips (Video/Audio)</h2>
+      <div class="space-y-6">
+        <div class="bg-zinc-800 p-6 rounded-xl">
+          <p class="text-green-400 font-bold">Your slower songs have 42% higher completion rate.</p>
+          <p class="text-gray-400 mt-2">Tip: Release more ballads or mid-tempo tracks — they keep fans listening longer.</p>
+        </div>
+        <div class="bg-zinc-800 p-6 rounded-xl">
+          <p class="text-green-400 font-bold">Videos posted on Tuesday at 7pm get 3× more views.</p>
+          <p class="text-gray-400 mt-2">Tip: Schedule your next release for Tuesday evening.</p>
+        </div>
+        <div class="bg-zinc-800 p-6 rounded-xl">
+          <p class="text-green-400 font-bold">Your fans in California and UK are most engaged.</p>
+          <p class="text-gray-400 mt-2">Tip: Consider targeted ads or a tour stop in these regions.</p>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- MERCH STORE ANALYTICS SECTION -->
+  <div class="mb-16">
+    <h2 class="text-3xl font-bold mb-6 text-purple-400 border-b border-purple-900 pb-4">Merch Store Analytics</h2>
+    <p class="text-gray-400 mb-8">Sales performance, top products, and buyer insights for your merch store</p>
+
+    <!-- Merch Overview Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+      <div class="card p-6">
+        <p class="text-gray-400 text-sm">Total Items Sold (All Time)</p>
+        <p class="text-5xl font-bold text-purple-400 mt-2">1,842</p>
+      </div>
+      <div class="card p-6">
+        <p class="text-gray-400 text-sm">Gross Revenue (All Time)</p>
+        <p class="text-5xl font-bold text-purple-400 mt-2">$28,910</p>
+      </div>
+      <div class="card p-6">
+        <p class="text-gray-400 text-sm">Average Order Value</p>
+        <p class="text-5xl font-bold text-purple-400 mt-2">$48.15</p>
+      </div>
+      <div class="card p-6">
+        <p class="text-gray-400 text-sm">Sales This Month</p>
+        <p class="text-5xl font-bold text-purple-400 mt-2">$4,312</p>
+      </div>
+    </div>
+
+    <!-- Top Selling Products -->
+    <div class="card p-8 mb-12">
+      <h3 class="text-2xl font-bold mb-6">Top Selling Merch</h3>
+      <div class="space-y-4">
+        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
+          <span class="font-medium">Black Logo Hoodie (XL)</span>
+          <span>421 sold • $12,630</span>
+        </div>
+        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
+          <span class="font-medium">Vinyl - Album 1 (Limited)</span>
+          <span>289 sold • $5,780</span>
+        </div>
+        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
+          <span class="font-medium">Tour Poster (Signed)</span>
+          <span>214 sold • $3,210</span>
+        </div>
+        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
+          <span class="font-medium">White T-Shirt (Classic Logo)</span>
+          <span>198 sold • $2,970</span>
+        </div>
+        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
+          <span class="font-medium">Sticker Pack (10 pcs)</span>
+          <span>176 sold • $1,760</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sales by Country -->
+    <div class="card p-8 mb-12">
+      <h3 class="text-2xl font-bold mb-6">Sales by Country</h3>
+      <ul class="space-y-4">
+        <li class="flex justify-between"><span>🇺🇸 United States</span><span class="font-mono">$14,892 (51.5%)</span></li>
+        <li class="flex justify-between"><span>🇲🇽 Mexico</span><span class="font-mono">$6,210 (21.5%)</span></li>
+        <li class="flex justify-between"><span>🇬🇧 United Kingdom</span><span class="font-mono">$3,450 (11.9%)</span></li>
+        <li class="flex justify-between"><span>🇨🇦 Canada</span><span class="font-mono">$1,980 (6.8%)</span></li>
+        <li class="flex justify-between"><span>🇦🇺 Australia</span><span class="font-mono">$1,210 (4.2%)</span></li>
+        <li class="flex justify-between"><span>🇩🇪 Germany</span><span class="font-mono">$890 (3.1%)</span></li>
+        <li class="flex justify-between"><span>🇧🇷 Brazil</span><span class="font-mono">$278 (1.0%)</span></li>
+      </ul>
+    </div>
+
+    <!-- AI Merch Insights -->
+    <div class="card p-8">
+      <h2 class="text-2xl font-bold mb-6 text-purple-400">🎯 AI-Powered Merch Insights & Tips</h2>
+      <div class="space-y-6">
+        <div class="bg-zinc-800 p-6 rounded-xl">
+          <p class="text-purple-400 font-bold">Black Logo Hoodie is your #1 seller (421 units).</p>
+          <p class="text-gray-400 mt-2">Tip: Restock immediately and consider adding new colors (grey, navy) or limited-edition prints.</p>
+        </div>
+        <div class="bg-zinc-800 p-6 rounded-xl">
+          <p class="text-purple-400 font-bold">Mexico is your #2 market ($6,210) — almost as strong as UK.</p>
+          <p class="text-gray-400 mt-2">Tip: Add Spanish-language tags/descriptions and run a Mexico-exclusive promo or bundle.</p>
+        </div>
+        <div class="bg-zinc-800 p-6 rounded-xl">
+          <p class="text-purple-400 font-bold">Average order value is $48.15 — strong for merch.</p>
+          <p class="text-gray-400 mt-2">Tip: Introduce bundles (hoodie + sticker pack + vinyl) to push AOV above $60.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <footer class="bg-black border-t border-gray-800 py-6 text-center text-sm text-gray-500">
   <p>© 2026 Rhythm Deck Music. All rights reserved.</p>
 </footer>
+
+</body>
+</html>
 </body>
 </html>
