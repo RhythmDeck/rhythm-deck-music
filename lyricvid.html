@@ -84,12 +84,16 @@
   color: #00ffcc;
   white-space: nowrap;
 }
+.instructions-section {
+  background: #1f1f1f;
+  border: 2px solid #10b981;
+  border-radius: 12px;
+}
 @media (max-width: 640px) {
   .hero-height { height: 50vh; }
   .preview-container { max-width: 100%; }
   .tweak-panel { padding: 12px; }
   .preview-canvas { font-size: 1rem !important; }
-  .grid-cols-3 { grid-template-columns: 1fr; gap: 12px; }
   .font-preview { font-size: 14px; margin-left: 8px; }
   .upload-thumbnail { max-height: 150px; }
 }
@@ -115,7 +119,7 @@
       <p class="text-xs text-gray-400">Unleash Your Beat</p>
     </div>
   </div>
-  <a href="https://rhythmdeckmusic.com/"
+  <a href="https://rhythmdeck.vercel.app/"
      class="px-5 py-2 rounded-full brand-gradient font-semibold text-black hover:opacity-90 transition">
      Home
   </a>
@@ -138,19 +142,57 @@
   </div>
 </section>
 
+<!-- New Instructions Section - Light grey background with emerald green border -->
+<section class="instructions-section py-10 px-6 max-w-5xl mx-auto mt-8">
+  <h3 class="text-2xl font-bold text-center text-emerald-400 mb-8">How to Use Rhythm Deck LyricVid</h3>
+  
+  <div class="space-y-8 text-gray-300 text-sm md:text-base">
+    <div>
+      <strong class="text-white">Step 1: Upload Your Music Video</strong><br>
+      Drag & drop or click to select an MP4 file from your computer or phone. A thumbnail will appear once selected.
+    </div>
+    <div>
+      <strong class="text-white">Step 2: Paste Your Lyrics</strong><br>
+      Copy and paste your full lyrics into the box (one line per phrase or verse is best for clean timing).
+    </div>
+    <div>
+      <strong class="text-white">Step 3: Click "Generate Lyric Video"</strong><br>
+      The app will process your video and lyrics. A progress bar will show while generating the preview.
+    </div>
+    <div>
+      <strong class="text-white">Step 4: Preview & Customize</strong><br>
+      Play the video to see lyrics appear automatically timed to the music. Use the tweak panel to adjust in real time:
+      <ul class="list-disc list-inside mt-2 ml-4 space-y-1 text-gray-400">
+        <li><strong>Timing Offset</strong> — Move lyrics earlier or later if they appear out of sync.</li>
+        <li><strong>Font Size</strong> — Change how large the lyrics appear on screen.</li>
+        <li><strong>Font Color</strong> — Pick any color for the text.</li>
+        <li><strong>Font Style</strong> — Choose from 12 professional and creative fonts (see live preview next to dropdown).</li>
+        <li><strong>Vertical Position</strong> — Move lyrics higher or lower on the screen.</li>
+        <li><strong>Horizontal Alignment</strong> — Left, Center, or Right alignment.</li>
+        <li><strong>Animation Style</strong> — Choose Fade, Pop Up, Bounce, or Highlight for visual flair.</li>
+      </ul>
+    </div>
+    <div>
+      <strong class="text-white">Step 5: Download or Export</strong><br>
+      • Choose format: MP4 (video with lyrics), WAV (clean audio only), or MP3 (compressed audio).<br>
+      • Click **Export as .vtt Subtitles** to download a subtitle file for other video editors.<br>
+      • Click **Download** to get your finished file.
+    </div>
+  </div>
+</section>
+
 <!-- Main Content -->
 <section class="py-12 px-4 md:px-6 max-w-5xl mx-auto">
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-10 shadow-2xl">
     <h3 class="text-2xl md:text-3xl font-bold mb-8 text-center text-green-400">
       Rhythm Deck LyricVid – Create Your Lyric Video
     </h3>
-
     <!-- Upload & Lyrics -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-10">
       <div>
         <label class="block text-lg mb-3 text-gray-300">1. Upload Your Music Video</label>
         <div id="uploadArea" class="border-2 border-dashed border-green-500 rounded-xl p-6 md:p-10 text-center cursor-pointer hover:bg-zinc-800 transition relative">
-          <p class="text-gray-400 text-sm md:text-base">Drag & drop MP4 or click here to browse</p>
+          <p class="text-gray-400 text-sm md:text-base">Drag & drop MP4 or click to browse (max 100MB)</p>
           <input type="file" accept="video/mp4" class="hidden" id="videoUpload">
           <img id="uploadThumbnail" class="upload-thumbnail hidden mx-auto mt-4" alt="Video thumbnail">
           <div id="progressBar" class="progress-bar hidden">
@@ -372,11 +414,10 @@ function generatePreview() {
       progressBar.classList.add("hidden");
       finishGenerate();
     }
-  }, 150); // ~3 seconds total
+  }, 150);
 }
 
 function finishGenerate() {
-  // Mock timed subtitles (3 seconds per line)
   const lines = document.getElementById("lyricsInput").value.split("\n").filter(line => line.trim());
   subtitles = lines.map((line, index) => ({
     text: line,
@@ -391,7 +432,6 @@ function finishGenerate() {
   const url = URL.createObjectURL(currentVideoFile);
   video.src = url;
   video.load();
-  // Do NOT auto-play
 
   video.addEventListener("timeupdate", drawSubtitles);
   video.addEventListener("loadedmetadata", () => {
@@ -401,7 +441,7 @@ function finishGenerate() {
   });
 }
 
-// Draw subtitles on canvas with live styles
+// Draw subtitles on canvas
 function drawSubtitles() {
   if (!video || !ctx) return;
 
