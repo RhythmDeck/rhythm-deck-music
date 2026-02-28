@@ -6,6 +6,7 @@
   <title>Rhythm Deck | Analytics – Platinum Pro</title>
   <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"></script>
   <style>
     .hero-height { height: 60vh; }
     .brand-gradient { background: linear-gradient(135deg, #00c853, #00bfa5); }
@@ -16,7 +17,6 @@
 </head>
 <body class="bg-black text-white overflow-x-hidden">
 
-<!-- Header -->
 <header class="bg-black text-white p-4 flex justify-between items-center border-b border-gray-800">
   <div class="flex items-center gap-3">
     <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full">
@@ -28,195 +28,121 @@
   <a href="profile-admin-pro.html" class="px-5 py-2 rounded-full brand-gradient font-semibold text-black">Back to Dashboard</a>
 </header>
 
-<!-- Main Analytics Content -->
 <section class="max-w-7xl mx-auto py-12 px-6">
   <h1 class="text-4xl font-bold mb-2">Your Analytics Dashboard</h1>
-  <p class="text-gray-400 mb-10">Separate insights for your Video/Audio content and Merch Store sales</p>
+  <p class="text-gray-400 mb-10">Separate real-time insights for Video/Audio content and Merch Store sales</p>
 
-  <!-- VIDEO & AUDIO ANALYTICS SECTION -->
-  <div class="mb-16">
+  <div class="mb-20">
     <h2 class="text-3xl font-bold mb-6 text-green-400 border-b border-green-900 pb-4">Video & Audio Analytics</h2>
     <p class="text-gray-400 mb-8">Performance metrics for all uploaded tracks, videos, and live streams</p>
 
-    <!-- Overview Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Total Views (30 days)</p>
-        <p class="text-5xl font-bold text-green-400 mt-2">124,893</p>
+        <p class="text-5xl font-bold text-green-400 mt-2" id="totalViews">0</p>
       </div>
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Total Watch Time</p>
-        <p class="text-5xl font-bold text-green-400 mt-2">487 hrs</p>
+        <p class="text-5xl font-bold text-green-400 mt-2" id="watchTime">0 hrs</p>
       </div>
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Avg. Completion Rate</p>
-        <p class="text-5xl font-bold text-green-400 mt-2">68%</p>
+        <p class="text-5xl font-bold text-green-400 mt-2" id="completionRate">0%</p>
       </div>
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Revenue This Month</p>
-        <p class="text-5xl font-bold text-green-400 mt-2">$2,847</p>
+        <p class="text-5xl font-bold text-green-400 mt-2" id="revenueMonth">$0</p>
       </div>
     </div>
 
-    <!-- Geographic Breakdown -->
     <div class="card p-8 mb-12">
       <h2 class="text-2xl font-bold mb-6">Where Your Audience Is Watching From</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h3 class="font-bold text-lg mb-4">Top Countries (All Views)</h3>
-          <ul class="space-y-4">
-            <li class="flex justify-between"><span>🇺🇸 United States</span><span class="font-mono">48,291 views (38.7%)</span></li>
-            <li class="flex justify-between"><span>🇬🇧 United Kingdom</span><span class="font-mono">19,872 views (15.9%)</span></li>
-            <li class="flex justify-between"><span>🇨🇦 Canada</span><span class="font-mono">12,443 views (10.0%)</span></li>
-            <li class="flex justify-between"><span>🇦🇺 Australia</span><span class="font-mono">8,912 views (7.1%)</span></li>
-            <li class="flex justify-between"><span>🇩🇪 Germany</span><span class="font-mono">6,784 views (5.4%)</span></li>
-            <li class="flex justify-between"><span>🇧🇷 Brazil</span><span class="font-mono">4,231 views (3.4%)</span></li>
-            <li class="flex justify-between"><span>🇯🇵 Japan</span><span class="font-mono">3,892 views (3.1%)</span></li>
-            <li class="flex justify-between"><span>🇲🇽 Mexico</span><span class="font-mono">3,214 views (2.6%)</span></li>
-            <li class="flex justify-between"><span>🇫🇷 France</span><span class="font-mono">2,987 views (2.4%)</span></li>
+          <ul class="space-y-4" id="videoCountries">
+            <li class="text-gray-500 italic">Loading...</li>
           </ul>
         </div>
         <div>
           <h3 class="font-bold text-lg mb-4">Top Cities</h3>
-          <ul class="space-y-3 text-sm">
-            <li>Nashville, TN — 12,443 views</li>
-            <li>Los Angeles, CA — 9,872 views</li>
-            <li>London, UK — 7,654 views</li>
-            <li>New York, NY — 6,321 views</li>
-            <li>Toronto, Canada — 4,892 views</li>
-            <li>Mexico City, MX — 3,214 views</li>
-            <li>Berlin, DE — 2,876 views</li>
-            <li>Sydney, AU — 2,543 views</li>
+          <ul class="space-y-3 text-sm" id="videoCities">
+            <li class="text-gray-500 italic">Loading...</li>
           </ul>
         </div>
       </div>
     </div>
 
-    <!-- Demographics -->
     <div class="card p-8 mb-12">
       <h2 class="text-2xl font-bold mb-6">Audience Demographics (Aggregated & Anonymous)</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h3 class="font-bold mb-4">Age Groups</h3>
-          <div class="space-y-4">
-            <div>18–24: 42%</div>
-            <div>25–34: 31%</div>
-            <div>35–44: 18%</div>
-            <div>45+: 9%</div>
+          <div class="space-y-4" id="videoAgeGroups">
+            <div class="text-gray-500 italic">Loading...</div>
           </div>
         </div>
         <div>
           <h3 class="font-bold mb-4">Gender (Aggregated)</h3>
-          <div class="space-y-4">
-            <div>Female: 54%</div>
-            <div>Male: 43%</div>
-            <div>Non-binary / Prefer not to say: 3%</div>
+          <div class="space-y-4" id="videoGenders">
+            <div class="text-gray-500 italic">Loading...</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- AI Insights for Video/Audio -->
     <div class="card p-8">
       <h2 class="text-2xl font-bold mb-6 text-green-400">🎯 AI-Powered Insights & Tips (Video/Audio)</h2>
-      <div class="space-y-6">
-        <div class="bg-zinc-800 p-6 rounded-xl">
-          <p class="text-green-400 font-bold">Your slower songs have 42% higher completion rate.</p>
-          <p class="text-gray-400 mt-2">Tip: Release more ballads or mid-tempo tracks — they keep fans listening longer.</p>
-        </div>
-        <div class="bg-zinc-800 p-6 rounded-xl">
-          <p class="text-green-400 font-bold">Videos posted on Tuesday at 7pm get 3× more views.</p>
-          <p class="text-gray-400 mt-2">Tip: Schedule your next release for Tuesday evening.</p>
-        </div>
-        <div class="bg-zinc-800 p-6 rounded-xl">
-          <p class="text-green-400 font-bold">Your fans in California and UK are most engaged.</p>
-          <p class="text-gray-400 mt-2">Tip: Consider targeted ads or a tour stop in these regions.</p>
+      <div class="space-y-6" id="videoInsights">
+        <div class="bg-zinc-800 p-6 rounded-xl text-gray-500 italic">
+          Loading insights...
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MERCH STORE ANALYTICS SECTION -->
   <div class="mb-16">
     <h2 class="text-3xl font-bold mb-6 text-purple-400 border-b border-purple-900 pb-4">Merch Store Analytics</h2>
     <p class="text-gray-400 mb-8">Sales performance, top products, and buyer insights for your merch store</p>
 
-    <!-- Merch Overview Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Total Items Sold (All Time)</p>
-        <p class="text-5xl font-bold text-purple-400 mt-2">1,842</p>
+        <p class="text-5xl font-bold text-purple-400 mt-2" id="merchTotalSold">0</p>
       </div>
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Gross Revenue (All Time)</p>
-        <p class="text-5xl font-bold text-purple-400 mt-2">$28,910</p>
+        <p class="text-5xl font-bold text-purple-400 mt-2" id="merchGrossRevenue">$0.00</p>
       </div>
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Average Order Value</p>
-        <p class="text-5xl font-bold text-purple-400 mt-2">$48.15</p>
+        <p class="text-5xl font-bold text-purple-400 mt-2" id="merchAvgOrder">$0.00</p>
       </div>
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Sales This Month</p>
-        <p class="text-5xl font-bold text-purple-400 mt-2">$4,312</p>
+        <p class="text-5xl font-bold text-purple-400 mt-2" id="merchMonthSales">$0.00</p>
       </div>
     </div>
 
-    <!-- Top Selling Products -->
     <div class="card p-8 mb-12">
       <h3 class="text-2xl font-bold mb-6">Top Selling Merch</h3>
-      <div class="space-y-4">
-        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
-          <span class="font-medium">Black Logo Hoodie (XL)</span>
-          <span>421 sold • $12,630</span>
-        </div>
-        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
-          <span class="font-medium">Vinyl - Album 1 (Limited)</span>
-          <span>289 sold • $5,780</span>
-        </div>
-        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
-          <span class="font-medium">Tour Poster (Signed)</span>
-          <span>214 sold • $3,210</span>
-        </div>
-        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
-          <span class="font-medium">White T-Shirt (Classic Logo)</span>
-          <span>198 sold • $2,970</span>
-        </div>
-        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
-          <span class="font-medium">Sticker Pack (10 pcs)</span>
-          <span>176 sold • $1,760</span>
-        </div>
+      <div class="space-y-4" id="topProducts">
+        <div class="text-gray-500 italic">Loading...</div>
       </div>
     </div>
 
-    <!-- Sales by Country -->
     <div class="card p-8 mb-12">
       <h3 class="text-2xl font-bold mb-6">Sales by Country</h3>
-      <ul class="space-y-4">
-        <li class="flex justify-between"><span>🇺🇸 United States</span><span class="font-mono">$14,892 (51.5%)</span></li>
-        <li class="flex justify-between"><span>🇲🇽 Mexico</span><span class="font-mono">$6,210 (21.5%)</span></li>
-        <li class="flex justify-between"><span>🇬🇧 United Kingdom</span><span class="font-mono">$3,450 (11.9%)</span></li>
-        <li class="flex justify-between"><span>🇨🇦 Canada</span><span class="font-mono">$1,980 (6.8%)</span></li>
-        <li class="flex justify-between"><span>🇦🇺 Australia</span><span class="font-mono">$1,210 (4.2%)</span></li>
-        <li class="flex justify-between"><span>🇩🇪 Germany</span><span class="font-mono">$890 (3.1%)</span></li>
-        <li class="flex justify-between"><span>🇧🇷 Brazil</span><span class="font-mono">$278 (1.0%)</span></li>
+      <ul class="space-y-4" id="merchCountries">
+        <li class="text-gray-500 italic">Loading...</li>
       </ul>
     </div>
 
-    <!-- AI Merch Insights -->
     <div class="card p-8">
       <h2 class="text-2xl font-bold mb-6 text-purple-400">🎯 AI-Powered Merch Insights & Tips</h2>
-      <div class="space-y-6">
-        <div class="bg-zinc-800 p-6 rounded-xl">
-          <p class="text-purple-400 font-bold">Black Logo Hoodie is your #1 seller (421 units).</p>
-          <p class="text-gray-400 mt-2">Tip: Restock immediately and consider adding new colors (grey, navy) or limited-edition prints.</p>
-        </div>
-        <div class="bg-zinc-800 p-6 rounded-xl">
-          <p class="text-purple-400 font-bold">Mexico is your #2 market ($6,210) — almost as strong as UK.</p>
-          <p class="text-gray-400 mt-2">Tip: Add Spanish-language tags/descriptions and run a Mexico-exclusive promo or bundle.</p>
-        </div>
-        <div class="bg-zinc-800 p-6 rounded-xl">
-          <p class="text-purple-400 font-bold">Average order value is $48.15 — strong for merch.</p>
-          <p class="text-gray-400 mt-2">Tip: Introduce bundles (hoodie + sticker pack + vinyl) to push AOV above $60.</p>
+      <div class="space-y-6" id="merchInsights">
+        <div class="bg-zinc-800 p-6 rounded-xl text-gray-500 italic">
+          Loading insights...
         </div>
       </div>
     </div>
@@ -228,7 +154,144 @@
   <p>© 2026 Rhythm Deck Music. All rights reserved.</p>
 </footer>
 
-</body>
-</html>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const supabase = createClient(
+    'https://bxoqhmfnseskwqkywppg.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+  );
+
+  async function loadAnalytics() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert('Please log in to view analytics');
+      return;
+    }
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Video & Audio Analytics
+    const { data: views, error: viewsError } = await supabase
+      .from('video_views')
+      .select('watch_duration_sec, percent_completed, viewer_country, viewer_city, viewer_age_group, viewer_gender, viewed_at')
+      .eq('user_id', user.id)
+      .gte('viewed_at', thirtyDaysAgo.toISOString());
+
+    if (viewsError) {
+      console.error('Video views error:', viewsError);
+    } else {
+      const totalViews = views.length;
+      const watchTimeHours = views.reduce((sum, v) => sum + (v.watch_duration_sec || 0), 0) / 3600;
+      const avgCompletion = totalViews > 0 ? Math.round(views.reduce((sum, v) => sum + (v.percent_completed || 0), 0) / totalViews) : 0;
+
+      document.getElementById('totalViews').textContent = totalViews.toLocaleString();
+      document.getElementById('watchTime').textContent = watchTimeHours.toFixed(0) + ' hrs';
+      document.getElementById('completionRate').textContent = avgCompletion + '%';
+    }
+
+    // Mock revenue for now (replace with real query when you have payment data)
+    document.getElementById('revenueMonth').textContent = '$2,847';
+
+    // Merch Analytics
+    const { data: sales, error: salesError } = await supabase
+      .from('merch_sales')
+      .select('quantity, total_usd, buyer_country, buyer_age_group, buyer_gender, sold_at, product_id')
+      .eq('user_id', user.id);
+
+    if (salesError) {
+      console.error('Merch sales error:', salesError);
+    } else {
+      const totalSold = sales.reduce((sum, s) => sum + (s.quantity || 0), 0);
+      const grossRevenue = sales.reduce((sum, s) => sum + (s.total_usd || 0), 0);
+      const thisMonthSales = sales.filter(s => new Date(s.sold_at) >= thirtyDaysAgo);
+      const monthRevenue = thisMonthSales.reduce((sum, s) => sum + (s.total_usd || 0), 0);
+      const avgOrder = totalSold > 0 ? (grossRevenue / totalSold).toFixed(2) : '0.00';
+
+      document.getElementById('merchTotalSold').textContent = totalSold;
+      document.getElementById('merchGrossRevenue').textContent = '$' + grossRevenue.toFixed(2);
+      document.getElementById('merchAvgOrder').textContent = '$' + avgOrder;
+      document.getElementById('merchMonthSales').textContent = '$' + monthRevenue.toFixed(2);
+
+      // Top products (group by product_id)
+      const productMap = {};
+      sales.forEach(s => {
+        const pid = s.product_id || 'unknown';
+        if (!productMap[pid]) productMap[pid] = { qty: 0, rev: 0 };
+        productMap[pid].qty += s.quantity || 0;
+        productMap[pid].rev += s.total_usd || 0;
+      });
+
+      const topProducts = Object.entries(productMap)
+        .sort((a, b) => b[1].qty - a[1].qty)
+        .slice(0, 5);
+
+      document.getElementById('topProducts').innerHTML = topProducts.length > 0
+        ? topProducts.map(([pid, stats]) => `
+            <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
+              <span class="font-medium">${pid}</span>
+              <span>${stats.qty} sold • $${stats.rev.toFixed(2)}</span>
+            </div>
+          `).join('')
+        : '<div class="text-gray-500 italic">No sales yet</div>';
+
+      // Top countries
+      const countryMap = {};
+      sales.forEach(s => {
+        const c = s.buyer_country || 'Unknown';
+        if (!countryMap[c]) countryMap[c] = 0;
+        countryMap[c] += s.total_usd || 0;
+      });
+
+      const topCountries = Object.entries(countryMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 7);
+
+      document.getElementById('merchCountries').innerHTML = topCountries.length > 0
+        ? topCountries.map(([country, rev]) => `
+            <li class="flex justify-between">
+              <span>${country}</span>
+              <span class="font-mono">$${rev.toFixed(2)}</span>
+            </li>
+          `).join('')
+        : '<li class="text-gray-500 italic">No sales data yet</li>';
+    }
+
+    // Placeholder AI insights (static for now)
+    document.getElementById('videoInsights').innerHTML = `
+      <div class="bg-zinc-800 p-6 rounded-xl">
+        <p class="text-green-400 font-bold">Your slower songs have 42% higher completion rate.</p>
+        <p class="text-gray-400 mt-2">Tip: Release more ballads or mid-tempo tracks — they keep fans listening longer.</p>
+      </div>
+      <div class="bg-zinc-800 p-6 rounded-xl">
+        <p class="text-green-400 font-bold">Videos posted on Tuesday at 7pm get 3× more views.</p>
+        <p class="text-gray-400 mt-2">Tip: Schedule your next release for Tuesday evening.</p>
+      </div>
+      <div class="bg-zinc-800 p-6 rounded-xl">
+        <p class="text-green-400 font-bold">Your fans in California and UK are most engaged.</p>
+        <p class="text-gray-400 mt-2">Tip: Consider targeted ads or a tour stop in these regions.</p>
+      </div>
+    `;
+
+    document.getElementById('merchInsights').innerHTML = `
+      <div class="bg-zinc-800 p-6 rounded-xl">
+        <p class="text-purple-400 font-bold">Black Logo Hoodie is your #1 seller.</p>
+        <p class="text-gray-400 mt-2">Tip: Restock immediately and consider adding new colors or limited-edition prints.</p>
+      </div>
+      <div class="bg-zinc-800 p-6 rounded-xl">
+        <p class="text-purple-400 font-bold">Mexico is a strong market for merch sales.</p>
+        <p class="text-gray-400 mt-2">Tip: Add Spanish-language tags and run localized promos or bundles.</p>
+      </div>
+      <div class="bg-zinc-800 p-6 rounded-xl">
+        <p class="text-purple-400 font-bold">Average order value is solid.</p>
+        <p class="text-gray-400 mt-2">Tip: Introduce bundles to push AOV higher.</p>
+      </div>
+    `;
+  }
+
+  document.addEventListener('DOMContentLoaded', loadAnalytics);
+</script>
+
 </body>
 </html>
