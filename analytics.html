@@ -12,10 +12,10 @@
     .instrument { position: fixed; font-size: 40px; opacity: 0.7; filter: drop-shadow(0 0 10px #00ffcc); animation: float 8s infinite ease-in-out alternate; }
     @keyframes float { from { transform: translateY(0px); } to { transform: translateY(-50px); } }
     .card { background: #1a1a1a; border: 1px solid #00ffcc; border-radius: 12px; }
-    .country-row { cursor: pointer; transition: background 0.2s; }
+    details summary { cursor: pointer; list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] summary .arrow { transform: rotate(180deg); }
     .country-row:hover { background: #2a2a2a; }
-    .dropdown-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-    .dropdown-content.open { max-height: 500px; }
   </style>
 </head>
 <body class="bg-black text-white overflow-x-hidden">
@@ -61,21 +61,150 @@
 
     <div class="card p-8 mb-12">
       <h2 class="text-2xl font-bold mb-6">Where Your Audience Is Watching From</h2>
+      <p class="text-sm text-gray-400 mb-4 italic">Click a country to see top watched videos in that region (ordered by views).</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h3 class="font-bold text-lg mb-4">Top Countries (All Views)</h3>
-          <ul class="space-y-4">
-            <li class="flex justify-between"><span>🇺🇸 United States</span><span class="font-mono">48,291 views (38.7%)</span></li>
-            <li class="flex justify-between"><span>🇬🇧 United Kingdom</span><span class="font-mono">19,872 views (15.9%)</span></li>
-            <li class="flex justify-between"><span>🇨🇦 Canada</span><span class="font-mono">12,443 views (10.0%)</span></li>
-            <li class="flex justify-between"><span>🇦🇺 Australia</span><span class="font-mono">8,912 views (7.1%)</span></li>
-            <li class="flex justify-between"><span>🇩🇪 Germany</span><span class="font-mono">6,784 views (5.4%)</span></li>
-            <li class="flex justify-between"><span>🇧🇷 Brazil</span><span class="font-mono">4,231 views (3.4%)</span></li>
-            <li class="flex justify-between"><span>🇯🇵 Japan</span><span class="font-mono">3,892 views (3.1%)</span></li>
-            <li class="flex justify-between"><span>🇲🇽 Mexico</span><span class="font-mono">3,214 views (2.6%)</span></li>
-            <li class="flex justify-between"><span>🇫🇷 France</span><span class="font-mono">2,987 views (2.4%)</span></li>
-          </ul>
+          <div class="space-y-2">
+            <details class="group">
+              <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+                <span>🇺🇸 United States</span>
+                <span class="font-mono">48,291 views (38.7%)</span>
+                <span class="arrow transition-transform">▼</span>
+              </summary>
+              <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+                <ul class="space-y-2 text-sm">
+                  <li class="flex justify-between"><span>Live Performance - Neon Lights</span><span>18,421 views</span></li>
+                  <li class="flex justify-between"><span>Acoustic Cover - Yesterday</span><span>12,890 views</span></li>
+                  <li class="flex justify-between"><span>Studio Session - New Single</span><span>9,876 views</span></li>
+                  <li class="flex justify-between"><span>Behind the Scenes - Album Recording</span><span>7,654 views</span></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+                <span>🇬🇧 United Kingdom</span>
+                <span class="font-mono">19,872 views (15.9%)</span>
+                <span class="arrow transition-transform">▼</span>
+              </summary>
+              <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+                <ul class="space-y-2 text-sm">
+                  <li class="flex justify-between"><span>Live Performance - Neon Lights</span><span>8,210 views</span></li>
+                  <li class="flex justify-between"><span>Acoustic Cover - Yesterday</span><span>5,432 views</span></li>
+                  <li class="flex justify-between"><span>Studio Session - New Single</span><span>4,110 views</span></li>
+                  <li class="flex justify-between"><span>Behind the Scenes - Album Recording</span><span>2,120 views</span></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+                <span>🇨🇦 Canada</span>
+                <span class="font-mono">12,443 views (10.0%)</span>
+                <span class="arrow transition-transform">▼</span>
+              </summary>
+              <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+                <ul class="space-y-2 text-sm">
+                  <li class="flex justify-between"><span>Studio Session - New Single</span><span>5,678 views</span></li>
+                  <li class="flex justify-between"><span>Live Performance - Neon Lights</span><span>4,321 views</span></li>
+                  <li class="flex justify-between"><span>Acoustic Cover - Yesterday</span><span>2,444 views</span></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+                <span>🇦🇺 Australia</span>
+                <span class="font-mono">8,912 views (7.1%)</span>
+                <span class="arrow transition-transform">▼</span>
+              </summary>
+              <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+                <ul class="space-y-2 text-sm">
+                  <li class="flex justify-between"><span>Live Performance - Neon Lights</span><span>3,890 views</span></li>
+                  <li class="flex justify-between"><span>Behind the Scenes - Album Recording</span><span>2,567 views</span></li>
+                  <li class="flex justify-between"><span>Acoustic Cover - Yesterday</span><span>2,455 views</span></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+                <span>🇩🇪 Germany</span>
+                <span class="font-mono">6,784 views (5.4%)</span>
+                <span class="arrow transition-transform">▼</span>
+              </summary>
+              <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+                <ul class="space-y-2 text-sm">
+                  <li class="flex justify-between"><span>Studio Session - New Single</span><span>3,210 views</span></li>
+                  <li class="flex justify-between"><span>Live Performance - Neon Lights</span><span>2,890 views</span></li>
+                  <li class="flex justify-between"><span>Acoustic Cover - Yesterday</span><span>684 views</span></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+                <span>🇧🇷 Brazil</span>
+                <span class="font-mono">4,231 views (3.4%)</span>
+                <span class="arrow transition-transform">▼</span>
+              </summary>
+              <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+                <ul class="space-y-2 text-sm">
+                  <li class="flex justify-between"><span>Live Performance - Neon Lights</span><span>2,100 views</span></li>
+                  <li class="flex justify-between"><span>Behind the Scenes - Album Recording</span><span>1,890 views</span></li>
+                  <li class="flex justify-between"><span>Studio Session - New Single</span><span>241 views</span></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+                <span>🇯🇵 Japan</span>
+                <span class="font-mono">3,892 views (3.1%)</span>
+                <span class="arrow transition-transform">▼</span>
+              </summary>
+              <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+                <ul class="space-y-2 text-sm">
+                  <li class="flex justify-between"><span>Acoustic Cover - Yesterday</span><span>1,980 views</span></li>
+                  <li class="flex justify-between"><span>Live Performance - Neon Lights</span><span>1,456 views</span></li>
+                  <li class="flex justify-between"><span>Studio Session - New Single</span><span>456 views</span></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+                <span>🇲🇽 Mexico</span>
+                <span class="font-mono">3,214 views (2.6%)</span>
+                <span class="arrow transition-transform">▼</span>
+              </summary>
+              <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+                <ul class="space-y-2 text-sm">
+                  <li class="flex justify-between"><span>Live Performance - Neon Lights</span><span>1,890 views</span></li>
+                  <li class="flex justify-between"><span>Studio Session - New Single</span><span>890 views</span></li>
+                  <li class="flex justify-between"><span>Behind the Scenes - Album Recording</span><span>434 views</span></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+                <span>🇫🇷 France</span>
+                <span class="font-mono">2,987 views (2.4%)</span>
+                <span class="arrow transition-transform">▼</span>
+              </summary>
+              <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+                <ul class="space-y-2 text-sm">
+                  <li class="flex justify-between"><span>Acoustic Cover - Yesterday</span><span>1,456 views</span></li>
+                  <li class="flex justify-between"><span>Live Performance - Neon Lights</span><span>890 views</span></li>
+                  <li class="flex justify-between"><span>Studio Session - New Single</span><span>641 views</span></li>
+                </ul>
+              </div>
+            </details>
+          </div>
         </div>
+
         <div>
           <h3 class="font-bold text-lg mb-4">Top Cities</h3>
           <ul class="space-y-3 text-sm">
@@ -166,20 +295,20 @@
           <span>421 sold • $12,630</span>
         </div>
         <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
-          <span class="font-medium">Vinyl - Album 1 (Limited)</span>
-          <span>289 sold • $5,780</span>
+          <span class="font-medium">Coffee Mug - Neon Logo</span>
+          <span>312 sold • $4,680</span>
         </div>
         <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
-          <span class="font-medium">Tour Poster (Signed)</span>
-          <span>214 sold • $3,210</span>
-        </div>
-        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
-          <span class="font-medium">White T-Shirt (Classic Logo)</span>
-          <span>198 sold • $2,970</span>
+          <span class="font-medium">White Classic T-Shirt</span>
+          <span>289 sold • $4,335</span>
         </div>
         <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
           <span class="font-medium">Sticker Pack (10 pcs)</span>
-          <span>176 sold • $1,760</span>
+          <span>214 sold • $2,140</span>
+        </div>
+        <div class="flex justify-between items-center bg-zinc-800 p-4 rounded-lg">
+          <span class="font-medium">Phone Case - Album Art</span>
+          <span>198 sold • $3,960</span>
         </div>
       </div>
     </div>
@@ -187,110 +316,132 @@
     <div class="card p-8 mb-12">
       <h3 class="text-2xl font-bold mb-6">Sales by Country</h3>
       <p class="text-sm text-gray-400 mb-4 italic">Click a country to see product sales breakdown in that region.</p>
-      <ul class="space-y-2">
-        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('us-dropdown').classList.toggle('open')">
-          <span>🇺🇸 United States</span>
-          <span class="font-mono">$14,892 (51.5%)</span>
-        </li>
-        <div id="us-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
-          <ul class="space-y-2 text-sm">
-            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>198 sold</span></li>
-            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>142 sold</span></li>
-            <li class="flex justify-between"><span>Tour Poster (Signed)</span><span>89 sold</span></li>
-            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>76 sold</span></li>
-            <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>64 sold</span></li>
-          </ul>
-        </div>
+      <div class="space-y-2">
+        <details class="group">
+          <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+            <span>🇺🇸 United States</span>
+            <span class="font-mono">$14,892 (51.5%)</span>
+            <span class="arrow transition-transform">▼</span>
+          </summary>
+          <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+            <ul class="space-y-2 text-sm">
+              <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>198 sold</span></li>
+              <li class="flex justify-between"><span>Coffee Mug - Neon Logo</span><span>142 sold</span></li>
+              <li class="flex justify-between"><span>White Classic T-Shirt</span><span>89 sold</span></li>
+              <li class="flex justify-between"><span>Phone Case - Album Art</span><span>76 sold</span></li>
+              <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>64 sold</span></li>
+            </ul>
+          </div>
+        </details>
 
-        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('mx-dropdown').classList.toggle('open')">
-          <span>🇲🇽 Mexico</span>
-          <span class="font-mono">$6,210 (21.5%)</span>
-        </li>
-        <div id="mx-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
-          <ul class="space-y-2 text-sm">
-            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>112 sold</span></li>
-            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>78 sold</span></li>
-            <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>55 sold</span></li>
-            <li class="flex justify-between"><span>Tour Poster (Signed)</span><span>41 sold</span></li>
-            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>32 sold</span></li>
-          </ul>
-        </div>
+        <details class="group">
+          <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+            <span>🇲🇽 Mexico</span>
+            <span class="font-mono">$6,210 (21.5%)</span>
+            <span class="arrow transition-transform">▼</span>
+          </summary>
+          <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+            <ul class="space-y-2 text-sm">
+              <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>145 sold</span></li>
+              <li class="flex justify-between"><span>Coffee Mug - Neon Logo</span><span>98 sold</span></li>
+              <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>76 sold</span></li>
+              <li class="flex justify-between"><span>White Classic T-Shirt</span><span>54 sold</span></li>
+            </ul>
+          </div>
+        </details>
 
-        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('gb-dropdown').classList.toggle('open')">
-          <span>🇬🇧 United Kingdom</span>
-          <span class="font-mono">$3,450 (11.9%)</span>
-        </li>
-        <div id="gb-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
-          <ul class="space-y-2 text-sm">
-            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>68 sold</span></li>
-            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>45 sold</span></li>
-            <li class="flex justify-between"><span>Tour Poster (Signed)</span><span>32 sold</span></li>
-            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>28 sold</span></li>
-          </ul>
-        </div>
+        <details class="group">
+          <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+            <span>🇬🇧 United Kingdom</span>
+            <span class="font-mono">$3,450 (11.9%)</span>
+            <span class="arrow transition-transform">▼</span>
+          </summary>
+          <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+            <ul class="space-y-2 text-sm">
+              <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>68 sold</span></li>
+              <li class="flex justify-between"><span>White Classic T-Shirt</span><span>45 sold</span></li>
+              <li class="flex justify-between"><span>Phone Case - Album Art</span><span>32 sold</span></li>
+              <li class="flex justify-between"><span>Coffee Mug - Neon Logo</span><span>28 sold</span></li>
+            </ul>
+          </div>
+        </details>
 
-        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('ca-dropdown').classList.toggle('open')">
-          <span>🇨🇦 Canada</span>
-          <span class="font-mono">$1,980 (6.8%)</span>
-        </li>
-        <div id="ca-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
-          <ul class="space-y-2 text-sm">
-            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>41 sold</span></li>
-            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>29 sold</span></li>
-            <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>22 sold</span></li>
-          </ul>
-        </div>
+        <details class="group">
+          <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+            <span>🇨🇦 Canada</span>
+            <span class="font-mono">$1,980 (6.8%)</span>
+            <span class="arrow transition-transform">▼</span>
+          </summary>
+          <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+            <ul class="space-y-2 text-sm">
+              <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>41 sold</span></li>
+              <li class="flex justify-between"><span>Coffee Mug - Neon Logo</span><span>29 sold</span></li>
+              <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>22 sold</span></li>
+              <li class="flex justify-between"><span>Phone Case - Album Art</span><span>18 sold</span></li>
+            </ul>
+          </div>
+        </details>
 
-        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('au-dropdown').classList.toggle('open')">
-          <span>🇦🇺 Australia</span>
-          <span class="font-mono">$1,210 (4.2%)</span>
-        </li>
-        <div id="au-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
-          <ul class="space-y-2 text-sm">
-            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>29 sold</span></li>
-            <li class="flex justify-between"><span>Tour Poster (Signed)</span><span>18 sold</span></li>
-            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>15 sold</span></li>
-          </ul>
-        </div>
+        <details class="group">
+          <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+            <span>🇦🇺 Australia</span>
+            <span class="font-mono">$1,210 (4.2%)</span>
+            <span class="arrow transition-transform">▼</span>
+          </summary>
+          <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+            <ul class="space-y-2 text-sm">
+              <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>29 sold</span></li>
+              <li class="flex justify-between"><span>White Classic T-Shirt</span><span>18 sold</span></li>
+              <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>15 sold</span></li>
+            </ul>
+          </div>
+        </details>
 
-        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('de-dropdown').classList.toggle('open')">
-          <span>🇩🇪 Germany</span>
-          <span class="font-mono">$890 (3.1%)</span>
-        </li>
-        <div id="de-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
-          <ul class="space-y-2 text-sm">
-            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>19 sold</span></li>
-            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>14 sold</span></li>
-          </ul>
-        </div>
+        <details class="group">
+          <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+            <span>🇩🇪 Germany</span>
+            <span class="font-mono">$890 (3.1%)</span>
+            <span class="arrow transition-transform">▼</span>
+          </summary>
+          <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+            <ul class="space-y-2 text-sm">
+              <li class="flex justify-between"><span>Coffee Mug - Neon Logo</span><span>19 sold</span></li>
+              <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>14 sold</span></li>
+              <li class="flex justify-between"><span>Phone Case - Album Art</span><span>9 sold</span></li>
+            </ul>
+          </div>
+        </details>
 
-        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('br-dropdown').classList.toggle('open')">
-          <span>🇧🇷 Brazil</span>
-          <span class="font-mono">$278 (1.0%)</span>
-        </li>
-        <div id="br-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
-          <ul class="space-y-2 text-sm">
-            <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>12 sold</span></li>
-            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>8 sold</span></li>
-          </ul>
-        </div>
-      </ul>
+        <details class="group">
+          <summary class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg">
+            <span>🇧🇷 Brazil</span>
+            <span class="font-mono">$278 (1.0%)</span>
+            <span class="arrow transition-transform">▼</span>
+          </summary>
+          <div class="bg-zinc-950 p-4 rounded-b-lg mt-1">
+            <ul class="space-y-2 text-sm">
+              <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>12 sold</span></li>
+              <li class="flex justify-between"><span>White Classic T-Shirt</span><span>8 sold</span></li>
+            </ul>
+          </div>
+        </details>
+      </div>
     </div>
 
     <div class="card p-8">
       <h2 class="text-2xl font-bold mb-6 text-purple-400">🎯 AI-Powered Merch Insights & Tips</h2>
       <div class="space-y-6">
         <div class="bg-zinc-800 p-6 rounded-xl">
-          <p class="text-purple-400 font-bold">Black Logo Hoodie is your #1 seller (421 units).</p>
-          <p class="text-gray-400 mt-2">Tip: Restock immediately and consider adding new colors (grey, navy) or limited-edition prints.</p>
+          <p class="text-purple-400 font-bold">Black Logo Hoodie leads sales worldwide.</p>
+          <p class="text-gray-400 mt-2">Tip: Restock fast and launch new colorways or graphic variants.</p>
         </div>
         <div class="bg-zinc-800 p-6 rounded-xl">
-          <p class="text-purple-400 font-bold">Mexico is your #2 market ($6,210) — almost as strong as UK.</p>
-          <p class="text-gray-400 mt-2">Tip: Add Spanish-language tags/descriptions and run a Mexico-exclusive promo or bundle.</p>
+          <p class="text-purple-400 font-bold">Mexico loves stickers and mugs — high volume, low price point.</p>
+          <p class="text-gray-400 mt-2">Tip: Create seasonal or limited-run sticker/mug bundles for this market.</p>
         </div>
         <div class="bg-zinc-800 p-6 rounded-xl">
-          <p class="text-purple-400 font-bold">Average order value is $48.15 — strong for merch.</p>
-          <p class="text-gray-400 mt-2">Tip: Introduce bundles (hoodie + sticker pack + vinyl) to push AOV above $60.</p>
+          <p class="text-purple-400 font-bold">Average order value remains strong at $48.15.</p>
+          <p class="text-gray-400 mt-2">Tip: Push hoodie + mug or t-shirt + sticker bundles to increase AOV further.</p>
         </div>
       </div>
     </div>
