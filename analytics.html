@@ -12,11 +12,14 @@
     .instrument { position: fixed; font-size: 40px; opacity: 0.7; filter: drop-shadow(0 0 10px #00ffcc); animation: float 8s infinite ease-in-out alternate; }
     @keyframes float { from { transform: translateY(0px); } to { transform: translateY(-50px); } }
     .card { background: #1a1a1a; border: 1px solid #00ffcc; border-radius: 12px; }
+    .country-row { cursor: pointer; transition: background 0.2s; }
+    .country-row:hover { background: #2a2a2a; }
+    .dropdown-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+    .dropdown-content.open { max-height: 500px; }
   </style>
 </head>
 <body class="bg-black text-white overflow-x-hidden">
 
-<!-- Header -->
 <header class="bg-black text-white p-4 flex justify-between items-center border-b border-gray-800">
   <div class="flex items-center gap-3">
     <img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full">
@@ -28,7 +31,6 @@
   <a href="profile-admin-pro.html" class="px-5 py-2 rounded-full brand-gradient font-semibold text-black">Back to Dashboard</a>
 </header>
 
-<!-- Main Analytics Content -->
 <section class="max-w-7xl mx-auto py-12 px-6">
   <h1 class="text-4xl font-bold mb-2">Your Analytics Dashboard</h1>
   <p class="text-gray-400 mb-10">Separate insights for your Video/Audio content and Merch Store sales</p>
@@ -38,7 +40,6 @@
     <h2 class="text-3xl font-bold mb-6 text-green-400 border-b border-green-900 pb-4">Video & Audio Analytics</h2>
     <p class="text-gray-400 mb-8">Performance metrics for all uploaded tracks, videos, and live streams</p>
 
-    <!-- Overview Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Total Views (30 days)</p>
@@ -58,7 +59,6 @@
       </div>
     </div>
 
-    <!-- Geographic Breakdown -->
     <div class="card p-8 mb-12">
       <h2 class="text-2xl font-bold mb-6">Where Your Audience Is Watching From</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -92,7 +92,6 @@
       </div>
     </div>
 
-    <!-- Demographics -->
     <div class="card p-8 mb-12">
       <h2 class="text-2xl font-bold mb-6">Audience Demographics (Aggregated & Anonymous)</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -116,7 +115,6 @@
       </div>
     </div>
 
-    <!-- AI Insights for Video/Audio -->
     <div class="card p-8">
       <h2 class="text-2xl font-bold mb-6 text-green-400">🎯 AI-Powered Insights & Tips (Video/Audio)</h2>
       <div class="space-y-6">
@@ -141,7 +139,6 @@
     <h2 class="text-3xl font-bold mb-6 text-purple-400 border-b border-purple-900 pb-4">Merch Store Analytics</h2>
     <p class="text-gray-400 mb-8">Sales performance, top products, and buyer insights for your merch store</p>
 
-    <!-- Merch Overview Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
       <div class="card p-6">
         <p class="text-gray-400 text-sm">Total Items Sold (All Time)</p>
@@ -161,7 +158,6 @@
       </div>
     </div>
 
-    <!-- Top Selling Products -->
     <div class="card p-8 mb-12">
       <h3 class="text-2xl font-bold mb-6">Top Selling Merch</h3>
       <div class="space-y-4">
@@ -188,21 +184,99 @@
       </div>
     </div>
 
-    <!-- Sales by Country -->
     <div class="card p-8 mb-12">
       <h3 class="text-2xl font-bold mb-6">Sales by Country</h3>
-      <ul class="space-y-4">
-        <li class="flex justify-between"><span>🇺🇸 United States</span><span class="font-mono">$14,892 (51.5%)</span></li>
-        <li class="flex justify-between"><span>🇲🇽 Mexico</span><span class="font-mono">$6,210 (21.5%)</span></li>
-        <li class="flex justify-between"><span>🇬🇧 United Kingdom</span><span class="font-mono">$3,450 (11.9%)</span></li>
-        <li class="flex justify-between"><span>🇨🇦 Canada</span><span class="font-mono">$1,980 (6.8%)</span></li>
-        <li class="flex justify-between"><span>🇦🇺 Australia</span><span class="font-mono">$1,210 (4.2%)</span></li>
-        <li class="flex justify-between"><span>🇩🇪 Germany</span><span class="font-mono">$890 (3.1%)</span></li>
-        <li class="flex justify-between"><span>🇧🇷 Brazil</span><span class="font-mono">$278 (1.0%)</span></li>
+      <p class="text-sm text-gray-400 mb-4 italic">Click a country to see product sales breakdown in that region.</p>
+      <ul class="space-y-2">
+        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('us-dropdown').classList.toggle('open')">
+          <span>🇺🇸 United States</span>
+          <span class="font-mono">$14,892 (51.5%)</span>
+        </li>
+        <div id="us-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
+          <ul class="space-y-2 text-sm">
+            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>198 sold</span></li>
+            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>142 sold</span></li>
+            <li class="flex justify-between"><span>Tour Poster (Signed)</span><span>89 sold</span></li>
+            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>76 sold</span></li>
+            <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>64 sold</span></li>
+          </ul>
+        </div>
+
+        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('mx-dropdown').classList.toggle('open')">
+          <span>🇲🇽 Mexico</span>
+          <span class="font-mono">$6,210 (21.5%)</span>
+        </li>
+        <div id="mx-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
+          <ul class="space-y-2 text-sm">
+            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>112 sold</span></li>
+            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>78 sold</span></li>
+            <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>55 sold</span></li>
+            <li class="flex justify-between"><span>Tour Poster (Signed)</span><span>41 sold</span></li>
+            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>32 sold</span></li>
+          </ul>
+        </div>
+
+        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('gb-dropdown').classList.toggle('open')">
+          <span>🇬🇧 United Kingdom</span>
+          <span class="font-mono">$3,450 (11.9%)</span>
+        </li>
+        <div id="gb-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
+          <ul class="space-y-2 text-sm">
+            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>68 sold</span></li>
+            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>45 sold</span></li>
+            <li class="flex justify-between"><span>Tour Poster (Signed)</span><span>32 sold</span></li>
+            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>28 sold</span></li>
+          </ul>
+        </div>
+
+        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('ca-dropdown').classList.toggle('open')">
+          <span>🇨🇦 Canada</span>
+          <span class="font-mono">$1,980 (6.8%)</span>
+        </li>
+        <div id="ca-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
+          <ul class="space-y-2 text-sm">
+            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>41 sold</span></li>
+            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>29 sold</span></li>
+            <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>22 sold</span></li>
+          </ul>
+        </div>
+
+        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('au-dropdown').classList.toggle('open')">
+          <span>🇦🇺 Australia</span>
+          <span class="font-mono">$1,210 (4.2%)</span>
+        </li>
+        <div id="au-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
+          <ul class="space-y-2 text-sm">
+            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>29 sold</span></li>
+            <li class="flex justify-between"><span>Tour Poster (Signed)</span><span>18 sold</span></li>
+            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>15 sold</span></li>
+          </ul>
+        </div>
+
+        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('de-dropdown').classList.toggle('open')">
+          <span>🇩🇪 Germany</span>
+          <span class="font-mono">$890 (3.1%)</span>
+        </li>
+        <div id="de-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
+          <ul class="space-y-2 text-sm">
+            <li class="flex justify-between"><span>Vinyl - Album 1 (Limited)</span><span>19 sold</span></li>
+            <li class="flex justify-between"><span>Black Logo Hoodie (XL)</span><span>14 sold</span></li>
+          </ul>
+        </div>
+
+        <li class="country-row flex justify-between bg-zinc-900 p-4 rounded-lg" onclick="document.getElementById('br-dropdown').classList.toggle('open')">
+          <span>🇧🇷 Brazil</span>
+          <span class="font-mono">$278 (1.0%)</span>
+        </li>
+        <div id="br-dropdown" class="dropdown-content bg-zinc-950 p-4 rounded-b-lg mt-1">
+          <ul class="space-y-2 text-sm">
+            <li class="flex justify-between"><span>Sticker Pack (10 pcs)</span><span>12 sold</span></li>
+            <li class="flex justify-between"><span>White T-Shirt (Classic Logo)</span><span>8 sold</span></li>
+          </ul>
+        </div>
       </ul>
     </div>
 
-    <!-- AI Merch Insights -->
     <div class="card p-8">
       <h2 class="text-2xl font-bold mb-6 text-purple-400">🎯 AI-Powered Merch Insights & Tips</h2>
       <div class="space-y-6">
