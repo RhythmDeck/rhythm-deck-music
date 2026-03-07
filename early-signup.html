@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Early Sign-Up | Rhythm Deck Music</title>
   <base href="/">
+  <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://js.stripe.com/v3/?advancedFraudSignals=false"></script>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
@@ -26,15 +27,39 @@
         <p class="text-xs text-gray-300">Unleash Your Beat</p>
       </div>
     </div>
-    <nav class="space-x-3 text-sm md:text-base">
-      <a href="index.html" class="hover:text-green-400 transition">Home</a>
-      <a href="about.html" class="hover:text-green-400 transition">About</a>
-      <a href="benefits.html" class="hover:text-green-400 transition">Benefits</a>
-      <a href="contact.html" class="hover:text-green-400 transition">Contact</a>
-      <a href="pricing.html" class="hover:text-green-400 transition">Pricing</a>
-      <a href="login.html" class="bg-white text-black px-3 py-1 rounded-full hover:bg-gray-300 transition shadow-md">Login</a>
-      <a href="signup.html" class="bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-400 transition shadow-md">Sign Up</a>
-    </nav>
+    <nav class="flex flex-col items-end gap-4 sm:gap-3">
+  <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
+    <a href="index.html" class="menu-btn home-btn">Home</a>
+    <a href="about.html" class="menu-btn about-btn">About</a>
+    <a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
+    <a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
+    <a href="contact.html" class="menu-btn contact-btn">Contact</a>
+    <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
+    <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
+    <div class="relative ml-2">
+      <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+      <div id="dropdownMenu" class="dropdown-menu">
+        <div class="dropdown-item" onClick="document.getElementById('free-vs-pro-section').scrollIntoView({behavior: 'smooth'});">FREE vs PRO</div>
+        <div class="dropdown-item" onClick="document.getElementById('platinum-pro-section').scrollIntoView({behavior: 'smooth'});">PLATINUM PRO</div>
+        <div class="dropdown-item" onClick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
+        <div class="dropdown-item" onClick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});">CORE FEATURES</div>
+        <div class="dropdown-item" onClick="document.getElementById('rhythm-vision-comparison-section').scrollIntoView({behavior: 'smooth'});">RHYTHM VISION PLANS COMPARISON</div>
+        <div class="dropdown-item" onClick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});">RHYTHM WAV PLAYLIST PLATFORM</div>
+        <div class="dropdown-item" onClick="window.open('/rhythm-deck-studio.html', '_blank');">
+          RHYTHM DECK STUDIO
+        </div>
+        <div class="dropdown-item" onClick="window.open('chord-engine.html', '_blank');">
+          RHYTHM DECK CHORD ENGINE
+        </div>
+        <div class="dropdown-item" onClick="window.open('lyricvid.html', '_blank');">
+          RHYTHM DECK LYRICVID
+        </div>
+        <div class="dropdown-item" onClick="document.getElementById('instruction-manuals-section').scrollIntoView({behavior: 'smooth'});">INSTRUCTION MANUALS</div>
+        <div class="dropdown-item" onClick="document.getElementById('qa-section').scrollIntoView({behavior: 'smooth'});">Q&A</div>
+      </div>
+    </div>
+  </div>
+</nav>
   </header>
   <section class="relative h-[350px] md:h-[450px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
            style="background-image: url('banner-cropped.jpg');">
