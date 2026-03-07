@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Early Sign-Up | Rhythm Deck Music</title>
   <base href="/">
-  <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://js.stripe.com/v3/?advancedFraudSignals=false"></script>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
@@ -18,16 +17,16 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
   <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
-  <!-- Header & Hero -->
-  <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
-    <div class="flex items-center space-x-3">
-      <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
-      <div>
-        <h1 class="text-xl md:text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
-        <p class="text-xs text-gray-300">Unleash Your Beat</p>
-      </div>
+  <!-- HEADER -->
+<header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 shadow-lg">
+  <div class="flex items-center space-x-3">
+    <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+      <p class="text-xs sm:text-sm text-gray-300">Unleash Your Beat</p>
     </div>
-    <nav class="flex flex-col items-end gap-4 sm:gap-3">
+  </div>
+  <nav class="flex flex-col items-end gap-4 sm:gap-3">
   <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
     <a href="index.html" class="menu-btn home-btn">Home</a>
     <a href="about.html" class="menu-btn about-btn">About</a>
@@ -60,7 +59,7 @@
     </div>
   </div>
 </nav>
-  </header>
+</header>
   <section class="relative h-[350px] md:h-[450px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
            style="background-image: url('banner-cropped.jpg');">
     <div class="bg-black bg-opacity-60 p-8 md:p-10 rounded-xl text-center shadow-2xl">
@@ -77,10 +76,10 @@
     <div class="container mx-auto">
       <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
         <div class="w-1/2 hidden md:block">
-          <img src="early-signup.jpg" alt="Creative Music Setup" class="w-full h-full object-cover">
+          <img src="contact.png" alt="Creative Music Setup" class="w-full h-full object-cover">
         </div>
         <div class="w-full md:w-1/2 p-6 md:p-10">
-          <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Pre-Launch Early Sign-Up Form</h2>
+          <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Early Sign-Up Form</h2>
           <div class="space-y-6 mb-8">
             <div class="bg-gray-100 p-6 rounded-xl">
               <h3 class="text-xl font-bold text-green-700 mb-2">1. Help Us Grow Strong from Day One</h3>
@@ -152,8 +151,7 @@
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
-    emailjs.init("your_emailjs_user_id");  // Replace with your actual EmailJS User ID
-
+    emailjs.init("your_emailjs_user_id"); // Replace with your actual EmailJS User ID
     function showMessage(title, message, color = 'bg-green-600') {
       const id = 'toast-' + Date.now();
       document.getElementById('toastContainer').insertAdjacentHTML('beforeend', `
