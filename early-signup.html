@@ -29,8 +29,7 @@
     <a href="benefits.html" class="menu-btn benefits-btn" target="_blank">Benefits</a>
     <a href="pricing.html" class="menu-btn pricing-btn" target="_blank">Pricing</a>
     <a href="contact.html" class="menu-btn contact-btn" target="_blank">Contact</a>
-    <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
-      </div>
+    <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium" target="_blank">Sign Up</a>
     </div>
   </div>
 </nav>
@@ -53,7 +52,7 @@
   <div class="container mx-auto">
     <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
       <div class="w-1/2 hidden md:block">
-        <img src="early-signup.jpg" alt="Creative Music Setup" class="w-full h-full object-cover">
+        <img src="contact.png" alt="Creative Music Setup" class="w-full h-full object-cover">
       </div>
       <div class="w-full md:w-1/2 p-6 md:p-10">
         <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Pre-Launch Early Sign-Up Form</h2>
@@ -180,8 +179,8 @@
         const artistName = document.getElementById('artistName').value.trim();
         const email = document.getElementById('email').value.trim().toLowerCase();
         const rawSubdomain = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-        const bandName = document.getElementById('bandName').value.trim();
-        const referral = new URLSearchParams(window.location.search).get("ref");  // Referral from URL param
+        const bandName = document.getElementById('bandName') ? document.getElementById('bandName').value.trim() : ''; // Make optional
+        const referral = new URLSearchParams(window.location.search).get("ref"); // Referral from URL param
         try {
           if (!artistName || !email || rawSubdomain.length < 3) {
             throw new Error("Please fill all mandatory fields and choose a subdomain (at least 3 characters).");
@@ -189,7 +188,7 @@
           // Check subdomain availability
           const { data: taken } = await supabase.from('profiles').select('id').eq('subdomain', rawSubdomain).maybeSingle();
           if (taken) throw new Error(`Subdomain "${rawSubdomain}" is already taken`);
-          const password = Math.random().toString(36).slice(-10);  // Generate random password
+          const password = Math.random().toString(36).slice(-10); // Generate random password
           // Sign up with Supabase Auth
           const { data: { user }, error: authError } = await supabase.auth.signUp({
             email,
@@ -211,11 +210,11 @@
             email,
             subdomain: rawSubdomain,
             created_at: new Date().toISOString(),
-            plan: 'platinum',  // Set to Platinum Pro
-            paid: true,  // Free for life
+            plan: 'platinum', // Set to Platinum Pro
+            paid: true, // Free for life
             payment_pending: false,
-            referral_code: user.id.slice(0,6),  // Generate referral code
-            referred_by: referral  // From URL param
+            referral_code: user.id.slice(0,6), // Generate referral code
+            referred_by: referral // From URL param
           };
           const { error: upsertError } = await supabase.from('profiles').upsert(updateData);
           if (upsertError) throw new Error(upsertError.message || 'Failed to save profile');
