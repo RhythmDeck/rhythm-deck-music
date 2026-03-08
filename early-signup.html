@@ -4,124 +4,133 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Early Sign-Up | Rhythm Deck Music</title>
-  <base href="/">
   <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://js.stripe.com/v3/?advancedFraudSignals=false"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"></script>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <style>
-    .input-focus:focus { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4); }
-    .platinum-highlight { border-color: #d4af37; background: rgba(212,175,55,0.05); }
     .required::after { content: " *"; color: red; }
-    .progress-bar { background-color: #4caf50; height: 4px; width: 0%; transition: width 0.3s; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
-  <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
-  <!-- Header & Hero -->
-  <header class="bg-black text-white p-4 flex justify-between items-center shadow-lg">
-    <div class="flex items-center space-x-3">
-      <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
-      <div>
-        <h1 class="text-xl md:text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
-        <p class="text-xs text-gray-300">Unleash Your Beat</p>
+
+<header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 shadow-lg">
+  <div class="flex items-center space-x-3">
+    <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+      <p class="text-xs sm:text-sm text-gray-300">Unleash Your Beat</p>
+    </div>
+  </div>
+  <nav class="flex flex-col items-end gap-4 sm:gap-3">
+  <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
+    <a href="index.html" class="menu-btn home-btn">Home</a>
+    <a href="about.html" class="menu-btn about-btn">About</a>
+    <a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
+    <a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
+    <a href="contact.html" class="menu-btn contact-btn">Contact</a>
+    <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
+    <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
+    <div class="relative ml-2">
+      <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+      <div id="dropdownMenu" class="dropdown-menu">
+        <div class="dropdown-item" onClick="document.getElementById('free-vs-pro-section').scrollIntoView({behavior: 'smooth'});">FREE vs PRO</div>
+        <div class="dropdown-item" onClick="document.getElementById('platinum-pro-section').scrollIntoView({behavior: 'smooth'});">PLATINUM PRO</div>
+        <div class="dropdown-item" onClick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
+        <div class="dropdown-item" onClick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});">CORE FEATURES</div>
+        <div class="dropdown-item" onClick="document.getElementById('rhythm-vision-comparison-section').scrollIntoView({behavior: 'smooth'});">RHYTHM VISION PLANS COMPARISON</div>
+        <div class="dropdown-item" onClick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});">RHYTHM WAV PLAYLIST PLATFORM</div>
+        <div class="dropdown-item" onClick="window.open('/rhythm-deck-studio.html', '_blank');">
+          RHYTHM DECK STUDIO
+        </div>
+        <div class="dropdown-item" onClick="window.open('chord-engine.html', '_blank');">
+          RHYTHM DECK CHORD ENGINE
+        </div>
+        <div class="dropdown-item" onClick="window.open('lyricvid.html', '_blank');">
+          RHYTHM DECK LYRICVID
+        </div>
+        <div class="dropdown-item" onClick="document.getElementById('instruction-manuals-section').scrollIntoView({behavior: 'smooth'});">INSTRUCTION MANUALS</div>
+        <div class="dropdown-item" onClick="document.getElementById('qa-section').scrollIntoView({behavior: 'smooth'});">Q&A</div>
       </div>
     </div>
-    <nav class="space-x-3 text-sm md:text-base">
-      <a href="index.html" class="hover:text-green-400 transition">Home</a>
-      <a href="about.html" class="hover:text-green-400 transition">About</a>
-      <a href="benefits.html" class="hover:text-green-400 transition">Benefits</a>
-      <a href="contact.html" class="hover:text-green-400 transition">Contact</a>
-      <a href="pricing.html" class="hover:text-green-400 transition">Pricing</a>
-      <a href="login.html" class="bg-white text-black px-3 py-1 rounded-full hover:bg-gray-300 transition shadow-md">Login</a>
-      <a href="signup.html" class="bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-400 transition shadow-md">Sign Up</a>
-    </nav>
-  </header>
-  <section class="relative h-[350px] md:h-[450px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
-           style="background-image: url('banner-cropped.jpg');">
-    <div class="bg-black bg-opacity-60 p-8 md:p-10 rounded-xl text-center shadow-2xl">
-      <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-3">Pre-Launch Early Sign-Up</h2>
-      <p class="text-white text-md max-w-xl mx-auto mb-4">
-        Join now and get Platinum Pro FREE for life!
-      </p>
-      <a href="#signupForm" class="bg-green-500 text-white font-semibold px-6 py-2 rounded-full hover:bg-green-400 transition transform hover:scale-105 inline-block shadow-lg">
-        Sign Up Now
-      </a>
-    </div>
-  </section>
-  <main class="flex-grow flex items-center justify-center py-12 md:py-16 px-4">
-    <div class="container mx-auto">
-      <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
-        <div class="w-1/2 hidden md:block">
-          <img src="contact.png" alt="Creative Music Setup" class="w-full h-full object-cover">
-        </div>
-        <div class="w-full md:w-1/2 p-6 md:p-10">
-          <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Pre-Launch Early Sign-Up Form</h2>
-          <div class="space-y-6 mb-8">
-            <div class="bg-gray-100 p-6 rounded-xl">
-              <h3 class="text-xl font-bold text-green-700 mb-2">1. Help Us Grow Strong from Day One</h3>
-              <p class="text-gray-700">We're building a powerful base of early adopters to kick off our marketing campaign with momentum. Your sign-up and feedback will help us attract more artists, create buzz, and ensure Rhythm Deck launches as the go-to hub for indie music success. Be part of the movement that's changing the game!</p>
-            </div>
-            <div class="bg-gray-100 p-6 rounded-xl">
-              <h3 class="text-xl font-bold text-green-700 mb-2">2. Get In While We're Building and Testing</h3>
-              <p class="text-gray-700">We're actively developing key features like live streaming with chat, Rhythm Vision (our AI music video generator), collaboration tools for artists/producers/distributors, and our exclusive messaging platform. Early sign-ups give you a front-row seat to test these, provide input, and see your ideas come to life. Don't wait – influence the platform before everyone else!</p>
-            </div>
-            <div class="bg-gray-100 p-6 rounded-xl">
-              <h3 class="text-xl font-bold text-green-700 mb-2">3. Unlock Lifetime Platinum Pro Access for FREE</h3>
-              <p class="text-gray-700">Sign up now and you'll get our premium Platinum Pro tier 100% free for life (normally $200/year). That means unlimited access to the Tip Bucket for fan donations, monetize/sell your videos, run your own Merch Store, and manage your custom admin + public profile pages. Be an early insider and start building your audience and income before the crowds arrive!</p>
-            </div>
-            <div class="bg-gray-100 p-6 rounded-xl">
-              <h3 class="text-xl font-bold text-green-700 mb-2">4. Don't Miss the Early Advantage – Sign Up Today!</h3>
-              <p class="text-gray-700">Pre-launch spots are limited, and once we go full launch, this free lifetime Platinum Pro offer ends. Joining now positions you as a founding member with exclusive perks, priority support, and the chance to grow your career faster than ever. Imagine having all your tools in one place, monetizing from day one, and connecting with the industry – all for free forever. What are you waiting for? Secure your spot and let's make music history together!</p>
-            </div>
+  </div>
+</nav>
+</header>
+
+<section class="relative h-[350px] md:h-[450px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
+         style="background-image: url('banner-cropped.jpg');">
+  <div class="bg-black bg-opacity-60 p-8 md:p-10 rounded-xl text-center shadow-2xl">
+    <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-3">Pre-Launch Early Sign-Up</h2>
+    <p class="text-white text-md max-w-xl mx-auto mb-4">
+      Join now and get Platinum Pro FREE for life!
+    </p>
+    <a href="#signupForm" class="bg-green-500 text-white font-semibold px-6 py-2 rounded-full hover:bg-green-400 transition transform hover:scale-105 inline-block shadow-lg">
+      Sign Up Now
+    </a>
+  </div>
+</section>
+
+<main class="flex-grow flex items-center justify-center py-12 md:py-16 px-4">
+  <div class="container mx-auto">
+    <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
+      <div class="w-1/2 hidden md:block">
+        <img src="early-signup.jpg" alt="Creative Music Setup" class="w-full h-full object-cover">
+      </div>
+      <div class="w-full md:w-1/2 p-6 md:p-10">
+        <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Pre-Launch Early Sign-Up Form</h2>
+        <div class="space-y-6 mb-8">
+          <div class="bg-gray-100 p-6 rounded-xl">
+            <h3 class="text-xl font-bold text-green-700 mb-2">1. Help Us Grow Strong from Day One</h3>
+            <p class="text-gray-700">We're building a powerful base of early adopters to kick off our marketing campaign with momentum. Your sign-up and feedback will help us attract more artists, create buzz, and ensure Rhythm Deck launches as the go-to hub for indie music success. Be part of the movement that's changing the game!</p>
           </div>
-          <form id="signupForm" class="space-y-4">
-            <div><label class="block text-gray-700 font-semibold mb-1 required">Personal Name</label>
-              <input type="text" id="personalName" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
-            </div>
-            <div><label class="block text-gray-700 font-semibold mb-1">Band Name (if you have one)</label>
-              <input type="text" id="bandName" class="w-full border border-gray-300 rounded-lg p-3 input-focus">
-            </div>
-            <div><label class="block text-gray-700 font-semibold mb-1 required">Email Address</label>
-              <input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
-            </div>
-            <div>
-              <label class="block text-gray-700 font-semibold mb-1">Choose Your Subdomain <br><small class="text-gray-500">(Example: no spaces: retro-rock-band)</small></label>
-              <div class="flex">
-                <input type="text" id="subdomain" placeholder="yourname" required minlength="3" class="flex-grow border border-gray-300 rounded-l-lg p-3 input-focus">
-                <span class="bg-gray-200 text-gray-700 px-3 py-3 rounded-r-lg text-sm flex items-center border border-l-0 border-gray-300 select-none">.rhythmdeckmusic.com</span>
-              </div>
-              <div id="subdomainStatus" class="mt-2 text-sm h-5 font-medium"></div>
-            </div>
-            <div><label class="block text-gray-700 font-semibold mb-1 required">Upload Photo</label>
-              <input type="file" id="photo" accept="image/*" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
-            </div>
-            <div><label class="block text-gray-700 font-semibold mb-1 required">Write Your Bio</label>
-              <textarea id="bio" required class="w-full border border-gray-300 rounded-lg p-3 input-focus" rows="5"></textarea>
-            </div>
-            <div><label class="block text-gray-700 font-semibold mb-1">Upload Thumbnail Image (optional, for your videos)</label>
-              <input type="file" id="thumbnail" accept="image/*" class="w-full border border-gray-300 rounded-lg p-3 input-focus">
-            </div>
-            <div><label class="block text-gray-700 font-semibold mb-1 required">Upload Videos (at least 1, up to 5)</label>
-              <input type="file" id="videos" accept="video/*" multiple required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
-              <p class="text-sm text-gray-500 mt-2">Videos must be 100 MB or less. Compress for free at <a href="https://clideo.com/compress-video" target="_blank" class="text-blue-500 underline">clideo.com</a> if needed.</p>
-              <div class="mt-2">
-                <p>Upload Progress:</p>
-                <div id="progressContainer" class="h-4 bg-gray-600 rounded"></div>
-              </div>
-            </div>
-            <div class="flex items-center space-x-2">
-              <input type="checkbox" id="terms" required class="rounded text-green-500 h-4 w-4">
-              <label for="terms" class="text-gray-700 text-sm">I agree to the <a href="terms.html" class="text-green-500 hover:underline">Terms</a> and <a href="privacy.html" class="text-green-500 hover:underline">Privacy Policy</a>.</label>
-            </div>
-            <button type="submit" id="submitButton" class="w-full bg-green-500 text-white font-bold py-4 rounded-lg hover:bg-green-600 transition text-lg">
-              Sign Up Now & Get Platinum Pro FREE for Life!
-            </button>
-          </form>
+          <div class="bg-gray-100 p-6 rounded-xl">
+            <h3 class="text-xl font-bold text-green-700 mb-2">2. Get In While We're Building and Testing</h3>
+            <p class="text-gray-700">We're actively developing key features like live streaming with chat, Rhythm Vision (our AI music video generator), collaboration tools for artists/producers/distributors, and our exclusive messaging platform. Early sign-ups give you a front-row seat to test these, provide input, and see your ideas come to life. Don't wait – influence the platform before everyone else!</p>
+          </div>
+          <div class="bg-gray-100 p-6 rounded-xl">
+            <h3 class="text-xl font-bold text-green-700 mb-2">3. Unlock Lifetime Platinum Pro Access for FREE</h3>
+            <p class="text-gray-700">Sign up now and you'll get our premium Platinum Pro tier 100% free for life (normally $200/year). That means unlimited access to the Tip Bucket for fan donations, monetize/sell your videos, run your own Merch Store, and manage your custom admin + public profile pages. Be an early insider and start building your audience and income before the crowds arrive!</p>
+          </div>
+          <div class="bg-gray-100 p-6 rounded-xl">
+            <h3 class="text-xl font-bold text-green-700 mb-2">4. Don't Miss the Early Advantage – Sign Up Today!</h3>
+            <p class="text-gray-700">Pre-launch spots are limited, and once we go full launch, this free lifetime Platinum Pro offer ends. Joining now positions you as a founding member with exclusive perks, priority support, and the chance to grow your career faster than ever. Imagine having all your tools in one place, monetizing from day one, and connecting with the industry – all for free forever. What are you waiting for? Secure your spot and let's make music history together!</p>
+          </div>
         </div>
+        <div class="text-center mb-6">
+          <p id="artistCount" class="text-xl font-bold text-green-700">Loading artist count...</p>
+        </div>
+        <form id="signupForm" class="space-y-4">
+          <div><label class="block text-gray-700 font-semibold mb-1 required">Artist / Band Name</label>
+            <input type="text" id="artistName" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
+          </div>
+          <div><label class="block text-gray-700 font-semibold mb-1">Band Name (optional)</label>
+            <input type="text" id="bandName" class="w-full border border-gray-300 rounded-lg p-3 input-focus">
+          </div>
+          <div><label class="block text-gray-700 font-semibold mb-1 required">Email Address</label>
+            <input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-1 required">Choose Your Subdomain <br><small class="text-gray-500">(Example: no spaces: retro-rock-band)</small></label>
+            <div class="flex">
+              <input type="text" id="subdomain" placeholder="yourname" required minlength="3" class="flex-grow border border-gray-300 rounded-l-lg p-3 input-focus">
+              <span class="bg-gray-200 text-gray-700 px-3 py-3 rounded-r-lg text-sm flex items-center border border-l-0 border-gray-300 select-none">.rhythmdeckmusic.com</span>
+            </div>
+            <div id="subdomainStatus" class="mt-2 text-sm h-5 font-medium"></div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <input type="checkbox" id="terms" required class="rounded text-green-500 h-4 w-4">
+            <label for="terms" class="text-gray-700 text-sm">I agree to the <a href="terms.html" class="text-green-500 hover:underline">Terms</a> and <a href="privacy.html" class="text-green-500 hover:underline">Privacy Policy</a>.</label>
+          </div>
+          <p class="text-gray-700 text-sm">After signing up, you'll receive a confirmation email for your Platinum Pro account.</p>
+          <p class="text-gray-700 text-sm">You'll also receive a second email with instructions on how to use your Platinum Pro admin page.</p>
+          <button type="submit" id="submitButton" class="w-full bg-green-500 text-white font-bold py-4 rounded-lg hover:bg-green-600 transition text-lg">
+            Sign Up Now & Get Platinum Pro FREE for Life!
+          </button>
+        </form>
       </div>
     </div>
-  </main>
+  </div>
+</main>
   <footer class="bg-black text-white mt-10 p-5 text-center text-sm">
     <nav class="mb-2 space-x-4">
       <a href="contact.html" class="hover:text-green-400">Contact Us</a>
@@ -151,7 +160,6 @@
     }
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('signupForm');
-      const progressContainer = document.getElementById('progressContainer');
       const submitButton = document.getElementById('submitButton');
       const subdomainInput = document.getElementById('subdomain');
       const subdomainStatus = document.getElementById('subdomainStatus');
@@ -181,25 +189,17 @@
         e.preventDefault();
         submitButton.disabled = true;
         submitButton.innerHTML = 'Submitting...';
-        const personalName = document.getElementById('personalName').value.trim();
-        const bandName = document.getElementById('bandName').value.trim();
+        const artistName = document.getElementById('artistName').value.trim();
         const email = document.getElementById('email').value.trim().toLowerCase();
         const rawSubdomain = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-        const bio = document.getElementById('bio').value.trim();
-        const photo = document.getElementById('photo').files[0];
-        const thumbnail = document.getElementById('thumbnail').files[0];
-        const videos = document.getElementById('videos').files;
+        const bandName = document.getElementById('bandName').value.trim();
         try {
-          if (!personalName || !email || !bio || !photo || videos.length < 1 || videos.length > 5 || rawSubdomain.length < 3) {
-            throw new Error("Please fill all mandatory fields, choose a subdomain (at least 3 characters), and upload 1-5 videos.");
+          if (!artistName || !email || rawSubdomain.length < 3) {
+            throw new Error("Please fill all mandatory fields and choose a subdomain (at least 3 characters).");
           }
           // Check subdomain availability
           const { data: taken } = await supabase.from('profiles').select('id').eq('subdomain', rawSubdomain).maybeSingle();
           if (taken) throw new Error(`Subdomain "${rawSubdomain}" is already taken`);
-          for (let video of videos) {
-            if (video.size > 100 * 1024 * 1024) throw new Error("Each video must be 100 MB or less.");
-          }
-          progressContainer.innerHTML = '<div class="progress-bar" style="width: 0%;"></div>';
           const password = Math.random().toString(36).slice(-10);  // Generate random password
           // Sign up with Supabase Auth
           const { data: { user }, error: authError } = await supabase.auth.signUp({
@@ -207,43 +207,20 @@
             password,
             options: {
               data: {
-                full_name: personalName,
+                full_name: artistName,
                 band_name: bandName,
                 subdomain: rawSubdomain
               }
             }
           });
           if (authError) throw new Error(authError.message || 'Signup failed');
-          // Upload photo
-          const { data: photoData } = await supabase.storage.from('photos').upload(`${email}/photo`, photo);
-          // Upload thumbnail if provided
-          let thumbnailUrl = '';
-          if (thumbnail) {
-            const { data: thumbData } = await supabase.storage.from('thumbnails').upload(`${email}/thumbnail`, thumbnail);
-            thumbnailUrl = thumbData.path;
-          }
-          // Upload videos with progress
-          const videoUrls = [];
-          const totalVideos = videos.length;
-          let uploaded = 0;
-          for (let video of videos) {
-            const { data: videoData } = await supabase.storage.from('videos').upload(`${email}/${video.name}`, video);
-            videoUrls.push(videoData.path);
-            uploaded++;
-            const progress = (uploaded / totalVideos) * 100;
-            progressContainer.firstChild.style.width = `${progress}%`;
-          }
-          // Create/update profile with Platinum Pro for life
+          // Create/update profile with Platinum Pro
           const updateData = {
             id: user.id,
-            name: personalName,
+            name: artistName,
             band_name: bandName,
             email,
             subdomain: rawSubdomain,
-            bio,
-            photo_url: photoData.path,
-            thumbnail_url,
-            video_urls: videoUrls,
             created_at: new Date().toISOString(),
             plan: 'platinum',  // Set to Platinum Pro
             paid: true,  // Free for life
@@ -251,23 +228,29 @@
           };
           const { error: upsertError } = await supabase.from('profiles').upsert(updateData);
           if (upsertError) throw new Error(upsertError.message || 'Failed to save profile');
-          // Send email via EmailJS
-          await emailjs.send("your_service_id", "your_template_id", {
-            personal_name: personalName,
-            band_name: bandName,
+          // Send confirmation email to user
+          await emailjs.send("your_service_id", "confirmation_template_id", {
+            to_email: email,
+            artist_name: artistName,
+            password: password
+          });
+          // Send instructions email to user
+          await emailjs.send("your_service_id", "instructions_template_id", {
+            to_email: email,
+            artist_name: artistName
+          });
+          // Send signup info to admin
+          await emailjs.send("your_service_id", "admin_template_id", {
+            artist_name: artistName,
             email: email,
-            bio: bio,
-            photo_url: photoData.path,
-            thumbnail_url: thumbnailUrl,
-            video_urls: videoUrls.join(', '),
+            band_name: bandName,
             subdomain: rawSubdomain,
-            password: password,  // Send the generated password in email
             to_email: "rhythmdeckmusic@gmail.com"
           });
           showMessage('Success', 'Thank you for signing up! Redirecting to your Platinum Pro admin page...');
           setTimeout(() => location.href = 'profile-admin-pro.html', 1500);
         } catch (err) {
-          showMessage('Error', err.message || 'Submission failed. Please try again.', 'bg-red-600');
+          showMessage('Error', err.message || 'Signup failed. Please try again.', 'bg-red-600');
           console.error(err);
         } finally {
           submitButton.disabled = false;
