@@ -13,7 +13,7 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
-
+  <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 shadow-lg">
   <div class="flex items-center space-x-3">
     <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
@@ -29,7 +29,29 @@
     <a href="benefits.html" class="menu-btn benefits-btn" target="_blank">Benefits</a>
     <a href="pricing.html" class="menu-btn pricing-btn" target="_blank">Pricing</a>
     <a href="contact.html" class="menu-btn contact-btn" target="_blank">Contact</a>
+    <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium" target="_blank">Login</a>
     <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium" target="_blank">Sign Up</a>
+    <div class="relative ml-2">
+      <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+      <div id="dropdownMenu" class="dropdown-menu">
+        <div class="dropdown-item" onClick="window.open('index.html#free-vs-pro-section', '_blank');">FREE vs PRO</div>
+        <div class="dropdown-item" onClick="window.open('index.html#platinum-pro-section', '_blank');">PLATINUM PRO</div>
+        <div class="dropdown-item" onClick="window.open('index.html#producers-distributors-section', '_blank');">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
+        <div class="dropdown-item" onClick="window.open('index.html#core-features-section', '_blank');">CORE FEATURES</div>
+        <div class="dropdown-item" onClick="window.open('index.html#rhythm-vision-comparison-section', '_blank');">RHYTHM VISION PLANS COMPARISON</div>
+        <div class="dropdown-item" onClick="window.open('index.html#rhythm-wav-section', '_blank');">RHYTHM WAV PLAYLIST PLATFORM</div>
+        <div class="dropdown-item" onClick="window.open('/rhythm-deck-studio.html', '_blank');">
+          RHYTHM DECK STUDIO
+        </div>
+        <div class="dropdown-item" onClick="window.open('chord-engine.html', '_blank');">
+          RHYTHM DECK CHORD ENGINE
+        </div>
+        <div class="dropdown-item" onClick="window.open('lyricvid.html', '_blank');">
+          RHYTHM DECK LYRICVID
+        </div>
+        <div class="dropdown-item" onClick="window.open('index.html#instruction-manuals-section', '_blank');">INSTRUCTION MANUALS</div>
+        <div class="dropdown-item" onClick="window.open('index.html#qa-section', '_blank');">Q&A</div>
+      </div>
     </div>
   </div>
 </nav>
@@ -78,7 +100,7 @@
           <p id="artistCount" class="text-xl font-bold text-green-700">Loading artist count...</p>
         </div>
         <form id="signupForm" class="space-y-4">
-          <div><label class="block text-gray-700 font-semibold mb-1 required">Artist / Band Name</label>
+          <div><label class="block text-gray-700 font-semibold mb-1 required">Name / Band Name</label>
             <input type="text" id="artistName" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
           </div>
           <div><label class="block text-gray-700 font-semibold mb-1 required">Email Address</label>
@@ -179,7 +201,6 @@
         const artistName = document.getElementById('artistName').value.trim();
         const email = document.getElementById('email').value.trim().toLowerCase();
         const rawSubdomain = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-        const bandName = document.getElementById('bandName') ? document.getElementById('bandName').value.trim() : ''; // Make optional
         const referral = new URLSearchParams(window.location.search).get("ref"); // Referral from URL param
         try {
           if (!artistName || !email || rawSubdomain.length < 3) {
@@ -196,7 +217,6 @@
             options: {
               data: {
                 full_name: artistName,
-                band_name: bandName,
                 subdomain: rawSubdomain
               }
             }
@@ -206,7 +226,6 @@
           const updateData = {
             id: user.id,
             name: artistName,
-            band_name: bandName,
             email,
             subdomain: rawSubdomain,
             created_at: new Date().toISOString(),
@@ -233,7 +252,6 @@
           await emailjs.send("your_service_id", "admin_template_id", {
             artist_name: artistName,
             email: email,
-            band_name: bandName,
             subdomain: rawSubdomain,
             referral: referral || 'none',
             to_email: "rhythmdeckmusic@gmail.com"
