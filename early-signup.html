@@ -74,7 +74,7 @@
   <div class="container mx-auto">
     <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
       <div class="w-1/2 hidden md:block">
-        <img src="early-signup.jpg" alt="Creative Music Setup" class="w-full h-full object-cover">
+        <img src="contact.png" alt="Creative Music Setup" class="w-full h-full object-cover">
       </div>
       <div class="w-full md:w-1/2 p-6 md:p-10">
         <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Pre-Launch Early Sign-Up Form</h2>
@@ -102,9 +102,6 @@
         <form id="signupForm" class="space-y-4">
           <div><label class="block text-gray-700 font-semibold mb-1 required">Artist / Band Name</label>
             <input type="text" id="artistName" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
-          </div>
-          <div><label class="block text-gray-700 font-semibold mb-1">Band Name (optional)</label>
-            <input type="text" id="bandName" class="w-full border border-gray-300 rounded-lg p-3 input-focus">
           </div>
           <div><label class="block text-gray-700 font-semibold mb-1 required">Email Address</label>
             <input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3 input-focus">
@@ -158,6 +155,18 @@
       setTimeout(() => document.getElementById(id)?.classList.add('opacity-100', 'scale-100'), 50);
       setTimeout(() => document.getElementById(id)?.remove(), 10000);
     }
+    async function loadArtistCount() {
+      try {
+        const { count } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true });
+        const total = count || 0;
+        document.getElementById("artistCount").innerText = "🎧 " + total.toLocaleString() + " artists already joined Rhythm Deck";
+      } catch (err) {
+        document.getElementById("artistCount").innerText = "Artist count unavailable";
+      }
+    }
+    loadArtistCount();
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('signupForm');
       const submitButton = document.getElementById('submitButton');
@@ -193,6 +202,7 @@
         const email = document.getElementById('email').value.trim().toLowerCase();
         const rawSubdomain = subdomainInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
         const bandName = document.getElementById('bandName').value.trim();
+        const referral = new URLSearchParams(window.location.search).get("ref");  // Referral from URL param
         try {
           if (!artistName || !email || rawSubdomain.length < 3) {
             throw new Error("Please fill all mandatory fields and choose a subdomain (at least 3 characters).");
@@ -224,7 +234,9 @@
             created_at: new Date().toISOString(),
             plan: 'platinum',  // Set to Platinum Pro
             paid: true,  // Free for life
-            payment_pending: false
+            payment_pending: false,
+            referral_code: user.id.slice(0,6),  // Generate referral code
+            referred_by: referral  // From URL param
           };
           const { error: upsertError } = await supabase.from('profiles').upsert(updateData);
           if (upsertError) throw new Error(upsertError.message || 'Failed to save profile');
@@ -245,6 +257,7 @@
             email: email,
             band_name: bandName,
             subdomain: rawSubdomain,
+            referral: referral || 'none',
             to_email: "rhythmdeckmusic@gmail.com"
           });
           showMessage('Success', 'Thank you for signing up! Redirecting to your Platinum Pro admin page...');
