@@ -7,13 +7,188 @@
   <link rel="icon" href="logo-favicon.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"></script>
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <style>
+    a:hover { color: #0000FF; }
+    #videoModal { display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; }
+    #videoModal.active { display: flex; }
+    .cursor-pointer { cursor: pointer; }
+    .style1 { color: #FFFFFF }
+    @keyframes logoIntro {
+      0% { transform: translate(140px, 60px) scale(4) rotate(0deg); opacity: 0; box-shadow: 0 0 0 rgba(0,255,120,0); }
+      15% { opacity: 1; }
+      60% { transform: translate(40px, 20px) scale(1.8) rotate(720deg); box-shadow: 0 0 30px rgba(0,255,120,0.35); }
+      100% { transform: translate(0, 0) scale(1) rotate(1080deg); box-shadow: none; }
+    }
+    .logo-intro { animation: logoIntro 5.5s ease-out forwards; transform-origin: center; will-change: transform; }
+    .video-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 5;
+    }
+    .video-container:hover .video-controls, .video-controls:focus-within {
+      opacity: 1;
+    }
+    .progress-bar {
+      flex-grow: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #10b981;
+      transition: width 0.1s linear;
+    }
+    .time-text {
+      color: white;
+      font-size: 0.9rem;
+      min-width: 90px;
+      text-align: center;
+    }
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .volume-slider {
+      width: 80px;
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .play-pause-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.25s;
+      z-index: 10;
+      cursor: pointer;
+    }
+    .play-pause-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .play-pause-btn {
+      background: rgba(0,0,0,0.65);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+    }
+    .play-pause-btn:hover {
+      transform: scale(1.08);
+      background: rgba(0,0,0,0.85);
+    }
+    .hidden { display: none !important; }
+    @media (max-width: 640px) { .hero-height { height: 60vh; min-height: 400px; } }
+    .plan-card {
+      background: rgba(30, 27, 71, 0.6);
+      border: 2px solid #6b7280;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .plan-card.pro { border-color: #10b981; }
+    .plan-card.platinum { border-color: #d4af37; background: rgba(59, 37, 89, 0.7); }
+    .plan-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .plan-badge { background: #d4af37; color: #1a0f2e; font-weight: bold; padding: 0.5rem 1rem; border-radius: 999px; }
+    .menu-btn {
+      padding: 0.6rem 1.25rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      font-size: 1rem;
+    }
+    .menu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+    .home-btn { background: linear-gradient(to right, #22c55e, #16a34a); color: white; }
+    .about-btn { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; }
+    .benefits-btn { background: linear-gradient(to right, #f59e0b, #d97706); color: white; }
+    .pricing-btn { background: linear-gradient(to right, #ec4899, #db2777); color: white; }
+    .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
+    .features-badge {
+      background: linear-gradient(135deg, #a855f7, #d946ef);
+      color: white;
+      font-weight: bold;
+      padding: 0.5rem 1.1rem;
+      border-radius: 9999px;
+      box-shadow: 0 4px 12px rgba(168,85,247,0.5);
+      transition: all 0.3s;
+      cursor: pointer;
+      user-select: none;
+    }
+    .features-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(168,85,247,0.7);
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 0.5rem;
+      width: 280px;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      z-index: 50;
+      display: none;
+    }
+    .dropdown-item {
+      padding: 0.85rem 1.5rem;
+      color: #1f2937;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .dropdown-item:hover {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+  .style2 {color: #FF0000}
     .required::after { content: " *"; color: red; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
   <div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
+<!-- HEADER -->
 <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 shadow-lg">
   <div class="flex items-center space-x-3">
     <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
@@ -74,7 +249,7 @@
   <div class="container mx-auto">
     <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
       <div class="w-1/2 hidden md:block">
-        <img src="contact.png" alt="Creative Music Setup" class="w-full h-full object-cover">
+        <img src="early-signup.jpg" alt="Creative Music Setup" class="w-full h-full object-cover">
       </div>
       <div class="w-full md:w-1/2 p-6 md:p-10">
         <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Pre-Launch Early Sign-Up Form</h2>
@@ -142,7 +317,6 @@
       "https://bxoqhmfnseskwqkywppg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
     );
-    emailjs.init("your_emailjs_user_id"); // Replace with your actual EmailJS User ID
     function showMessage(title, message, color = 'bg-green-600') {
       const id = 'toast-' + Date.now();
       document.getElementById('toastContainer').insertAdjacentHTML('beforeend', `
@@ -237,24 +411,19 @@
           };
           const { error: upsertError } = await supabase.from('profiles').upsert(updateData);
           if (upsertError) throw new Error(upsertError.message || 'Failed to save profile');
-          // Send confirmation email to user
-          await emailjs.send("your_service_id", "confirmation_template_id", {
-            to_email: email,
-            artist_name: artistName,
-            password: password
-          });
-          // Send instructions email to user
-          await emailjs.send("your_service_id", "instructions_template_id", {
-            to_email: email,
-            artist_name: artistName
-          });
-          // Send signup info to admin
-          await emailjs.send("your_service_id", "admin_template_id", {
-            artist_name: artistName,
-            email: email,
-            subdomain: rawSubdomain,
-            referral: referral || 'none',
-            to_email: "rhythmdeckmusic@gmail.com"
+          // Send signup info to admin using formsubmit.co
+          await fetch("https://formsubmit.co/ajax/rhythmdeckmusic@gmail.com", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              subject: "New Rhythm Deck Artist Signup",
+              name: artistName,
+              email: email,
+              subdomain: rawSubdomain,
+              referral: referral || 'none'
+            })
           });
           showMessage('Success', 'Thank you for signing up! Redirecting to your Platinum Pro admin page...');
           setTimeout(() => location.href = 'profile-admin-pro.html', 1500);
