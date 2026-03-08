@@ -1,227 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>Rhythm Deck Founding Artists</title><br>
-<link rel="icon" href="logo-favicon.png" type="image/png">
-<meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
-  <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
-  <meta name="robots" content="index, follow">
-  <meta name="author" content="Rhythm Deck Team">
+<title>Rhythm Deck – Artist Signup</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{background:#0f172a;color:white;font-family:sans-serif}
-.counter{font-size:40px;font-weight:800;color:#22c55e}
+
+body{
+margin:0;
+font-family:Inter;
+background:#0a0a0f;
+color:white;
+}
+
+header{
+display:flex;
+align-items:center;
+padding:20px 40px;
+background:#0e0e14;
+border-bottom:3px solid #00a86b;
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.logo img{
+width:40px;
+height:40px;
+}
+
+.brand{
+font-size:22px;
+font-weight:800;
+}
+
+.tagline{
+font-size:13px;
+opacity:.7;
+}
+
+.hero{
+text-align:center;
+padding:70px 20px;
+}
+
+.hero h1{
+font-size:46px;
+margin-bottom:10px;
+}
+
+.hero p{
+opacity:.8;
+}
+
+.counter{
+margin-top:20px;
+font-size:20px;
+}
+
+.founding{
+margin-top:10px;
+color:#ffd166;
+}
+
+.section{
+max-width:460px;
+margin:auto;
+background:#14141c;
+padding:35px;
+border-radius:12px;
+border:3px solid #00a86b;
+margin-top:40px;
+}
+
+input{
+width:100%;
+padding:14px;
+border:none;
+border-radius:8px;
+margin-bottom:15px;
+font-size:15px;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:8px;
+background:linear-gradient(90deg,#00a86b,#00e0a0);
+color:white;
+font-weight:700;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+opacity:.9;
+}
+
+.note{
+font-size:13px;
+opacity:.7;
+margin-top:15px;
+}
+
+.error{
+color:#ff6b6b;
+margin-top:10px;
+}
+
+.ticker{
+margin-top:70px;
+text-align:center;
+opacity:.7;
+}
+
+footer{
+margin-top:120px;
+padding:30px;
+text-align:center;
+background:#0e0e14;
+border-top:3px solid #00a86b;
+font-size:13px;
+opacity:.6;
+}
+
 </style>
+
 </head>
 
-<body class="min-h-screen flex flex-col">
+<body>
 
-<header class="bg-black p-5 flex justify-between items-center">
-<div class="flex items-center gap-3">
-<img src="logo-1-sm.jpg" class="w-10 h-10 rounded-full">
+<header>
+
+<div class="logo">
+
+<img src="logo.png">
+
 <div>
-<div class="font-bold text-lg">RHYTHM DECK</div>
-<div class="text-xs text-gray-400">Unleash Your Beat</div>
+
+<div class="brand">Rhythm Deck</div>
+
+<div class="tagline">Unleash Your Beat</div>
+
 </div>
+
 </div>
+
 </header>
 
-<section class="text-center py-16 px-6 bg-gradient-to-b from-black to-gray-900">
 
-<h1 class="text-4xl md:text-5xl font-extrabold mb-6">
-Founding Artist Program
-</h1>
+<section class="hero">
 
-<p class="text-lg text-gray-300 max-w-2xl mx-auto mb-10">
-Join the first artists shaping Rhythm Deck.
-Early creators receive lifetime perks and priority exposure.
-</p>
+<h1>Claim Your Artist Profile</h1>
 
-<div class="bg-gray-800 p-6 rounded-xl max-w-3xl mx-auto mb-10">
+<p>Join the next generation music platform for independent artists.</p>
 
-<div class="counter" id="artistCount">0</div>
-<div class="text-gray-300 mb-2">Artists Already Joined</div>
+<div class="counter" id="artistCount">Loading artist count...</div>
 
-<div class="text-yellow-400 font-semibold">
-Only <span id="spotsRemaining">10000</span> Founding Artist Spots Remaining
-</div>
-
-</div>
+<div class="founding" id="foundingCount"></div>
 
 </section>
 
-<section class="flex justify-center px-4 pb-16">
 
-<div class="bg-gray-900 p-10 rounded-xl shadow-xl w-full max-w-xl">
+<div class="section">
 
-<h2 class="text-2xl font-bold text-center mb-6">
-Create Your Artist Account
-</h2>
+<input id="artistName" placeholder="Artist or Band Name">
 
-<form id="signupForm" class="space-y-5">
+<input id="email" placeholder="Email Address">
 
-<div>
-<label class="block text-sm mb-1">Artist / Band Name</label>
-<input id="name" required class="w-full p-3 rounded bg-gray-800 border border-gray-700">
-</div>
+<button onclick="signup()">Join Rhythm Deck</button>
 
-<div>
-<label class="block text-sm mb-1">Email</label>
-<input id="email" type="email" required class="w-full p-3 rounded bg-gray-800 border border-gray-700">
-</div>
+<div class="error" id="error"></div>
 
-<button id="submitBtn"
-class="w-full bg-green-500 hover:bg-green-600 p-4 rounded text-lg font-bold">
-Join Rhythm Deck
-</button>
-
-</form>
-
-<div class="text-sm text-gray-400 text-center mt-6">
-After signing up you will receive:
-<br><br>
-• An email confirming your Rhythm Deck Platinum Pro account
-<br>
-• A second email with instructions on how to use your Platinum Pro Profile admin page
+<div class="note">
+After signup you will receive:<br><br>
+• A confirmation email<br>
+• Instructions for your Platinum Pro Profile admin page
 </div>
 
 </div>
 
-</section>
 
-<section class="bg-black py-16 px-6">
+<div class="ticker" id="ticker"></div>
 
-<h2 class="text-center text-2xl font-bold mb-10">
-Top Founding Artists
-</h2>
 
-<div id="leaderboard"
-class="max-w-xl mx-auto space-y-3 text-center text-gray-300">
-Loading leaderboard...
-</div>
+<footer>
 
-</section>
+Rhythm Deck © 2026
 
-<footer class="bg-black text-center text-gray-400 py-6 text-sm">
-© 2026 Rhythm Deck
 </footer>
 
-<script type="module">
 
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+<script>
 
-const supabase = createClient(
-"https://bxoqhmfnseskwqkywppg.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
-)
+const SUPABASE_URL="https://bxoqhmfnseskwqkywppg.supabase.co"
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 
-const urlParams = new URLSearchParams(window.location.search)
-const referral = urlParams.get("ref")
+const supabase=supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
 
-async function loadArtistCount(){
 
-const { count } = await supabase
+async function loadCounts(){
+
+const {count}=await supabase
 .from("profiles")
 .select("*",{count:"exact",head:true})
 
-document.getElementById("artistCount").innerText = count
+const total=count||0
 
-const remaining = 10000 - count
-document.getElementById("spotsRemaining").innerText = remaining
+document.getElementById("artistCount").innerText=
+"🎧 "+total.toLocaleString()+" artists already joined Rhythm Deck"
 
-}
+const remaining=10000-total
 
-async function loadLeaderboard(){
-
-const { data } = await supabase
-.from("profiles")
-.select("name,referral_count")
-.order("referral_count",{ascending:false})
-.limit(10)
-
-let html=""
-
-data.forEach((a,i)=>{
-html+=`
-<div class="bg-gray-900 p-4 rounded flex justify-between">
-<span>${i+1}. ${a.name}</span>
-<span class="text-green-400">${a.referral_count || 0} invites</span>
-</div>
-`
-})
-
-document.getElementById("leaderboard").innerHTML=html
+document.getElementById("foundingCount").innerText=
+remaining.toLocaleString()+" founding artist spots remaining"
 
 }
 
-function generateReferralCode(name){
-return name.toLowerCase().replace(/[^a-z0-9]/g,"")
-}
+loadCounts()
 
-document.getElementById("signupForm")
-.addEventListener("submit",async(e)=>{
 
-e.preventDefault()
+async function signup(){
 
-const btn=document.getElementById("submitBtn")
-btn.innerText="Creating account..."
+document.getElementById("error").innerText=""
 
-const name=document.getElementById("name").value.trim()
-const email=document.getElementById("email").value.trim().toLowerCase()
+const artist=document.getElementById("artistName").value.trim()
+const email=document.getElementById("email").value.trim()
 
-const referralCode=generateReferralCode(name)
+if(!artist||!email){
 
-const { data:userData,error:authError } =
-await supabase.auth.signInWithOtp({
-email:email,
-options:{emailRedirectTo:window.location.origin+"/platinum-pro-admin.html"}
-})
-
-if(authError){
-alert(authError.message)
-btn.innerText="Join Rhythm Deck"
+document.getElementById("error").innerText="Please fill both fields"
 return
 }
 
-const { data:user }=await supabase.auth.getUser()
+const referral=new URLSearchParams(window.location.search).get("ref")
 
-if(user?.user?.id){
-
-await supabase.from("profiles").upsert({
-
-id:user.user.id,
-name:name,
+const {data,error}=await supabase.auth.signUp({
 email:email,
-referral_code:referralCode,
-referred_by:referral || null,
-referral_count:0,
-plan:"platinum",
-paid:true,
-created_at:new Date()
+password:Math.random().toString(36).slice(-10)
+})
+
+if(error){
+
+if(error.message.includes("rate limit")){
+
+document.getElementById("error").innerText=
+"Signup limit reached. Please wait 30 seconds and try again."
+
+}else{
+
+document.getElementById("error").innerText=error.message
+}
+
+return
+}
+
+const user=data.user
+
+await supabase.from("profiles").insert({
+
+id:user.id,
+name:artist,
+email:email,
+plan:"free",
+paid:false,
+referral_code:user.id.slice(0,6),
+referred_by:referral
 
 })
 
-if(referral){
+await fetch("https://formsubmit.co/ajax/rhythmdeckmusic@gmail.com",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
 
-await supabase.rpc("increment_referral_count",{code:referral})
+subject:"New Artist Signup",
 
-}
-
-}
-
-alert("Success! Check your email to access your Platinum Pro dashboard.")
-
-btn.innerText="Check Email"
+artist:artist,
+email:email
 
 })
+})
 
-loadArtistCount()
-loadLeaderboard()
+setTimeout(()=>{
+
+window.location.href="/platinum-pro-admin.html"
+
+},1500)
+
+}
+
+
+async function ticker(){
+
+const {data}=await supabase
+.from("profiles")
+.select("name")
+.order("created_at",{ascending:false})
+.limit(5)
+
+if(!data)return
+
+let text=data.map(a=>"🎤 "+a.name+" just joined").join(" • ")
+
+document.getElementById("ticker").innerText=text
+
+}
+
+setInterval(ticker,8000)
+
+ticker()
 
 </script>
 
