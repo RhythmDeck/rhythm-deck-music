@@ -342,6 +342,19 @@
     }
     loadArtistCount();
     document.addEventListener('DOMContentLoaded', () => {
+      const badge = document.getElementById('featuresBadge');
+      const menu = document.getElementById('dropdownMenu');
+      if (badge && menu) {
+        badge.addEventListener('click', e => {
+          e.stopPropagation();
+          menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', e => {
+          if (!badge.contains(e.target) && !menu.contains(e.target)) {
+            menu.style.display = 'none';
+          }
+        });
+      }
       const form = document.getElementById('signupForm');
       const submitButton = document.getElementById('submitButton');
       const subdomainInput = document.getElementById('subdomain');
