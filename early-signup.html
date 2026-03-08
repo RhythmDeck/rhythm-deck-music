@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Rhythm Deck – Artist Signup</title>
+<title>Rhythm Deck | Early Artist Signup</title>
+
+<link rel="icon" href="logo-favicon.png" type="image/png">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
@@ -16,7 +19,7 @@
 body{
 margin:0;
 font-family:Inter;
-background:#0a0a0f;
+background:#0b0b11;
 color:white;
 }
 
@@ -35,13 +38,13 @@ gap:12px;
 }
 
 .logo img{
-width:40px;
-height:40px;
+width:42px;
+height:42px;
 }
 
 .brand{
-font-size:22px;
 font-weight:800;
+font-size:22px;
 }
 
 .tagline{
@@ -55,7 +58,7 @@ padding:70px 20px;
 }
 
 .hero h1{
-font-size:46px;
+font-size:44px;
 margin-bottom:10px;
 }
 
@@ -108,15 +111,15 @@ button:hover{
 opacity:.9;
 }
 
+.error{
+color:#ff6b6b;
+margin-top:10px;
+}
+
 .note{
 font-size:13px;
 opacity:.7;
 margin-top:15px;
-}
-
-.error{
-color:#ff6b6b;
-margin-top:10px;
 }
 
 .ticker{
@@ -145,20 +148,16 @@ opacity:.6;
 
 <div class="logo">
 
-<img src="logo.png">
+<img src="logo-1-sm.jpg">
 
 <div>
-
 <div class="brand">Rhythm Deck</div>
-
 <div class="tagline">Unleash Your Beat</div>
-
 </div>
 
 </div>
 
 </header>
-
 
 <section class="hero">
 
@@ -172,7 +171,6 @@ opacity:.6;
 
 </section>
 
-
 <div class="section">
 
 <input id="artistName" placeholder="Artist or Band Name">
@@ -184,16 +182,17 @@ opacity:.6;
 <div class="error" id="error"></div>
 
 <div class="note">
-After signup you will receive:<br><br>
+
+After signing up you will receive:<br><br>
+
 • A confirmation email<br>
-• Instructions for your Platinum Pro Profile admin page
-</div>
+• Instructions for your Platinum Pro admin page
 
 </div>
 
+</div>
 
 <div class="ticker" id="ticker"></div>
-
 
 <footer>
 
@@ -201,30 +200,40 @@ Rhythm Deck © 2026
 
 </footer>
 
-
 <script>
 
-const SUPABASE_URL="https://bxoqhmfnseskwqkywppg.supabase.co"
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+const SUPABASE_URL = "https://bxoqhmfnseskwqkywppg.supabase.co"
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 
-const supabase=supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
-
+const supabaseClient = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+)
 
 async function loadCounts(){
 
-const {count}=await supabase
+try{
+
+const { count } = await supabaseClient
 .from("profiles")
-.select("*",{count:"exact",head:true})
+.select("*",{ count:"exact", head:true })
 
-const total=count||0
+const total = count || 0
 
-document.getElementById("artistCount").innerText=
-"🎧 "+total.toLocaleString()+" artists already joined Rhythm Deck"
+document.getElementById("artistCount").innerText =
+"🎧 " + total.toLocaleString() + " artists already joined Rhythm Deck"
 
-const remaining=10000-total
+const remaining = 10000 - total
 
-document.getElementById("foundingCount").innerText=
-remaining.toLocaleString()+" founding artist spots remaining"
+document.getElementById("foundingCount").innerText =
+remaining.toLocaleString() + " founding artist spots remaining"
+
+}catch(err){
+
+document.getElementById("artistCount").innerText =
+"Artist count unavailable"
+
+}
 
 }
 
@@ -235,40 +244,42 @@ async function signup(){
 
 document.getElementById("error").innerText=""
 
-const artist=document.getElementById("artistName").value.trim()
-const email=document.getElementById("email").value.trim()
+const artist = document.getElementById("artistName").value.trim()
+const email = document.getElementById("email").value.trim()
 
-if(!artist||!email){
+if(!artist || !email){
 
-document.getElementById("error").innerText="Please fill both fields"
+document.getElementById("error").innerText =
+"Please fill both fields"
+
 return
+
 }
 
-const referral=new URLSearchParams(window.location.search).get("ref")
+const referral =
+new URLSearchParams(window.location.search).get("ref")
 
-const {data,error}=await supabase.auth.signUp({
+const password =
+Math.random().toString(36).slice(-10)
+
+const { data, error } =
+await supabaseClient.auth.signUp({
 email:email,
-password:Math.random().toString(36).slice(-10)
+password:password
 })
 
 if(error){
 
-if(error.message.includes("rate limit")){
-
-document.getElementById("error").innerText=
-"Signup limit reached. Please wait 30 seconds and try again."
-
-}else{
-
-document.getElementById("error").innerText=error.message
-}
+document.getElementById("error").innerText =
+error.message
 
 return
+
 }
 
-const user=data.user
+const user = data.user
 
-await supabase.from("profiles").insert({
+await supabaseClient.from("profiles").insert({
 
 id:user.id,
 name:artist,
@@ -287,7 +298,7 @@ headers:{
 },
 body:JSON.stringify({
 
-subject:"New Artist Signup",
+subject:"New Rhythm Deck Artist",
 
 artist:artist,
 email:email
@@ -297,32 +308,36 @@ email:email
 
 setTimeout(()=>{
 
-window.location.href="/platinum-pro-admin.html"
+window.location.href="platinum-pro-admin.html"
 
 },1500)
 
 }
 
-
 async function ticker(){
 
-const {data}=await supabase
+try{
+
+const { data } = await supabaseClient
 .from("profiles")
 .select("name")
 .order("created_at",{ascending:false})
 .limit(5)
 
-if(!data)return
+if(!data) return
 
-let text=data.map(a=>"🎤 "+a.name+" just joined").join(" • ")
+const text =
+data.map(a=>"🎤 "+a.name+" joined").join(" • ")
 
 document.getElementById("ticker").innerText=text
 
+}catch(e){}
+
 }
 
-setInterval(ticker,8000)
-
 ticker()
+
+setInterval(ticker,8000)
 
 </script>
 
