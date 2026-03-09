@@ -3,283 +3,418 @@
 <head>
 
 <meta charset="UTF-8">
-<title>Rhythm Deck – Early Artist Signup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Early Sign-Up | Rhythm Deck Music</title>
 
-<link rel="icon" href="/favicon.ico">
+<link rel="icon" href="logo-favicon.png" type="image/png">
+
+<script src="https://cdn.tailwindcss.com"></script>
 
 <style>
 
-body{
-font-family:Arial,Helvetica,sans-serif;
-background:#0f0f10;
-color:white;
-margin:0;
-padding:0;
+.menu-btn{
+padding:.6rem 1.25rem;
+border-radius:9999px;
+font-weight:600;
+transition:.3s;
+box-shadow:0 2px 8px rgba(0,0,0,.25);
+font-size:1rem
 }
 
-header{
-display:flex;
-align-items:center;
-padding:20px;
-border-bottom:2px solid #00a86b;
+.menu-btn:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 16px rgba(0,0,0,.35)
 }
 
-.logo{
-width:42px;
-height:42px;
-margin-right:12px;
-}
+.home-btn{background:linear-gradient(to right,#22c55e,#16a34a);color:#fff}
+.about-btn{background:linear-gradient(to right,#3b82f6,#2563eb);color:#fff}
+.benefits-btn{background:linear-gradient(to right,#f59e0b,#d97706);color:#fff}
+.pricing-btn{background:linear-gradient(to right,#ec4899,#db2777);color:#fff}
+.contact-btn{background:linear-gradient(to right,#8b5cf6,#7c3aed);color:#fff}
 
-.title{
-font-size:26px;
+.features-badge{
+background:linear-gradient(135deg,#a855f7,#d946ef);
+color:#fff;
 font-weight:bold;
-}
-
-.tagline{
-font-size:14px;
-color:#ccc;
-}
-
-.container{
-max-width:620px;
-margin:60px auto;
-padding:30px;
-border:2px solid #00a86b;
-border-radius:10px;
-background:#181818;
-}
-
-h1{
-text-align:center;
-margin-top:0;
-}
-
-.counter{
-text-align:center;
-font-size:18px;
-margin-bottom:25px;
-color:#00e68a;
-}
-
-input{
-width:100%;
-padding:12px;
-margin-bottom:16px;
-border-radius:6px;
-border:none;
-font-size:16px;
-}
-
-button{
-width:100%;
-padding:14px;
-font-size:18px;
-background:#00a86b;
-border:none;
-border-radius:6px;
-color:white;
+padding:.5rem 1.1rem;
+border-radius:9999px;
+box-shadow:0 4px 12px rgba(168,85,247,.5);
+transition:.3s;
 cursor:pointer;
-font-weight:bold;
+user-select:none
 }
 
-button:hover{
-background:#00c77f;
+.features-badge:hover{
+transform:scale(1.05);
+box-shadow:0 6px 16px rgba(168,85,247,.7)
 }
 
-.note{
-margin-top:15px;
-font-size:13px;
-color:#bbb;
-text-align:center;
+.dropdown-menu{
+position:absolute;
+top:100%;
+right:0;
+margin-top:.5rem;
+width:280px;
+background:#fff;
+border-radius:1rem;
+box-shadow:0 10px 30px rgba(0,0,0,.25);
+border:1px solid #e5e7eb;
+overflow:hidden;
+z-index:50;
+display:none
 }
 
-.section{
-border:2px solid #00a86b;
-padding:20px;
-border-radius:8px;
-margin-bottom:25px;
+.dropdown-item{
+padding:.85rem 1.5rem;
+color:#1f2937;
+font-weight:500;
+transition:.2s;
+cursor:pointer
 }
 
-.features{
-font-size:15px;
-line-height:1.6;
+.dropdown-item:hover{
+background:#f3e8ff;
+color:#7c3aed
 }
+
+.required::after{content:" *";color:red}
 
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </head>
 
-<body>
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen font-sans">
 
-<header>
+<div id="toastContainer" class="fixed inset-0 pointer-events-none z-50"></div>
 
-<img class="logo" src="logo-1-sm.jpg">
+<header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-lg">
+
+<div class="flex items-center space-x-3">
+
+<img src="logo-1-sm.jpg" class="w-12 h-12 rounded-full">
 
 <div>
-<div class="title">Rhythm Deck</div>
-<div class="tagline">Unleash Your Beat</div>
+<h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+<p class="text-sm text-gray-300">Unleash Your Beat</p>
 </div>
+
+</div>
+
+<nav class="flex flex-wrap justify-end items-center gap-3">
+
+<a href="index.html" class="menu-btn home-btn">Home</a>
+<a href="about.html" class="menu-btn about-btn">About</a>
+<a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
+<a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
+<a href="contact.html" class="menu-btn contact-btn">Contact</a>
+
+<a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 font-medium">Login</a>
+
+<a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 font-medium">Sign Up</a>
+
+<div class="relative">
+
+<div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+
+<div id="dropdownMenu" class="dropdown-menu">
+
+<div class="dropdown-item" onclick="window.open('index.html#free-vs-pro-section','_blank')">FREE vs PRO</div>
+<div class="dropdown-item" onclick="window.open('index.html#platinum-pro-section','_blank')">PLATINUM PRO</div>
+<div class="dropdown-item" onclick="window.open('index.html#core-features-section','_blank')">CORE FEATURES</div>
+
+</div>
+
+</div>
+
+</nav>
 
 </header>
 
 
-<div class="container">
+<section class="relative h-[420px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
+style="background-image:url('banner-cropped.jpg')">
 
-<h1>Claim Your Platinum Pro Artist Profile</h1>
+<div class="bg-black bg-opacity-60 p-10 rounded-xl text-center shadow-2xl">
 
-<div class="counter">
-Founding Artists Joined: <span id="artistCount">Loading...</span>
+<h2 class="text-4xl font-extrabold text-white mb-3">Pre-Launch Early Sign-Up</h2>
+
+<p class="text-white max-w-xl mx-auto mb-4">
+Join now and get Platinum Pro FREE for life!
+</p>
+
+<p class="text-yellow-400 font-bold mb-5">
+🔥 Founding artists get permanent discovery priority when Rhythm Deck launches
+</p>
+
+<a href="#signupForm"
+class="bg-green-500 text-white font-semibold px-6 py-2 rounded-full hover:bg-green-400 transition transform hover:scale-105 inline-block shadow-lg">
+
+Sign Up Now
+
+</a>
+
 </div>
 
-<div class="section features">
+</section>
 
-<b>Founding Artist Benefits</b>
 
-<ul>
-<li>Priority placement on Rhythm Deck</li>
-<li>Permanent Platinum Pro profile</li>
-<li>Featured discovery algorithm boost</li>
-<li>Founding Artist badge</li>
-<li>Direct fan discovery tools</li>
-</ul>
+<main class="flex-grow flex items-center justify-center py-16 px-4">
+
+<div class="container mx-auto">
+
+<div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
+
+<div class="w-1/2 hidden md:block">
+
+<img src="early-signup.jpg" class="w-full h-full object-cover">
 
 </div>
 
-<form id="signupForm">
 
-<input
-type="text"
-id="artistName"
-placeholder="Artist or Band Name"
-required
->
+<div class="w-full md:w-1/2 p-10">
 
-<input
-type="email"
-id="email"
-placeholder="Email Address"
-required
->
+<h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">
 
-<input
-type="password"
-id="password"
-placeholder="Create Password"
-required
->
+Pre-Launch Early Sign-Up Form
 
-<input
-type="text"
-id="subdomain"
-placeholder="Choose Profile URL (example: yourband)"
-required
->
+</h2>
 
-<button type="submit">
-Join Rhythm Deck
+<div class="text-center mb-6">
+
+<p id="artistCount" class="text-xl font-bold text-green-700">
+
+Loading artist count...
+
+</p>
+
+</div>
+
+
+<form id="signupForm" class="space-y-4">
+
+<div>
+
+<label class="block text-gray-700 font-semibold mb-1 required">
+
+Name / Band Name
+
+</label>
+
+<input type="text" id="artistName" required
+class="w-full border border-gray-300 rounded-lg p-3">
+
+</div>
+
+
+<div>
+
+<label class="block text-gray-700 font-semibold mb-1 required">
+
+Email Address
+
+</label>
+
+<input type="email" id="email" required
+class="w-full border border-gray-300 rounded-lg p-3">
+
+</div>
+
+
+<div>
+
+<label class="block text-gray-700 font-semibold mb-1 required">
+
+Password
+
+</label>
+
+<input type="password" id="password" required minlength="6"
+class="w-full border border-gray-300 rounded-lg p-3">
+
+</div>
+
+
+<div>
+
+<label class="block text-gray-700 font-semibold mb-1 required">
+
+Choose Your Subdomain
+
+</label>
+
+<div class="flex">
+
+<input type="text" id="subdomain" required minlength="3"
+class="flex-grow border border-gray-300 rounded-l-lg p-3">
+
+<span class="bg-gray-200 px-3 py-3 rounded-r-lg text-sm flex items-center border border-l-0 border-gray-300">
+
+.rhythmdeckmusic.com
+
+</span>
+
+</div>
+
+<div id="subdomainStatus" class="mt-2 text-sm h-5"></div>
+
+</div>
+
+
+<div class="flex items-center space-x-2">
+
+<input type="checkbox" id="terms" required>
+
+<label class="text-gray-700 text-sm">
+
+I agree to the
+<a href="terms.html" class="text-green-500">Terms</a>
+and
+<a href="privacy.html" class="text-green-500">Privacy Policy</a>
+
+</label>
+
+</div>
+
+
+<p class="text-gray-700 text-sm">
+
+After signing up you'll receive a confirmation email for your Platinum Pro account.
+
+</p>
+
+
+<button id="submitButton"
+class="w-full bg-green-500 text-white font-bold py-4 rounded-lg hover:bg-green-600 text-lg">
+
+Sign Up Now & Get Platinum Pro FREE for Life!
+
 </button>
 
 </form>
 
-<div class="note">
-After signup you'll receive a confirmation email and instructions for using your Platinum Pro Artist Admin page.
 </div>
 
 </div>
 
+</div>
 
-<script>
+</main>
 
-const supabaseUrl = "https://bxoqhmfnseskwqkywppg.supabase.co"
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 
-const supabase = window.supabase.createClient(
-supabaseUrl,
-supabaseKey
+<footer class="bg-black text-white mt-10 p-5 text-center text-sm">
+
+<nav class="mb-2 space-x-4">
+
+<a href="contact.html" class="hover:text-green-400">Contact</a>
+<a href="privacy.html" class="hover:text-green-400">Privacy Policy</a>
+<a href="terms.html" class="hover:text-green-400">Terms</a>
+
+</nav>
+
+<p>© 2025 Rhythm Deck Music</p>
+
+</footer>
+
+
+<script type="module">
+
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+
+const supabase=createClient(
+"https://bxoqhmfnseskwqkywppg.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 )
 
-const urlParams = new URLSearchParams(window.location.search)
-const referral = urlParams.get("ref")
 
 async function loadArtistCount(){
 
-const {count,error} = await supabase
+const {count}=await supabase
 .from("profiles")
 .select("*",{count:"exact",head:true})
 
-if(!error){
-document.getElementById("artistCount").innerText = count
-}
+document.getElementById("artistCount").innerText=
+"🎧 "+(count||0)+" artists already joined Rhythm Deck"
 
 }
 
 loadArtistCount()
 
-document.getElementById("signupForm").addEventListener("submit", async (e)=>{
+
+const form=document.getElementById("signupForm")
+const button=document.getElementById("submitButton")
+
+
+form.addEventListener("submit",async e=>{
 
 e.preventDefault()
 
-const artistName = document.getElementById("artistName").value.trim()
-const email = document.getElementById("email").value.trim()
-const password = document.getElementById("password").value
-const subdomain = document.getElementById("subdomain").value.trim().toLowerCase()
+button.disabled=true
+button.innerText="Creating Account..."
 
-if(password.length < 8){
 
-alert("Password must be at least 8 characters.")
-return
+const artist=document.getElementById("artistName").value.trim()
+const email=document.getElementById("email").value.trim()
+const password=document.getElementById("password").value
+const subdomain=document.getElementById("subdomain").value.trim().toLowerCase()
 
-}
+try{
 
-const referralCode = Math.random().toString(36).substring(2,8)
+const {data:taken}=await supabase
+.from("profiles")
+.select("id")
+.eq("subdomain",subdomain)
+.maybeSingle()
 
-const {data:authData,error:authError} = await supabase.auth.signUp({
+if(taken) throw new Error("Subdomain already taken")
 
-email:email,
-password:password
 
+const {data,error}=await supabase.auth.signUp({
+email,
+password
 })
 
-if(authError){
+if(error) throw error
 
-alert(authError.message)
-return
 
-}
-
-const userId = authData.user.id
-
-const {error:profileError} = await supabase
-.from("profiles")
-.insert({
-
-id:userId,
-artist_name:artistName,
-email:email,
-subdomain:subdomain,
+await supabase.from("profiles").upsert({
+id:data.user.id,
+name:artist,
+email,
+subdomain,
 plan:"platinum",
 paid:true,
-early_founder:true,
-referral_code:referralCode,
-referred_by:referral,
-referral_count:0
-
+created_at:new Date()
 })
 
-if(profileError){
 
-alert(profileError.message)
-return
+await fetch("https://formsubmit.co/ajax/rhythmdeckmusic@gmail.com",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+subject:"New Rhythm Deck Artist Signup",
+artist,
+email,
+subdomain
+})
+})
+
+
+alert("Account created! Please log in.")
+
+location.href="login.html"
+
+}catch(err){
+
+alert(err.message)
 
 }
 
-window.location.href="login.html"
+button.disabled=false
+button.innerText="Sign Up Now & Get Platinum Pro FREE for Life!"
 
 })
+
 
 </script>
 
