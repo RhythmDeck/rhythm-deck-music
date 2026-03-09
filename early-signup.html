@@ -101,7 +101,33 @@ color:#7c3aed
 
 </div>
 
+<nav class="flex flex-wrap justify-end items-center gap-3">
 
+<a href="index.html" class="menu-btn home-btn">Home</a>
+<a href="about.html" class="menu-btn about-btn">About</a>
+<a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
+<a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
+<a href="contact.html" class="menu-btn contact-btn">Contact</a>
+
+<a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 font-medium">Login</a>
+
+<a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 font-medium">Sign Up</a>
+
+<div class="relative">
+
+<div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+
+<div id="dropdownMenu" class="dropdown-menu">
+
+<div class="dropdown-item" onclick="window.open('index.html#free-vs-pro-section','_blank')">FREE vs PRO</div>
+<div class="dropdown-item" onclick="window.open('index.html#platinum-pro-section','_blank')">PLATINUM PRO</div>
+<div class="dropdown-item" onclick="window.open('index.html#core-features-section','_blank')">CORE FEATURES</div>
+
+</div>
+
+</div>
+
+</nav>
 
 </header>
 
@@ -127,39 +153,7 @@ class="bg-green-500 text-white font-semibold px-6 py-2 rounded-full hover:bg-gre
 Sign Up Now
 
 </a>
-<nav class="flex flex-col items-end gap-4 sm:gap-3">
-  <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
-    <a href="index.html" class="menu-btn home-btn" target="_blank">Home</a>
-    <a href="about.html" class="menu-btn about-btn" target="_blank">About</a>
-    <a href="benefits.html" class="menu-btn benefits-btn" target="_blank">Benefits</a>
-    <a href="pricing.html" class="menu-btn pricing-btn" target="_blank">Pricing</a>
-    <a href="contact.html" class="menu-btn contact-btn" target="_blank">Contact</a>
-    <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium" target="_blank">Login</a>
-    <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium" target="_blank">Sign Up</a>
-    <div class="relative ml-2">
-      <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
-      <div id="dropdownMenu" class="dropdown-menu">
-        <div class="dropdown-item" onClick="window.open('index.html#free-vs-pro-section', '_blank');">FREE vs PRO</div>
-        <div class="dropdown-item" onClick="window.open('index.html#platinum-pro-section', '_blank');">PLATINUM PRO</div>
-        <div class="dropdown-item" onClick="window.open('index.html#producers-distributors-section', '_blank');">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
-        <div class="dropdown-item" onClick="window.open('index.html#core-features-section', '_blank');">CORE FEATURES</div>
-        <div class="dropdown-item" onClick="window.open('index.html#rhythm-vision-comparison-section', '_blank');">RHYTHM VISION PLANS COMPARISON</div>
-        <div class="dropdown-item" onClick="window.open('index.html#rhythm-wav-section', '_blank');">RHYTHM WAV PLAYLIST PLATFORM</div>
-        <div class="dropdown-item" onClick="window.open('/rhythm-deck-studio.html', '_blank');">
-          RHYTHM DECK STUDIO
-        </div>
-        <div class="dropdown-item" onClick="window.open('chord-engine.html', '_blank');">
-          RHYTHM DECK CHORD ENGINE
-        </div>
-        <div class="dropdown-item" onClick="window.open('lyricvid.html', '_blank');">
-          RHYTHM DECK LYRICVID
-        </div>
-        <div class="dropdown-item" onClick="window.open('index.html#instruction-manuals-section', '_blank');">INSTRUCTION MANUALS</div>
-        <div class="dropdown-item" onClick="window.open('index.html#qa-section', '_blank');">Q&A</div>
-      </div>
-    </div>
-  </div>
-</nav>
+
 </div>
 
 </section>
@@ -340,9 +334,8 @@ const {count}=await supabase
 .select("*",{count:"exact",head:true})
 
 document.getElementById("artistCount").innerText=
-"🎧 "+(count||155)+" artists already joined Rhythm Deck"<br />
+"🎧 "+(count||155)+" artists already joined Rhythm Deck"
 345 spots left
-
 }
 
 loadArtistCount()
