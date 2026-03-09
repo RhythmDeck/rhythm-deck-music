@@ -101,27 +101,41 @@ color:#7c3aed
 
 </div>
 
-<nav class="flex flex-wrap justify-end items-center gap-3">
+<nav class="flex flex-col items-end gap-4 sm:gap-3">
 
-<a href="index.html" class="menu-btn home-btn">Home</a>
-<a href="about.html" class="menu-btn about-btn">About</a>
-<a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
-<a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
-<a href="contact.html" class="menu-btn contact-btn">Contact</a>
+<div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
 
-<a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 font-medium">Login</a>
+<a href="index.html" target="_blank" class="menu-btn home-btn">Home</a>
+<a href="about.html" target="_blank" class="menu-btn about-btn">About</a>
+<a href="benefits.html" target="_blank" class="menu-btn benefits-btn">Benefits</a>
+<a href="pricing.html" target="_blank" class="menu-btn pricing-btn">Pricing</a>
+<a href="contact.html" target="_blank" class="menu-btn contact-btn">Contact</a>
 
-<a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 font-medium">Sign Up</a>
+<a href="login.html" target="_blank" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
 
-<div class="relative">
+<a href="signup.html" target="_blank" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
 
-<div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+<div class="relative ml-2">
+
+<div id="featuresBadge" class="features-badge">
+Rhythm Deck Features ▼
+</div>
 
 <div id="dropdownMenu" class="dropdown-menu">
 
 <div class="dropdown-item" onclick="window.open('index.html#free-vs-pro-section','_blank')">FREE vs PRO</div>
 <div class="dropdown-item" onclick="window.open('index.html#platinum-pro-section','_blank')">PLATINUM PRO</div>
+<div class="dropdown-item" onclick="window.open('index.html#producers-distributors-section','_blank')">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
 <div class="dropdown-item" onclick="window.open('index.html#core-features-section','_blank')">CORE FEATURES</div>
+<div class="dropdown-item" onclick="window.open('index.html#rhythm-vision-comparison-section','_blank')">RHYTHM VISION PLANS COMPARISON</div>
+<div class="dropdown-item" onclick="window.open('index.html#rhythm-wav-section','_blank')">RHYTHM WAV PLAYLIST PLATFORM</div>
+<div class="dropdown-item" onclick="window.open('/rhythm-deck-studio.html','_blank')">RHYTHM DECK STUDIO</div>
+<div class="dropdown-item" onclick="window.open('chord-engine.html','_blank')">RHYTHM DECK CHORD ENGINE</div>
+<div class="dropdown-item" onclick="window.open('lyricvid.html','_blank')">RHYTHM DECK LYRICVID</div>
+<div class="dropdown-item" onclick="window.open('index.html#instruction-manuals-section','_blank')">INSTRUCTION MANUALS</div>
+<div class="dropdown-item" onclick="window.open('index.html#qa-section','_blank')">Q&A</div>
+
+</div>
 
 </div>
 
@@ -130,7 +144,6 @@ color:#7c3aed
 </nav>
 
 </header>
-
 
 <section class="relative h-[420px] bg-gray-700 bg-cover bg-center flex items-center justify-center shadow-inner"
 style="background-image:url('banner-cropped.jpg')">
@@ -149,15 +162,12 @@ Join now and get Platinum Pro FREE for life!
 
 <a href="#signupForm"
 class="bg-green-500 text-white font-semibold px-6 py-2 rounded-full hover:bg-green-400 transition transform hover:scale-105 inline-block shadow-lg">
-
 Sign Up Now
-
 </a>
 
 </div>
 
 </section>
-
 
 <main class="flex-grow flex items-center justify-center py-16 px-4">
 
@@ -166,129 +176,81 @@ Sign Up Now
 <div class="bg-white shadow-2xl rounded-xl max-w-6xl w-full flex overflow-hidden mx-auto">
 
 <div class="w-1/2 hidden md:block">
-
 <img src="early-signup.jpg" class="w-full h-full object-cover">
-
 </div>
-
 
 <div class="w-full md:w-1/2 p-10">
 
 <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">
-
 Pre-Launch Early Sign-Up Form
-
 </h2>
 
 <div class="text-center mb-6">
-
 <p id="artistCount" class="text-xl font-bold text-green-700">
-
 Loading artist count...
-
 </p>
-
 </div>
-
 
 <form id="signupForm" class="space-y-4">
 
 <div>
-
-<label class="block text-gray-700 font-semibold mb-1 required">
-
-Name / Band Name
-
-</label>
-
-<input type="text" id="artistName" required
-class="w-full border border-gray-300 rounded-lg p-3">
-
+<label class="block text-gray-700 font-semibold mb-1 required">Name / Band Name</label>
+<input type="text" id="artistName" required class="w-full border border-gray-300 rounded-lg p-3">
 </div>
 
-
 <div>
-
-<label class="block text-gray-700 font-semibold mb-1 required">
-
-Email Address
-
-</label>
-
-<input type="email" id="email" required
-class="w-full border border-gray-300 rounded-lg p-3">
-
+<label class="block text-gray-700 font-semibold mb-1 required">Email Address</label>
+<input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3">
 </div>
 
-
 <div>
+<label class="block text-gray-700 font-semibold mb-1 required">Password</label>
 
-<label class="block text-gray-700 font-semibold mb-1 required">
-
-Password
-
-</label>
+<div class="relative">
 
 <input type="password" id="password" required minlength="6"
-class="w-full border border-gray-300 rounded-lg p-3">
+class="w-full border border-gray-300 rounded-lg p-3 pr-12">
+
+<button type="button" id="togglePassword"
+class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-lg">👁</button>
 
 </div>
 
+</div>
 
 <div>
-
-<label class="block text-gray-700 font-semibold mb-1 required">
-
-Choose Your Subdomain
-
-</label>
+<label class="block text-gray-700 font-semibold mb-1 required">Choose Your Subdomain</label>
 
 <div class="flex">
-
 <input type="text" id="subdomain" required minlength="3"
 class="flex-grow border border-gray-300 rounded-l-lg p-3">
 
 <span class="bg-gray-200 px-3 py-3 rounded-r-lg text-sm flex items-center border border-l-0 border-gray-300">
-
 .rhythmdeckmusic.com
-
 </span>
-
 </div>
 
 <div id="subdomainStatus" class="mt-2 text-sm h-5"></div>
 
 </div>
 
-
 <div class="flex items-center space-x-2">
-
 <input type="checkbox" id="terms" required>
-
 <label class="text-gray-700 text-sm">
-
 I agree to the
 <a href="terms.html" class="text-green-500">Terms</a>
 and
 <a href="privacy.html" class="text-green-500">Privacy Policy</a>
-
 </label>
-
 </div>
 
-
 <p class="text-gray-700 text-sm">
-
 After signing up you'll receive a confirmation email for your Platinum Pro account.
-
 </p>
-
 
 <button id="submitButton"
 class="w-full bg-green-500 text-white font-bold py-4 rounded-lg hover:bg-green-600 text-lg">
-
 Sign Up Now & Get Platinum Pro FREE for Life!
-
 </button>
 
 </form>
@@ -301,21 +263,17 @@ Sign Up Now & Get Platinum Pro FREE for Life!
 
 </main>
 
-
 <footer class="bg-black text-white mt-10 p-5 text-center text-sm">
 
 <nav class="mb-2 space-x-4">
-
 <a href="contact.html" class="hover:text-green-400">Contact</a>
 <a href="privacy.html" class="hover:text-green-400">Privacy Policy</a>
 <a href="terms.html" class="hover:text-green-400">Terms</a>
-
 </nav>
 
 <p>© 2025 Rhythm Deck Music</p>
 
 </footer>
-
 
 <script type="module">
 
@@ -326,6 +284,32 @@ const supabase=createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 )
 
+const badge=document.getElementById("featuresBadge")
+const menu=document.getElementById("dropdownMenu")
+
+badge.addEventListener("click",e=>{
+e.stopPropagation()
+menu.style.display=menu.style.display==="block"?"none":"block"
+})
+
+document.addEventListener("click",e=>{
+if(!menu.contains(e.target)&&!badge.contains(e.target)){
+menu.style.display="none"
+}
+})
+
+const togglePassword=document.getElementById("togglePassword")
+const passwordField=document.getElementById("password")
+
+togglePassword.onclick=()=>{
+if(passwordField.type==="password"){
+passwordField.type="text"
+togglePassword.innerText="🙈"
+}else{
+passwordField.type="password"
+togglePassword.innerText="👁"
+}
+}
 
 async function loadArtistCount(){
 
@@ -333,17 +317,47 @@ const {count}=await supabase
 .from("profiles")
 .select("*",{count:"exact",head:true})
 
+const joined=count||155
+const total=10000
+const remaining=total-joined
+
 document.getElementById("artistCount").innerText=
-"🎧 "+(count||155)+" artists already joined Rhythm Deck"
-345 spots left
+"🎧 "+joined+" artists already joined Rhythm Deck • "+remaining+" founding spots left"
+
 }
 
 loadArtistCount()
 
+const subdomainInput=document.getElementById("subdomain")
+const subdomainStatus=document.getElementById("subdomainStatus")
+
+subdomainInput.addEventListener("input",async()=>{
+
+const value=subdomainInput.value.trim().toLowerCase()
+
+if(value.length<3){
+subdomainStatus.innerText=""
+return
+}
+
+const {data}=await supabase
+.from("profiles")
+.select("id")
+.eq("subdomain",value)
+.maybeSingle()
+
+if(data){
+subdomainStatus.innerText="❌ Subdomain already taken"
+subdomainStatus.className="text-red-500 text-sm"
+}else{
+subdomainStatus.innerText="✅ Subdomain available"
+subdomainStatus.className="text-green-600 text-sm"
+}
+
+})
 
 const form=document.getElementById("signupForm")
 const button=document.getElementById("submitButton")
-
 
 form.addEventListener("submit",async e=>{
 
@@ -351,7 +365,6 @@ e.preventDefault()
 
 button.disabled=true
 button.innerText="Creating Account..."
-
 
 const artist=document.getElementById("artistName").value.trim()
 const email=document.getElementById("email").value.trim()
@@ -368,14 +381,12 @@ const {data:taken}=await supabase
 
 if(taken) throw new Error("Subdomain already taken")
 
-
 const {data,error}=await supabase.auth.signUp({
 email,
 password
 })
 
 if(error) throw error
-
 
 await supabase.from("profiles").upsert({
 id:data.user.id,
@@ -387,7 +398,6 @@ paid:true,
 created_at:new Date()
 })
 
-
 await fetch("https://formsubmit.co/ajax/rhythmdeckmusic@gmail.com",{
 method:"POST",
 headers:{'Content-Type':'application/json'},
@@ -398,7 +408,6 @@ email,
 subdomain
 })
 })
-
 
 alert("Account created! Please log in.")
 
@@ -414,7 +423,6 @@ button.disabled=false
 button.innerText="Sign Up Now & Get Platinum Pro FREE for Life!"
 
 })
-
 
 </script>
 
