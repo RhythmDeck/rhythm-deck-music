@@ -604,7 +604,7 @@ Do one block per platform. Thank you!`;
       const { data: logoData } = supabase.storage.from('media').getPublicUrl(profile.logo_url);
       document.getElementById('logoPreview').src = logoData.publicUrl + '?t=' + Date.now();
     }
-    const publicUrl = `https://rhythmdeck.vercel.app/public-profile.html?id=${profile.subdomain || currentUser.id}`;
+    const publicUrl = `https://rhythmdeckmusic.com/public-profile.html?id=${profile.subdomain || currentUser.id}`;
     document.getElementById('publicUrl').textContent = publicUrl;
     document.getElementById('publicLink').href = publicUrl;
   };
