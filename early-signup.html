@@ -123,17 +123,17 @@ Rhythm Deck Features ▼
 
 <div id="dropdownMenu" class="dropdown-menu">
 
-<div class="dropdown-item" onclick="window.open('index.html#free-vs-pro-section','_blank')">FREE vs PRO</div>
-<div class="dropdown-item" onclick="window.open('index.html#platinum-pro-section','_blank')">PLATINUM PRO</div>
-<div class="dropdown-item" onclick="window.open('index.html#producers-distributors-section','_blank')">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
-<div class="dropdown-item" onclick="window.open('index.html#core-features-section','_blank')">CORE FEATURES</div>
-<div class="dropdown-item" onclick="window.open('index.html#rhythm-vision-comparison-section','_blank')">RHYTHM VISION PLANS COMPARISON</div>
-<div class="dropdown-item" onclick="window.open('index.html#rhythm-wav-section','_blank')">RHYTHM WAV PLAYLIST PLATFORM</div>
-<div class="dropdown-item" onclick="window.open('/rhythm-deck-studio.html','_blank')">RHYTHM DECK STUDIO</div>
-<div class="dropdown-item" onclick="window.open('chord-engine.html','_blank')">RHYTHM DECK CHORD ENGINE</div>
-<div class="dropdown-item" onclick="window.open('lyricvid.html','_blank')">RHYTHM DECK LYRICVID</div>
-<div class="dropdown-item" onclick="window.open('index.html#instruction-manuals-section','_blank')">INSTRUCTION MANUALS</div>
-<div class="dropdown-item" onclick="window.open('index.html#qa-section','_blank')">Q&A</div>
+<div class="dropdown-item" onClick="window.open('index.html#free-vs-pro-section','_blank')">FREE vs PRO</div>
+<div class="dropdown-item" onClick="window.open('index.html#platinum-pro-section','_blank')">PLATINUM PRO</div>
+<div class="dropdown-item" onClick="window.open('index.html#producers-distributors-section','_blank')">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
+<div class="dropdown-item" onClick="window.open('index.html#core-features-section','_blank')">CORE FEATURES</div>
+<div class="dropdown-item" onClick="window.open('index.html#rhythm-vision-comparison-section','_blank')">RHYTHM VISION PLANS COMPARISON</div>
+<div class="dropdown-item" onClick="window.open('index.html#rhythm-wav-section','_blank')">RHYTHM WAV PLAYLIST PLATFORM</div>
+<div class="dropdown-item" onClick="window.open('/rhythm-deck-studio.html','_blank')">RHYTHM DECK STUDIO</div>
+<div class="dropdown-item" onClick="window.open('chord-engine.html','_blank')">RHYTHM DECK CHORD ENGINE</div>
+<div class="dropdown-item" onClick="window.open('lyricvid.html','_blank')">RHYTHM DECK LYRICVID</div>
+<div class="dropdown-item" onClick="window.open('index.html#instruction-manuals-section','_blank')">INSTRUCTION MANUALS</div>
+<div class="dropdown-item" onClick="window.open('index.html#qa-section','_blank')">Q&A</div>
 
 </div>
 
@@ -409,21 +409,17 @@ togglePassword.innerText="👁"
 }
 }
 
+Redo this code to show that we have 1000 spots available, 746 have signup up for the early platinum pro account so far and we have 256 spots left to show urgency.
 async function loadArtistCount(){
-
 const {count}=await supabase
 .from("profiles")
 .select("*",{count:"exact",head:true})
-
 const joined=count||155
 const total=10000
 const remaining=total-joined
-
 document.getElementById("artistCount").innerText=
 "🎧 "+joined+" artists already joined Rhythm Deck • "+remaining+" founding spots left"
-
 }
-
 loadArtistCount()
 
 const subdomainInput=document.getElementById("subdomain")
