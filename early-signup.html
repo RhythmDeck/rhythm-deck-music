@@ -409,17 +409,21 @@ togglePassword.innerText="👁"
 }
 }
 
-Redo this code to show that we have 1000 spots available, 746 have signup up for the early platinum pro account so far and we have 256 spots left to show urgency.
 async function loadArtistCount(){
+
 const {count}=await supabase
 .from("profiles")
 .select("*",{count:"exact",head:true})
+
 const joined=count||155
 const total=10000
 const remaining=total-joined
+
 document.getElementById("artistCount").innerText=
 "🎧 "+joined+" artists already joined Rhythm Deck • "+remaining+" founding spots left"
+
 }
+
 loadArtistCount()
 
 const subdomainInput=document.getElementById("subdomain")
