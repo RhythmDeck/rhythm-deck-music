@@ -498,12 +498,68 @@ created_at:new Date()
 
 await fetch("https://formsubmit.co/ajax/rhythmdeckmusic@gmail.com",{
 method:"POST",
-headers:{'Content-Type':'application/json'},
+headers:{
+"Content-Type":"application/json",
+"Accept":"application/json"
+},
 body:JSON.stringify({
+
 subject:"New Rhythm Deck Artist Signup",
-artist,
-email,
-subdomain
+
+artist:artist,
+email:email,
+subdomain:subdomain,
+
+_autoresponse:
+"Welcome to Rhythm Deck!\n\n"+
+"Your Platinum Pro founding artist account has been created.\n\n"+
+
+"LOGIN HERE:\n"+
+"https://rhythmdeckmusic.com/login.html\n\n"+
+
+"YOUR PUBLIC ARTIST PAGE:\n"+
+"https://rhythmdeckmusic.com/public-profile.html?id="+subdomain+"\n\n"+
+
+"FEATURES YOU CAN USE RIGHT NOW:\n\n"+
+
+"• Upload MP3 music\n"+
+"• Upload MP4 music videos\n"+
+"• Customize your artist profile (banner, logo, bio)\n"+
+"• Share your public artist page with fans\n"+
+"• Receive likes and comments from fans\n"+
+"• Join the Collaboration Network to connect with other artists\n"+
+"• Access the Radio Station Database\n"+
+
+"FEATURES CURRENTLY IN DEVELOPMENT:\n\n"+
+
+"• Live streaming concerts\n"+
+"• Fan tipping system\n"+
+"• Direct social media publishing\n"+
+"• Playlist promotion tools\n"+
+"• Expanded artist discovery algorithms\n\n"+
+"• Create and sell merchandise in your merch store\n"+
+"• Use the Analytics Dashboard to track engagement\n"+
+"• Use Rhythm Deck creative tools like:\n"+
+"  - Rhythm Deck Studio\n"+
+"  - Chord Engine\n"+
+"  - LyricVid Generator\n"+
+"• Access Rhythm Vision Platinum promotion tools\n\n"+
+
+"These features require integrations with external platforms and are currently being finalized.\n\n"+
+
+"FOUNDING ARTIST ADVANTAGE:\n\n"+
+"You are now one of the first Rhythm Deck founding artists.\n"+
+"Founding artists receive permanent discovery priority when Rhythm Deck launches publicly.\n\n"+
+
+"If you have ideas or feedback, simply reply to this email.\n\n"+
+
+"Thank you for helping build the Rhythm Deck community.\n\n"+
+
+"— Rhythm Deck Team\n"+
+"https://rhythmdeckmusic.com",
+
+_template:"table"
+
 })
 })
 
