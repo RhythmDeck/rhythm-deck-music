@@ -345,42 +345,82 @@ Sign Up Now & Get Platinum Pro FREE for Life!
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
 
-const supabase=createClient(
+const supabase = createClient(
 "https://bxoqhmfnseskwqkywppg.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 )
 
-const togglePassword=document.getElementById("togglePassword")
-const passwordField=document.getElementById("password")
+const togglePassword = document.getElementById("togglePassword")
+const passwordField = document.getElementById("password")
 
-togglePassword.onclick=()=>{
-if(passwordField.type==="password"){
-passwordField.type="text"
-togglePassword.innerText="🙈"
+togglePassword.onclick = () => {
+if(passwordField.type === "password"){
+passwordField.type = "text"
+togglePassword.innerText = "🙈"
 }else{
-passwordField.type="password"
-togglePassword.innerText="👁"
+passwordField.type = "password"
+togglePassword.innerText = "👁"
 }
 }
 
 function loadArtistCount(){
 
-const total=1000
-const joined=646
-const remaining=total-joined
-const percent=(joined/total)*100
+const total = 1000
+const joined = 746
+const remaining = total - joined
+const percent = (joined / total) * 100
 
-document.getElementById("artistCount").innerText=
+document.getElementById("artistCount").innerText =
 "🔥 "+joined+" artists have already claimed Platinum Pro • Only "+remaining+" founding spots left out of "+total+"!"
 
-document.getElementById("progressFill").style.width=percent+"%"
+document.getElementById("progressFill").style.width = percent + "%"
 
-document.getElementById("progressText").innerText=
+document.getElementById("progressText").innerText =
 joined+" / "+total+" Founding Spots Claimed"
 
 }
 
 loadArtistCount()
+
+
+const form = document.getElementById("signupForm")
+const submitButton = document.getElementById("submitButton")
+
+form.addEventListener("submit", async (e) => {
+
+e.preventDefault()
+
+submitButton.innerText = "Creating Account..."
+submitButton.disabled = true
+
+const name = document.getElementById("artistName").value
+const email = document.getElementById("email").value
+const password = document.getElementById("password").value
+const subdomain = document.getElementById("subdomain").value
+
+const { data, error } = await supabase.auth.signUp({
+email: email,
+password: password,
+options:{
+data:{
+artist_name: name,
+subdomain: subdomain
+}
+}
+})
+
+if(error){
+alert(error.message)
+submitButton.innerText = "Sign Up Now & Get Platinum Pro FREE for Life!"
+submitButton.disabled = false
+return
+}
+
+alert("🎉 Your Rhythm Deck account was created! Please log in.")
+
+window.location.href = "login.html"
+
+})
 
 </script>
 
