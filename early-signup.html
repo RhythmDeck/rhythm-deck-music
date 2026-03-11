@@ -347,7 +347,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
 "https://bxoqhmfnseskwqkywppg.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
+"YOUR_PUBLIC_ANON_KEY"
 )
 
 const form = document.getElementById("signupForm")
@@ -360,13 +360,45 @@ e.preventDefault()
 submitButton.disabled = true
 submitButton.innerText = "Creating Account..."
 
+/* GET FORM VALUES */
+
+const name = document.getElementById("artistName").value.trim()
 const email = document.getElementById("email").value.trim()
 const password = document.getElementById("password").value
+let subdomain = document.getElementById("subdomain").value.trim()
 
-const { error } = await supabase.auth.signUp({
+/* CLEAN SUBDOMAIN */
 
-email,
-password
+subdomain = subdomain
+.replace(/\s+/g,"")
+.replace(/[^a-zA-Z0-9]/g,"")
+
+if(subdomain.length < 3){
+
+alert("Subdomain must be at least 3 characters.")
+
+submitButton.disabled=false
+submitButton.innerText="Sign Up Now & Get Platinum Pro FREE for Life!"
+
+return
+
+}
+
+/* CREATE AUTH USER */
+
+const { data, error } = await supabase.auth.signUp({
+
+email: email,
+password: password,
+
+options: {
+
+data: {
+name: name,
+subdomain: subdomain
+}
+
+}
 
 })
 
@@ -381,7 +413,9 @@ return
 
 }
 
-alert("Account created! Please log in.")
+/* SUCCESS */
+
+alert("Account created successfully! Please log in.")
 
 window.location.href="login.html"
 
