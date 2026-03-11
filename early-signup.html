@@ -353,18 +353,6 @@ const supabase = createClient(
 const form = document.getElementById("signupForm")
 const submitButton = document.getElementById("submitButton")
 
-/* password toggle */
-
-const togglePassword = document.getElementById("togglePassword")
-const passwordField = document.getElementById("password")
-
-togglePassword.onclick = () => {
-passwordField.type = passwordField.type === "password" ? "text" : "password"
-togglePassword.innerText = passwordField.type === "password" ? "👁" : "🙈"
-}
-
-/* signup */
-
 form.addEventListener("submit", async (e)=>{
 
 e.preventDefault()
@@ -372,53 +360,30 @@ e.preventDefault()
 submitButton.disabled = true
 submitButton.innerText = "Creating Account..."
 
-const name = document.getElementById("artistName").value.trim()
 const email = document.getElementById("email").value.trim()
 const password = document.getElementById("password").value
-const subdomain = document.getElementById("subdomain").value.trim()
 
-/* create auth user */
+const { error } = await supabase.auth.signUp({
 
-const { data:authData, error:authError } = await supabase.auth.signUp({
 email,
 password
+
 })
 
-if(authError){
-alert(authError.message)
-submitButton.disabled = false
-submitButton.innerText = "Sign Up Now & Get Platinum Pro FREE for Life!"
-return
-}
+if(error){
 
-const user = authData.user
+alert(error.message)
 
-/* create profile */
-
-const { error:profileError } = await supabase
-.from("profiles")
-.insert([
-{
-id: user.id,
-email: email,
-name: name,
-subdomain: subdomain,
-role: "artist",
-plan: "platinum",
-subscription_status: "active",
-paid: false
-}
-])
-
-if(profileError){
-alert(profileError.message)
 submitButton.disabled=false
+submitButton.innerText="Sign Up Now & Get Platinum Pro FREE for Life!"
+
 return
+
 }
 
-alert("Account created successfully! Please log in.")
+alert("Account created! Please log in.")
 
-window.location.href = "login.html"
+window.location.href="login.html"
 
 })
 
