@@ -345,10 +345,80 @@ Sign Up Now & Get Platinum Pro FREE for Life!
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
 
+/* -------------------------------- */
+/* SUPABASE CLIENT */
+/* -------------------------------- */
+
 const supabase = createClient(
 "https://bxoqhmfnseskwqkywppg.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 )
+
+/* -------------------------------- */
+/* PASSWORD TOGGLE */
+/* -------------------------------- */
+
+const togglePassword = document.getElementById("togglePassword")
+const passwordField = document.getElementById("password")
+
+if(togglePassword && passwordField){
+
+togglePassword.addEventListener("click", ()=>{
+
+if(passwordField.type === "password"){
+passwordField.type = "text"
+togglePassword.innerText = "🙈"
+}else{
+passwordField.type = "password"
+togglePassword.innerText = "👁"
+}
+
+})
+
+}
+
+/* -------------------------------- */
+/* ARTIST COUNT + PROGRESS BAR */
+/* -------------------------------- */
+
+const artistCountEl = document.getElementById("artistCount")
+const progressFill = document.getElementById("progressFill")
+const progressText = document.getElementById("progressText")
+
+async function loadArtistCount(){
+
+const { count, error } = await supabase
+.from("profiles")
+.select("*", { count: "exact", head: true })
+
+if(error){
+console.log("Count error:", error)
+return
+}
+
+const maxArtists = 10000
+
+const percent = Math.min((count / maxArtists) * 100, 100)
+
+if(artistCountEl){
+artistCountEl.innerText = `${count} Artists Joined`
+}
+
+if(progressFill){
+progressFill.style.width = percent + "%"
+}
+
+if(progressText){
+progressText.innerText = `${maxArtists - count} founding spots remaining`
+}
+
+}
+
+loadArtistCount()
+
+/* -------------------------------- */
+/* SIGNUP FORM */
+/* -------------------------------- */
 
 const form = document.getElementById("signupForm")
 const submitButton = document.getElementById("submitButton")
@@ -360,11 +430,10 @@ e.preventDefault()
 submitButton.disabled = true
 submitButton.innerText = "Creating Account..."
 
-/* GET FORM VALUES */
-
 const name = document.getElementById("artistName").value.trim()
 const email = document.getElementById("email").value.trim()
 const password = document.getElementById("password").value
+
 let subdomain = document.getElementById("subdomain").value.trim()
 
 /* CLEAN SUBDOMAIN */
@@ -377,14 +446,14 @@ if(subdomain.length < 3){
 
 alert("Subdomain must be at least 3 characters.")
 
-submitButton.disabled=false
-submitButton.innerText="Sign Up Now & Get Platinum Pro FREE for Life!"
+submitButton.disabled = false
+submitButton.innerText = "Sign Up Now & Get Platinum Pro FREE for Life!"
 
 return
 
 }
 
-/* CREATE AUTH USER */
+/* CREATE USER */
 
 const { data, error } = await supabase.auth.signUp({
 
@@ -394,8 +463,10 @@ password: password,
 options: {
 
 data: {
+
 name: name,
 subdomain: subdomain
+
 }
 
 }
@@ -406,8 +477,8 @@ if(error){
 
 alert(error.message)
 
-submitButton.disabled=false
-submitButton.innerText="Sign Up Now & Get Platinum Pro FREE for Life!"
+submitButton.disabled = false
+submitButton.innerText = "Sign Up Now & Get Platinum Pro FREE for Life!"
 
 return
 
@@ -417,7 +488,7 @@ return
 
 alert("Account created successfully! Please log in.")
 
-window.location.href="login.html"
+window.location.href = "login.html"
 
 })
 
