@@ -124,75 +124,82 @@ const supabase = createClient(
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 )
 
-const form = document.getElementById("signupForm")
-const submitButton = document.getElementById("submitButton")
+const errorEl = document.getElementById("errorMessage")
+const warningEl = document.getElementById("industryWarning")
 
 /* password toggle */
 
-const togglePassword = document.getElementById("togglePassword")
-const passwordField = document.getElementById("password")
+const passwordInput = document.getElementById("loginPassword")
 
-togglePassword.onclick = () => {
-passwordField.type = passwordField.type === "password" ? "text" : "password"
-togglePassword.innerText = passwordField.type === "password" ? "👁" : "🙈"
+document.getElementById("toggleEye").onclick = () => {
+passwordInput.type = passwordInput.type === "password" ? "text" : "password"
 }
 
-/* signup */
+/* LOGIN */
 
-form.addEventListener("submit", async (e)=>{
+document.getElementById("loginForm").addEventListener("submit", async (e)=>{
 
 e.preventDefault()
 
-submitButton.disabled = true
-submitButton.innerText = "Creating Account..."
+errorEl.classList.add("hidden")
+warningEl.classList.add("hidden")
 
-const name = document.getElementById("artistName").value.trim()
-const email = document.getElementById("email").value.trim()
-const password = document.getElementById("password").value
-const subdomain = document.getElementById("subdomain").value.trim()
+const email = document.getElementById("loginEmail").value.trim()
+const password = document.getElementById("loginPassword").value
 
-/* create auth user */
+/* authenticate */
 
-const { data:authData, error:authError } = await supabase.auth.signUp({
+const { data, error } = await supabase.auth.signInWithPassword({
 email,
 password
 })
 
-if(authError){
-alert(authError.message)
-submitButton.disabled = false
-submitButton.innerText = "Sign Up Now & Get Platinum Pro FREE for Life!"
+if(error){
+errorEl.textContent = error.message
+errorEl.classList.remove("hidden")
 return
 }
 
-const user = authData.user
+/* load profile */
 
-/* create profile */
-
-const { error:profileError } = await supabase
+const { data: profile, error: profileError } = await supabase
 .from("profiles")
-.insert([
-{
-id: user.id,
-email: email,
-name: name,
-subdomain: subdomain,
-role: "artist",
-plan: "platinum",
-subscription_status: "active",
-paid: false
-}
-])
+.select("plan")
+.eq("id", data.user.id)
+.single()
 
-if(profileError){
-alert(profileError.message)
-submitButton.disabled=false
+if(profileError || !profile){
+errorEl.textContent = "Account not active."
+errorEl.classList.remove("hidden")
 return
 }
 
-alert("Account created successfully! Please log in.")
+/* INDUSTRY ACCOUNT */
 
-window.location.href = "login.html"
+if(profile.plan === "industry"){
+await supabase.auth.signOut()
+warningEl.classList.remove("hidden")
+return
+}
+
+/* PRO DASHBOARD */
+
+if(profile.plan === "pro"){
+window.location.href = "profile-admin-pro.html"
+return
+}
+
+/* PLATINUM DASHBOARD */
+
+if(profile.plan === "platinum"){
+window.location.href = "platinum-pro-admin.html"
+return
+}
+
+/* fallback */
+
+errorEl.textContent = "This login is for active artists only."
+errorEl.classList.remove("hidden")
 
 })
 
