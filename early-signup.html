@@ -377,18 +377,14 @@ Sign Up Now & Get Platinum Pro FREE for Life!
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
 
-/* -------------------------------- */
 /* SUPABASE CLIENT */
-/* -------------------------------- */
 
 const supabase = createClient(
 "https://bxoqhmfnseskwqkywppg.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 )
 
-/* -------------------------------- */
 /* PASSWORD TOGGLE */
-/* -------------------------------- */
 
 const togglePassword = document.getElementById("togglePassword")
 const passwordField = document.getElementById("password")
@@ -409,9 +405,7 @@ togglePassword.innerText="👁"
 
 }
 
-/* -------------------------------- */
-/* ARTIST COUNT + PROGRESS BAR */
-/* -------------------------------- */
+/* ARTIST COUNT */
 
 const artistCountEl=document.getElementById("artistCount")
 const progressFill=document.getElementById("progressFill")
@@ -447,9 +441,7 @@ progressText.innerText=`${1000-count} founding spots remaining`
 
 loadArtistCount()
 
-/* -------------------------------- */
 /* SIGNUP FORM */
-/* -------------------------------- */
 
 const form=document.getElementById("signupForm")
 const submitButton=document.getElementById("submitButton")
@@ -499,9 +491,7 @@ return
 
 }
 
-/* -------------------------------- */
 /* SEND EMAIL VIA FORMSUBMIT */
-/* -------------------------------- */
 
 await fetch("https://formsubmit.co/ajax/rhythmdeckmusic@gmail.com",{
 
@@ -519,6 +509,10 @@ subject:"New Rhythm Deck Artist Signup",
 artist:artist,
 email:email,
 subdomain:subdomain,
+
+_replyto:email,
+
+_template:"table",
 
 _autoresponse:
 "Welcome to Rhythm Deck!\n\n"+
