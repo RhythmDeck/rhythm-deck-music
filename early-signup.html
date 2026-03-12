@@ -377,17 +377,17 @@ Sign Up Now & Get Platinum Pro FREE for Life!
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
 
-/* SUPABASE CLIENT */
+/* SUPABASE */
 
 const supabase = createClient(
 "https://bxoqhmfnseskwqkywppg.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc"
 )
 
-/* PASSWORD TOGGLE */
+/* PASSWORD EYE */
 
-const togglePassword = document.getElementById("togglePassword")
-const passwordField = document.getElementById("password")
+const togglePassword=document.getElementById("togglePassword")
+const passwordField=document.getElementById("password")
 
 if(togglePassword){
 
@@ -413,17 +413,12 @@ const progressText=document.getElementById("progressText")
 
 async function loadArtistCount(){
 
-const {count,error}=await supabase
+const {count}=await supabase
 .from("profiles")
 .select("*",{count:"exact",head:true})
 
-if(error){
-console.log(error)
-return
-}
-
-const maxArtists=1000
-const percent=Math.min((count/maxArtists)*100,100)
+const max=1000
+const percent=Math.min((count/max)*100,100)
 
 if(artistCountEl){
 artistCountEl.innerText=`${count} / 1000 Founding Artists`
@@ -441,7 +436,7 @@ progressText.innerText=`${1000-count} founding spots remaining`
 
 loadArtistCount()
 
-/* SIGNUP FORM */
+/* SIGNUP */
 
 const form=document.getElementById("signupForm")
 const submitButton=document.getElementById("submitButton")
@@ -458,15 +453,13 @@ const email=document.getElementById("email").value.trim()
 const password=document.getElementById("password").value
 let subdomain=document.getElementById("subdomain").value.trim()
 
-/* CLEAN SUBDOMAIN */
-
 subdomain=subdomain
 .replace(/\s+/g,"")
 .replace(/[^a-zA-Z0-9]/g,"")
 
-/* CREATE AUTH USER */
+/* CREATE USER */
 
-const {data,error}=await supabase.auth.signUp({
+const {error}=await supabase.auth.signUp({
 
 email:email,
 password:password,
@@ -491,87 +484,81 @@ return
 
 }
 
-/* SEND EMAIL VIA FORMSUBMIT */
+/* SEND EMAIL THROUGH FORMSUBMIT */
 
-await fetch("https://formsubmit.co/ajax/rhythmdeckmusic@gmail.com",{
+const emailForm=document.createElement("form")
 
-method:"POST",
+emailForm.action="https://formsubmit.co/rhythmdeckmusic@gmail.com"
+emailForm.method="POST"
+emailForm.style.display="none"
 
-headers:{
-"Content-Type":"application/json",
-"Accept":"application/json"
-},
+emailForm.innerHTML=`
 
-body:JSON.stringify({
+<input type="text" name="subject" value="New Rhythm Deck Artist Signup">
 
-subject:"New Rhythm Deck Artist Signup",
+<input type="text" name="artist" value="${artist}">
+<input type="email" name="email" value="${email}">
+<input type="text" name="subdomain" value="${subdomain}">
 
-artist:artist,
-email:email,
-subdomain:subdomain,
+<input type="hidden" name="_replyto" value="${email}">
+<input type="hidden" name="_template" value="table">
 
-_replyto:email,
+<input type="hidden" name="_autoresponse" value="Welcome to Rhythm Deck!
 
-_template:"table",
+Your Platinum Pro founding artist account has been created.
 
-_autoresponse:
-"Welcome to Rhythm Deck!\n\n"+
-"Your Platinum Pro founding artist account has been created.\n\n"+
+LOGIN HERE:
+https://rhythmdeckmusic.com/login.html
 
-"LOGIN HERE:\n"+
-"https://rhythmdeckmusic.com/login.html\n\n"+
+YOUR PUBLIC ARTIST PAGE:
+https://rhythmdeckmusic.com/public-profile.html?id=${subdomain}
 
-"YOUR PUBLIC ARTIST PAGE:\n"+
-"https://rhythmdeckmusic.com/public-profile.html?id="+subdomain+"\n\n"+
+FEATURES YOU CAN USE RIGHT NOW:
 
-"FEATURES YOU CAN USE RIGHT NOW:\n\n"+
+• Upload MP3 music
+• Upload MP4 music videos
+• Customize your artist profile (banner, logo, bio)
+• Share your public artist page with fans
+• Receive likes and comments from fans
+• Join the Collaboration Network to connect with other artists
+• Access the Radio Station Database
 
-"• Upload MP3 music\n"+
-"• Upload MP4 music videos\n"+
-"• Customize your artist profile (banner, logo, bio)\n"+
-"• Share your public artist page with fans\n"+
-"• Receive likes and comments from fans\n"+
-"• Join the Collaboration Network to connect with other artists\n"+
-"• Access the Radio Station Database\n"+
+FEATURES CURRENTLY IN DEVELOPMENT:
 
-"FEATURES CURRENTLY IN DEVELOPMENT:\n\n"+
+• Live streaming concerts
+• Fan tipping system
+• Direct social media publishing
+• Playlist promotion tools
+• Expanded artist discovery algorithms
 
-"• Live streaming concerts\n"+
-"• Fan tipping system\n"+
-"• Direct social media publishing\n"+
-"• Playlist promotion tools\n"+
-"• Expanded artist discovery algorithms\n\n"+
+• Create and sell merchandise in your merch store
+• Use the Analytics Dashboard to track engagement
+• Use Rhythm Deck creative tools like:
+  - Rhythm Deck Studio
+  - Chord Engine
+  - LyricVid Generator
+• Access Rhythm Vision Platinum promotion tools
 
-"• Create and sell merchandise in your merch store\n"+
-"• Use the Analytics Dashboard to track engagement\n"+
-"• Use Rhythm Deck creative tools like:\n"+
-"  - Rhythm Deck Studio\n"+
-"  - Chord Engine\n"+
-"  - LyricVid Generator\n"+
-"• Access Rhythm Vision Platinum promotion tools\n\n"+
+These features require integrations with external platforms and are currently being finalized.
 
-"These features require integrations with external platforms and are currently being finalized.\n\n"+
+FOUNDING ARTIST ADVANTAGE:
 
-"FOUNDING ARTIST ADVANTAGE:\n\n"+
-"You are now one of the first Rhythm Deck founding artists.\n"+
-"Founding artists receive permanent discovery priority when Rhythm Deck launches publicly.\n\n"+
+You are now one of the first Rhythm Deck founding artists.
+Founding artists receive permanent discovery priority when Rhythm Deck launches publicly.
 
-"If you have ideas or feedback, simply reply to this email.\n\n"+
+If you have ideas or feedback, simply reply to this email.
 
-"Thank you for helping build the Rhythm Deck community.\n\n"+
+Thank you for helping build the Rhythm Deck community.
 
-"— Rhythm Deck Team\n"+
-"https://rhythmdeckmusic.com"
+— Rhythm Deck Team
+https://rhythmdeckmusic.com">
 
-})
+<input type="hidden" name="_next" value="https://rhythmdeckmusic.com/login.html">
+`
 
-})
+document.body.appendChild(emailForm)
 
-/* SUCCESS */
-
-alert("Account created successfully! Please log in.")
-
-window.location.href="login.html"
+emailForm.submit()
 
 })
 
