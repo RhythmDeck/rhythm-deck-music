@@ -561,6 +561,30 @@ emailForm.submit()
 })
 
 </script>
+<script>
 
+const badge = document.getElementById("featuresBadge")
+const menu = document.getElementById("dropdownMenu")
+
+badge.addEventListener("click", (e)=>{
+e.stopPropagation()
+
+if(menu.style.display === "block"){
+menu.style.display = "none"
+}else{
+menu.style.display = "block"
+}
+
+})
+
+document.addEventListener("click", (e)=>{
+
+if(!menu.contains(e.target) && !badge.contains(e.target)){
+menu.style.display = "none"
+}
+
+})
+
+</script>
 </body>
 </html>
