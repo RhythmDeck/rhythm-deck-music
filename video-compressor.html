@@ -9,20 +9,18 @@ body { background:#050505; font-family:Arial, sans-serif; color:#e5e7eb; margin:
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
 .logo-wrap { display:flex; align-items:center; gap:12px; }
 .logo-wrap img { height:48px; }
-.logo-text { font-size:1.5rem; font-weight:bold; color:#10b981; line-height:1.1; }
+.logo-text { font-size:1.5rem; font-weight:bold; color:#10b981; }
 .tagline { font-size:0.9rem; color:#9ca3af; }
-.hero { display:grid; grid-template-columns: 1fr 1fr; gap:30px; margin-bottom:40px; align-items: stretch; }
-.instructions { border:2px solid #10b981; border-radius:18px; padding:26px; font-size:18px; line-height:1.75; background: #0a0a0a; }
-.image-box { border-radius:18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-.image-box img { width:100%; height:100%; object-fit: cover; display: block; }
+.hero { display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:40px; }
+.instructions { border:2px solid #10b981; border-radius:18px; padding:26px; font-size:18px; line-height:1.75; background:#0a0a0a; }
+.image-box img { width:100%; height:100%; object-fit:cover; border-radius:18px; }
 .section { margin-top:26px; }
 label { font-weight:bold; display:block; margin-bottom:6px; }
 input, select { width:100%; padding:12px; border-radius:12px; border:none; background:#1f2937; color:#e5e7eb; }
 button { padding:16px 26px; background:#10b981; border:none; border-radius:16px; font-weight:bold; cursor:pointer; width:100%; font-size:1.1rem; }
 button:disabled { opacity:.5; cursor:not-allowed; }
-#status { white-space:pre-line; font-size:15px; background:#111; padding:15px; border-radius:12px; min-height:160px; }
-.note { background:#052e16; border:1px solid #10b981; padding:15px; border-radius:12px; margin:20px 0; font-size:15px; }
-#previewContainer video { width:100%; max-height:320px; border-radius:12px; background:#000; }
+#status { white-space:pre-line; background:#111; padding:15px; border-radius:12px; min-height:200px; font-size:15px; }
+.note { background:#052e16; border:1px solid #10b981; padding:15px; border-radius:12px; margin:20px 0; }
 </style>
 </head>
 <body>
@@ -43,13 +41,14 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 
 <div class="hero">
   <div class="instructions">
-    <strong>Advanced Video Compressor</strong><br><br>
-    • All processing happens in your browser (100% private)<br>
-    • First load takes 15–40 seconds (downloads FFmpeg)<br>
-    • Subsequent compressions are faster
+    <strong>Advanced Video Compressor (Browser Version)</strong><br><br>
+    • All processing happens in your browser<br>
+    • First load can take 20–60 seconds (downloads FFmpeg)<br>
+    • Try with a small video (<50MB) first<br>
+    • If it fails, we will switch to server-side
   </div>
   <div class="image-box">
-    <img src="compressor.png" alt="Rhythm Deck Video Compressor">
+    <img src="compressor.png" alt="Video Compressor">
   </div>
 </div>
 
@@ -59,22 +58,25 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 </div>
 
 <div class="section">
+  <label>Compression Quality (CRF)</label>
+  <input type="range" min="18" max="35" value="23" id="crf" step="1">
+  <div class="small" id="crfText">CRF 23 → Excellent balance</div>
+</div>
+
+<div class="section">
   <button id="start">Compress Video</button>
 </div>
 
-<div id="statusWrap" style="margin-top:20px;">
-  <div id="status">Ready – Click Compress Video (first time is slow)</div>
-</div>
+<div id="status">Ready – Click Compress Video</div>
 
 <div id="previewContainer" style="display:none; margin-top:20px;">
   <h3>✅ Compression Complete</h3>
   <video id="outputVideo" controls style="width:100%; max-height:400px;"></video><br><br>
-  <a id="downloadLink" style="color:#10b981; font-weight:bold; text-decoration:underline;">⬇️ Download Compressed Video</a>
+  <a id="downloadLink" style="color:#10b981; font-weight:bold;">⬇️ Download Compressed Video</a>
 </div>
 </div>
 
-<!-- Correct FFmpeg library -->
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/umd/ffmpeg.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.min.js"></script>
 
 <script>
 let ffmpeg = null;
@@ -82,41 +84,45 @@ let ffmpeg = null;
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
 const statusEl = document.getElementById('status');
+const crfSlider = document.getElementById('crf');
+const crfText = document.getElementById('crfText');
 const previewContainer = document.getElementById('previewContainer');
 const outputVideo = document.getElementById('outputVideo');
 const downloadLink = document.getElementById('downloadLink');
 
+crfSlider.oninput = () => {
+  const v = crfSlider.value;
+  crfText.textContent = `CRF ${v} → ${v <= 20 ? 'Near lossless' : v <= 25 ? 'Recommended' : 'Strong compression'}`;
+};
+crfSlider.oninput();
+
 startBtn.onclick = async () => {
   const file = fileInput.files[0];
-  if (!file) {
-    alert("Please select a video file first.");
-    return;
-  }
+  if (!file) return alert("Please select a video file first.");
 
   startBtn.disabled = true;
   startBtn.textContent = "Loading FFmpeg...";
-  statusEl.textContent = "Loading FFmpeg (first time only – 15 to 40 seconds)...\n";
+  statusEl.textContent = "Downloading FFmpeg (20–60 seconds the first time)...\n";
 
   try {
     if (!ffmpeg) {
+      console.log("Creating FFmpeg instance...");
       ffmpeg = new FFmpegWASM.FFmpeg();
       await ffmpeg.load();
-      statusEl.textContent += "FFmpeg loaded successfully!\n";
+      console.log("FFmpeg loaded");
     }
 
-    statusEl.textContent += "Preparing video...\n";
+    statusEl.textContent += "FFmpeg loaded. Writing video to memory...\n";
 
-    // Write input file
     const inputName = "input.mp4";
     await ffmpeg.writeFile(inputName, new Uint8Array(await file.arrayBuffer()));
 
-    statusEl.textContent += "Compressing with good quality (CRF 23)...\n";
+    statusEl.textContent += "Starting compression...\n";
 
-    // Simple compression command
     await ffmpeg.exec([
       '-i', inputName,
       '-c:v', 'libx264',
-      '-crf', '23',
+      '-crf', crfSlider.value.toString(),
       '-preset', 'medium',
       '-c:a', 'aac',
       '-b:a', '128k',
@@ -130,17 +136,17 @@ startBtn.onclick = async () => {
     outputVideo.src = url;
     downloadLink.href = url;
     downloadLink.download = 'compressed-' + file.name.replace(/\.[^/.]+$/, "") + '.mp4';
-
     previewContainer.style.display = 'block';
-    statusEl.textContent += "\n✅ Compression finished! You can now download the file.";
+
+    statusEl.textContent += "\n✅ Compression successful!";
 
   } catch (err) {
     console.error("FFmpeg Error:", err);
-    statusEl.textContent += "\nError: " + (err.message || err);
+    statusEl.textContent += "\nError: " + (err.message || "Unknown error") + "\nThis browser version is having issues on Vercel.\nWe should switch to a server-side compressor.";
   }
 
   startBtn.disabled = false;
-  startBtn.textContent = "Compress Another Video";
+  startBtn.textContent = "Try Again";
 };
 </script>
 </body>
