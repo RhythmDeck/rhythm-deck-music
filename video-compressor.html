@@ -19,8 +19,7 @@ label { font-weight:bold; display:block; margin-bottom:6px; }
 input, select { width:100%; padding:12px; border-radius:12px; border:none; background:#1f2937; color:#e5e7eb; }
 button { padding:16px 26px; background:#10b981; border:none; border-radius:16px; font-weight:bold; cursor:pointer; width:100%; font-size:1.1rem; }
 button:disabled { opacity:.5; cursor:not-allowed; }
-#status { white-space:pre-line; background:#111; padding:15px; border-radius:12px; min-height:200px; font-size:15px; }
-.note { background:#052e16; border:1px solid #10b981; padding:15px; border-radius:12px; margin:20px 0; }
+#status { white-space:pre-line; background:#111; padding:15px; border-radius:12px; min-height:180px; font-size:15px; }
 </style>
 </head>
 <body>
@@ -41,11 +40,11 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 
 <div class="hero">
   <div class="instructions">
-    <strong>Advanced Video Compressor (Browser Version)</strong><br><br>
-    • All processing happens in your browser<br>
-    • First load can take 20–60 seconds (downloads FFmpeg)<br>
-    • Try with a small video (<50MB) first<br>
-    • If it fails, we will switch to server-side
+    <strong>Server-Side Video Compressor</strong><br><br>
+    • Upload any video<br>
+    • Processed on Vercel servers<br>
+    • Choose quality level<br>
+    • Download compressed MP4 ready for Rhythm Deck
   </div>
   <div class="image-box">
     <img src="compressor.png" alt="Video Compressor">
@@ -68,27 +67,14 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 </div>
 
 <div id="status">Ready – Click Compress Video</div>
-
-<div id="previewContainer" style="display:none; margin-top:20px;">
-  <h3>✅ Compression Complete</h3>
-  <video id="outputVideo" controls style="width:100%; max-height:400px;"></video><br><br>
-  <a id="downloadLink" style="color:#10b981; font-weight:bold;">⬇️ Download Compressed Video</a>
 </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.min.js"></script>
 
 <script>
-let ffmpeg = null;
-
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
 const statusEl = document.getElementById('status');
 const crfSlider = document.getElementById('crf');
 const crfText = document.getElementById('crfText');
-const previewContainer = document.getElementById('previewContainer');
-const outputVideo = document.getElementById('outputVideo');
-const downloadLink = document.getElementById('downloadLink');
 
 crfSlider.oninput = () => {
   const v = crfSlider.value;
@@ -98,55 +84,39 @@ crfSlider.oninput();
 
 startBtn.onclick = async () => {
   const file = fileInput.files[0];
-  if (!file) return alert("Please select a video file first.");
+  if (!file) return alert("Please select a video file");
 
   startBtn.disabled = true;
-  startBtn.textContent = "Loading FFmpeg...";
-  statusEl.textContent = "Downloading FFmpeg (20–60 seconds the first time)...\n";
+  startBtn.textContent = "Uploading & compressing...";
+  statusEl.textContent = "Uploading video...\n";
+
+  const formData = new FormData();
+  formData.append('video', file);
+  formData.append('crf', crfSlider.value);
 
   try {
-    if (!ffmpeg) {
-      console.log("Creating FFmpeg instance...");
-      ffmpeg = new FFmpegWASM.FFmpeg();
-      await ffmpeg.load();
-      console.log("FFmpeg loaded");
-    }
+    const res = await fetch('/api/compress-video', {
+      method: 'POST',
+      body: formData
+    });
 
-    statusEl.textContent += "FFmpeg loaded. Writing video to memory...\n";
+    if (!res.ok) throw new Error("Server error");
 
-    const inputName = "input.mp4";
-    await ffmpeg.writeFile(inputName, new Uint8Array(await file.arrayBuffer()));
-
-    statusEl.textContent += "Starting compression...\n";
-
-    await ffmpeg.exec([
-      '-i', inputName,
-      '-c:v', 'libx264',
-      '-crf', crfSlider.value.toString(),
-      '-preset', 'medium',
-      '-c:a', 'aac',
-      '-b:a', '128k',
-      'output.mp4'
-    ]);
-
-    const data = await ffmpeg.readFile('output.mp4');
-    const blob = new Blob([data], { type: 'video/mp4' });
+    const blob = await res.blob();
     const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'compressed-' + file.name;
+    a.click();
 
-    outputVideo.src = url;
-    downloadLink.href = url;
-    downloadLink.download = 'compressed-' + file.name.replace(/\.[^/.]+$/, "") + '.mp4';
-    previewContainer.style.display = 'block';
-
-    statusEl.textContent += "\n✅ Compression successful!";
-
+    statusEl.textContent += "\n✅ Compression complete! File downloaded.";
   } catch (err) {
-    console.error("FFmpeg Error:", err);
-    statusEl.textContent += "\nError: " + (err.message || "Unknown error") + "\nThis browser version is having issues on Vercel.\nWe should switch to a server-side compressor.";
+    console.error(err);
+    statusEl.textContent += "\nError: " + err.message;
   }
 
   startBtn.disabled = false;
-  startBtn.textContent = "Try Again";
+  startBtn.textContent = "Compress Another Video";
 };
 </script>
 </body>
