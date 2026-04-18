@@ -16,12 +16,12 @@ header { display:flex; justify-content:space-between; align-items:center; margin
 .image-box img { width:100%; height:100%; object-fit:cover; border-radius:18px; }
 .section { margin-top:26px; }
 label { font-weight:bold; display:block; margin-bottom:6px; }
-input, select, button { width:100%; padding:12px; border-radius:12px; border:none; background:#1f2937; color:#e5e7eb; }
+input, button { width:100%; padding:12px; border-radius:12px; border:none; }
 button { background:#10b981; font-weight:bold; cursor:pointer; font-size:1.1rem; }
 button:disabled { opacity:0.5; cursor:not-allowed; }
-.progress-bar { background:#111; border-radius:12px; overflow:hidden; height:22px; margin:8px 0; border:1px solid #10b981; }
-.progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#10b981,#34d399); transition:width 0.3s ease; }
-#status { white-space:pre-line; background:#111; padding:15px; border-radius:12px; min-height:160px; font-size:15px; }
+#status { white-space:pre-line; background:#111; padding:15px; border-radius:12px; min-height:200px; }
+.progress-bar { background:#111; height:22px; border-radius:12px; overflow:hidden; margin:8px 0; border:1px solid #10b981; }
+.progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#10b981,#34d399); transition:width 0.4s; }
 </style>
 </head>
 <body>
@@ -43,10 +43,9 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 <div class="hero">
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
-    • Upload any video<br>
-    • Real-time progress shown below<br>
-    • Processed on server<br>
-    • Best final size: 50–200 MB for Rhythm Deck
+    • Upload → Supabase Storage<br>
+    • Compress on Vercel<br>
+    • Real-time progress shown below
   </div>
   <div class="image-box">
     <img src="compressor.png" alt="Video Compressor">
@@ -59,65 +58,57 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 </div>
 
 <div class="section">
-  <label>Compression Quality (CRF)</label>
-  <input type="range" min="18" max="35" value="23" id="crf" step="1">
-  <div class="small" id="crfText">CRF 23 → Recommended balance</div>
-</div>
-
-<div class="section">
   <button id="start">Start Compression</button>
 </div>
 
 <div id="status">Ready — Select a video and click Start Compression</div>
 
-<!-- Progress Bars -->
 <div id="progressContainer" style="display:none; margin-top:20px;">
-  <div class="progress-label">Uploading <span id="uploadPercent">0%</span></div>
+  <div>Uploading <span id="uploadPercent">0%</span></div>
   <div class="progress-bar"><div id="uploadBar" class="progress-fill"></div></div>
-
-  <div class="progress-label" style="margin-top:15px;">Compressing <span id="compressPercent">0%</span></div>
+  
+  <div style="margin-top:15px;">Compressing <span id="compressPercent">0%</span></div>
   <div class="progress-bar"><div id="compressBar" class="progress-fill"></div></div>
 </div>
 </div>
 
 <script>
+// === CHANGE THESE TWO LINES WITH YOUR SUPABASE DETAILS ===
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY-HERE';
+// ========================================================
+
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
 const statusEl = document.getElementById('status');
-const crfSlider = document.getElementById('crf');
-const crfText = document.getElementById('crfText');
 const progressContainer = document.getElementById('progressContainer');
 const uploadBar = document.getElementById('uploadBar');
 const uploadPercent = document.getElementById('uploadPercent');
 const compressBar = document.getElementById('compressBar');
 const compressPercent = document.getElementById('compressPercent');
 
-crfSlider.oninput = () => {
-  crfText.textContent = `CRF ${crfSlider.value} → ${crfSlider.value <= 20 ? 'Near lossless' : crfSlider.value <= 25 ? 'Recommended' : 'Strong compression'}`;
-};
-
 startBtn.onclick = async () => {
   const file = fileInput.files[0];
-  if (!file) return alert("Please select a video file");
+  if (!file) return alert("Please select a video");
 
   startBtn.disabled = true;
   progressContainer.style.display = 'block';
-  statusEl.textContent = "Starting upload...\n";
+  statusEl.textContent = "Uploading to Supabase...\n";
 
   const formData = new FormData();
-  formData.append('video', file);
-  formData.append('crf', crfSlider.value);
+  formData.append('file', file);
 
   try {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/compress-video');
+    xhr.open('POST', `${https://bxoqhmfnseskwqkywppg.supabase.co}/storage/v1/object/video-uploads/${Date.now()}-${file.name}`);
+
+    xhr.setRequestHeader('Authorization', `Bearer ${eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc}`);
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
         const percent = Math.round((e.loaded / e.total) * 100);
         uploadBar.style.width = percent + '%';
         uploadPercent.textContent = percent + '%';
-        statusEl.textContent = `Uploading... ${percent}%\n`;
       }
     };
 
@@ -125,26 +116,32 @@ startBtn.onclick = async () => {
       if (xhr.status === 200) {
         uploadBar.style.width = '100%';
         uploadPercent.textContent = '100%';
-        statusEl.textContent += "Upload complete. Compressing on server...\n";
+        statusEl.textContent += "Upload complete. Starting server compression...\n";
 
-        const blob = new Blob([xhr.response]);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'compressed-' + file.name;
-        a.click();
+        // Call Vercel to compress (only sends small URL, no 413 error)
+        const compressRes = await fetch('/api/compress-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filePath: `${Date.now()}-${file.name}` })
+        });
 
-        compressBar.style.width = '100%';
-        compressPercent.textContent = '100%';
-        statusEl.textContent += "\n✅ Compression complete! File downloaded.";
+        if (compressRes.ok) {
+          const blob = await compressRes.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'compressed-' + file.name;
+          a.click();
+
+          compressBar.style.width = '100%';
+          compressPercent.textContent = '100%';
+          statusEl.textContent += "\n✅ Compression complete! File downloaded.";
+        } else {
+          statusEl.textContent += "\nCompression failed on server.";
+        }
       } else {
-        statusEl.textContent += "\nError: Server returned " + xhr.status;
+        statusEl.textContent += "\nUpload failed.";
       }
-      startBtn.disabled = false;
-    };
-
-    xhr.onerror = () => {
-      statusEl.textContent += "\nNetwork error. Please try again.";
       startBtn.disabled = false;
     };
 
