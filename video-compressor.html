@@ -16,10 +16,12 @@ header { display:flex; justify-content:space-between; align-items:center; margin
 .image-box img { width:100%; height:100%; object-fit:cover; border-radius:18px; }
 .section { margin-top:26px; }
 label { font-weight:bold; display:block; margin-bottom:6px; }
-input, select { width:100%; padding:12px; border-radius:12px; border:none; background:#1f2937; color:#e5e7eb; }
-button { padding:16px 26px; background:#10b981; border:none; border-radius:16px; font-weight:bold; cursor:pointer; width:100%; font-size:1.1rem; }
-button:disabled { opacity:.5; cursor:not-allowed; }
-#status { white-space:pre-line; background:#111; padding:15px; border-radius:12px; min-height:180px; font-size:15px; }
+input, select, button { width:100%; padding:12px; border-radius:12px; border:none; background:#1f2937; color:#e5e7eb; }
+button { background:#10b981; font-weight:bold; cursor:pointer; font-size:1.1rem; }
+button:disabled { opacity:0.5; cursor:not-allowed; }
+.progress-bar { background:#111; border-radius:12px; overflow:hidden; height:22px; margin:8px 0; border:1px solid #10b981; }
+.progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#10b981,#34d399); transition:width 0.3s ease; }
+#status { white-space:pre-line; background:#111; padding:15px; border-radius:12px; min-height:160px; font-size:15px; }
 </style>
 </head>
 <body>
@@ -40,11 +42,11 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 
 <div class="hero">
   <div class="instructions">
-    <strong>Server-Side Video Compressor</strong><br><br>
+    <strong>Video Compressor</strong><br><br>
     • Upload any video<br>
-    • Processed on Vercel servers<br>
-    • Choose quality level<br>
-    • Download compressed MP4 ready for Rhythm Deck
+    • Real-time progress shown below<br>
+    • Processed on server<br>
+    • Best final size: 50–200 MB for Rhythm Deck
   </div>
   <div class="image-box">
     <img src="compressor.png" alt="Video Compressor">
@@ -59,14 +61,23 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 <div class="section">
   <label>Compression Quality (CRF)</label>
   <input type="range" min="18" max="35" value="23" id="crf" step="1">
-  <div class="small" id="crfText">CRF 23 → Excellent balance</div>
+  <div class="small" id="crfText">CRF 23 → Recommended balance</div>
 </div>
 
 <div class="section">
-  <button id="start">Compress Video</button>
+  <button id="start">Start Compression</button>
 </div>
 
-<div id="status">Ready – Click Compress Video</div>
+<div id="status">Ready — Select a video and click Start Compression</div>
+
+<!-- Progress Bars -->
+<div id="progressContainer" style="display:none; margin-top:20px;">
+  <div class="progress-label">Uploading <span id="uploadPercent">0%</span></div>
+  <div class="progress-bar"><div id="uploadBar" class="progress-fill"></div></div>
+
+  <div class="progress-label" style="margin-top:15px;">Compressing <span id="compressPercent">0%</span></div>
+  <div class="progress-bar"><div id="compressBar" class="progress-fill"></div></div>
+</div>
 </div>
 
 <script>
@@ -75,48 +86,74 @@ const startBtn = document.getElementById('start');
 const statusEl = document.getElementById('status');
 const crfSlider = document.getElementById('crf');
 const crfText = document.getElementById('crfText');
+const progressContainer = document.getElementById('progressContainer');
+const uploadBar = document.getElementById('uploadBar');
+const uploadPercent = document.getElementById('uploadPercent');
+const compressBar = document.getElementById('compressBar');
+const compressPercent = document.getElementById('compressPercent');
 
 crfSlider.oninput = () => {
-  const v = crfSlider.value;
-  crfText.textContent = `CRF ${v} → ${v <= 20 ? 'Near lossless' : v <= 25 ? 'Recommended' : 'Strong compression'}`;
+  crfText.textContent = `CRF ${crfSlider.value} → ${crfSlider.value <= 20 ? 'Near lossless' : crfSlider.value <= 25 ? 'Recommended' : 'Strong compression'}`;
 };
-crfSlider.oninput();
 
 startBtn.onclick = async () => {
   const file = fileInput.files[0];
   if (!file) return alert("Please select a video file");
 
   startBtn.disabled = true;
-  startBtn.textContent = "Uploading & compressing...";
-  statusEl.textContent = "Uploading video...\n";
+  progressContainer.style.display = 'block';
+  statusEl.textContent = "Starting upload...\n";
 
   const formData = new FormData();
   formData.append('video', file);
   formData.append('crf', crfSlider.value);
 
   try {
-    const res = await fetch('/api/compress-video', {
-      method: 'POST',
-      body: formData
-    });
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/compress-video');
 
-    if (!res.ok) throw new Error("Server error");
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        uploadBar.style.width = percent + '%';
+        uploadPercent.textContent = percent + '%';
+        statusEl.textContent = `Uploading... ${percent}%\n`;
+      }
+    };
 
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'compressed-' + file.name;
-    a.click();
+    xhr.onload = async () => {
+      if (xhr.status === 200) {
+        uploadBar.style.width = '100%';
+        uploadPercent.textContent = '100%';
+        statusEl.textContent += "Upload complete. Compressing on server...\n";
 
-    statusEl.textContent += "\n✅ Compression complete! File downloaded.";
+        const blob = new Blob([xhr.response]);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'compressed-' + file.name;
+        a.click();
+
+        compressBar.style.width = '100%';
+        compressPercent.textContent = '100%';
+        statusEl.textContent += "\n✅ Compression complete! File downloaded.";
+      } else {
+        statusEl.textContent += "\nError: Server returned " + xhr.status;
+      }
+      startBtn.disabled = false;
+    };
+
+    xhr.onerror = () => {
+      statusEl.textContent += "\nNetwork error. Please try again.";
+      startBtn.disabled = false;
+    };
+
+    xhr.send(formData);
+
   } catch (err) {
-    console.error(err);
     statusEl.textContent += "\nError: " + err.message;
+    startBtn.disabled = false;
   }
-
-  startBtn.disabled = false;
-  startBtn.textContent = "Compress Another Video";
 };
 </script>
 </body>
