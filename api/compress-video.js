@@ -1,57 +1,66 @@
 import { NextResponse } from 'next/server';
 import ffmpeg from 'fluent-ffmpeg';
-import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
+import ffmpegStatic from 'ffmpeg-static';
+import { createClient } from '@supabase/supabase-js';
 
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfmpegPath(ffmpegStatic);
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export const config = {
   api: {
-    bodyParser: false,        // Important for file uploads
-    maxDuration: 300,         // 5 minutes max (upgrade plan if needed)
+    bodyParser: false,
+    maxDuration: 300, // 5 minutes max
   },
 };
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const formData = await req.formData();
-    const videoFile = formData.get('video');
-    const crf = parseInt(formData.get('crf')) || 23;
+    const { filePath } = await request.json();
 
-    if (!videoFile) {
-      return NextResponse.json({ error: 'No video uploaded' }, { status: 400 });
+    if (!filePath) {
+      return NextResponse.json({ error: 'No filePath provided' }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await videoFile.arrayBuffer());
-    const inputPath = `/tmp/input-${Date.now()}.mp4`;
-    const outputPath = `/tmp/output-${Date.now()}.mp4`;
+    // Get signed URL from Supabase
+    const { data: signedUrlData, error } = await supabase.storage
+      .from('video-uploads')
+      .createSignedUrl(filePath, 3600); // 1 hour valid
 
-    // Write file to temp folder
-    await require('fs').promises.writeFile(inputPath, buffer);
+    if (error) throw error;
 
-    // Run compression
+    const inputUrl = signedUrlData.signedUrl;
+    const outputPath = `/tmp/compressed-${Date.now()}.mp4`;
+
+    // Compress using FFmpeg
     await new Promise((resolve, reject) => {
-      ffmpeg(inputPath)
-        .outputOptions([`-crf ${crf}`, '-preset medium', '-c:a aac', '-b:a 128k'])
+      ffmpeg(inputUrl)
+        .outputOptions('-crf 23')
+        .outputOptions('-preset medium')
+        .outputOptions('-c:a aac')
+        .outputOptions('-b:a 128k')
         .on('end', resolve)
         .on('error', reject)
         .save(outputPath);
     });
 
-    const outputBuffer = await require('fs').promises.readFile(outputPath);
+    const outputBuffer = require('fs').readFileSync(outputPath);
 
-    // Clean up temp files
-    require('fs').unlinkSync(inputPath);
-    require('fs').unlinkSync(outputPath);
+    // Optional: Clean up Supabase file after compression
+    // await supabase.storage.from('video-uploads').remove([filePath]);
 
     return new NextResponse(outputBuffer, {
       headers: {
         'Content-Type': 'video/mp4',
-        'Content-Disposition': 'attachment; filename="compressed.mp4"',
+        'Content-Disposition': `attachment; filename="compressed-${Date.now()}.mp4"`,
       },
     });
 
   } catch (error) {
-    console.error(error);
+    console.error('Compression error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}// JavaScript Document
+}
