@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <title>Rhythm Deck – Video Compressor</title>
 <style>
-body { background:#050505; font-family:Arial, sans-serif; color:#e5e7eb; }
+body { background:#050505; font-family:Arial, sans-serif; color:#e5e7eb; margin:0; padding:0; }
 .container { max-width:1200px; margin:40px auto; padding:30px; border:2px solid #10b981; border-radius:22px; background:linear-gradient(180deg,#0b0b0b,#060606); box-shadow:0 30px 70px rgba(0,0,0,.85); }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
 .logo-wrap { display:flex; align-items:center; gap:12px; }
@@ -50,10 +50,9 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 <div class="hero">
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
-    • Upload any video (any size)<br>
-    • Uploaded in safe 100MB chunks<br>
+    • Uploads in safe 100MB chunks to Supabase<br>
     • Compressed on Vercel servers<br>
-    • Download as single MP4 or ZIP
+    • Real-time progress shown below
   </div>
   <div class="image-box">
     <img src="compressor.png" alt="Compressor">
@@ -95,7 +94,6 @@ button:disabled { opacity:.5; cursor:not-allowed; }
   <option value="mp4">Single MP4 (merged)</option>
   <option value="zip">ZIP (parts)</option>
 </select>
-
 </div>
 
 <div class="section">
@@ -116,6 +114,11 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 </div>
 
 <script>
+// ================== YOUR SUPABASE SETTINGS ==================
+const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
+// ===========================================================
+
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
 const status = document.getElementById('status');
@@ -164,11 +167,6 @@ startBtn.onclick = async () => {
 
   startBtn.disabled = true;
   startBtn.textContent = 'Processing...';
-
-  uploadInner.style.width = '0%';
-  uploadText.textContent = '0%';
-  compressInner.style.width = '0%';
-  compressText.textContent = 'Waiting...';
   status.textContent = 'Uploading video...\n';
 
   const file = fileInput.files[0];
@@ -189,13 +187,13 @@ startBtn.onclick = async () => {
     form.append('index', index);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/upload-chunk');   // ← Vercel route
+    xhr.open('POST', '/api/upload-chunk');
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
-        const totalPercent = Math.round(((uploadedBytes + e.loaded) / totalBytes) * 100);
-        uploadInner.style.width = totalPercent + '%';
-        uploadText.textContent = totalPercent + '%';
+        const percent = Math.round(((uploadedBytes + e.loaded) / totalBytes) * 100);
+        uploadInner.style.width = percent + '%';
+        uploadText.textContent = percent + '%';
       }
     };
 
@@ -231,7 +229,7 @@ startBtn.onclick = async () => {
     [width, height] = dims.value.split('x');
   }
 
-  const res = await fetch('/api/start', {   // ← Vercel route
+  const res = await fetch('/api/start', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
