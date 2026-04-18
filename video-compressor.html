@@ -4,24 +4,31 @@
 <meta charset="UTF-8" />
 <title>Rhythm Deck – Video Compressor</title>
 <style>
-body { background:#050505; font-family:Arial, sans-serif; color:#e5e7eb; margin:0; padding:0; }
+body { background:#050505; font-family:Arial, sans-serif; color:#e5e7eb; }
 .container { max-width:1200px; margin:40px auto; padding:30px; border:2px solid #10b981; border-radius:22px; background:linear-gradient(180deg,#0b0b0b,#060606); box-shadow:0 30px 70px rgba(0,0,0,.85); }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
 .logo-wrap { display:flex; align-items:center; gap:12px; }
 .logo-wrap img { height:48px; }
-.logo-text { font-size:1.5rem; font-weight:bold; color:#10b981; }
+.logo-text { font-size:1.5rem; font-weight:bold; color:#10b981; line-height:1.1; }
 .tagline { font-size:0.9rem; color:#9ca3af; }
-.hero { display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:40px; }
-.instructions { border:2px solid #10b981; border-radius:18px; padding:26px; font-size:18px; line-height:1.75; background:#0a0a0a; }
+nav a { display:inline-block; padding:10px 20px; margin-left:12px; border-radius:999px; font-weight:bold; text-decoration:none; transition:all 0.2s; }
+nav a.home { background:linear-gradient(90deg,#22c55e,#16a34a); color:white; }
+nav a.contact { background:linear-gradient(90deg,#8b5cf6,#7c3aed); color:white; }
+nav a:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.5); }
+.hero { display:grid; grid-template-columns:1fr 1.5fr; gap:30px; }
+.instructions { border:2px solid #10b981; border-radius:18px; padding:26px; font-size:18px; line-height:1.75; }
 .image-box img { width:100%; height:100%; object-fit:cover; border-radius:18px; }
 .section { margin-top:26px; }
 label { font-weight:bold; display:block; margin-bottom:6px; }
-input, button { width:100%; padding:12px; border-radius:12px; border:none; }
-button { background:#10b981; font-weight:bold; cursor:pointer; font-size:1.1rem; }
-button:disabled { opacity:0.5; cursor:not-allowed; }
-#status { white-space:pre-line; background:#111; padding:15px; border-radius:12px; min-height:200px; }
-.progress-bar { background:#111; height:22px; border-radius:12px; overflow:hidden; margin:8px 0; border:1px solid #10b981; }
-.progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#10b981,#34d399); transition:width 0.4s; }
+input, select { width:100%; padding:12px; border-radius:12px; border:none; }
+button { padding:16px 26px; background:#10b981; border:none; border-radius:16px; font-weight:bold; cursor:pointer; }
+button:disabled { opacity:.5; cursor:not-allowed; }
+#statusWrap { display:grid; grid-template-columns:1fr 300px; gap:20px; margin-top:18px; }
+#status { white-space:pre-line; font-size:15px; }
+#uploadProgressOuter, #compressProgressOuter { background:#111; border-radius:12px; overflow:hidden; border:1px solid #10b981; height:22px; margin-top:10px; }
+#uploadProgressInner, #compressProgressInner { height:100%; width:0%; background:linear-gradient(90deg,#10b981,#34d399); transition:width 0.4s ease; }
+.progress-label { margin-top:6px; font-size:13px; color:#9ca3af; text-align:left; font-weight:bold; }
+.timer { float:right; color:#10b981; }
 </style>
 </head>
 <body>
@@ -43,115 +50,228 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 <div class="hero">
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
-    • Uploads to Supabase (in chunks if needed)<br>
-    • Compresses on Vercel<br>
-    • Real-time progress shown below
+    • Upload any video (any size)<br>
+    • Uploaded in safe 100MB chunks<br>
+    • Compressed on Vercel servers<br>
+    • Download as single MP4 or ZIP
   </div>
   <div class="image-box">
-    <img src="compressor.png" alt="Video Compressor">
+    <img src="compressor.png" alt="Compressor">
   </div>
 </div>
 
 <div class="section">
-  <label>Upload Video</label>
-  <input type="file" id="file" accept="video/*">
+<label>Upload Video</label>
+<input type="file" id="file">
 </div>
 
 <div class="section">
-  <button id="start">Start Compression</button>
+<label>Compression Quality (CRF)</label>
+<input type="range" min="18" max="30" value="23" id="crf">
+<div class="small" id="crfText"></div>
 </div>
 
-<div id="status">Ready — Select a video and click Start Compression</div>
+<div class="section">
+<label>Target Dimensions</label>
+<select id="dimensions">
+  <option value="auto">Automatic</option>
+  <option value="1920x1080">1080p</option>
+  <option value="1280x720">720p</option>
+  <option value="manual">Manual</option>
+</select>
+<div id="manualDims" style="display:none">
+  <input id="w" placeholder="Width">
+  <input id="h" placeholder="Height">
+</div>
+</div>
 
-<div id="progressContainer" style="display:none; margin-top:20px;">
-  <div>Uploading <span id="uploadPercent">0%</span></div>
-  <div class="progress-bar"><div id="uploadBar" class="progress-fill"></div></div>
-  
-  <div style="margin-top:15px;">Compressing <span id="compressPercent">0%</span></div>
-  <div class="progress-bar"><div id="compressBar" class="progress-fill"></div></div>
+<div class="section">
+<label><input type="checkbox" id="hevc" checked> Use HEVC (H.265)</label>
+</div>
+
+<div class="section">
+<label>Download Format</label>
+<select id="format">
+  <option value="mp4">Single MP4 (merged)</option>
+  <option value="zip">ZIP (parts)</option>
+</select>
+
+</div>
+
+<div class="section">
+<button id="start">Compress Video</button>
+</div>
+
+<div id="statusWrap">
+  <div id="status"></div>
+  <div>
+    <div class="progress-label">Uploading chunks <span id="uploadTimer" class="timer">00:00</span></div>
+    <div id="uploadProgressOuter"><div id="uploadProgressInner"></div></div>
+    <div id="uploadProgressText" class="progress-label">0%</div>
+    <div class="progress-label" style="margin-top:20px;">Compressing <span id="compressTimer" class="timer">00:00</span></div>
+    <div id="compressProgressOuter"><div id="compressProgressInner"></div></div>
+    <div id="compressProgressText" class="progress-label">Waiting…</div>
+  </div>
 </div>
 </div>
 
 <script>
-// ================== YOUR SUPABASE SETTINGS ==================
-const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
-// ===========================================================
-
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
-const statusEl = document.getElementById('status');
-const progressContainer = document.getElementById('progressContainer');
-const uploadBar = document.getElementById('uploadBar');
-const uploadPercent = document.getElementById('uploadPercent');
-const compressBar = document.getElementById('compressBar');
-const compressPercent = document.getElementById('compressPercent');
+const status = document.getElementById('status');
+const crf = document.getElementById('crf');
+const crfText = document.getElementById('crfText');
+const dims = document.getElementById('dimensions');
+const manual = document.getElementById('manualDims');
+const uploadInner = document.getElementById('uploadProgressInner');
+const uploadText = document.getElementById('uploadProgressText');
+const compressInner = document.getElementById('compressProgressInner');
+const compressText = document.getElementById('compressProgressText');
+const uploadTimerEl = document.getElementById('uploadTimer');
+const compressTimerEl = document.getElementById('compressTimer');
+
+let uploadStartTime = null, compressStartTime = null;
+let uploadTimerInterval = null, compressTimerInterval = null;
+
+function formatTime(seconds) {
+  const min = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const sec = (seconds % 60).toString().padStart(2, '0');
+  return `${min}:${sec}`;
+}
+
+function startTimer(type) {
+  const now = Date.now();
+  if (type === 'upload') {
+    uploadStartTime = now;
+    uploadTimerInterval = setInterval(() => uploadTimerEl.textContent = formatTime(Math.floor((Date.now() - uploadStartTime)/1000)), 1000);
+  } else {
+    compressStartTime = now;
+    compressTimerInterval = setInterval(() => compressTimerEl.textContent = formatTime(Math.floor((Date.now() - compressStartTime)/1000)), 1000);
+  }
+}
+
+function stopTimer(type) {
+  if (type === 'upload' && uploadTimerInterval) clearInterval(uploadTimerInterval);
+  if (type === 'compress' && compressTimerInterval) clearInterval(compressTimerInterval);
+}
+
+dims.onchange = () => manual.style.display = dims.value === 'manual' ? 'block' : 'none';
+crf.oninput = () => crfText.textContent = `CRF ${crf.value} → ~${(30 - crf.value) * 4}% size reduction`;
+crf.oninput();
 
 startBtn.onclick = async () => {
-  const file = fileInput.files[0];
-  if (!file) return alert("Please select a video file");
+  if (!fileInput.files[0]) return alert('Select a video');
 
   startBtn.disabled = true;
-  progressContainer.style.display = 'block';
-  statusEl.textContent = "Uploading to Supabase...\n";
+  startBtn.textContent = 'Processing...';
 
-  const timestamp = Date.now();
-  const fileName = `${timestamp}-${file.name}`;
+  uploadInner.style.width = '0%';
+  uploadText.textContent = '0%';
+  compressInner.style.width = '0%';
+  compressText.textContent = 'Waiting...';
+  status.textContent = 'Uploading video...\n';
 
-  const formData = new FormData();
-  formData.append('file', file);
+  const file = fileInput.files[0];
+  const totalBytes = file.size;
+  let uploadedBytes = 0;
+  const fileId = crypto.randomUUID();
+  const chunkSize = 100 * 1024 * 1024; // 100MB chunks
+  let index = 0;
+  let offset = 0;
 
-  try {
+  startTimer('upload');
+
+  while (offset < totalBytes) {
+    const slice = file.slice(offset, offset + chunkSize);
+    const form = new FormData();
+    form.append('chunk', slice);
+    form.append('fileId', fileId);
+    form.append('index', index);
+
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/video-uploads/${fileName}`);
-    xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_ANON_KEY}`);
+    xhr.open('POST', '/api/upload-chunk');   // ← Vercel route
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
-        const percent = Math.round((e.loaded / e.total) * 100);
-        uploadBar.style.width = percent + '%';
-        uploadPercent.textContent = percent + '%';
+        const totalPercent = Math.round(((uploadedBytes + e.loaded) / totalBytes) * 100);
+        uploadInner.style.width = totalPercent + '%';
+        uploadText.textContent = totalPercent + '%';
       }
     };
 
-    xhr.onload = async () => {
-      if (xhr.status === 200) {
-        uploadBar.style.width = '100%';
-        uploadPercent.textContent = '100%';
-        statusEl.textContent += "Upload successful. Starting server compression...\n";
-
-        const compressRes = await fetch('/api/compress-video', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filePath: fileName })
-        });
-
-        if (compressRes.ok) {
-          const blob = await compressRes.blob();
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'compressed-' + file.name;
-          a.click();
-
-          compressBar.style.width = '100%';
-          compressPercent.textContent = '100%';
-          statusEl.textContent += "\n✅ Compression complete! File downloaded.";
-        } else {
-          statusEl.textContent += "\nCompression failed on server.";
-        }
-      } else {
-        statusEl.textContent += "\nUpload failed. Status: " + xhr.status;
-      }
-      startBtn.disabled = false;
-    };
-
-    xhr.send(formData);
-
-  } catch (err) {
-    statusEl.textContent += "\nError: " + err.message;
-    startBtn.disabled = false;
+    await new Promise((resolve) => {
+      xhr.onload = () => {
+        uploadedBytes += slice.size;
+        const percent = Math.min(100, Math.round((uploadedBytes / totalBytes) * 100));
+        uploadInner.style.width = percent + '%';
+        uploadText.textContent = percent + '%';
+        status.textContent += `Uploaded chunk ${index + 1}\n`;
+        offset += chunkSize;
+        index++;
+        resolve();
+      };
+      xhr.onerror = () => { status.textContent += 'Upload failed.\n'; resolve(); };
+      xhr.send(form);
+    });
   }
+
+  stopTimer('upload');
+  status.textContent += '\nUpload complete. Starting compression...\n';
+  uploadInner.style.width = '100%';
+  uploadText.textContent = '100%';
+
+  startTimer('compress');
+  compressText.textContent = 'Compressing… 0%';
+
+  let width, height;
+  if (dims.value === 'manual') {
+    width = document.getElementById('w').value;
+    height = document.getElementById('h').value;
+  } else if (dims.value !== 'auto') {
+    [width, height] = dims.value.split('x');
+  }
+
+  const res = await fetch('/api/start', {   // ← Vercel route
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fileId,
+      crf: crf.value,
+      hevc: document.getElementById('hevc').checked,
+      width,
+      height,
+      output: document.getElementById('format').value
+    })
+  });
+
+  const data = await res.json();
+
+  if (!data.ok) {
+    status.textContent += 'Compression failed.';
+    stopTimer('compress');
+    startBtn.disabled = false;
+    startBtn.textContent = 'Compress Video';
+    return;
+  }
+
+  const progressInterval = setInterval(async () => {
+    const progRes = await fetch(`/api/progress?fileId=${fileId}`);
+    const progData = await progRes.json();
+    if (progData.progress !== undefined) {
+      const p = Math.min(100, Math.round(progData.progress));
+      compressInner.style.width = p + '%';
+      compressText.textContent = `Compressing… ${p}%`;
+      if (p >= 100) {
+        clearInterval(progressInterval);
+        stopTimer('compress');
+        status.textContent += '\nCompression complete.\nDownloading…';
+        window.location = `/api/download?fileId=${fileId}&format=${document.getElementById('format').value}`;
+      }
+    }
+  }, 2000);
+
+  startBtn.disabled = false;
+  startBtn.textContent = 'Compress Video';
 };
 </script>
 </body>
