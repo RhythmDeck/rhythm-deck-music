@@ -43,7 +43,7 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 <div class="hero">
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
-    • Uploads to Supabase Storage<br>
+    • Uploads to Supabase (in chunks if needed)<br>
     • Compresses on Vercel<br>
     • Real-time progress shown below
   </div>
@@ -73,9 +73,9 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 </div>
 
 <script>
-// ================== CHANGE THESE TWO LINES ==================
-const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';   // ← Your Project URL
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';                         // ← Your Anon Key
+// ================== YOUR SUPABASE SETTINGS ==================
+const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
 // ===========================================================
 
 const fileInput = document.getElementById('file');
@@ -104,7 +104,6 @@ startBtn.onclick = async () => {
   try {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/video-uploads/${fileName}`);
-
     xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_ANON_KEY}`);
 
     xhr.upload.onprogress = (e) => {
@@ -119,9 +118,8 @@ startBtn.onclick = async () => {
       if (xhr.status === 200) {
         uploadBar.style.width = '100%';
         uploadPercent.textContent = '100%';
-        statusEl.textContent += "Upload successful. Starting compression...\n";
+        statusEl.textContent += "Upload successful. Starting server compression...\n";
 
-        // Trigger compression on Vercel
         const compressRes = await fetch('/api/compress-video', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
