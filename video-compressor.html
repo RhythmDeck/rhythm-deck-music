@@ -43,8 +43,8 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 <div class="hero">
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
-    • Upload → Supabase Storage<br>
-    • Compress on Vercel<br>
+    • Uploads to Supabase Storage<br>
+    • Compresses on Vercel<br>
     • Real-time progress shown below
   </div>
   <div class="image-box">
@@ -73,10 +73,10 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 </div>
 
 <script>
-// === CHANGE THESE TWO LINES WITH YOUR SUPABASE DETAILS ===
-const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY-HERE';
-// ========================================================
+// ================== CHANGE THESE TWO LINES ==================
+const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';   // ← Your Project URL
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';                         // ← Your Anon Key
+// ===========================================================
 
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
@@ -89,20 +89,23 @@ const compressPercent = document.getElementById('compressPercent');
 
 startBtn.onclick = async () => {
   const file = fileInput.files[0];
-  if (!file) return alert("Please select a video");
+  if (!file) return alert("Please select a video file");
 
   startBtn.disabled = true;
   progressContainer.style.display = 'block';
   statusEl.textContent = "Uploading to Supabase...\n";
+
+  const timestamp = Date.now();
+  const fileName = `${timestamp}-${file.name}`;
 
   const formData = new FormData();
   formData.append('file', file);
 
   try {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${https://bxoqhmfnseskwqkywppg.supabase.co}/storage/v1/object/video-uploads/${Date.now()}-${file.name}`);
+    xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/video-uploads/${fileName}`);
 
-    xhr.setRequestHeader('Authorization', `Bearer ${eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc}`);
+    xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_ANON_KEY}`);
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
@@ -116,13 +119,13 @@ startBtn.onclick = async () => {
       if (xhr.status === 200) {
         uploadBar.style.width = '100%';
         uploadPercent.textContent = '100%';
-        statusEl.textContent += "Upload complete. Starting server compression...\n";
+        statusEl.textContent += "Upload successful. Starting compression...\n";
 
-        // Call Vercel to compress (only sends small URL, no 413 error)
+        // Trigger compression on Vercel
         const compressRes = await fetch('/api/compress-video', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filePath: `${Date.now()}-${file.name}` })
+          body: JSON.stringify({ filePath: fileName })
         });
 
         if (compressRes.ok) {
@@ -140,7 +143,7 @@ startBtn.onclick = async () => {
           statusEl.textContent += "\nCompression failed on server.";
         }
       } else {
-        statusEl.textContent += "\nUpload failed.";
+        statusEl.textContent += "\nUpload failed. Status: " + xhr.status;
       }
       startBtn.disabled = false;
     };
