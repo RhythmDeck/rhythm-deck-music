@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegStatic from 'ffmpeg-static';
 import fs from 'fs';
-import path from 'path';
 
 ffmpeg.setFfmpegPath(ffmpegStatic);
 
@@ -15,22 +14,30 @@ export async function POST(req) {
     const { fileId, crf = 23, hevc, width, height, output } = await req.json();
 
     // List all chunks for this fileId
-    const { data: chunks } = await supabase.storage
+    const { data: chunks, error: listError } = await supabase.storage
       .from('video-uploads')
       .list('', { search: fileId });
 
-    if (!chunks || chunks.length === 0) {
-      throw new Error('No chunks found for this file');
-    }
+    if (listError) throw listError;
+    if (!chunks || chunks.length === 0) throw new Error('No chunks found for this fileId');
 
-    // Create a merged input file in /tmp
+    // Sort chunks by index
+    const sortedChunks = chunks.sort((a, b) => {
+      const indexA = parseInt(a.name.split('-chunk-')[1] || 0);
+      const indexB = parseInt(b.name.split('-chunk-')[1] || 0);
+      return indexA - indexB;
+    });
+
+    // Create merged file
     const mergedPath = `/tmp/merged-${fileId}.mp4`;
     const writeStream = fs.createWriteStream(mergedPath);
 
-    for (const chunk of chunks.sort((a, b) => a.name.localeCompare(b.name))) {
-      const { data: chunkData } = await supabase.storage
+    for (const chunk of sortedChunks) {
+      const { data: chunkData, error: downloadError } = await supabase.storage
         .from('video-uploads')
         .download(chunk.name);
+
+      if (downloadError) throw downloadError;
 
       writeStream.write(chunkData);
     }
@@ -55,7 +62,7 @@ export async function POST(req) {
 
     const buffer = fs.readFileSync(outputPath);
 
-    // Clean up temp files
+    // Clean up
     fs.unlinkSync(mergedPath);
     fs.unlinkSync(outputPath);
 
