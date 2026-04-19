@@ -11,16 +11,27 @@ export const config = { api: { maxDuration: 300 } };
 
 export async function POST(req) {
   try {
-    const { fileId, crf = 23, hevc, width, height, output } = await req.json();
+    const { fileId, crf = 23, hevc } = await req.json();
 
-    // List all chunks for this fileId
+    console.log(`[START] Received request for fileId: ${fileId}`);
+
+    // List all files in the bucket to see what actually exists
+    const { data: allFiles, error: listAllError } = await supabase.storage
+      .from('video-uploads')
+      .list('');
+
+    console.log(`[START] Total files in bucket: ${allFiles ? allFiles.length : 0}`);
+
+    // List chunks for this fileId
     const { data: chunks, error: listError } = await supabase.storage
       .from('video-uploads')
       .list('', { search: fileId });
 
+    console.log(`[START] Chunks found for ${fileId}: ${chunks ? chunks.length : 0}`);
+
     if (listError) throw listError;
     if (!chunks || chunks.length === 0) {
-      throw new Error(`No chunks found for fileId: ${fileId}`);
+      throw new Error(`No chunks found for fileId: ${fileId}. Bucket has ${allFiles ? allFiles.length : 0} files total.`);
     }
 
     // Sort chunks by index
@@ -30,7 +41,9 @@ export async function POST(req) {
       return idxA - idxB;
     });
 
-    // Merge all chunks into one file
+    console.log(`[START] Sorted chunks: ${sortedChunks.map(c => c.name).join(', ')}`);
+
+    // Merge chunks
     const mergedPath = `/tmp/merged-${fileId}.mp4`;
     const writeStream = fs.createWriteStream(mergedPath);
 
@@ -42,6 +55,7 @@ export async function POST(req) {
       if (downloadError) throw downloadError;
 
       writeStream.write(chunkData);
+      console.log(`[START] Merged chunk: ${chunk.name}`);
     }
 
     writeStream.end();
@@ -64,7 +78,6 @@ export async function POST(req) {
 
     const buffer = fs.readFileSync(outputPath);
 
-    // Clean up
     fs.unlinkSync(mergedPath);
     fs.unlinkSync(outputPath);
 
