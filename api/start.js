@@ -11,7 +11,7 @@ export const config = { api: { maxDuration: 300 } };
 
 export async function POST(req) {
   try {
-    const { fileId, crf = 23, hevc, width, height, output } = await req.json();
+    const { fileId, crf = 23, hevc } = await req.json();
 
     // List all chunks for this fileId
     const { data: chunks, error: listError } = await supabase.storage
@@ -19,16 +19,18 @@ export async function POST(req) {
       .list('', { search: fileId });
 
     if (listError) throw listError;
-    if (!chunks || chunks.length === 0) throw new Error('No chunks found for this fileId');
+    if (!chunks || chunks.length === 0) {
+      throw new Error(`No chunks found for fileId: ${fileId}. Make sure upload-chunk worked.`);
+    }
 
     // Sort chunks by index
     const sortedChunks = chunks.sort((a, b) => {
-      const indexA = parseInt(a.name.split('-chunk-')[1] || 0);
-      const indexB = parseInt(b.name.split('-chunk-')[1] || 0);
-      return indexA - indexB;
+      const idxA = parseInt(a.name.split('-chunk-')[1] || 0);
+      const idxB = parseInt(b.name.split('-chunk-')[1] || 0);
+      return idxA - idxB;
     });
 
-    // Create merged file
+    // Merge chunks into one file
     const mergedPath = `/tmp/merged-${fileId}.mp4`;
     const writeStream = fs.createWriteStream(mergedPath);
 
