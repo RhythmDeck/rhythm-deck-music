@@ -2,150 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Rhythm Deck – Album Compressor</title>
+<title>Rhythm Deck – Video Compressor</title>
 <style>
-body {
-  background:#050505;
-  font-family:Arial, sans-serif;
-  color:#e5e7eb;
-}
-.container {
-  max-width:1200px;
-  margin:40px auto;
-  padding:30px;
-  border:2px solid #10b981;
-  border-radius:22px;
-  background:linear-gradient(180deg,#0b0b0b,#060606);
-  box-shadow:0 30px 70px rgba(0,0,0,.85);
-}
-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:30px;
-}
-.logo-wrap {
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.logo-wrap img {
-  height:48px;
-}
-.logo-text {
-  font-size:1.5rem;
-  font-weight:bold;
-  color:#10b981;
-  line-height:1.1;
-}
-.tagline {
-  font-size:0.9rem;
-  color:#9ca3af;
-}
-nav a {
-  display:inline-block;
-  padding:10px 20px;
-  margin-left:12px;
-  border-radius:999px;
-  font-weight:bold;
-  text-decoration:none;
-  transition:all 0.2s;
-}
-nav a.home {
-  background:linear-gradient(90deg,#22c55e,#16a34a);
-  color:white;
-}
-nav a.contact {
-  background:linear-gradient(90deg,#8b5cf6,#7c3aed);
-  color:white;
-}
-nav a:hover {
-  transform:translateY(-2px);
-  box-shadow:0 8px 20px rgba(0,0,0,0.5);
-}
-.hero {
-  display:grid;
-  grid-template-columns:1fr 1.5fr;
-  gap:30px;
-}
-.instructions {
-  border:2px solid #10b981;
-  border-radius:18px;
-  padding:26px;
-  font-size:18px;
-  line-height:1.75;
-}
-.image-box img {
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  border-radius:18px;
-}
-.section {
-  margin-top:26px;
-}
-label {
-  font-weight:bold;
-  display:block;
-  margin-bottom:6px;
-}
-input, select {
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-}
-button {
-  padding:16px 26px;
-  background:#10b981;
-  border:none;
-  border-radius:16px;
-  font-weight:bold;
-  cursor:pointer;
-}
-button:disabled {
-  opacity:.5;
-  cursor:not-allowed;
-}
-.small {
-  font-size:14px;
-  color:#9ca3af;
-}
-#statusWrap {
-  display:grid;
-  grid-template-columns:1fr 300px;
-  gap:20px;
-  margin-top:18px;
-}
-#status {
-  white-space:pre-line;
-  font-size:15px;
-}
-#uploadProgressOuter, #compressProgressOuter {
-  background:#111;
-  border-radius:12px;
-  overflow:hidden;
-  border:1px solid #10b981;
-  height:22px;
-  margin-top:10px;
-}
-#uploadProgressInner, #compressProgressInner {
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#10b981,#34d399);
-  transition:width 0.4s ease;
-}
-.progress-label {
-  margin-top:6px;
-  font-size:13px;
-  color:#9ca3af;
-  text-align:left;
-  font-weight:bold;
-}
-.timer {
-  float:right;
-  color:#10b981;
-}
+body { background:#050505; font-family:Arial, sans-serif; color:#e5e7eb; margin:0; padding:0; }
+.container { max-width:1200px; margin:40px auto; padding:30px; border:2px solid #10b981; border-radius:22px; background:linear-gradient(180deg,#0b0b0b,#060606); box-shadow:0 30px 70px rgba(0,0,0,.85); }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+.logo-wrap { display:flex; align-items:center; gap:12px; }
+.logo-wrap img { height:48px; }
+.logo-text { font-size:1.5rem; font-weight:bold; color:#10b981; line-height:1.1; }
+.tagline { font-size:0.9rem; color:#9ca3af; }
+nav a { display:inline-block; padding:10px 20px; margin-left:12px; border-radius:999px; font-weight:bold; text-decoration:none; transition:all 0.2s; }
+nav a.home { background:linear-gradient(90deg,#22c55e,#16a34a); color:white; }
+nav a.contact { background:linear-gradient(90deg,#8b5cf6,#7c3aed); color:white; }
+nav a:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.5); }
+.hero { display:grid; grid-template-columns:1fr 1.5fr; gap:30px; }
+.instructions { border:2px solid #10b981; border-radius:18px; padding:26px; font-size:18px; line-height:1.75; }
+.image-box img { width:100%; height:100%; object-fit:cover; border-radius:18px; }
+.section { margin-top:26px; }
+label { font-weight:bold; display:block; margin-bottom:6px; }
+input, select { width:100%; padding:12px; border-radius:12px; border:none; }
+button { padding:16px 26px; background:#10b981; border:none; border-radius:16px; font-weight:bold; cursor:pointer; }
+button:disabled { opacity:.5; cursor:not-allowed; }
+#statusWrap { display:grid; grid-template-columns:1fr 300px; gap:20px; margin-top:18px; }
+#status { white-space:pre-line; font-size:15px; }
+#uploadProgressOuter, #compressProgressOuter { background:#111; border-radius:12px; overflow:hidden; border:1px solid #10b981; height:22px; margin-top:10px; }
+#uploadProgressInner, #compressProgressInner { height:100%; width:0%; background:linear-gradient(90deg,#10b981,#34d399); transition:width 0.4s ease; }
+.progress-label { margin-top:6px; font-size:13px; color:#9ca3af; text-align:left; font-weight:bold; }
+.timer { float:right; color:#10b981; }
 </style>
 </head>
 <body>
@@ -163,37 +46,30 @@ button:disabled {
     <a href="contact.html" class="contact" target="_blank">Contact</a>
   </nav>
 </header>
+
 <div class="hero">
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
-    • Upload a full video (any size)<br>
-    • File is uploaded in safe chunks<br>
-    • Video is split into smaller segments<br>
-    • Each segment is compressed server-side<br>
-    • Download as ZIP or merged MP4<br><br>
-    <strong>CRF (Quality)</strong><br>
-    Lower = higher quality / larger file<br>
-    18–20 → visually lossless<br>
-    22–24 → recommended<br>
-    26+ → aggressive compression<br><br>
-    <strong>HEVC (H.265)</strong><br>
-    ~40% smaller files than H.264<br>
-    Slower encode, same quality<br><br>
-    🔒 Processing happens on Rhythm Deck servers
+    • Uploads in safe 100MB chunks to Supabase<br>
+    • Merges chunks and compresses on Vercel<br>
+    • Real-time progress shown below
   </div>
   <div class="image-box">
     <img src="compressor.png" alt="Compressor">
   </div>
 </div>
+
 <div class="section">
 <label>Upload Video</label>
 <input type="file" id="file">
 </div>
+
 <div class="section">
 <label>Compression Quality (CRF)</label>
 <input type="range" min="18" max="30" value="23" id="crf">
 <div class="small" id="crfText"></div>
 </div>
+
 <div class="section">
 <label>Target Dimensions</label>
 <select id="dimensions">
@@ -207,38 +83,42 @@ button:disabled {
   <input id="h" placeholder="Height">
 </div>
 </div>
+
 <div class="section">
-<label>
-<input type="checkbox" id="hevc"> Use HEVC (H.265)
-</label>
+<label><input type="checkbox" id="hevc" checked> Use HEVC (H.265)</label>
 </div>
+
 <div class="section">
 <label>Download Format</label>
 <select id="format">
-  <option value="zip">ZIP (album parts)</option>
   <option value="mp4">Single MP4 (merged)</option>
+  <option value="zip">ZIP (parts)</option>
 </select>
 </div>
+
 <div class="section">
 <button id="start">Compress Video</button>
 </div>
+
 <div id="statusWrap">
   <div id="status"></div>
   <div>
     <div class="progress-label">Uploading chunks <span id="uploadTimer" class="timer">00:00</span></div>
-    <div id="uploadProgressOuter">
-      <div id="uploadProgressInner"></div>
-    </div>
+    <div id="uploadProgressOuter"><div id="uploadProgressInner"></div></div>
     <div id="uploadProgressText" class="progress-label">0%</div>
     <div class="progress-label" style="margin-top:20px;">Compressing <span id="compressTimer" class="timer">00:00</span></div>
-    <div id="compressProgressOuter">
-      <div id="compressProgressInner"></div>
-    </div>
+    <div id="compressProgressOuter"><div id="compressProgressInner"></div></div>
     <div id="compressProgressText" class="progress-label">Waiting…</div>
   </div>
 </div>
 </div>
+
 <script>
+// ================== YOUR SUPABASE SETTINGS ==================
+const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
+// ===========================================================
+
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
 const status = document.getElementById('status');
@@ -253,11 +133,8 @@ const compressText = document.getElementById('compressProgressText');
 const uploadTimerEl = document.getElementById('uploadTimer');
 const compressTimerEl = document.getElementById('compressTimer');
 
-// Timers
-let uploadStartTime = null;
-let compressStartTime = null;
-let uploadTimerInterval = null;
-let compressTimerInterval = null;
+let uploadStartTime = null, compressStartTime = null;
+let uploadTimerInterval = null, compressTimerInterval = null;
 
 function formatTime(seconds) {
   const min = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -269,58 +146,28 @@ function startTimer(type) {
   const now = Date.now();
   if (type === 'upload') {
     uploadStartTime = now;
-    uploadTimerInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - uploadStartTime) / 1000);
-      uploadTimerEl.textContent = formatTime(elapsed);
-    }, 1000);
-  } else if (type === 'compress') {
+    uploadTimerInterval = setInterval(() => uploadTimerEl.textContent = formatTime(Math.floor((Date.now() - uploadStartTime)/1000)), 1000);
+  } else {
     compressStartTime = now;
-    compressTimerInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - compressStartTime) / 1000);
-      compressTimerEl.textContent = formatTime(elapsed);
-    }, 1000);
+    compressTimerInterval = setInterval(() => compressTimerEl.textContent = formatTime(Math.floor((Date.now() - compressStartTime)/1000)), 1000);
   }
 }
 
 function stopTimer(type) {
-  if (type === 'upload' && uploadTimerInterval) {
-    clearInterval(uploadTimerInterval);
-    uploadTimerInterval = null;
-  }
-  if (type === 'compress' && compressTimerInterval) {
-    clearInterval(compressTimerInterval);
-    compressTimerInterval = null;
-  }
+  if (type === 'upload' && uploadTimerInterval) clearInterval(uploadTimerInterval);
+  if (type === 'compress' && compressTimerInterval) clearInterval(compressTimerInterval);
 }
 
-dims.onchange = () => {
-  manual.style.display = dims.value === 'manual' ? 'block' : 'none';
-};
-
-crf.oninput = () => {
-  const v = crf.value;
-  const est = (30 - v) * 4;
-  crfText.textContent = `CRF ${v} → ~${est}% size reduction`;
-};
+dims.onchange = () => manual.style.display = dims.value === 'manual' ? 'block' : 'none';
+crf.oninput = () => crfText.textContent = `CRF ${crf.value} → ~${(30 - crf.value) * 4}% size reduction`;
 crf.oninput();
 
 startBtn.onclick = async () => {
-  if (!fileInput.files[0]) {
-    alert('Select a video');
-    return;
-  }
+  if (!fileInput.files[0]) return alert('Select a video');
 
   startBtn.disabled = true;
   startBtn.textContent = 'Processing...';
-
-  // Reset UI
-  uploadInner.style.width = '0%';
-  uploadText.textContent = '0%';
-  compressInner.style.width = '0%';
-  compressText.textContent = 'Waiting...';
-  uploadTimerEl.textContent = '00:00';
-  compressTimerEl.textContent = '00:00';
-  status.textContent = 'Uploading album...\n';
+  status.textContent = 'Uploading video...\n';
 
   const file = fileInput.files[0];
   const totalBytes = file.size;
@@ -339,17 +186,14 @@ startBtn.onclick = async () => {
     form.append('fileId', fileId);
     form.append('index', index);
 
-    // Real-time sub-chunk progress
-    const subChunkStart = Date.now();
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://rhythm-deck-music.onrender.com/compress/upload-chunk');
+    xhr.open('POST', '/api/upload-chunk');
+
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
-        const chunkUploaded = e.loaded;
-        const chunkPercent = (chunkUploaded / slice.size) * 100;
-        const totalPercent = ((uploadedBytes + chunkUploaded) / totalBytes) * 100;
-        uploadInner.style.width = totalPercent + '%';
-        uploadText.textContent = Math.round(totalPercent) + '%';
+        const percent = Math.round(((uploadedBytes + e.loaded) / totalBytes) * 100);
+        uploadInner.style.width = percent + '%';
+        uploadText.textContent = percent + '%';
       }
     };
 
@@ -364,20 +208,13 @@ startBtn.onclick = async () => {
         index++;
         resolve();
       };
-      xhr.onerror = () => {
-        status.textContent += 'Upload failed.\n';
-        stopTimer('upload');
-        startBtn.disabled = false;
-        startBtn.textContent = 'Compress Album';
-        resolve();
-      };
+      xhr.onerror = () => { status.textContent += 'Upload failed.\n'; resolve(); };
       xhr.send(form);
     });
   }
 
-  // Upload done
   stopTimer('upload');
-  status.textContent += '\nStarting compression...\n';
+  status.textContent += '\nAll chunks uploaded. Merging and compressing...\n';
   uploadInner.style.width = '100%';
   uploadText.textContent = '100%';
 
@@ -392,7 +229,7 @@ startBtn.onclick = async () => {
     [width, height] = dims.value.split('x');
   }
 
-  const res = await fetch('https://rhythm-deck-music.onrender.com/compress/start', {
+  const res = await fetch('/api/start', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -406,17 +243,17 @@ startBtn.onclick = async () => {
   });
 
   const data = await res.json();
+
   if (!data.ok) {
     status.textContent += 'Compression failed.';
     stopTimer('compress');
     startBtn.disabled = false;
-    startBtn.textContent = 'Compress Album';
+    startBtn.textContent = 'Compress Video';
     return;
   }
 
-  // Real-time compression progress polling
   const progressInterval = setInterval(async () => {
-    const progRes = await fetch(`https://rhythm-deck-music.onrender.com/compress/progress?fileId=${fileId}`);
+    const progRes = await fetch(`/api/progress?fileId=${fileId}`);
     const progData = await progRes.json();
     if (progData.progress !== undefined) {
       const p = Math.min(100, Math.round(progData.progress));
@@ -426,13 +263,13 @@ startBtn.onclick = async () => {
         clearInterval(progressInterval);
         stopTimer('compress');
         status.textContent += '\nCompression complete.\nDownloading…';
-        window.location = `https://rhythm-deck-music.onrender.com${data.download}`;
+        window.location = `/api/download?fileId=${fileId}&format=${document.getElementById('format').value}`;
       }
     }
-  }, 2000); // Poll every 2 seconds for smooth updates
+  }, 2000);
 
   startBtn.disabled = false;
-  startBtn.textContent = 'Compress Album';
+  startBtn.textContent = 'Compress Video';
 };
 </script>
 </body>
