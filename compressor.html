@@ -52,6 +52,7 @@ button:disabled { opacity:.5; cursor:not-allowed; }
     <strong>Video Compressor</strong><br><br>
     • Uploads in safe 100MB chunks to Supabase<br>
     • Merges chunks and compresses on Vercel<br>
+    • Supports large files (900MB+ tested)<br>
     • Real-time progress shown below
   </div>
   <div class="image-box">
@@ -68,6 +69,32 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 <label>Compression Quality (CRF)</label>
 <input type="range" min="18" max="30" value="23" id="crf">
 <div class="small" id="crfText"></div>
+</div>
+
+<div class="section">
+<label>Target Dimensions</label>
+<select id="dimensions">
+  <option value="auto">Automatic</option>
+  <option value="1920x1080">1080p</option>
+  <option value="1280x720">720p</option>
+  <option value="manual">Manual</option>
+</select>
+<div id="manualDims" style="display:none">
+  <input id="w" placeholder="Width">
+  <input id="h" placeholder="Height">
+</div>
+</div>
+
+<div class="section">
+<label><input type="checkbox" id="hevc" checked> Use HEVC (H.265) – Smaller file</label>
+</div>
+
+<div class="section">
+<label>Download Format</label>
+<select id="format">
+  <option value="mp4">Single MP4 (merged)</option>
+  <option value="zip">ZIP (parts)</option>
+</select>
 </div>
 
 <div class="section">
@@ -98,6 +125,8 @@ const startBtn = document.getElementById('start');
 const status = document.getElementById('status');
 const crf = document.getElementById('crf');
 const crfText = document.getElementById('crfText');
+const dims = document.getElementById('dimensions');
+const manual = document.getElementById('manualDims');
 const uploadInner = document.getElementById('uploadProgressInner');
 const uploadText = document.getElementById('uploadProgressText');
 const compressInner = document.getElementById('compressProgressInner');
@@ -130,6 +159,7 @@ function stopTimer(type) {
   if (type === 'compress' && compressTimerInterval) clearInterval(compressTimerInterval);
 }
 
+dims.onchange = () => manual.style.display = dims.value === 'manual' ? 'block' : 'none';
 crf.oninput = () => crfText.textContent = `CRF ${crf.value} → ~${(30 - crf.value) * 4}% size reduction`;
 crf.oninput();
 
@@ -138,7 +168,7 @@ startBtn.onclick = async () => {
 
   startBtn.disabled = true;
   startBtn.textContent = 'Processing...';
-  status.textContent = 'Uploading video...\n';
+  status.textContent = 'Uploading video in chunks...\n';
 
   const file = fileInput.files[0];
   const totalBytes = file.size;
@@ -192,13 +222,24 @@ startBtn.onclick = async () => {
   startTimer('compress');
   compressText.textContent = 'Merging & Compressing… 0%';
 
+  let width, height;
+  if (dims.value === 'manual') {
+    width = document.getElementById('w').value;
+    height = document.getElementById('h').value;
+  } else if (dims.value !== 'auto') {
+    [width, height] = dims.value.split('x');
+  }
+
   const res = await fetch('/api/start', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       fileId,
       crf: crf.value,
-      hevc: document.getElementById('hevc').checked
+      hevc: document.getElementById('hevc').checked,
+      width,
+      height,
+      output: document.getElementById('format').value
     })
   });
 
@@ -224,7 +265,7 @@ startBtn.onclick = async () => {
         clearInterval(progressInterval);
         stopTimer('compress');
         status.textContent += '\nCompression complete.\nDownloading…';
-        window.location = `/api/download?fileId=${fileId}`;
+        window.location = `/api/download?fileId=${fileId}&format=${document.getElementById('format').value}`;
       }
     }
   }, 2000);
