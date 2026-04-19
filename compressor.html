@@ -50,8 +50,8 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 <div class="hero">
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
-    • Uploads in safe 100MB chunks to Supabase bucket "video-uploads"<br>
-    • Merges all chunks and compresses on Vercel<br>
+    • Uploads to Supabase Storage (handles large files)<br>
+    • Compresses on Vercel<br>
     • Real-time progress shown below
   </div>
   <div class="image-box">
@@ -77,10 +77,10 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 <div id="statusWrap">
   <div id="status">Ready — Select a video and click Compress Video</div>
   <div>
-    <div class="progress-label">Uploading chunks <span id="uploadTimer" class="timer">00:00</span></div>
+    <div class="progress-label">Uploading to Supabase <span id="uploadTimer" class="timer">00:00</span></div>
     <div id="uploadProgressOuter"><div id="uploadProgressInner"></div></div>
     <div id="uploadProgressText" class="progress-label">0%</div>
-    <div class="progress-label" style="margin-top:20px;">Compressing <span id="compressTimer" class="timer">00:00</span></div>
+    <div class="progress-label" style="margin-top:20px;">Compressing on Vercel <span id="compressTimer" class="timer">00:00</span></div>
     <div id="compressProgressOuter"><div id="compressProgressInner"></div></div>
     <div id="compressProgressText" class="progress-label">Waiting…</div>
   </div>
@@ -137,100 +137,68 @@ startBtn.onclick = async () => {
   if (!fileInput.files[0]) return alert('Select a video');
 
   startBtn.disabled = true;
-  startBtn.textContent = 'Processing...';
-  status.textContent = 'Uploading video in chunks...\n';
+  startBtn.textContent = 'Uploading to Supabase...';
+  status.textContent = 'Uploading large video to Supabase Storage...\n';
 
   const file = fileInput.files[0];
-  const totalBytes = file.size;
-  let uploadedBytes = 0;
-  const fileId = crypto.randomUUID();
-  const chunkSize = 100 * 1024 * 1024; // 100MB chunks
-  let index = 0;
-  let offset = 0;
+  const fileName = `${Date.now()}-${file.name}`;
 
-  startTimer('upload');
+  const formData = new FormData();
+  formData.append('file', file);
 
-  while (offset < totalBytes) {
-    const slice = file.slice(offset, offset + chunkSize);
-    const form = new FormData();
-    form.append('chunk', slice);
-    form.append('fileId', fileId);
-    form.append('index', index);
-
+  try {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/upload-chunk');
+    xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/video-uploads/${fileName}`);
+    xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_ANON_KEY}`);
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
-        const percent = Math.round(((uploadedBytes + e.loaded) / totalBytes) * 100);
+        const percent = Math.round((e.loaded / e.total) * 100);
         uploadInner.style.width = percent + '%';
         uploadText.textContent = percent + '%';
       }
     };
 
-    await new Promise((resolve) => {
-      xhr.onload = () => {
-        uploadedBytes += slice.size;
-        const percent = Math.min(100, Math.round((uploadedBytes / totalBytes) * 100));
-        uploadInner.style.width = percent + '%';
-        uploadText.textContent = percent + '%';
-        status.textContent += `Uploaded chunk ${index + 1}\n`;
-        offset += chunkSize;
-        index++;
-        resolve();
-      };
-      xhr.onerror = () => { status.textContent += 'Upload failed.\n'; resolve(); };
-      xhr.send(form);
-    });
-  }
+    xhr.onload = async () => {
+      if (xhr.status === 200) {
+        uploadInner.style.width = '100%';
+        uploadText.textContent = '100%';
+        status.textContent += "Upload to Supabase complete. Starting compression on Vercel...\n";
 
-  stopTimer('upload');
-  status.textContent += '\nAll chunks uploaded. Merging and compressing on server...\n';
-  uploadInner.style.width = '100%';
-  uploadText.textContent = '100%';
+        // Call Vercel with only the file name (small payload, no 413 error)
+        const compressRes = await fetch('/api/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName, crf: crf.value, hevc: document.getElementById('hevc').checked })
+        });
 
-  startTimer('compress');
-  compressText.textContent = 'Merging & Compressing… 0%';
+        if (compressRes.ok) {
+          const blob = await compressRes.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'compressed-' + file.name;
+          a.click();
 
-  const res = await fetch('/api/start', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      fileId,
-      crf: crf.value,
-      hevc: document.getElementById('hevc').checked
-    })
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    status.textContent += `\nCompression failed: ${errorText}`;
-    stopTimer('compress');
-    startBtn.disabled = false;
-    startBtn.textContent = 'Compress Video';
-    return;
-  }
-
-  const data = await res.json();
-
-  const progressInterval = setInterval(async () => {
-    const progRes = await fetch(`/api/progress?fileId=${fileId}`);
-    const progData = await progRes.json();
-    if (progData.progress !== undefined) {
-      const p = Math.min(100, Math.round(progData.progress));
-      compressInner.style.width = p + '%';
-      compressText.textContent = `Compressing… ${p}%`;
-      if (p >= 100) {
-        clearInterval(progressInterval);
-        stopTimer('compress');
-        status.textContent += '\nCompression complete.\nDownloading…';
-        window.location = `/api/download?fileId=${fileId}`;
+          compressInner.style.width = '100%';
+          compressText.textContent = '100%';
+          status.textContent += "\n✅ Compression complete! File downloaded.";
+        } else {
+          status.textContent += "\nCompression failed on Vercel.";
+        }
+      } else {
+        status.textContent += "\nUpload to Supabase failed.";
       }
-    }
-  }, 2000);
+      startBtn.disabled = false;
+      startBtn.textContent = 'Compress Video';
+    };
 
-  startBtn.disabled = false;
-  startBtn.textContent = 'Compress Video';
+    xhr.send(formData);
+
+  } catch (err) {
+    status.textContent += "\nError: " + err.message;
+    startBtn.disabled = false;
+  }
 };
 </script>
 </body>
