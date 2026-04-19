@@ -51,7 +51,7 @@ button:disabled { opacity:.5; cursor:not-allowed; }
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
     • Uploads in safe 100MB chunks to Supabase<br>
-    • Merges all chunks on server before compression<br>
+    • Merges chunks and compresses on Vercel<br>
     • Real-time progress shown below
   </div>
   <div class="image-box">
@@ -214,7 +214,7 @@ startBtn.onclick = async () => {
   }
 
   stopTimer('upload');
-  status.textContent += '\nAll chunks uploaded. Merging and compressing on server...\n';
+  status.textContent += '\nAll chunks uploaded. Merging and compressing...\n';
   uploadInner.style.width = '100%';
   uploadText.textContent = '100%';
 
@@ -243,7 +243,8 @@ startBtn.onclick = async () => {
   });
 
   if (!res.ok) {
-    status.textContent += 'Compression failed on server.';
+    const errorText = await res.text();
+    status.textContent += `\nCompression failed: ${errorText}`;
     stopTimer('compress');
     startBtn.disabled = false;
     startBtn.textContent = 'Compress Video';
