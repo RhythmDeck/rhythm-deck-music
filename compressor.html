@@ -51,7 +51,7 @@ button:disabled { opacity:.5; cursor:not-allowed; }
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
     • Uploads in safe 100MB chunks to Supabase<br>
-    • Merges chunks and compresses on Vercel<br>
+    • Merges all chunks on server before compression<br>
     • Real-time progress shown below
   </div>
   <div class="image-box">
@@ -214,12 +214,12 @@ startBtn.onclick = async () => {
   }
 
   stopTimer('upload');
-  status.textContent += '\nAll chunks uploaded. Merging and compressing...\n';
+  status.textContent += '\nAll chunks uploaded. Merging and compressing on server...\n';
   uploadInner.style.width = '100%';
   uploadText.textContent = '100%';
 
   startTimer('compress');
-  compressText.textContent = 'Compressing… 0%';
+  compressText.textContent = 'Merging & Compressing… 0%';
 
   let width, height;
   if (dims.value === 'manual') {
@@ -242,15 +242,15 @@ startBtn.onclick = async () => {
     })
   });
 
-  const data = await res.json();
-
-  if (!data.ok) {
-    status.textContent += 'Compression failed.';
+  if (!res.ok) {
+    status.textContent += 'Compression failed on server.';
     stopTimer('compress');
     startBtn.disabled = false;
     startBtn.textContent = 'Compress Video';
     return;
   }
+
+  const data = await res.json();
 
   const progressInterval = setInterval(async () => {
     const progRes = await fetch(`/api/progress?fileId=${fileId}`);
