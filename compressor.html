@@ -87,9 +87,14 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 </div>
 </div>
 
-<script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'; // rotate if this key was exposed publicly
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const BUCKET = 'video-uploads';
 
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
@@ -110,118 +115,127 @@ function formatTime(seconds) {
   const sec = (seconds % 60).toString().padStart(2, '0');
   return `${min}:${sec}`;
 }
-
 function startTimer(type) {
   const now = Date.now();
   if (type === 'upload') {
     uploadStartTime = now;
-    uploadTimerInterval = setInterval(() => uploadTimerEl.textContent = formatTime(Math.floor((Date.now() - uploadStartTime)/1000)), 1000);
+    uploadTimerInterval = setInterval(() => {
+      uploadTimerEl.textContent = formatTime(Math.floor((Date.now() - uploadStartTime) / 1000));
+    }, 1000);
   } else {
     compressStartTime = now;
-    compressTimerInterval = setInterval(() => compressTimerEl.textContent = formatTime(Math.floor((Date.now() - compressStartTime)/1000)), 1000);
+    compressTimerInterval = setInterval(() => {
+      compressTimerEl.textContent = formatTime(Math.floor((Date.now() - compressStartTime) / 1000));
+    }, 1000);
   }
 }
-
 function stopTimer(type) {
   if (type === 'upload' && uploadTimerInterval) clearInterval(uploadTimerInterval);
   if (type === 'compress' && compressTimerInterval) clearInterval(compressTimerInterval);
+}
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+function chunkPath(fileId, index) {
+  return `uploads/${fileId}/chunks/${String(index).padStart(6, '0')}.part`;
+}
+async function uploadChunkWithRetry(path, blob, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
+      upsert: true,
+      contentType: 'application/octet-stream',
+      cacheControl: '3600'
+    });
+    if (!error) return;
+    if (attempt === maxRetries) throw error;
+    await sleep(500 * attempt);
+  }
 }
 
 crf.oninput = () => crfText.textContent = `CRF ${crf.value} → ~${(30 - crf.value) * 4}% size reduction`;
 crf.oninput();
 
 startBtn.onclick = async () => {
-  if (!fileInput.files[0]) return alert('Select a video');
+  const file = fileInput.files?.[0];
+  if (!file) return alert('Select a video');
 
   startBtn.disabled = true;
   startBtn.textContent = 'Processing...';
-  status.textContent = 'Uploading in 40MB chunks...\n';
+  status.textContent = 'Uploading chunks to Supabase Storage...\n';
 
-  const file = fileInput.files[0];
-  const totalBytes = file.size;
-  let uploadedBytes = 0;
-  const fileId = crypto.randomUUID();
-  const chunkSize = 40 * 1024 * 1024; // 40MB chunks
-  let index = 0;
-  let offset = 0;
+  try {
+    const fileId = crypto.randomUUID();
+    const chunkSize = 40 * 1024 * 1024; // your app-level chunk size
+    const totalChunks = Math.ceil(file.size / chunkSize);
+    let uploadedBytes = 0;
 
-  startTimer('upload');
+    startTimer('upload');
 
-  while (offset < totalBytes) {
-    const slice = file.slice(offset, offset + chunkSize);
-    const form = new FormData();
-    form.append('chunk', slice);
-    form.append('fileId', fileId);
-    form.append('index', index);
+    for (let index = 0; index < totalChunks; index++) {
+      const start = index * chunkSize;
+      const end = Math.min(start + chunkSize, file.size);
+      const slice = file.slice(start, end);
+      const path = chunkPath(fileId, index);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/upload-chunk');
+      await uploadChunkWithRetry(path, slice, 3);
 
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        const percent = Math.round(((uploadedBytes + e.loaded) / totalBytes) * 100);
-        uploadInner.style.width = percent + '%';
-        uploadText.textContent = percent + '%';
-      }
-    };
+      uploadedBytes += slice.size;
+      const percent = Math.round((uploadedBytes / file.size) * 100);
+      uploadInner.style.width = `${percent}%`;
+      uploadText.textContent = `${percent}%`;
+      status.textContent += `Uploaded chunk ${index + 1}/${totalChunks}\n`;
+    }
 
-    await new Promise((resolve) => {
-      xhr.onload = () => {
-        uploadedBytes += slice.size;
-        const percent = Math.min(100, Math.round((uploadedBytes / totalBytes) * 100));
-        uploadInner.style.width = percent + '%';
-        uploadText.textContent = percent + '%';
-        status.textContent += `Uploaded chunk ${index + 1}\n`;
-        offset += chunkSize;
-        index++;
-        resolve();
-      };
-      xhr.onerror = () => { status.textContent += 'Upload failed.\n'; resolve(); };
-      xhr.send(form);
+    stopTimer('upload');
+    uploadInner.style.width = '100%';
+    uploadText.textContent = '100%';
+    status.textContent += '\nAll chunks uploaded. Merging and compressing...\n';
+
+    startTimer('compress');
+    compressText.textContent = 'Compressing… 0%';
+
+    // NOTE: removed missing hevc checkbox reference
+    const res = await fetch('/api/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileId,
+        crf: Number(crf.value),
+        totalChunks,
+        originalName: file.name
+      })
     });
-  }
 
-  stopTimer('upload');
-  status.textContent += '\nAll chunks uploaded. Merging and compressing...\n';
-  uploadInner.style.width = '100%';
-  uploadText.textContent = '100%';
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
 
-  startTimer('compress');
-  compressText.textContent = 'Compressing… 0%';
+    const progressInterval = setInterval(async () => {
+      const progRes = await fetch(`/api/progress?fileId=${fileId}`);
+      const progData = await progRes.json();
 
-  const res = await fetch('/api/start', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fileId, crf: crf.value, hevc: document.getElementById('hevc').checked })
-  });
+      if (progData.progress !== undefined) {
+        const p = Math.min(100, Math.round(progData.progress));
+        compressInner.style.width = `${p}%`;
+        compressText.textContent = `Compressing… ${p}%`;
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    status.textContent += `\nCompression failed: ${errorText}`;
+        if (p >= 100) {
+          clearInterval(progressInterval);
+          stopTimer('compress');
+          status.textContent += '\nCompression complete.\nDownloading…';
+          window.location = `/api/download?fileId=${fileId}`;
+        }
+      }
+    }, 2000);
+
+  } catch (err) {
+    stopTimer('upload');
     stopTimer('compress');
+    status.textContent += `\nFailed: ${err.message || err}`;
+  } finally {
     startBtn.disabled = false;
     startBtn.textContent = 'Compress Video';
-    return;
   }
-
-  const progressInterval = setInterval(async () => {
-    const progRes = await fetch(`/api/progress?fileId=${fileId}`);
-    const progData = await progRes.json();
-    if (progData.progress !== undefined) {
-      const p = Math.min(100, Math.round(progData.progress));
-      compressInner.style.width = p + '%';
-      compressText.textContent = `Compressing… ${p}%`;
-      if (p >= 100) {
-        clearInterval(progressInterval);
-        stopTimer('compress');
-        status.textContent += '\nCompression complete.\nDownloading…';
-        window.location = `/api/download?fileId=${fileId}`;
-      }
-    }
-  }, 2000);
-
-  startBtn.disabled = false;
-  startBtn.textContent = 'Compress Video';
 };
 </script>
 </body>
