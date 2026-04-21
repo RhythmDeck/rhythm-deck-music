@@ -1,185 +1,241 @@
+// pages/api/compress-video.js
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { spawn } from 'child_process';
 import { createClient } from '@supabase/supabase-js';
-import ffmpegPath from 'ffmpeg-static';
-import { spawn } from 'node:child_process';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const INTERNAL_JOB_SECRET = process.env.INTERNAL_JOB_SECRET;
 const BUCKET = 'video-uploads';
 
-async function writeStatus(fileId, status) {
-  const statusPath = `uploads/${fileId}/status.json`;
-  const body = JSON.stringify({ ...status, updatedAt: new Date().toISOString() });
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  const { error } = await supabase.storage.from(BUCKET).upload(statusPath, body, {
+function run(cmd, args, onStderr) {
+  return new Promise((resolve, reject) => {
+    const p = spawn(cmd, args);
+    let stderr = '';
+
+    p.stderr.on('data', (d) => {
+      const s = d.toString();
+      stderr += s;
+      if (onStderr) onStderr(s);
+    });
+
+    p.on('close', (code) => {
+      if (code === 0) return resolve();
+      reject(new Error(`${cmd} exited with code ${code}\n${stderr}`));
+    });
+
+    p.on('error', reject);
+  });
+}
+
+async function writeProgress(fileId, payload) {
+  const progressPath = `uploads/${fileId}/progress.json`;
+  await supabaseAdmin.storage.from(BUCKET).upload(progressPath, JSON.stringify(payload), {
     upsert: true,
     contentType: 'application/json',
-  });
-  if (error) throw error;
-}
-
-function runFfmpeg(args) {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath, args, { stdio: ['ignore', 'pipe', 'pipe'] });
-
-    let stderr = '';
-    proc.stderr.on('data', (d) => {
-      stderr += d.toString();
-    });
-
-    proc.on('error', reject);
-    proc.on('close', (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`ffmpeg failed with code ${code}: ${stderr}`));
-    });
+    cacheControl: '0',
   });
 }
 
-export async function POST(req) {
-  const secret = req.headers.get('x-job-secret');
-  if (!process.env.INTERNAL_JOB_SECRET || secret !== process.env.INTERNAL_JOB_SECRET) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+function hhmmssToSec(h, m, s) {
+  return Number(h) * 3600 + Number(m) * 60 + Number(s);
+}
+
+async function getDurationSeconds(inputPath) {
+  const args = [
+    '-v', 'error',
+    '-show_entries', 'format=duration',
+    '-of', 'default=noprint_wrappers=1:nokey=1',
+    inputPath,
+  ];
+
+  return new Promise((resolve) => {
+    const p = spawn('ffprobe', args);
+    let out = '';
+    p.stdout.on('data', (d) => (out += d.toString()));
+    p.on('close', () => {
+      const n = Number(out.trim());
+      resolve(Number.isFinite(n) ? n : 0);
+    });
+    p.on('error', () => resolve(0));
+  });
+}
+
+function sanitizeSettings(input = {}) {
+  const presets = new Set(['ultrafast', 'veryfast', 'faster', 'fast', 'medium']);
+  const bitrates = new Set(['96k', '128k', '160k', '192k', '256k', '320k']);
+  const sampleRates = new Set([44100, 48000]);
+  const channels = new Set([1, 2]);
+  const fpsAllowed = new Set([24, 30, 60]);
+  const scales = new Set([1, 0.75, 0.5]);
+
+  const crf = Number.isFinite(Number(input.crf)) ? Number(input.crf) : 23;
+
+  return {
+    crf: Math.min(30, Math.max(18, crf)),
+    audioBitrate: bitrates.has(input.audioBitrate) ? input.audioBitrate : '128k',
+    audioSampleRate: sampleRates.has(Number(input.audioSampleRate))
+      ? Number(input.audioSampleRate)
+      : 44100,
+    audioChannels: channels.has(Number(input.audioChannels)) ? Number(input.audioChannels) : 2,
+    videoPreset: presets.has(input.videoPreset) ? input.videoPreset : 'veryfast',
+    fpsCap: fpsAllowed.has(Number(input.fpsCap)) ? Number(input.fpsCap) : null,
+    resolutionScale: scales.has(Number(input.resolutionScale)) ? Number(input.resolutionScale) : 1,
+    normalizeAudio: Boolean(input.normalizeAudio),
+  };
+}
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  if (req.headers['x-internal-job-secret'] !== INTERNAL_JOB_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  let tempDir = null;
+  const { fileId, totalChunks, originalName, settings } = req.body || {};
+  if (!fileId || !Number.isInteger(totalChunks) || totalChunks <= 0 || !originalName) {
+    return res.status(400).json({ error: 'fileId, totalChunks, and originalName are required' });
+  }
+
+  const cfg = sanitizeSettings(settings);
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), `compress-${fileId}-`));
+  const inputPath = path.join(tmpDir, 'input.mp4');
+  const outputPath = path.join(tmpDir, 'output.mp4');
 
   try {
-    const { fileId } = await req.json();
-
-    if (!fileId || typeof fileId !== 'string') {
-      return Response.json({ error: 'fileId is required' }, { status: 400 });
-    }
-
-    const safeFileId = fileId.replace(/[^a-zA-Z0-9-_]/g, '');
-    if (!safeFileId) {
-      return Response.json({ error: 'invalid fileId' }, { status: 400 });
-    }
-
-    if (!ffmpegPath) throw new Error('ffmpeg binary not found (ffmpeg-static)');
-
-    await writeStatus(safeFileId, {
+    await writeProgress(fileId, {
       state: 'processing',
-      progress: 10,
-      message: 'Collecting chunks',
-    });
-
-    const chunksPrefix = `uploads/${safeFileId}/chunks`;
-    const { data: chunkObjects, error: listError } = await supabase.storage
-      .from(BUCKET)
-      .list(chunksPrefix, { limit: 10000, sortBy: { column: 'name', order: 'asc' } });
-
-    if (listError) throw listError;
-    if (!chunkObjects || chunkObjects.length === 0) {
-      throw new Error('No chunks found for this fileId');
-    }
-
-    const chunkNames = chunkObjects
-      .map((o) => o.name)
-      .filter(Boolean)
-      .sort();
-
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), `video-${safeFileId}-`));
-    const inputPath = path.join(tempDir, 'input.mp4');
-    const outputPath = path.join(tempDir, 'compressed.mp4');
-
-    await writeStatus(safeFileId, {
-      state: 'processing',
-      progress: 25,
+      progress: 5,
       message: 'Downloading chunks',
-      totalChunks: chunkNames.length,
+      updatedAt: new Date().toISOString(),
     });
 
-    const buffers = [];
-    for (const name of chunkNames) {
-      const chunkPath = `${chunksPrefix}/${name}`;
-      const { data, error } = await supabase.storage.from(BUCKET).download(chunkPath);
-      if (error) throw error;
+    // Merge chunks from Supabase Storage into one local file
+    const fd = fs.openSync(inputPath, 'w');
+    try {
+      for (let i = 0; i < totalChunks; i++) {
+        const chunkPath = `uploads/${fileId}/chunks/${String(i).padStart(6, '0')}.part`;
+        const { data, error } = await supabaseAdmin.storage.from(BUCKET).download(chunkPath);
+        if (error) throw new Error(`Chunk ${i + 1} download failed: ${error.message}`);
 
-      const arr = await data.arrayBuffer();
-      buffers.push(Buffer.from(arr));
+        const buf = Buffer.from(await data.arrayBuffer());
+        fs.writeSync(fd, buf);
+
+        const mergeProgress = Math.round(5 + ((i + 1) / totalChunks) * 20); // 5..25
+        await writeProgress(fileId, {
+          state: 'processing',
+          progress: mergeProgress,
+          message: `Merging chunks ${i + 1}/${totalChunks}`,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    } finally {
+      fs.closeSync(fd);
     }
 
-    const merged = Buffer.concat(buffers);
-    await fs.writeFile(inputPath, merged);
-
-    await writeStatus(safeFileId, {
+    await writeProgress(fileId, {
       state: 'processing',
-      progress: 60,
-      message: 'Running compression',
+      progress: 30,
+      message: 'Starting FFmpeg compression',
+      updatedAt: new Date().toISOString(),
     });
 
-    await runFfmpeg([
+    const duration = await getDurationSeconds(inputPath);
+
+    const vf = [];
+    if (cfg.resolutionScale !== 1) {
+      // Keep even dimensions
+      vf.push(`scale=trunc(iw*${cfg.resolutionScale}/2)*2:trunc(ih*${cfg.resolutionScale}/2)*2`);
+    }
+
+    const ffmpegArgs = [
       '-y',
-      '-i',
-      inputPath,
-      '-vcodec',
-      'libx264',
-      '-crf',
-      '28',
-      '-preset',
-      'veryfast',
-      '-acodec',
-      'aac',
-      '-b:a',
-      '128k',
-      outputPath,
-    ]);
+      '-i', inputPath,
+      '-c:v', 'libx264',
+      '-preset', cfg.videoPreset,
+      '-crf', String(cfg.crf),
+      '-c:a', 'aac',
+      '-b:a', cfg.audioBitrate,
+      '-ar', String(cfg.audioSampleRate),
+      '-ac', String(cfg.audioChannels),
+      '-movflags', '+faststart',
+    ];
 
-    await writeStatus(safeFileId, {
-      state: 'processing',
-      progress: 85,
-      message: 'Uploading compressed video',
+    if (cfg.fpsCap) {
+      ffmpegArgs.push('-r', String(cfg.fpsCap));
+    }
+
+    if (vf.length) {
+      ffmpegArgs.push('-vf', vf.join(','));
+    }
+
+    if (cfg.normalizeAudio) {
+      ffmpegArgs.push('-af', 'loudnorm=I=-14:TP=-1.5:LRA=11');
+    }
+
+    ffmpegArgs.push(outputPath);
+
+    await run('ffmpeg', ffmpegArgs, async (stderrLine) => {
+      if (!duration) return;
+      const m = stderrLine.match(/time=(\d+):(\d+):(\d+(?:\.\d+)?)/);
+      if (!m) return;
+
+      const sec = hhmmssToSec(m[1], m[2], m[3]);
+      const ratio = Math.max(0, Math.min(1, sec / duration));
+      const p = Math.round(30 + ratio * 60); // 30..90
+      await writeProgress(fileId, {
+        state: 'processing',
+        progress: p,
+        message: `Compressing… ${p}%`,
+        updatedAt: new Date().toISOString(),
+      });
     });
 
-    const outBuffer = await fs.readFile(outputPath);
-    const outputObjectPath = `uploads/${safeFileId}/compressed.mp4`;
+    await writeProgress(fileId, {
+      state: 'processing',
+      progress: 92,
+      message: 'Uploading compressed file',
+      updatedAt: new Date().toISOString(),
+    });
 
-    const { error: uploadError } = await supabase.storage
+    const outputStoragePath = `uploads/${fileId}/output.mp4`;
+    const outBuffer = fs.readFileSync(outputPath);
 
-      .from(BUCKET)
-      .upload(outputObjectPath, outBuffer, {
+    const { error: uploadError } = await supabaseAdmin.storage.from(BUCKET).upload(
+      outputStoragePath,
+      outBuffer,
+      {
         upsert: true,
         contentType: 'video/mp4',
-      });
+        cacheControl: '3600',
+      }
+    );
 
-    if (uploadError) throw uploadError;
+    if (uploadError) throw new Error(uploadError.message);
 
-    await writeStatus(safeFileId, {
+    await writeProgress(fileId, {
       state: 'done',
       progress: 100,
       message: 'Compression complete',
-      outputPath: outputObjectPath,
+      outputPath: outputStoragePath,
+      originalName,
+      updatedAt: new Date().toISOString(),
     });
 
-    return Response.json({ ok: true, fileId: safeFileId, outputPath: outputObjectPath });
-  } catch (error) {
-    console.error('compress-video error:', error);
-    try {
-      const body = await req.clone().json().catch(() => ({}));
-      if (body?.fileId) {
-        const safeFileId = String(body.fileId).replace(/[^a-zA-Z0-9-_]/g, '');
-        if (safeFileId) {
-          await writeStatus(safeFileId, {
-            state: 'error',
-            progress: 100,
-            message: error?.message || 'Compression failed',
-          });
-        }
-      }
-    } catch (_) {}
-
-    return Response.json(
-      { error: error?.message || 'Unexpected compression error' },
-      { status: 500 }
-    );
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    await writeProgress(fileId, {
+      state: 'error',
+      progress: 100,
+      message: err.message || 'Compression failed',
+      updatedAt: new Date().toISOString(),
+    });
+    return res.status(500).json({ error: err.message || 'Compression failed' });
   } finally {
-    if (tempDir) {
-      await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
-    }
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
   }
 }
