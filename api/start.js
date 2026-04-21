@@ -13,14 +13,9 @@ export async function POST(req) {
   try {
     const { fileName, crf = 23, hevc } = await req.json();
 
-    console.log(`Starting compression for file: ${fileName}`);
-
-    // Get signed URL from Supabase
-    const { data: signedUrlData, error } = await supabase.storage
+    const { data: signedUrlData } = await supabase.storage
       .from('video-uploads')
       .createSignedUrl(fileName, 3600);
-
-    if (error) throw error;
 
     const outputPath = `/tmp/compressed-${Date.now()}.mp4`;
 
@@ -37,7 +32,6 @@ export async function POST(req) {
     });
 
     const buffer = fs.readFileSync(outputPath);
-
     fs.unlinkSync(outputPath);
 
     return new Response(buffer, {
@@ -47,7 +41,7 @@ export async function POST(req) {
       }
     });
   } catch (error) {
-    console.error('Compression error:', error);
+    console.error(error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
