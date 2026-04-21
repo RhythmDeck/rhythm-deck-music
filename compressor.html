@@ -50,9 +50,9 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 <div class="hero">
   <div class="instructions">
     <strong>Video Compressor</strong><br><br>
-    • Uploads directly to Supabase Storage (large files supported)<br>
-    • Compresses on Vercel<br>
-    • Real-time progress shown below
+    • Uploads in safe 40MB chunks<br>
+    • Merges and compresses on server<br>
+    • Works with large files (900MB+)
   </div>
   <div class="image-box">
     <img src="compressor.png" alt="Compressor">
@@ -77,10 +77,10 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 <div id="statusWrap">
   <div id="status">Ready — Select a video and click Compress Video</div>
   <div>
-    <div class="progress-label">Uploading to Supabase <span id="uploadTimer" class="timer">00:00</span></div>
+    <div class="progress-label">Uploading <span id="uploadTimer" class="timer">00:00</span></div>
     <div id="uploadProgressOuter"><div id="uploadProgressInner"></div></div>
     <div id="uploadProgressText" class="progress-label">0%</div>
-    <div class="progress-label" style="margin-top:20px;">Compressing on Vercel <span id="compressTimer" class="timer">00:00</span></div>
+    <div class="progress-label" style="margin-top:20px;">Compressing <span id="compressTimer" class="timer">00:00</span></div>
     <div id="compressProgressOuter"><div id="compressProgressInner"></div></div>
     <div id="compressProgressText" class="progress-label">Waiting…</div>
   </div>
@@ -88,10 +88,8 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 </div>
 
 <script>
-// ================== YOUR SUPABASE SETTINGS ==================
 const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
-// ===========================================================
 
 const fileInput = document.getElementById('file');
 const startBtn = document.getElementById('start');
@@ -105,8 +103,7 @@ const compressText = document.getElementById('compressProgressText');
 const uploadTimerEl = document.getElementById('uploadTimer');
 const compressTimerEl = document.getElementById('compressTimer');
 
-let uploadStartTime = null, compressStartTime = null;
-let uploadTimerInterval = null, compressTimerInterval = null;
+let uploadStartTime, compressStartTime, uploadTimerInterval, compressTimerInterval;
 
 function formatTime(seconds) {
   const min = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -137,67 +134,94 @@ startBtn.onclick = async () => {
   if (!fileInput.files[0]) return alert('Select a video');
 
   startBtn.disabled = true;
-  startBtn.textContent = 'Uploading to Supabase...';
-  status.textContent = 'Uploading large video to Supabase Storage...\n';
+  startBtn.textContent = 'Processing...';
+  status.textContent = 'Uploading in 40MB chunks...\n';
 
   const file = fileInput.files[0];
-  const fileName = `${Date.now()}-${file.name}`;
+  const totalBytes = file.size;
+  let uploadedBytes = 0;
+  const fileId = crypto.randomUUID();
+  const chunkSize = 40 * 1024 * 1024; // 40MB chunks
+  let index = 0;
+  let offset = 0;
 
-  const formData = new FormData();
-  formData.append('file', file);
+  startTimer('upload');
 
-  try {
+  while (offset < totalBytes) {
+    const slice = file.slice(offset, offset + chunkSize);
+    const form = new FormData();
+    form.append('chunk', slice);
+    form.append('fileId', fileId);
+    form.append('index', index);
+
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${SUPABASE_URL}/storage/v1/object/video-uploads/${fileName}`);
-    xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_ANON_KEY}`);
+    xhr.open('POST', '/api/upload-chunk');
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
-        const percent = Math.round((e.loaded / e.total) * 100);
+        const percent = Math.round(((uploadedBytes + e.loaded) / totalBytes) * 100);
         uploadInner.style.width = percent + '%';
         uploadText.textContent = percent + '%';
       }
     };
 
-    xhr.onload = async () => {
-      if (xhr.status === 200) {
-        uploadInner.style.width = '100%';
-        uploadText.textContent = '100%';
-        status.textContent += "Upload complete. Starting compression on Vercel...\n";
-
-        const compressRes = await fetch('/api/start', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileName, crf: crf.value, hevc: document.getElementById('hevc').checked })
-        });
-
-        if (compressRes.ok) {
-          const blob = await compressRes.blob();
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'compressed-' + file.name;
-          a.click();
-
-          compressInner.style.width = '100%';
-          compressText.textContent = '100%';
-          status.textContent += "\n✅ Compression complete! File downloaded.";
-        } else {
-          status.textContent += "\nCompression failed on Vercel.";
-        }
-      } else {
-        status.textContent += "\nUpload to Supabase failed (status " + xhr.status + "). Check bucket policy.";
-      }
-      startBtn.disabled = false;
-      startBtn.textContent = 'Compress Video';
-    };
-
-    xhr.send(formData);
-
-  } catch (err) {
-    status.textContent += "\nError: " + err.message;
-    startBtn.disabled = false;
+    await new Promise((resolve) => {
+      xhr.onload = () => {
+        uploadedBytes += slice.size;
+        const percent = Math.min(100, Math.round((uploadedBytes / totalBytes) * 100));
+        uploadInner.style.width = percent + '%';
+        uploadText.textContent = percent + '%';
+        status.textContent += `Uploaded chunk ${index + 1}\n`;
+        offset += chunkSize;
+        index++;
+        resolve();
+      };
+      xhr.onerror = () => { status.textContent += 'Upload failed.\n'; resolve(); };
+      xhr.send(form);
+    });
   }
+
+  stopTimer('upload');
+  status.textContent += '\nAll chunks uploaded. Merging and compressing...\n';
+  uploadInner.style.width = '100%';
+  uploadText.textContent = '100%';
+
+  startTimer('compress');
+  compressText.textContent = 'Compressing… 0%';
+
+  const res = await fetch('/api/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fileId, crf: crf.value, hevc: document.getElementById('hevc').checked })
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    status.textContent += `\nCompression failed: ${errorText}`;
+    stopTimer('compress');
+    startBtn.disabled = false;
+    startBtn.textContent = 'Compress Video';
+    return;
+  }
+
+  const progressInterval = setInterval(async () => {
+    const progRes = await fetch(`/api/progress?fileId=${fileId}`);
+    const progData = await progRes.json();
+    if (progData.progress !== undefined) {
+      const p = Math.min(100, Math.round(progData.progress));
+      compressInner.style.width = p + '%';
+      compressText.textContent = `Compressing… ${p}%`;
+      if (p >= 100) {
+        clearInterval(progressInterval);
+        stopTimer('compress');
+        status.textContent += '\nCompression complete.\nDownloading…';
+        window.location = `/api/download?fileId=${fileId}`;
+      }
+    }
+  }, 2000);
+
+  startBtn.disabled = false;
+  startBtn.textContent = 'Compress Video';
 };
 </script>
 </body>
