@@ -1,38 +1,57 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-export const config = { api: { bodyParser: false } };
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export async function POST(req) {
   try {
     const form = await req.formData();
-    const chunk = form.get('chunk');
-    const fileId = form.get('fileId');
-    const index = form.get('index');
 
-    if (!chunk || !fileId) {
-      return Response.json({ error: 'Missing chunk or fileId' }, { status: 400 });
+    const chunk = form.get('chunk');
+    const fileIdRaw = form.get('fileId');
+    const indexRaw = form.get('index');
+
+    if (!(chunk instanceof Blob)) {
+      return Response.json({ error: 'chunk must be a file/blob' }, { status: 400 });
     }
 
-    const fileName = `${fileId}-chunk-${index}`;
+    if (!fileIdRaw || typeof fileIdRaw !== 'string') {
+      return Response.json({ error: 'fileId is required' }, { status: 400 });
+    }
 
-    console.log(`Uploading chunk: ${fileName}`);
+    const fileId = fileIdRaw.replace(/[^a-zA-Z0-9-_]/g, '');
+    if (!fileId) {
+      return Response.json({ error: 'invalid fileId' }, { status: 400 });
+    }
+
+    if (indexRaw === null || indexRaw === undefined) {
+      return Response.json({ error: 'index is required' }, { status: 400 });
+    }
+
+    const index = Number(indexRaw);
+    if (!Number.isInteger(index) || index < 0) {
+      return Response.json({ error: 'index must be a non-negative integer' }, { status: 400 });
+    }
+
+    const objectPath = `uploads/${fileId}/chunks/${String(index).padStart(6, '0')}.part`;
 
     const { error } = await supabase.storage
       .from('video-uploads')
-      .upload(fileName, chunk, { upsert: true });
+      .upload(objectPath, chunk, {
+        upsert: true,
+        contentType: 'application/octet-stream',
+      });
 
-    if (error) {
-      console.error('Supabase upload error:', error);
-      throw error;
-    }
+    if (error) throw error;
 
-    console.log(`Successfully uploaded chunk: ${fileName}`);
-
-    return Response.json({ success: true, fileName });
+    return Response.json({ ok: true, fileId, index, path: objectPath });
   } catch (error) {
-    console.error('Upload chunk error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('upload-chunck error:', error);
+    return Response.json(
+      { error: error?.message || 'Unexpected upload error' },
+      { status: 500 }
+    );
   }
 }
