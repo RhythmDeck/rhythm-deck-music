@@ -91,7 +91,7 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'; // rotate if this key was exposed publicly
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const BUCKET = 'video-uploads';
@@ -115,6 +115,7 @@ function formatTime(seconds) {
   const sec = (seconds % 60).toString().padStart(2, '0');
   return `${min}:${sec}`;
 }
+
 function startTimer(type) {
   const now = Date.now();
   if (type === 'upload') {
@@ -129,16 +130,20 @@ function startTimer(type) {
     }, 1000);
   }
 }
+
 function stopTimer(type) {
   if (type === 'upload' && uploadTimerInterval) clearInterval(uploadTimerInterval);
   if (type === 'compress' && compressTimerInterval) clearInterval(compressTimerInterval);
 }
+
 function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
+  return new Promise((r) => setTimeout(r, ms));
 }
+
 function chunkPath(fileId, index) {
   return `uploads/${fileId}/chunks/${String(index).padStart(6, '0')}.part`;
 }
+
 async function uploadChunkWithRetry(path, blob, maxRetries = 3) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
@@ -146,13 +151,16 @@ async function uploadChunkWithRetry(path, blob, maxRetries = 3) {
       contentType: 'application/octet-stream',
       cacheControl: '3600'
     });
+
     if (!error) return;
     if (attempt === maxRetries) throw error;
     await sleep(500 * attempt);
   }
 }
 
-crf.oninput = () => crfText.textContent = `CRF ${crf.value} → ~${(30 - crf.value) * 4}% size reduction`;
+crf.oninput = () => {
+  crfText.textContent = `CRF ${crf.value} → ~${(30 - crf.value) * 4}% size reduction`;
+};
 crf.oninput();
 
 startBtn.onclick = async () => {
@@ -163,9 +171,11 @@ startBtn.onclick = async () => {
   startBtn.textContent = 'Processing...';
   status.textContent = 'Uploading chunks to Supabase Storage...\n';
 
+  let progressInterval = null;
+
   try {
     const fileId = crypto.randomUUID();
-    const chunkSize = 40 * 1024 * 1024; // your app-level chunk size
+    const chunkSize = 40 * 1024 * 1024;
     const totalChunks = Math.ceil(file.size / chunkSize);
     let uploadedBytes = 0;
 
@@ -194,7 +204,6 @@ startBtn.onclick = async () => {
     startTimer('compress');
     compressText.textContent = 'Compressing… 0%';
 
-    // NOTE: removed missing hevc checkbox reference
     const res = await fetch('/api/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -210,21 +219,34 @@ startBtn.onclick = async () => {
       throw new Error(await res.text());
     }
 
-    const progressInterval = setInterval(async () => {
-      const progRes = await fetch(`/api/progress?fileId=${fileId}`);
-      const progData = await progRes.json();
+    progressInterval = setInterval(async () => {
+      try {
+        const progRes = await fetch(`/api/progress?fileId=${encodeURIComponent(fileId)}`);
+        if (!progRes.ok) throw new Error(await progRes.text());
 
-      if (progData.progress !== undefined) {
-        const p = Math.min(100, Math.round(progData.progress));
+        const progData = await progRes.json();
+        const p = Math.min(100, Math.round(Number(progData.progress ?? 0)));
+
         compressInner.style.width = `${p}%`;
         compressText.textContent = `Compressing… ${p}%`;
 
-        if (p >= 100) {
+        if (progData.state === 'error') {
+          clearInterval(progressInterval);
+          stopTimer('compress');
+          status.textContent += `\nCompression failed: ${progData.message || 'Unknown error'}`;
+          return;
+        }
+
+        if (progData.state === 'done') {
           clearInterval(progressInterval);
           stopTimer('compress');
           status.textContent += '\nCompression complete.\nDownloading…';
-          window.location = `/api/download?fileId=${fileId}`;
+          window.location = `/api/download?fileId=${encodeURIComponent(fileId)}`;
         }
+      } catch (e) {
+        clearInterval(progressInterval);
+        stopTimer('compress');
+        status.textContent += `\nProgress check failed: ${e.message || e}`;
       }
     }, 2000);
 
