@@ -9,6 +9,17 @@ const BUCKET = 'video-uploads';
 
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+function sanitizeFileId(value) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[^a-zA-Z0-9-_]/g, '');
+}
+
+function sanitizeFilename(name) {
+  if (typeof name !== 'string' || !name.trim()) return 'video.mp4';
+  // Keep it simple/safe for metadata only (not filesystem)
+  return name.replace(/[^\w.\- ]+/g, '').trim().slice(0, 200) || 'video.mp4';
+}
+
 function sanitizeSettings(input = {}) {
   const presets = new Set(['ultrafast', 'veryfast', 'faster', 'fast', 'medium']);
   const bitrates = new Set(['96k', '128k', '160k', '192k', '256k', '320k']);
@@ -17,29 +28,41 @@ function sanitizeSettings(input = {}) {
   const fpsAllowed = new Set([24, 30, 60]);
   const scales = new Set([1, 0.75, 0.5]);
 
-  const crf = Number.isFinite(Number(input.crf)) ? Number(input.crf) : 23;
+  const crfRaw = Number(input.crf);
+  const crf = Number.isFinite(crfRaw) ? crfRaw : 23;
+
+  const audioSampleRateRaw = Number(input.audioSampleRate);
+  const audioChannelsRaw = Number(input.audioChannels);
+  const fpsCapRaw = input.fpsCap === null || input.fpsCap === '' ? null : Number(input.fpsCap);
+  const resolutionScaleRaw = Number(input.resolutionScale);
 
   return {
     crf: Math.min(30, Math.max(18, crf)),
     audioBitrate: bitrates.has(input.audioBitrate) ? input.audioBitrate : '128k',
-    audioSampleRate: sampleRates.has(Number(input.audioSampleRate))
-      ? Number(input.audioSampleRate)
-      : 44100,
-    audioChannels: channels.has(Number(input.audioChannels)) ? Number(input.audioChannels) : 2,
+    audioSampleRate: sampleRates.has(audioSampleRateRaw) ? audioSampleRateRaw : 44100,
+    audioChannels: channels.has(audioChannelsRaw) ? audioChannelsRaw : 2,
     videoPreset: presets.has(input.videoPreset) ? input.videoPreset : 'veryfast',
-    fpsCap: fpsAllowed.has(Number(input.fpsCap)) ? Number(input.fpsCap) : null,
-    resolutionScale: scales.has(Number(input.resolutionScale)) ? Number(input.resolutionScale) : 1,
+    fpsCap: fpsAllowed.has(fpsCapRaw) ? fpsCapRaw : null,
+    resolutionScale: scales.has(resolutionScaleRaw) ? resolutionScaleRaw : 1,
     normalizeAudio: Boolean(input.normalizeAudio),
   };
 }
 
 async function writeProgress(fileId, payload) {
   const path = `uploads/${fileId}/progress.json`;
-  await supabaseAdmin.storage.from(BUCKET).upload(path, JSON.stringify(payload), {
-    upsert: true,
-    contentType: 'application/json',
-    cacheControl: '0',
-  });
+  const { error } = await supabaseAdmin.storage.from(BUCKET).upload(
+    path,
+    JSON.stringify(payload),
+    {
+      upsert: true,
+      contentType: 'application/json',
+      cacheControl: '0',
+    }
+  );
+
+  if (error) {
+    throw new Error(`Failed writing progress.json: ${error.message}`);
+  }
 }
 
 export default async function handler(req, res) {
@@ -48,20 +71,36 @@ export default async function handler(req, res) {
   }
 
   if (!APP_BASE_URL || !INTERNAL_JOB_SECRET) {
-    return res.status(500).json({ error: 'APP_BASE_URL and INTERNAL_JOB_SECRET must be set' });
+    return res.status(500).json({
+      error: 'APP_BASE_URL and INTERNAL_JOB_SECRET must be set',
+    });
   }
+
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    return res.status(500).json({ error: 'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set' });
+    return res.status(500).json({
+      error: 'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set',
+    });
   }
 
   try {
-    const { fileId, totalChunks, originalName, settings } = req.body || {};
-    if (!fileId || !Number.isInteger(totalChunks) || totalChunks <= 0 || !originalName) {
-      return res.status(400).json({ error: 'fileId, totalChunks, and originalName are required' });
+    const body = req.body || {};
+
+    const fileId = sanitizeFileId(body.fileId);
+    const totalChunks = Number(body.totalChunks);
+    const originalName = sanitizeFilename(body.originalName);
+    const settings = body.settings || {};
+
+    if (!fileId) {
+      return res.status(400).json({ error: 'Valid fileId is required' });
+    }
+
+    if (!Number.isInteger(totalChunks) || totalChunks <= 0) {
+      return res.status(400).json({ error: 'Valid totalChunks is required' });
     }
 
     const safeSettings = sanitizeSettings(settings);
 
+    // Immediately create progress marker
     await writeProgress(fileId, {
       state: 'queued',
       progress: 0,
@@ -75,7 +114,7 @@ export default async function handler(req, res) {
 
     const url = `${APP_BASE_URL.replace(/\/+$/, '')}/api/compress-video`;
 
-    // Fire-and-forget
+    // Fire-and-forget background trigger
     fetch(url, {
       method: 'POST',
       headers: {
@@ -89,16 +128,22 @@ export default async function handler(req, res) {
         settings: safeSettings,
       }),
     }).catch(async (err) => {
-      await writeProgress(fileId, {
-        state: 'error',
-        progress: 100,
-        message: `Failed to start job: ${err.message}`,
-        updatedAt: new Date().toISOString(),
-      });
+      try {
+        await writeProgress(fileId, {
+          state: 'error',
+          progress: 100,
+          message: `Failed to start job: ${err?.message || 'Unknown error'}`,
+          updatedAt: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.error('Failed to write startup error progress:', e);
+      }
     });
 
     return res.status(200).json({ ok: true, fileId });
   } catch (err) {
-    return res.status(500).json({ error: err.message || 'Unexpected error' });
+    return res.status(500).json({
+      error: err?.message || 'Unexpected error',
+    });
   }
 }
