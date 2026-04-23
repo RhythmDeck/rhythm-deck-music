@@ -4,6 +4,8 @@ import os from 'os';
 import path from 'path';
 import { spawn } from 'child_process';
 import { createClient } from '@supabase/supabase-js';
+import ffmpegPath from 'ffmpeg-static';
+import ffprobe from 'ffprobe-static';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -77,7 +79,6 @@ function run(cmd, args, onStderr) {
     });
 
     p.on('error', (err) => reject(new Error(`${cmd} failed to start: ${err.message}`)));
-
     p.on('close', (code) => {
       if (code === 0) return resolve();
       reject(new Error(`${cmd} exited with code ${code}\n${stderr}`));
@@ -85,28 +86,7 @@ function run(cmd, args, onStderr) {
   });
 }
 
-async function ensureBinaryAvailable(cmd) {
-  return new Promise((resolve, reject) => {
-    const p = spawn(cmd, ['-version'], { stdio: ['ignore', 'pipe', 'pipe'] });
-    p.on('error', () => {
-      reject(
-        new Error(
-          `${cmd} is not available in this runtime. On Vercel, install/provide ${cmd} binary or move processing to a worker service.`
-        )
-      );
-    });
-    p.on('close', (code) => {
-      if (code === 0) return resolve();
-      reject(
-        new Error(
-          `${cmd} is not available in this runtime. On Vercel, install/provide ${cmd} binary or move processing to a worker service.`
-        )
-      );
-    });
-  });
-}
-
-async function getDurationSeconds(inputPath) {
+async function getDurationSeconds(inputPath, ffprobePath) {
   const args = [
     '-v',
     'error',
@@ -118,7 +98,7 @@ async function getDurationSeconds(inputPath) {
   ];
 
   return new Promise((resolve) => {
-    const p = spawn('ffprobe', args);
+    const p = spawn(ffprobePath, args);
     let out = '';
     p.stdout.on('data', (d) => (out += d.toString()));
     p.on('error', () => resolve(0));
@@ -162,6 +142,15 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
+  const resolvedFfmpegPath = ffmpegPath;
+  const resolvedFfprobePath = ffprobe?.path;
+
+  if (!resolvedFfmpegPath || !resolvedFfprobePath) {
+    return res.status(500).json({
+      error: 'ffmpeg-static/ffprobe-static not available at runtime',
+    });
+  }
+
   const supabaseAdmin = getSupabaseAdmin();
   const body = parseBody(req);
 
@@ -183,9 +172,6 @@ export default async function handler(req, res) {
   const outputPath = path.join(tmpDir, 'output.mp4');
 
   try {
-    await ensureBinaryAvailable('ffmpeg');
-    await ensureBinaryAvailable('ffprobe');
-
     await writeProgress(supabaseAdmin, fileId, {
       state: 'processing',
       progress: 5,
@@ -206,7 +192,7 @@ export default async function handler(req, res) {
         const buf = Buffer.from(await data.arrayBuffer());
         fs.writeSync(fd, buf);
 
-        const mergeProgress = Math.round(5 + ((i + 1) / totalChunks) * 20); // 5..25
+        const mergeProgress = Math.round(5 + ((i + 1) / totalChunks) * 20);
         await writeProgress(supabaseAdmin, fileId, {
           state: 'processing',
           progress: mergeProgress,
@@ -225,7 +211,7 @@ export default async function handler(req, res) {
       updatedAt: new Date().toISOString(),
     });
 
-    const duration = await getDurationSeconds(inputPath);
+    const duration = await getDurationSeconds(inputPath, resolvedFfprobePath);
     const vf = [];
 
     if (cfg.resolutionScale !== 1) {
@@ -257,20 +243,19 @@ export default async function handler(req, res) {
     if (cfg.fpsCap) ffmpegArgs.push('-r', String(cfg.fpsCap));
     if (vf.length) ffmpegArgs.push('-vf', vf.join(','));
     if (cfg.normalizeAudio) ffmpegArgs.push('-af', 'loudnorm=I=-14:TP=-1.5:LRA=11');
-
     ffmpegArgs.push(outputPath);
 
     let lastProgress = 30;
     let lastWrite = 0;
 
-    await run('ffmpeg', ffmpegArgs, (stderrLine) => {
+    await run(resolvedFfmpegPath, ffmpegArgs, (stderrLine) => {
       if (!duration) return;
       const m = stderrLine.match(/time=(\d+):(\d+):(\d+(?:\.\d+)?)/);
       if (!m) return;
 
       const sec = hhmmssToSec(m[1], m[2], m[3]);
       const ratio = Math.max(0, Math.min(1, sec / duration));
-      const p = Math.round(30 + ratio * 60); // 30..90
+      const p = Math.round(30 + ratio * 60);
 
       const now = Date.now();
       if (p > lastProgress && now - lastWrite > 1000) {
