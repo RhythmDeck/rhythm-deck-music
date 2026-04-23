@@ -165,7 +165,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const SUPABASE_URL = 'https://bxoqhmfnseskwqkywppg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const BUCKET = 'video-uploads';
 
 const fileInput = document.getElementById('file');
@@ -173,15 +172,6 @@ const startBtn = document.getElementById('start');
 const status = document.getElementById('status');
 const crf = document.getElementById('crf');
 const crfText = document.getElementById('crfText');
-
-const audioBitrate = document.getElementById('audioBitrate');
-const audioSampleRate = document.getElementById('audioSampleRate');
-const audioChannels = document.getElementById('audioChannels');
-const videoPreset = document.getElementById('videoPreset');
-const fpsCap = document.getElementById('fpsCap');
-const resolutionScale = document.getElementById('resolutionScale');
-const normalizeAudio = document.getElementById('normalizeAudio');
-
 const uploadInner = document.getElementById('uploadProgressInner');
 const uploadText = document.getElementById('uploadProgressText');
 const compressInner = document.getElementById('compressProgressInner');
@@ -196,46 +186,24 @@ function formatTime(seconds) {
   const sec = (seconds % 60).toString().padStart(2, '0');
   return `${min}:${sec}`;
 }
+
 function startTimer(type) {
   const now = Date.now();
   if (type === 'upload') {
     uploadStartTime = now;
-    uploadTimerInterval = setInterval(() => {
-      uploadTimerEl.textContent = formatTime(Math.floor((Date.now() - uploadStartTime) / 1000));
-    }, 1000);
+    uploadTimerInterval = setInterval(() => uploadTimerEl.textContent = formatTime(Math.floor((Date.now() - uploadStartTime)/1000)), 1000);
   } else {
     compressStartTime = now;
-    compressTimerInterval = setInterval(() => {
-      compressTimerEl.textContent = formatTime(Math.floor((Date.now() - compressStartTime) / 1000));
-    }, 1000);
+    compressTimerInterval = setInterval(() => compressTimerEl.textContent = formatTime(Math.floor((Date.now() - compressStartTime)/1000)), 1000);
   }
 }
+
 function stopTimer(type) {
   if (type === 'upload' && uploadTimerInterval) clearInterval(uploadTimerInterval);
   if (type === 'compress' && compressTimerInterval) clearInterval(compressTimerInterval);
 }
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
-function chunkPath(fileId, index) {
-  return `uploads/${fileId}/chunks/${String(index).padStart(6, '0')}.part`;
-}
-async function uploadChunkWithRetry(path, blob, maxRetries = 3) {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
-      upsert: true,
-      contentType: 'application/octet-stream',
-      cacheControl: '3600'
-    });
-    if (!error) return;
-    if (attempt === maxRetries) throw error;
-    await sleep(500 * attempt);
-  }
-}
 
-crf.oninput = () => {
-  crfText.textContent = `CRF ${crf.value} → ~${(30 - crf.value) * 4}% size reduction`;
-};
+crf.oninput = () => crfText.textContent = `CRF ${crf.value} → ~${(30 - crf.value) * 4}% size reduction`;
 crf.oninput();
 
 startBtn.onclick = async () => {
@@ -244,104 +212,101 @@ startBtn.onclick = async () => {
 
   startBtn.disabled = true;
   startBtn.textContent = 'Processing...';
-  status.textContent = 'Uploading chunks to Supabase Storage...\n';
+  status.textContent = 'Uploading in 40MB chunks...\n';
 
-  let progressInterval = null;
+  const fileId = crypto.randomUUID();
+  const chunkSize = 40 * 1024 * 1024;
+  const totalChunks = Math.ceil(file.size / chunkSize);
+  let uploadedBytes = 0;
 
-  try {
-    const fileId = crypto.randomUUID();
-    const chunkSize = 40 * 1024 * 1024;
-    const totalChunks = Math.ceil(file.size / chunkSize);
-    let uploadedBytes = 0;
+  startTimer('upload');
 
-    startTimer('upload');
+  for (let index = 0; index < totalChunks; index++) {
+    const start = index * chunkSize;
+    const end = Math.min(start + chunkSize, file.size);
+    const slice = file.slice(start, end);
+    const path = `uploads/${fileId}/chunks/${String(index).padStart(6, '0')}.part`;
 
-    for (let index = 0; index < totalChunks; index++) {
-      const start = index * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
-      const slice = file.slice(start, end);
-      const path = chunkPath(fileId, index);
-
-      await uploadChunkWithRetry(path, slice, 3);
-
-      uploadedBytes += slice.size;
-      const percent = Math.round((uploadedBytes / file.size) * 100);
-      uploadInner.style.width = `${percent}%`;
-      uploadText.textContent = `${percent}%`;
-      status.textContent += `Uploaded chunk ${index + 1}/${totalChunks}\n`;
-    }
-
-    stopTimer('upload');
-    uploadInner.style.width = '100%';
-    uploadText.textContent = '100%';
-    status.textContent += '\nAll chunks uploaded. Merging and compressing...\n';
-
-    startTimer('compress');
-    compressText.textContent = 'Compressing… 0%';
-
-    const settings = {
-      crf: Number(crf.value),
-      audioBitrate: audioBitrate.value,
-      audioSampleRate: Number(audioSampleRate.value),
-      audioChannels: Number(audioChannels.value),
-      videoPreset: videoPreset.value,
-      fpsCap: fpsCap.value ? Number(fpsCap.value) : null,
-      resolutionScale: Number(resolutionScale.value),
-      normalizeAudio: Boolean(normalizeAudio.checked)
-    };
-
-    const res = await fetch('/api/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fileId,
-        totalChunks,
-        originalName: file.name,
-        settings
-      })
+    const { error } = await supabase.storage.from(BUCKET).upload(path, slice, {
+      upsert: true,
+      contentType: 'application/octet-stream'
     });
 
-    if (!res.ok) throw new Error(await res.text());
+    if (error) {
+      status.textContent += `Chunk ${index+1} failed: ${error.message}\n`;
+      stopTimer('upload');
+      startBtn.disabled = false;
+      startBtn.textContent = 'Compress Video';
+      return;
+    }
 
-    progressInterval = setInterval(async () => {
-      try {
-        const progRes = await fetch(`/api/progress?fileId=${encodeURIComponent(fileId)}`);
-        if (!progRes.ok) throw new Error(await progRes.text());
+    uploadedBytes += slice.size;
+    const percent = Math.round((uploadedBytes / file.size) * 100);
+    uploadInner.style.width = `${percent}%`;
+    uploadText.textContent = `${percent}%`;
+    status.textContent += `Uploaded chunk ${index + 1}/${totalChunks}\n`;
+  }
 
-        const progData = await progRes.json();
-        const p = Math.min(100, Math.round(Number(progData.progress ?? 0)));
+  stopTimer('upload');
+  uploadInner.style.width = '100%';
+  uploadText.textContent = '100%';
+  status.textContent += '\nAll chunks uploaded. Merging and compressing...\n';
 
-        compressInner.style.width = `${p}%`;
-        compressText.textContent = `Compressing… ${p}%`;
+  startTimer('compress');
+  compressText.textContent = 'Compressing… 0%';
 
-        if (progData.state === 'error') {
-          clearInterval(progressInterval);
-          stopTimer('compress');
-          status.textContent += `\nCompression failed: ${progData.message || 'Unknown error'}`;
-          return;
-        }
-
-        if (progData.state === 'done') {
-          clearInterval(progressInterval);
-          stopTimer('compress');
-          status.textContent += '\nCompression complete.\nDownloading…';
-          window.location = `/api/download?fileId=${encodeURIComponent(fileId)}`;
-        }
-      } catch (e) {
-        clearInterval(progressInterval);
-        stopTimer('compress');
-        status.textContent += `\nProgress check failed: ${e.message || e}`;
+  // Call your existing start.js
+  const res = await fetch('/api/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fileId,
+      totalChunks,
+      originalName: file.name,
+      settings: {
+        crf: Number(crf.value),
+        // add other settings from your form if needed
       }
-    }, 2000);
+    })
+  });
 
-  } catch (err) {
-    stopTimer('upload');
+  if (!res.ok) {
+    const err = await res.text();
+    status.textContent += `\nFailed to start compression: ${err}`;
     stopTimer('compress');
-    status.textContent += `\nFailed: ${err.message || err}`;
-  } finally {
     startBtn.disabled = false;
     startBtn.textContent = 'Compress Video';
+    return;
   }
+
+  // Progress polling (your existing code already handles it)
+  const progressInterval = setInterval(async () => {
+    try {
+      const progRes = await fetch(`/api/progress?fileId=${encodeURIComponent(fileId)}`);
+      if (!progRes.ok) throw new Error('Progress fetch failed');
+      const progData = await progRes.json();
+      const p = Math.min(100, Math.round(Number(progData.progress ?? 0)));
+      compressInner.style.width = `${p}%`;
+      compressText.textContent = `Compressing… ${p}%`;
+
+      if (progData.state === 'done') {
+        clearInterval(progressInterval);
+        stopTimer('compress');
+        status.textContent += '\nCompression complete.\nDownloading…';
+        window.location = `/api/download?fileId=${encodeURIComponent(fileId)}`;
+      } else if (progData.state === 'error') {
+        clearInterval(progressInterval);
+        stopTimer('compress');
+        status.textContent += `\nCompression failed: ${progData.message || 'Unknown error'}`;
+      }
+    } catch (e) {
+      console.error(e);
+      // Don't stop polling on every transient error
+    }
+  }, 3000); // poll every 3 seconds
+
+  startBtn.disabled = false;
+  startBtn.textContent = 'Compress Video';
 };
 </script>
 </body>
