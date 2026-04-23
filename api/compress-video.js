@@ -10,8 +10,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const INTERNAL_JOB_SECRET = process.env.INTERNAL_JOB_SECRET;
 const BUCKET = 'video-uploads';
 
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
 function sanitizeFileId(value) {
   if (typeof value !== 'string') return '';
   return value.replace(/[^a-zA-Z0-9-_]/g, '');
@@ -35,7 +33,8 @@ function sanitizeSettings(input = {}) {
 
   const audioSampleRateRaw = Number(input.audioSampleRate);
   const audioChannelsRaw = Number(input.audioChannels);
-  const fpsCapRaw = input.fpsCap === null || input.fpsCap === '' ? null : Number(input.fpsCap);
+  const fpsCapRaw =
+    input.fpsCap === null || input.fpsCap === '' ? null : Number(input.fpsCap);
   const resolutionScaleRaw = Number(input.resolutionScale);
 
   return {
@@ -50,6 +49,22 @@ function sanitizeSettings(input = {}) {
   };
 }
 
+function hhmmssToSec(h, m, s) {
+  return Number(h) * 3600 + Number(m) * 60 + Number(s);
+}
+
+function parseBody(req) {
+  if (!req?.body) return {};
+  if (typeof req.body === 'string') {
+    try {
+      return JSON.parse(req.body);
+    } catch {
+      return {};
+    }
+  }
+  return req.body;
+}
+
 function run(cmd, args, onStderr) {
   return new Promise((resolve, reject) => {
     const p = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -61,7 +76,7 @@ function run(cmd, args, onStderr) {
       if (onStderr) onStderr(s);
     });
 
-    p.on('error', reject);
+    p.on('error', (err) => reject(new Error(`${cmd} failed to start: ${err.message}`)));
 
     p.on('close', (code) => {
       if (code === 0) return resolve();
@@ -70,7 +85,55 @@ function run(cmd, args, onStderr) {
   });
 }
 
-async function writeProgress(fileId, payload) {
+async function ensureBinaryAvailable(cmd) {
+  return new Promise((resolve, reject) => {
+    const p = spawn(cmd, ['-version'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    p.on('error', () => {
+      reject(
+        new Error(
+          `${cmd} is not available in this runtime. On Vercel, install/provide ${cmd} binary or move processing to a worker service.`
+        )
+      );
+    });
+    p.on('close', (code) => {
+      if (code === 0) return resolve();
+      reject(
+        new Error(
+          `${cmd} is not available in this runtime. On Vercel, install/provide ${cmd} binary or move processing to a worker service.`
+        )
+      );
+    });
+  });
+}
+
+async function getDurationSeconds(inputPath) {
+  const args = [
+    '-v',
+    'error',
+    '-show_entries',
+    'format=duration',
+    '-of',
+    'default=noprint_wrappers=1:nokey=1',
+    inputPath,
+  ];
+
+  return new Promise((resolve) => {
+    const p = spawn('ffprobe', args);
+    let out = '';
+    p.stdout.on('data', (d) => (out += d.toString()));
+    p.on('error', () => resolve(0));
+    p.on('close', () => {
+      const n = Number(out.trim());
+      resolve(Number.isFinite(n) ? n : 0);
+    });
+  });
+}
+
+function getSupabaseAdmin() {
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+}
+
+async function writeProgress(supabaseAdmin, fileId, payload) {
   const progressPath = `uploads/${fileId}/progress.json`;
   const { error } = await supabaseAdmin.storage.from(BUCKET).upload(
     progressPath,
@@ -82,30 +145,6 @@ async function writeProgress(fileId, payload) {
     }
   );
   if (error) throw new Error(`Failed writing progress.json: ${error.message}`);
-}
-
-function hhmmssToSec(h, m, s) {
-  return Number(h) * 3600 + Number(m) * 60 + Number(s);
-}
-
-async function getDurationSeconds(inputPath) {
-  const args = [
-    '-v', 'error',
-    '-show_entries', 'format=duration',
-    '-of', 'default=noprint_wrappers=1:nokey=1',
-    inputPath,
-  ];
-
-  return new Promise((resolve) => {
-    const p = spawn('ffprobe', args);
-    let out = '';
-    p.stdout.on('data', (d) => (out += d.toString()));
-    p.on('close', () => {
-      const n = Number(out.trim());
-      resolve(Number.isFinite(n) ? n : 0);
-    });
-    p.on('error', () => resolve(0));
-  });
 }
 
 export default async function handler(req, res) {
@@ -123,7 +162,9 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const body = req.body || {};
+  const supabaseAdmin = getSupabaseAdmin();
+  const body = parseBody(req);
+
   const fileId = sanitizeFileId(body.fileId);
   const totalChunks = Number(body.totalChunks);
   const originalName = sanitizeFilename(body.originalName);
@@ -132,6 +173,7 @@ export default async function handler(req, res) {
   if (!fileId) {
     return res.status(400).json({ error: 'Valid fileId is required' });
   }
+
   if (!Number.isInteger(totalChunks) || totalChunks <= 0) {
     return res.status(400).json({ error: 'Valid totalChunks is required' });
   }
@@ -141,19 +183,22 @@ export default async function handler(req, res) {
   const outputPath = path.join(tmpDir, 'output.mp4');
 
   try {
-    await writeProgress(fileId, {
+    await ensureBinaryAvailable('ffmpeg');
+    await ensureBinaryAvailable('ffprobe');
+
+    await writeProgress(supabaseAdmin, fileId, {
       state: 'processing',
       progress: 5,
       message: 'Downloading chunks',
       updatedAt: new Date().toISOString(),
     });
 
-    // Merge chunks into one local input file
     const fd = fs.openSync(inputPath, 'w');
     try {
       for (let i = 0; i < totalChunks; i++) {
         const chunkPath = `uploads/${fileId}/chunks/${String(i).padStart(6, '0')}.part`;
         const { data, error } = await supabaseAdmin.storage.from(BUCKET).download(chunkPath);
+
         if (error || !data) {
           throw new Error(`Chunk ${i + 1} download failed: ${error?.message || 'Missing chunk'}`);
         }
@@ -162,7 +207,7 @@ export default async function handler(req, res) {
         fs.writeSync(fd, buf);
 
         const mergeProgress = Math.round(5 + ((i + 1) / totalChunks) * 20); // 5..25
-        await writeProgress(fileId, {
+        await writeProgress(supabaseAdmin, fileId, {
           state: 'processing',
           progress: mergeProgress,
           message: `Merging chunks ${i + 1}/${totalChunks}`,
@@ -173,7 +218,7 @@ export default async function handler(req, res) {
       fs.closeSync(fd);
     }
 
-    await writeProgress(fileId, {
+    await writeProgress(supabaseAdmin, fileId, {
       state: 'processing',
       progress: 30,
       message: 'Starting FFmpeg compression',
@@ -189,15 +234,24 @@ export default async function handler(req, res) {
 
     const ffmpegArgs = [
       '-y',
-      '-i', inputPath,
-      '-c:v', 'libx264',
-      '-preset', cfg.videoPreset,
-      '-crf', String(cfg.crf),
-      '-c:a', 'aac',
-      '-b:a', cfg.audioBitrate,
-      '-ar', String(cfg.audioSampleRate),
-      '-ac', String(cfg.audioChannels),
-      '-movflags', '+faststart',
+      '-i',
+      inputPath,
+      '-c:v',
+      'libx264',
+      '-preset',
+      cfg.videoPreset,
+      '-crf',
+      String(cfg.crf),
+      '-c:a',
+      'aac',
+      '-b:a',
+      cfg.audioBitrate,
+      '-ar',
+      String(cfg.audioSampleRate),
+      '-ac',
+      String(cfg.audioChannels),
+      '-movflags',
+      '+faststart',
     ];
 
     if (cfg.fpsCap) ffmpegArgs.push('-r', String(cfg.fpsCap));
@@ -206,7 +260,6 @@ export default async function handler(req, res) {
 
     ffmpegArgs.push(outputPath);
 
-    // Throttle progress writes so storage isn't spammed
     let lastProgress = 30;
     let lastWrite = 0;
 
@@ -223,16 +276,16 @@ export default async function handler(req, res) {
       if (p > lastProgress && now - lastWrite > 1000) {
         lastProgress = p;
         lastWrite = now;
-        writeProgress(fileId, {
+        writeProgress(supabaseAdmin, fileId, {
           state: 'processing',
           progress: p,
-          message: `Compressing… ${p}%`,
+          message: `Compressing... ${p}%`,
           updatedAt: new Date().toISOString(),
         }).catch(() => {});
       }
     });
 
-    await writeProgress(fileId, {
+    await writeProgress(supabaseAdmin, fileId, {
       state: 'processing',
       progress: 92,
       message: 'Uploading compressed file',
@@ -251,9 +304,10 @@ export default async function handler(req, res) {
         cacheControl: '3600',
       }
     );
+
     if (uploadError) throw new Error(uploadError.message);
 
-    await writeProgress(fileId, {
+    await writeProgress(supabaseAdmin, fileId, {
       state: 'done',
       progress: 100,
       message: 'Compression complete',
@@ -265,17 +319,18 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, fileId, outputPath: outputStoragePath });
   } catch (err) {
     try {
-      await writeProgress(fileId, {
+      await writeProgress(supabaseAdmin, fileId, {
         state: 'error',
         progress: 100,
         message: err?.message || 'Compression failed',
         updatedAt: new Date().toISOString(),
       });
-    } catch {}
+    } catch (_) {}
+
     return res.status(500).json({ error: err?.message || 'Compression failed' });
   } finally {
     try {
       fs.rmSync(tmpDir, { recursive: true, force: true });
-    } catch {}
+    } catch (_) {}
   }
 }
