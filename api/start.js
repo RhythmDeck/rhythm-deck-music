@@ -16,7 +16,7 @@ function sanitizeFileId(value) {
 
 function sanitizeFilename(name) {
   if (typeof name !== 'string' || !name.trim()) return 'video.mp4';
-  // Keep it simple/safe for metadata only (not filesystem)
+  // Keep safe for metadata only (not filesystem path usage)
   return name.replace(/[^\w.\- ]+/g, '').trim().slice(0, 200) || 'video.mp4';
 }
 
@@ -33,7 +33,8 @@ function sanitizeSettings(input = {}) {
 
   const audioSampleRateRaw = Number(input.audioSampleRate);
   const audioChannelsRaw = Number(input.audioChannels);
-  const fpsCapRaw = input.fpsCap === null || input.fpsCap === '' ? null : Number(input.fpsCap);
+  const fpsCapRaw =
+    input.fpsCap === null || input.fpsCap === '' ? null : Number(input.fpsCap);
   const resolutionScaleRaw = Number(input.resolutionScale);
 
   return {
@@ -50,15 +51,14 @@ function sanitizeSettings(input = {}) {
 
 async function writeProgress(fileId, payload) {
   const path = `uploads/${fileId}/progress.json`;
-  const { error } = await supabaseAdmin.storage.from(BUCKET).upload(
-    path,
-    JSON.stringify(payload),
-    {
+
+  const { error } = await supabaseAdmin.storage
+    .from(BUCKET)
+    .upload(path, JSON.stringify(payload), {
       upsert: true,
       contentType: 'application/json',
       cacheControl: '0',
-    }
-  );
+    });
 
   if (error) {
     throw new Error(`Failed writing progress.json: ${error.message}`);
@@ -100,7 +100,7 @@ export default async function handler(req, res) {
 
     const safeSettings = sanitizeSettings(settings);
 
-    // Immediately create progress marker
+    // 1) Mark as queued immediately
     await writeProgress(fileId, {
       state: 'queued',
       progress: 0,
@@ -112,10 +112,10 @@ export default async function handler(req, res) {
       updatedAt: new Date().toISOString(),
     });
 
+    // 2) Trigger compress endpoint (await so Vercel doesn't drop it)
     const url = `${APP_BASE_URL.replace(/\/+$/, '')}/api/compress-video`;
 
-    // Fire-and-forget background trigger
-    fetch(url, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -127,21 +127,36 @@ export default async function handler(req, res) {
         originalName,
         settings: safeSettings,
       }),
-    }).catch(async (err) => {
-      try {
+    });
+
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      throw new Error(
+        `compress-video failed with status ${response.status}${
+          bodyText ? `: ${bodyText}` : ''
+        }`
+      );
+    }
+
+    return res.status(200).json({ ok: true, fileId });
+  } catch (err) {
+    // Best effort: write startup error
+    try {
+      const body = req.body || {};
+      const fileId = sanitizeFileId(body.fileId);
+
+      if (fileId) {
         await writeProgress(fileId, {
           state: 'error',
           progress: 100,
           message: `Failed to start job: ${err?.message || 'Unknown error'}`,
           updatedAt: new Date().toISOString(),
         });
-      } catch (e) {
-        console.error('Failed to write startup error progress:', e);
       }
-    });
+    } catch (e) {
+      console.error('Failed to write startup error progress:', e);
+    }
 
-    return res.status(200).json({ ok: true, fileId });
-  } catch (err) {
     return res.status(500).json({
       error: err?.message || 'Unexpected error',
     });
