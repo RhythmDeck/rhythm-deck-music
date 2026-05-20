@@ -481,81 +481,28 @@ return
 
 }
 
-/* SEND EMAIL THROUGH FORMSUBMIT */
+/* SEND EMAIL THROUGH FORMSUBMIT (in background) */
 
-const emailForm=document.createElement("form")
+fetch("https://formsubmit.co/ajax/rhythmdeckmusic@gmail.com",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Accept":"application/json"
+},
+body:JSON.stringify({
+subject:"New Rhythm Deck Artist Signup",
+artist:artist,
+email:email,
+subdomain:subdomain,
+_replyto:email,
+_template:"table",
+_autoresponse:"Welcome to Rhythm Deck!\n\nYour Platinum Pro founding artist account has been created.\n\nLOGIN HERE:\nhttps://rhythmdeckmusic.com/login.html\n\nYOUR PUBLIC ARTIST PAGE:\nhttps://rhythmdeckmusic.com/public-profile.html?id="+subdomain+"\n\nFEATURES YOU CAN USE RIGHT NOW:\n\n• Upload MP3 music\n• Upload MP4 music videos\n• Customize your artist profile (banner, logo, bio)\n• Share your public artist page with fans\n• Receive likes and comments from fans\n• Join the Collaboration Network to connect with other artists\n• Access the Radio Station Database\n\nFEATURES CURRENTLY IN DEVELOPMENT:\n\n• Live streaming concerts\n• Fan tipping system\n• Direct social media publishing\n• Playlist promotion tools\n• Expanded artist discovery algorithms\n\n• Create and sell merchandise in your merch store\n• Use the Analytics Dashboard to track engagement\n• Use Rhythm Deck creative tools like:\n  - Rhythm Deck Studio\n  - Chord Engine\n  - LyricVid Generator\n• Access Rhythm Vision Platinum promotion tools\n\nThese features require integrations with external platforms and are currently being finalized.\n\nFOUNDING ARTIST ADVANTAGE:\n\nYou are now one of the first Rhythm Deck founding artists.\nFounding artists receive permanent discovery priority when Rhythm Deck launches publicly.\n\nIf you have ideas or feedback, simply reply to this email.\n\nThank you for helping build the Rhythm Deck community.\n\n— Rhythm Deck Team\nhttps://rhythmdeckmusic.com"
+})
+}).catch(()=>{})
 
-emailForm.action="https://formsubmit.co/rhythmdeckmusic@gmail.com"
-emailForm.method="POST"
-emailForm.style.display="none"
+/* REDIRECT TO ADMIN PAGE */
 
-emailForm.innerHTML=`
-
-<input type="text" name="subject" value="New Rhythm Deck Artist Signup">
-
-<input type="text" name="artist" value="${artist}">
-<input type="email" name="email" value="${email}">
-<input type="text" name="subdomain" value="${subdomain}">
-
-<input type="hidden" name="_replyto" value="${email}">
-<input type="hidden" name="_template" value="table">
-
-<input type="hidden" name="_autoresponse" value="Welcome to Rhythm Deck!
-
-Your Platinum Pro founding artist account has been created.
-
-LOGIN HERE:
-https://rhythmdeckmusic.com/login.html
-
-YOUR PUBLIC ARTIST PAGE:
-https://rhythmdeckmusic.com/public-profile.html?id=${subdomain}
-
-FEATURES YOU CAN USE RIGHT NOW:
-
-• Upload MP3 music
-• Upload MP4 music videos
-• Customize your artist profile (banner, logo, bio)
-• Share your public artist page with fans
-• Receive likes and comments from fans
-• Join the Collaboration Network to connect with other artists
-• Access the Radio Station Database
-
-FEATURES CURRENTLY IN DEVELOPMENT:
-
-• Live streaming concerts
-• Fan tipping system
-• Direct social media publishing
-• Playlist promotion tools
-• Expanded artist discovery algorithms
-
-• Create and sell merchandise in your merch store
-• Use the Analytics Dashboard to track engagement
-• Use Rhythm Deck creative tools like:
-  - Rhythm Deck Studio
-  - Chord Engine
-  - LyricVid Generator
-• Access Rhythm Vision Platinum promotion tools
-
-These features require integrations with external platforms and are currently being finalized.
-
-FOUNDING ARTIST ADVANTAGE:
-
-You are now one of the first Rhythm Deck founding artists.
-Founding artists receive permanent discovery priority when Rhythm Deck launches publicly.
-
-If you have ideas or feedback, simply reply to this email.
-
-Thank you for helping build the Rhythm Deck community.
-
-— Rhythm Deck Team
-https://rhythmdeckmusic.com">
-
-<input type="hidden" name="_next" value="https://rhythmdeckmusic.com/login.html">
-`
-
-document.body.appendChild(emailForm)
-
-emailForm.submit()
+window.location.href="https://rhythmdeckmusic.com/platinum-pro-admin.html"
 
 })
 
