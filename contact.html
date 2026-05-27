@@ -5,23 +5,117 @@
   <title>Contact | Rhythm Deck Music</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="logo-favicon.png" type="image/png">
-  <base href="/">
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    a:hover { color: #0000FF; }
+    .menu-btn {
+      padding: 0.6rem 1.25rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      font-size: 1rem;
+    }
+    .menu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+    .home-btn { background: linear-gradient(to right, #22c55e, #16a34a); color: white; }
+    .about-btn { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; }
+    .benefits-btn { background: linear-gradient(to right, #f59e0b, #d97706); color: white; }
+    .pricing-btn { background: linear-gradient(to right, #ec4899, #db2777); color: white; }
+    .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
+    .features-badge {
+      background: linear-gradient(135deg, #a855f7, #d946ef);
+      color: white;
+      font-weight: bold;
+      padding: 0.5rem 1.1rem;
+      border-radius: 9999px;
+      box-shadow: 0 4px 12px rgba(168,85,247,0.5);
+      transition: all 0.3s;
+      cursor: pointer;
+      user-select: none;
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 0.5rem;
+      width: 280px;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      z-index: 50;
+      display: none;
+    }
+    .dropdown-item {
+      padding: 0.85rem 1.5rem;
+      color: #1f2937;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .dropdown-item:hover {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
 
-  <!-- HEADER (your existing header) -->
-  <header class="bg-black text-white p-4 flex justify-between items-center">
-    <!-- ... keep your header unchanged ... -->
+  <!-- HEADER - Same as Homepage -->
+  <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 shadow-lg">
+    <div class="flex items-center space-x-3">
+      <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+        <p class="text-xs sm:text-sm text-gray-300">“Your complete music platform<br>— from idea to income.”</p>
+      </div>
+    </div>
+
+    <nav class="flex flex-col items-end gap-4 sm:gap-3">
+      <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
+        <a href="index.html" class="menu-btn home-btn">Home</a>
+        <a href="about.html" class="menu-btn about-btn">About</a>
+        <a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
+        <a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
+        <a href="contact.html" class="menu-btn contact-btn">Contact</a>
+        <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
+        <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
+        
+        <div class="relative ml-2">
+          <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+          <div id="dropdownMenu" class="dropdown-menu">
+            <div class="dropdown-item" onclick="document.getElementById('free-vs-pro-section').scrollIntoView({behavior: 'smooth'});">FREE vs PRO</div>
+            <div class="dropdown-item" onclick="document.getElementById('platinum-pro-section').scrollIntoView({behavior: 'smooth'});">PLATINUM PRO</div>
+            <div class="dropdown-item" onclick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
+            <div class="dropdown-item" onclick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});">CORE FEATURES</div>
+            <div class="dropdown-item" onclick="document.getElementById('rhythm-vision-comparison-section').scrollIntoView({behavior: 'smooth'});">RHYTHM VISION PLANS COMPARISON</div>
+            <div class="dropdown-item" onclick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});">RHYTHM WAV PLAYLIST PLATFORM</div>
+            <div class="dropdown-item" onclick="document.getElementById('rhythm-deck-studio-section').scrollIntoView({behavior: 'smooth'});">RHYTHM DECK STUDIO</div>
+            <div class="dropdown-item" onclick="window.open('chord-engine.html', '_blank');">RHYTHM DECK CHORD ENGINE</div>
+            <div class="dropdown-item" onclick="window.open('lyricvid.html', '_blank');">RHYTHM DECK LYRICVID</div>
+            <div class="dropdown-item" onclick="document.getElementById('qa-section').scrollIntoView({behavior: 'smooth'});">Q&A</div>
+          </div>
+        </div>
+      </div>
+    </nav>
   </header>
 
-  <!-- HERO (unchanged) -->
+  <!-- HERO -->
   <section class="relative h-[450px] bg-cover bg-center flex items-center justify-center"
            style="background-image: url('banner-cropped.jpg');">
-    <!-- ... your hero ... -->
+    <div class="bg-black bg-opacity-60 p-10 rounded-lg text-center">
+      <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">Let’s Connect and Collaborate</h2>
+      <p class="text-white text-lg max-w-2xl mx-auto">
+        Whether you’re an artist, producer, distributor or dreamer — we’d love to hear from you!
+      </p>
+    </div>
   </section>
 
-  <!-- CONTACT SECTION -->
+  <!-- CONTACT FORM -->
   <main class="flex-grow max-w-6xl mx-auto p-8 bg-white mt-6 rounded-lg shadow-md">
     <div class="grid md:grid-cols-2 gap-8 items-stretch">
       <!-- LEFT IMAGE -->
@@ -50,12 +144,12 @@
           <input type="hidden" name="_autoresponse" value="Thank you for reaching out! We'll reply soon.">
           <input type="hidden" name="_blacklist" value="viagra,casino,porn,free money,loan,xxx">
 
-          <!-- Honeypot Field (Bots love this) -->
+          <!-- Honeypot -->
           <div style="display: none !important;">
             <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
           </div>
 
-          <!-- Timestamp (Anti-spam) -->
+          <!-- Timestamp -->
           <input type="hidden" name="timestamp" id="timestamp" value="">
 
           <!-- Real Fields -->
@@ -98,48 +192,49 @@
     </div>
   </main>
 
-  <!-- FOOTER (unchanged) -->
+  <!-- FOOTER -->
   <footer class="bg-black text-white mt-10 p-4 text-center text-sm">
-    <!-- ... your footer ... -->
+    <nav class="mb-2 space-x-4">
+      <a href="contact.html" class="hover:underline">Contact Us</a>
+      <a href="privacy.html" class="hover:underline">Privacy Policy</a>
+      <a href="terms.html" class="hover:underline">Terms & Conditions</a>
+    </nav>
+    <p>© 2026 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
   <script>
+    // Anti-spam
     const form = document.getElementById('contactForm');
     const timestampField = document.getElementById('timestamp');
     const honeypot = document.getElementById('website');
 
-    // Set timestamp when page loads
     timestampField.value = Date.now();
 
     form.addEventListener('submit', function(e) {
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const role = document.getElementById('role').value;
-      const message = document.getElementById('message').value.trim();
-
-      // Honeypot Check
       if (honeypot.value.trim() !== '') {
         e.preventDefault();
-        console.log("Spam attempt blocked (Honeypot)");
+        console.log("Spam blocked");
         return false;
       }
 
-      // Time Check - Must take at least 4 seconds to fill form
       const timeTaken = (Date.now() - parseInt(timestampField.value)) / 1000;
       if (timeTaken < 4) {
         e.preventDefault();
-        console.log("Spam attempt blocked (Too Fast)");
-        alert("Please take a moment to fill out the form properly.");
-        return false;
-      }
-
-      // Basic validation
-      if (!name || !email || !role || !message) {
-        e.preventDefault();
-        alert("Please fill out all required fields.");
+        alert("Please take a moment to fill the form.");
         return false;
       }
     });
+
+    // Dropdown functionality
+    const badge = document.getElementById('featuresBadge');
+    const menu = document.getElementById('dropdownMenu');
+    if (badge && menu) {
+      badge.addEventListener('click', e => {
+        e.stopPropagation();
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      });
+      document.addEventListener('click', () => menu.style.display = 'none');
+    }
   </script>
 </body>
 </html>
