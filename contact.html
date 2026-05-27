@@ -7,19 +7,18 @@
   <link rel="icon" href="logo-favicon.png" type="image/png">
   <base href="/">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Cloudflare Turnstile (Recommended) -->
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
-  <!-- HEADER (unchanged) -->
+
+  <!-- HEADER (your existing header) -->
   <header class="bg-black text-white p-4 flex justify-between items-center">
-    <!-- ... your existing header ... -->
+    <!-- ... keep your header unchanged ... -->
   </header>
 
   <!-- HERO (unchanged) -->
   <section class="relative h-[450px] bg-cover bg-center flex items-center justify-center"
            style="background-image: url('banner-cropped.jpg');">
-    <!-- ... your existing hero ... -->
+    <!-- ... your hero ... -->
   </section>
 
   <!-- CONTACT SECTION -->
@@ -47,13 +46,17 @@
           <!-- FormSubmit Settings -->
           <input type="hidden" name="_next" value="https://rhythm-deck.wasmer.app/thank-you.html">
           <input type="hidden" name="_subject" value="New Contact Message from Rhythm Deck">
-          <input type="hidden" name="_captcha" value="true"> <!-- ENABLED -->
-          <input type="hidden" name="_autoresponse" value="Thank you! We'll get back to you soon.">
+          <input type="hidden" name="_captcha" value="true">
+          <input type="hidden" name="_autoresponse" value="Thank you for reaching out! We'll reply soon.">
+          <input type="hidden" name="_blacklist" value="viagra,casino,porn,free money,loan,xxx">
 
-          <!-- Honeypot (Bots will fill this) -->
-          <div style="display: none;">
-            <input type="text" name="honeypot" id="honeypot" tabindex="-1" autocomplete="off">
+          <!-- Honeypot Field (Bots love this) -->
+          <div style="display: none !important;">
+            <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
           </div>
+
+          <!-- Timestamp (Anti-spam) -->
+          <input type="hidden" name="timestamp" id="timestamp" value="">
 
           <!-- Real Fields -->
           <div>
@@ -86,11 +89,6 @@
             <textarea name="Message" id="message" rows="6" class="w-full border p-3 rounded focus:outline-none focus:border-green-500" placeholder="Your message..." required></textarea>
           </div>
 
-          <!-- Cloudflare Turnstile -->
-          <div class="flex justify-center py-2">
-            <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="light"></div>
-          </div>
-
           <button type="submit" id="submitBtn"
                   class="w-full bg-black hover:bg-green-600 text-white font-bold py-4 rounded-lg transition text-lg">
             Send Message
@@ -107,25 +105,38 @@
 
   <script>
     const form = document.getElementById('contactForm');
-    const honeypot = document.getElementById('honeypot');
+    const timestampField = document.getElementById('timestamp');
+    const honeypot = document.getElementById('website');
+
+    // Set timestamp when page loads
+    timestampField.value = Date.now();
 
     form.addEventListener('submit', function(e) {
-      // Honeypot check
-      if (honeypot.value.trim() !== '') {
-        e.preventDefault();
-        console.log("Spam detected");
-        return false;
-      }
-
-      // Basic validation
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const role = document.getElementById('role').value;
       const message = document.getElementById('message').value.trim();
 
-      if (!name || !email || !role || !message) {
-        alert("Please fill out all required fields.");
+      // Honeypot Check
+      if (honeypot.value.trim() !== '') {
         e.preventDefault();
+        console.log("Spam attempt blocked (Honeypot)");
+        return false;
+      }
+
+      // Time Check - Must take at least 4 seconds to fill form
+      const timeTaken = (Date.now() - parseInt(timestampField.value)) / 1000;
+      if (timeTaken < 4) {
+        e.preventDefault();
+        console.log("Spam attempt blocked (Too Fast)");
+        alert("Please take a moment to fill out the form properly.");
+        return false;
+      }
+
+      // Basic validation
+      if (!name || !email || !role || !message) {
+        e.preventDefault();
+        alert("Please fill out all required fields.");
         return false;
       }
     });
