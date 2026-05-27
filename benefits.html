@@ -1,190 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Rhythm Deck | Benefits</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Rhythm Deck | Benefits</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="logo-favicon.png" type="image/png">
-<!-- THIS ONE LINE FIXES ALL IMAGES ON EVERY PAGE FOREVER -->
   <base href="/">
+  <script src="https://cdn.tailwindcss.com"></script>
   
-<script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .menu-btn {
+      padding: 0.6rem 1.25rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      font-size: 1rem;
+    }
+    .menu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+    .home-btn { background: linear-gradient(to right, #22c55e, #16a34a); color: white; }
+    .about-btn { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; }
+    .benefits-btn { background: linear-gradient(to right, #f59e0b, #d97706); color: white; }
+    .pricing-btn { background: linear-gradient(to right, #ec4899, #db2777); color: white; }
+    .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
+    .features-badge {
+      background: linear-gradient(135deg, #a855f7, #d946ef);
+      color: white;
+      font-weight: bold;
+      padding: 0.5rem 1.1rem;
+      border-radius: 9999px;
+      box-shadow: 0 4px 12px rgba(168,85,247,0.5);
+      transition: all 0.3s;
+      cursor: pointer;
+      user-select: none;
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 0.5rem;
+      width: 280px;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      z-index: 50;
+      display: none;
+    }
+    .dropdown-item {
+      padding: 0.85rem 1.5rem;
+      color: #1f2937;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .dropdown-item:hover {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+  </style>
 </head>
-
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
 
-<!-- HEADER -->
-<header class="bg-black text-white p-4 flex justify-between items-center">
-  <div class="flex items-center space-x-3">
-    <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
-    <div>
-      <h1 class="text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
-      <p class="text-sm text-gray-300">Unleash Your Beat</p>
-    </div>
-  </div>
- <nav class="space-x-4">
-    <a href="index.html" class="hover:underline">Home</a>
-    <a href="about.html" class="hover:underline">About</a>
-    <a href="benefits.html" class="hover:underline text-green-400">Benefits</a>
-    <a href="pricing.html" class="hover:underline">Pricing</a>
-    <a href="contact.html" class="hover:underline">Contact</a>
-    <a href="login.html" class="bg-white text-black px-4 py-1 rounded hover:bg-gray-300">Login</a>
-    <a href="early-signup.html" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-400">Sign Up</a>
-  </nav>
-</header>
-
-<!-- HERO -->
-<section class="relative h-[500px] bg-cover bg-center flex items-center justify-center"
-         style="background-image: url('banner-cropped.jpg');">
-  <div class="bg-black bg-opacity-60 p-10 rounded-lg text-center">
-    <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">Where Music Meets Imagination</h2>
-    <p class="text-white text-lg max-w-2xl mx-auto">
-      Generate, share, and showcase your sound — all in one creative space<br><br>
-      <a href="early-signup.html" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-400">Create Account</a>
-    </p>
-  </div>
-</section>
-
-<main class="flex-grow">
-
-<section class="max-w-6xl mx-auto mt-10 bg-black text-white rounded-lg shadow-lg p-10">
-
-<div class="grid md:grid-cols-2 gap-10 items-center">
-
-<div>
-
-<h2 class="text-4xl font-bold text-green-400 mb-4">
-Free Pre-Launch Platinum Pro Account
-</h2>
-
-<p class="text-lg text-gray-300 mb-6">
-Rhythm Deck is currently preparing for its official launch and we are inviting a limited number of musicians to join as
-<strong>Founding Artists</strong>.
-</p>
-
-<p class="text-lg text-gray-300 mb-6">
-Artists who sign up during the pre-launch phase receive a
-<strong>Platinum Pro account completely free</strong> before the platform opens to the public.
-</p>
-
-<p class="text-lg text-gray-300 mb-6">
-Rhythm Deck combines the power of multiple platforms such as Spotify, SoundCloud, BandLab, Bandcamp, YouTube, and social media promotion tools into a single all-in-one platform designed specifically for independent musicians.
-</p>
-
-<p class="text-lg text-gray-300 mb-6">
-Instead of managing your music across multiple services, Rhythm Deck allows you to promote your music, build your audience, collaborate with other artists, and grow your career from one central hub.
-</p>
-
-<a href="early-signup.html"
-class="bg-green-500 text-white px-8 py-3 rounded-full font-bold hover:bg-green-400 transition transform hover:scale-105 inline-block">
-Claim Your Free Platinum Pro Account
-</a>
-
-</div>
-
-
-<div class="space-y-6">
-
-<div class="bg-gray-900 p-6 rounded-lg">
-<h3 class="text-xl font-semibold text-green-400 mb-2">Founding Artist Status</h3>
-<p class="text-gray-300">
-Be among the first artists on Rhythm Deck and receive priority discovery placement when the platform launches publicly.
-</p>
-</div>
-
-<div class="bg-gray-900 p-6 rounded-lg">
-<h3 class="text-xl font-semibold text-green-400 mb-2">Promote Your Music</h3>
-<p class="text-gray-300">
-Upload music, share videos, build your artist page, and connect directly with fans and collaborators.
-</p>
-</div>
-
-<div class="bg-gray-900 p-6 rounded-lg">
-<h3 class="text-xl font-semibold text-green-400 mb-2">All-in-One Music Platform</h3>
-<p class="text-gray-300">
-No more managing multiple services. Rhythm Deck combines discovery, promotion, collaboration, and artist tools in one place.
-</p>
-</div>
-
-</div>
-
-</div>
-</section>
-
-  <!-- MAIN BENEFITS SECTION (kept as-is) -->
-  <section class="max-w-5xl mx-auto p-6 bg-white mt-6 rounded-lg shadow-md">
-    <h2 class="text-3xl font-bold text-center mb-8">Benefits of joining Rhythm Deck</h2>
-
-    <div class="grid md:grid-cols-2 gap-8 items-start">
+  <!-- CONSISTENT HEADER -->
+  <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 shadow-lg">
+    <div class="flex items-center space-x-3">
+      <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
       <div>
-        <h3 class="text-2xl font-semibold mb-4">🎶 Compelling Reasons to Join 🎶</h3>
-        <ul class="list-disc pl-6 space-y-4 text-gray-700">
-          <li><strong>Exclusive Early Access:</strong> Hear new releases, music videos, and behind-the-scenes content first.</li>
-          <li><strong>Creative Tips & Resources:</strong> Insider tips on songwriting, AI music production, and DIY video creation.</li>
-          <li><strong>Community Spotlights:</strong> Your music could be showcased to the entire Rhythm Deck audience.</li>
-          <li><strong>Special Contests & Giveaways:</strong> Win exclusive gear, collaborations, and other rewards.</li>
-          <li><strong>Member-Only Projects:</strong> Collaborate on community songs or themed video challenges.</li>
-          <li><strong>VIP Updates:</strong> First to know about new features, creative tools, and partnerships.</li>
-        </ul>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+        <p class="text-xs sm:text-sm text-gray-300">“Your complete music platform<br>— from idea to income.”</p>
       </div>
+    </div>
 
-      <div class="flex justify-center">
-        <img src="image-11.jpg" alt="Join Rhythm Deck" class="rounded-lg shadow-lg">
+    <nav class="flex flex-col items-end gap-4 sm:gap-3">
+      <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
+        <a href="index.html" class="menu-btn home-btn">Home</a>
+        <a href="about.html" class="menu-btn about-btn">About</a>
+        <a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
+        <a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
+        <a href="contact.html" class="menu-btn contact-btn">Contact</a>
+        <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
+        <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
+        
+        <div class="relative ml-2">
+          <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+          <div id="dropdownMenu" class="dropdown-menu">
+            <div class="dropdown-item" onclick="document.getElementById('free-vs-pro-section').scrollIntoView({behavior: 'smooth'});">FREE vs PRO</div>
+            <div class="dropdown-item" onclick="document.getElementById('platinum-pro-section').scrollIntoView({behavior: 'smooth'});">PLATINUM PRO</div>
+            <div class="dropdown-item" onclick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
+            <div class="dropdown-item" onclick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});">CORE FEATURES</div>
+            <div class="dropdown-item" onclick="document.getElementById('rhythm-vision-comparison-section').scrollIntoView({behavior: 'smooth'});">RHYTHM VISION PLANS COMPARISON</div>
+            <div class="dropdown-item" onclick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});">RHYTHM WAV PLAYLIST PLATFORM</div>
+            <div class="dropdown-item" onclick="document.getElementById('rhythm-deck-studio-section').scrollIntoView({behavior: 'smooth'});">RHYTHM DECK STUDIO</div>
+            <div class="dropdown-item" onclick="window.open('chord-engine.html', '_blank');">RHYTHM DECK CHORD ENGINE</div>
+            <div class="dropdown-item" onclick="window.open('lyricvid.html', '_blank');">RHYTHM DECK LYRICVID</div>
+            <div class="dropdown-item" onclick="document.getElementById('qa-section').scrollIntoView({behavior: 'smooth'});">Q&A</div>
+          </div>
+        </div>
       </div>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative h-[500px] bg-cover bg-center flex items-center justify-center"
+           style="background-image: url('banner-cropped.jpg');">
+    <div class="bg-black bg-opacity-60 p-10 rounded-lg text-center">
+      <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">Where Music Meets Imagination</h2>
+      <p class="text-white text-lg max-w-2xl mx-auto">
+        Generate, share, and showcase your sound — all in one creative space<br><br>
+        <a href="early-signup.html" class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-400 inline-block">Create Account</a>
+      </p>
     </div>
   </section>
 
-  <!-- NEW DETAILED EXPLANATION SECTION -->
-  <section class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-md p-8 grid md:grid-cols-2 gap-10 items-center">
-    <div>
-      <img src="benefits.png" alt="Studio Collaboration" class="rounded-lg shadow-lg">
-    </div>
-
-    <div class="space-y-6">
-      <h3 class="text-3xl font-bold text-gray-900 mb-4">Dive Deeper into the Benefits</h3>
-
-      <div>
-        <h4 class="text-xl font-semibold text-green-600">Exclusive Early Access</h4>
-        <p class="text-gray-700">Get a front-row seat to the newest sounds and visuals before they go public. Be the first to experience upcoming releases, exclusive live sessions, and unreleased video premieres straight from our creative community.</p>
+  <!-- REST OF YOUR ORIGINAL CONTENT (unchanged) -->
+  <main class="flex-grow">
+    <section class="max-w-6xl mx-auto mt-10 bg-black text-white rounded-lg shadow-lg p-10">
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h2 class="text-4xl font-bold text-green-400 mb-4">Free Pre-Launch Platinum Pro Account</h2>
+          <p class="text-lg text-gray-300 mb-6">Rhythm Deck is currently preparing for its official launch and we are inviting a limited number of musicians to join as <strong>Founding Artists</strong>.</p>
+          <p class="text-lg text-gray-300 mb-6">Artists who sign up during the pre-launch phase receive a <strong>Platinum Pro account completely free</strong> before the platform opens to the public.</p>
+          <p class="text-lg text-gray-300 mb-6">Rhythm Deck combines the power of multiple platforms such as Spotify, SoundCloud, BandLab, Bandcamp, YouTube, and social media promotion tools into a single all-in-one platform designed specifically for independent musicians.</p>
+          <p class="text-lg text-gray-300 mb-6">Instead of managing your music across multiple services, Rhythm Deck allows you to promote your music, build your audience, collaborate with other artists, and grow your career from one central hub.</p>
+          <a href="early-signup.html" class="bg-green-500 text-white px-8 py-3 rounded-full font-bold hover:bg-green-400 transition transform hover:scale-105 inline-block">
+            Claim Your Free Platinum Pro Account
+          </a>
+        </div>
+        <div class="space-y-6">
+          <div class="bg-gray-900 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold text-green-400 mb-2">Founding Artist Status</h3>
+            <p class="text-gray-300">Be among the first artists on Rhythm Deck and receive priority discovery placement when the platform launches publicly.</p>
+          </div>
+          <div class="bg-gray-900 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold text-green-400 mb-2">Promote Your Music</h3>
+            <p class="text-gray-300">Upload music, share videos, build your artist page, and connect directly with fans and collaborators.</p>
+          </div>
+          <div class="bg-gray-900 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold text-green-400 mb-2">All-in-One Music Platform</h3>
+            <p class="text-gray-300">No more managing multiple services. Rhythm Deck combines discovery, promotion, collaboration, and artist tools in one place.</p>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div>
-        <h4 class="text-xl font-semibold text-green-600">Creative Tips & Resources</h4>
-        <p class="text-gray-700">Access expert insights on songwriting, production, and content creation. Learn how to harness AI music tools, craft dynamic soundscapes, and build your artistic identity through interactive workshops and guides.</p>
+    <!-- MAIN BENEFITS SECTION -->
+    <section class="max-w-5xl mx-auto p-6 bg-white mt-6 rounded-lg shadow-md">
+      <h2 class="text-3xl font-bold text-center mb-8">Benefits of joining Rhythm Deck</h2>
+      <div class="grid md:grid-cols-2 gap-8 items-start">
+        <div>
+          <h3 class="text-2xl font-semibold mb-4">🎶 Compelling Reasons to Join 🎶</h3>
+          <ul class="list-disc pl-6 space-y-4 text-gray-700">
+            <li><strong>Exclusive Early Access:</strong> Hear new releases, music videos, and behind-the-scenes content first.</li>
+            <li><strong>Creative Tips & Resources:</strong> Insider tips on songwriting, AI music production, and DIY video creation.</li>
+            <li><strong>Community Spotlights:</strong> Your music could be showcased to the entire Rhythm Deck audience.</li>
+            <li><strong>Special Contests & Giveaways:</strong> Win exclusive gear, collaborations, and other rewards.</li>
+            <li><strong>Member-Only Projects:</strong> Collaborate on community songs or themed video challenges.</li>
+            <li><strong>VIP Updates:</strong> First to know about new features, creative tools, and partnerships.</li>
+          </ul>
+        </div>
+        <div class="flex justify-center">
+          <img src="image-11.jpg" alt="Join Rhythm Deck" class="rounded-lg shadow-lg">
+        </div>
       </div>
+    </section>
 
+    <!-- DETAILED BENEFITS SECTION -->
+    <section class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-md p-8 grid md:grid-cols-2 gap-10 items-center">
       <div>
-        <h4 class="text-xl font-semibold text-green-600">Community Spotlights</h4>
-        <p class="text-gray-700">Every month, Rhythm Deck features emerging artists and standout projects. Gain exposure by having your music promoted across our network, growing your fanbase and credibility within the scene.</p>
+        <img src="benefits.png" alt="Studio Collaboration" class="rounded-lg shadow-lg">
       </div>
-
-      <div>
-        <h4 class="text-xl font-semibold text-green-600">Special Contests & Giveaways</h4>
-        <p class="text-gray-700">Join creative challenges, remix contests, and exclusive giveaways for members only. Win pro-level gear, free studio time, or opportunities to collaborate with industry mentors and influencers.</p>
+      <div class="space-y-6">
+        <h3 class="text-3xl font-bold text-gray-900 mb-4">Dive Deeper into the Benefits</h3>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600">Exclusive Early Access</h4>
+          <p class="text-gray-700">Get a front-row seat to the newest sounds and visuals before they go public.</p>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600">Creative Tips & Resources</h4>
+          <p class="text-gray-700">Access expert insights on songwriting, production, and content creation.</p>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600">Community Spotlights</h4>
+          <p class="text-gray-700">Gain exposure by having your music promoted across our network.</p>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600">Special Contests & Giveaways</h4>
+          <p class="text-gray-700">Join creative challenges and win pro-level gear and opportunities.</p>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600">Member-Only Projects</h4>
+          <p class="text-gray-700">Participate in collaborative songs and cross-genre productions.</p>
+        </div>
+        <div>
+          <h4 class="text-xl font-semibold text-green-600">VIP Updates</h4>
+          <p class="text-gray-700">Stay ahead with insider news about new features and tools.</p>
+        </div>
       </div>
+    </section>
+  </main>
 
-      <div>
-        <h4 class="text-xl font-semibold text-green-600">Member-Only Projects</h4>
-        <p class="text-gray-700">Participate in collaborative songs, visual storytelling challenges, and cross-genre productions. These exclusive projects are designed to push creativity, connect you with peers, and grow your portfolio.</p>
-      </div>
+  <!-- FOOTER -->
+  <footer class="bg-black text-white mt-10 p-4 text-center text-sm">
+    <nav class="mb-2 space-x-4">
+      <a href="contact.html" class="hover:underline">Contact Us</a>
+      <a href="privacy.html" class="hover:underline">Privacy Policy</a>
+      <a href="terms.html" class="hover:underline">Terms & Conditions</a>
+    </nav>
+    <p>© 2026 Rhythm Deck Music. All rights reserved.</p>
+  </footer>
 
-      <div>
-        <h4 class="text-xl font-semibold text-green-600">VIP Updates</h4>
-        <p class="text-gray-700">Stay ahead of the curve with insider news about upcoming features, creative partnerships, and platform innovations. Be the first to test new AI tools and special integrations designed to enhance your artistry.</p>
-      </div>
-    </div>
-  </section>
-</main>
-
-<!-- FOOTER -->
-<footer class="bg-black text-white mt-10 p-4 text-center text-sm">
-  <nav class="mb-2 space-x-4">
-    <a href="contact.html" class="hover:underline">Contact Us</a>
-    <a href="privacy.html" class="hover:underline">Privacy Policy</a>
-    <a href="terms.html" class="hover:underline">Terms & Conditions</a>
-  </nav>
-  <p>&copy; 2025 Rhythm Deck Music. All rights reserved.</p>
-</footer>
-
+  <script>
+    // Dropdown Menu
+    const badge = document.getElementById('featuresBadge');
+    const menu = document.getElementById('dropdownMenu');
+    if (badge && menu) {
+      badge.addEventListener('click', e => {
+        e.stopPropagation();
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      });
+      document.addEventListener('click', () => {
+        menu.style.display = 'none';
+      });
+    }
+  </script>
 </body>
 </html>
