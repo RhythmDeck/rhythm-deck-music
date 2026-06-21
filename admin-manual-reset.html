@@ -51,8 +51,14 @@
           
           <div>
             <label class="block text-sm font-medium mb-2">New Temporary Password</label>
-            <input id="newPassword" type="password" placeholder="Minimum 6 characters" 
-                   class="w-full p-4 border border-gray-300 rounded-2xl text-lg">
+            <div class="relative">
+              <input id="newPassword" type="password" placeholder="Minimum 6 characters" 
+                     class="w-full p-4 border border-gray-300 rounded-2xl text-lg pr-12">
+              <button type="button" id="toggleNewPass"
+                      class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xl">
+                👁
+              </button>
+            </div>
           </div>
 
           <button onclick="performReset()" 
@@ -75,11 +81,23 @@
       // ← REPLACE WITH YOUR SERVICE ROLE KEY
     );
 
-    const ADMIN_PASSWORD = "RicciTopo1234$";   // ← CHANGE THIS TO A STRONG PASSWORD
+    const ADMIN_PASSWORD = "RicciTopo1234$";   // ← CHANGE THIS TO YOUR STRONG PASSWORD
 
-    // Toggle visibility
+    // Toggle for Admin Password
     document.getElementById('toggleAdminPass').addEventListener('click', function() {
       const input = document.getElementById('adminPassword');
+      if (input.type === "password") {
+        input.type = "text";
+        this.textContent = "🙈";
+      } else {
+        input.type = "password";
+        this.textContent = "👁";
+      }
+    });
+
+    // Toggle for New Temporary Password
+    document.getElementById('toggleNewPass').addEventListener('click', function() {
+      const input = document.getElementById('newPassword');
       if (input.type === "password") {
         input.type = "text";
         this.textContent = "🙈";
