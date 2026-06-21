@@ -75,29 +75,31 @@
       // ← REPLACE WITH YOUR SERVICE ROLE KEY
     );
 
-    const ADMIN_PASSWORD = "RicciTopo1234$";   // ← CHANGE THIS
+    const ADMIN_PASSWORD = "RicciTopo1234$";   // ← CHANGE THIS TO YOUR STRONG PASSWORD
 
-    // Toggle admin password visibility
-    document.getElementById('toggleAdminPass').addEventListener('click', function() {
-      const input = document.getElementById('adminPassword');
-      if (input.type === "password") {
-        input.type = "text";
-        this.textContent = "🙈";
+    // Toggle password visibility
+    const toggleBtn = document.getElementById('toggleAdminPass');
+    const passwordInput = document.getElementById('adminPassword');
+
+    toggleBtn.addEventListener('click', () => {
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleBtn.textContent = "🙈";
       } else {
-        input.type = "password";
-        this.textContent = "👁";
+        passwordInput.type = "password";
+        toggleBtn.textContent = "👁";
       }
     });
 
     function checkPassword() {
-      const input = document.getElementById('adminPassword').value;
+      const input = passwordInput.value;
       const error = document.getElementById('loginError');
       
       if (input === ADMIN_PASSWORD) {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('resetScreen').classList.remove('hidden');
       } else {
-        error.textContent = "Incorrect password";
+        error.textContent = "Incorrect password. Please try again.";
         error.classList.remove('hidden');
       }
     }
@@ -121,23 +123,23 @@
       } else {
         resultEl.innerHTML = `
           <span class="text-green-600 block mb-3">✅ Password successfully reset for ${email}</span>
-          <button onclick="copyPassword('${password}')" 
-                  class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-sm font-medium">
+          <button onclick="copyToClipboard('${password}')" 
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium">
             📋 Copy Temporary Password
           </button>
-          <p class="text-sm text-gray-500 mt-4">Send this password to the user and ask them to log in and change it immediately.</p>
+          <p class="text-sm text-gray-500 mt-4">Send this password to the user. Ask them to log in and change it immediately in their profile settings.</p>
         `;
       }
     }
 
-    function copyPassword(password) {
-      navigator.clipboard.writeText(password).then(() => {
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
         alert("Temporary password copied to clipboard!");
       });
     }
 
-    // Allow Enter key
-    document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+    // Allow pressing Enter
+    passwordInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') checkPassword();
     });
   </script>
