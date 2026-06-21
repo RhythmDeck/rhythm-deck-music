@@ -61,7 +61,7 @@
             </div>
           </div>
 
-          <button onclick="performReset()" 
+          <button id="resetBtn"
                   class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-5 rounded-2xl text-lg">
             Reset Password Now
           </button>
@@ -81,9 +81,9 @@
       // ← REPLACE WITH YOUR SERVICE ROLE KEY
     );
 
-    const ADMIN_PASSWORD = "RicciTopo1234$";   // ← CHANGE THIS TO YOUR STRONG PASSWORD
+    const ADMIN_PASSWORD = "RicciTopo1234$";   // ← CHANGE THIS
 
-    // Toggle for Admin Password
+    // Toggle Admin Password
     document.getElementById('toggleAdminPass').addEventListener('click', function() {
       const input = document.getElementById('adminPassword');
       if (input.type === "password") {
@@ -95,7 +95,7 @@
       }
     });
 
-    // Toggle for New Temporary Password
+    // Toggle New Password
     document.getElementById('toggleNewPass').addEventListener('click', function() {
       const input = document.getElementById('newPassword');
       if (input.type === "password") {
@@ -122,6 +122,9 @@
         error.classList.remove('hidden');
       }
     }
+
+    // Reset Button
+    document.getElementById('resetBtn').addEventListener('click', performReset);
 
     async function performReset() {
       const email = document.getElementById('userEmail').value.trim();
