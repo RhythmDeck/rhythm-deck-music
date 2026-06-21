@@ -27,7 +27,7 @@
           </button>
         </div>
 
-        <button onclick="checkPassword()" 
+        <button id="loginBtn"
                 class="w-full mt-6 bg-black text-white py-4 rounded-2xl font-bold hover:bg-gray-800">
           Login
         </button>
@@ -75,24 +75,25 @@
       // ← REPLACE WITH YOUR SERVICE ROLE KEY
     );
 
-    const ADMIN_PASSWORD = "RicciTopo1234$";   // ← CHANGE THIS TO YOUR STRONG PASSWORD
+    const ADMIN_PASSWORD = "RicciTopo1234$";   // ← CHANGE THIS TO A STRONG PASSWORD
 
-    // Toggle password visibility
-    const toggleBtn = document.getElementById('toggleAdminPass');
-    const passwordInput = document.getElementById('adminPassword');
-
-    toggleBtn.addEventListener('click', () => {
-      if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        toggleBtn.textContent = "🙈";
+    // Toggle visibility
+    document.getElementById('toggleAdminPass').addEventListener('click', function() {
+      const input = document.getElementById('adminPassword');
+      if (input.type === "password") {
+        input.type = "text";
+        this.textContent = "🙈";
       } else {
-        passwordInput.type = "password";
-        toggleBtn.textContent = "👁";
+        input.type = "password";
+        this.textContent = "👁";
       }
     });
 
+    // Login Button
+    document.getElementById('loginBtn').addEventListener('click', checkPassword);
+
     function checkPassword() {
-      const input = passwordInput.value;
+      const input = document.getElementById('adminPassword').value;
       const error = document.getElementById('loginError');
       
       if (input === ADMIN_PASSWORD) {
@@ -127,21 +128,15 @@
                   class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium">
             📋 Copy Temporary Password
           </button>
-          <p class="text-sm text-gray-500 mt-4">Send this password to the user. Ask them to log in and change it immediately in their profile settings.</p>
         `;
       }
     }
 
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
-        alert("Temporary password copied to clipboard!");
+        alert("✅ Temporary password copied to clipboard!");
       });
     }
-
-    // Allow pressing Enter
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') checkPassword();
-    });
   </script>
 </body>
 </html>
