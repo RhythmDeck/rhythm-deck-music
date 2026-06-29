@@ -11,12 +11,12 @@
   <style>
     a:hover { color: #0000FF; }
     .menu-btn {
-      padding: 0.6rem 1.25rem;
+      padding: 0.5rem 1rem;
       border-radius: 9999px;
       font-weight: 600;
       transition: all 0.3s ease;
       box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
     .menu-btn:hover {
       transform: translateY(-2px);
@@ -28,6 +28,7 @@
     .pricing-btn { background: linear-gradient(to right, #ec4899, #db2777); color: white; }
     .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
     .merch-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
+    .featured-btn { background: linear-gradient(to right, #8b5cf6, #6366f1); color: white; }
     .video-controls {
       position: absolute;
       bottom: 0;
@@ -66,6 +67,7 @@
       <a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
       <a href="contact.html" class="menu-btn contact-btn">Contact</a>
       <a href="store.html" class="menu-btn merch-btn">Rhythm Deck Merch</a>
+      <a href="featured-artists.html" class="menu-btn featured-btn">Featured Artists</a>
       <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
       <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
     </div>
@@ -83,7 +85,7 @@
   </div>
 </section>
 
-<!-- PROMO VIDEO (Fixed) -->
+<!-- PROMO VIDEO (Fixed with Full Controls) -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
     <video
@@ -246,7 +248,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // PROMO VIDEO – FULL CONTROLS
+  // PROMO VIDEO – FULLY FUNCTIONAL
   const promoVideo = document.getElementById("promoVideo");
   if (promoVideo) {
     const overlay = document.getElementById("playPauseOverlay");
