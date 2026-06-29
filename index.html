@@ -5,130 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rhythm Deck</title>
   <link rel="icon" href="logo-favicon.png" type="image/png">
-  <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck. Watch, comment, like, and buy premium content directly from creators.">
-  <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support, premium content, music platform">
-  <meta name="robots" content="index, follow">
-  <meta name="author" content="Rhythm Deck Team">
+  <meta name="description" content="Discover exclusive videos, live streams, and support your favorite artists on Rhythm Deck.">
+  <meta name="keywords" content="rhythm deck, music artists, exclusive videos, live stream, artist support">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     a:hover { color: #0000FF; }
-    #videoModal { display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; }
-    #videoModal.active { display: flex; }
-    .cursor-pointer { cursor: pointer; }
-    .style1 { color: #FFFFFF }
-    @keyframes logoIntro {
-      0% { transform: translate(140px, 60px) scale(4) rotate(0deg); opacity: 0; box-shadow: 0 0 0 rgba(0,255,120,0); }
-      15% { opacity: 1; }
-      60% { transform: translate(40px, 20px) scale(1.8) rotate(720deg); box-shadow: 0 0 30px rgba(0,255,120,0.35); }
-      100% { transform: translate(0, 0) scale(1) rotate(1080deg); box-shadow: none; }
-    }
-    .logo-intro { animation: logoIntro 5.5s ease-out forwards; transform-origin: center; will-change: transform; }
-    .video-controls {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 5;
-    }
-    .video-container:hover .video-controls, .video-controls:focus-within {
-      opacity: 1;
-    }
-    .progress-bar {
-      flex-grow: 1;
-      height: 6px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 3px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: #10b981;
-      transition: width 0.1s linear;
-    }
-    .time-text {
-      color: white;
-      font-size: 0.9rem;
-      min-width: 90px;
-      text-align: center;
-    }
-    .volume-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .volume-slider {
-      width: 80px;
-      height: 6px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 3px;
-      outline: none;
-      -webkit-appearance: none;
-    }
-    .volume-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      background: white;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    .play-pause-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.25s;
-      z-index: 10;
-      cursor: pointer;
-    }
-    .play-pause-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .play-pause-btn {
-      background: rgba(0,0,0,0.65);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 100px;
-      height: 100px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.7);
-    }
-    .play-pause-btn:hover {
-      transform: scale(1.08);
-      background: rgba(0,0,0,0.85);
-    }
-    .hidden { display: none !important; }
-    @media (max-width: 640px) { .hero-height { height: 60vh; min-height: 400px; } }
-    .plan-card {
-      background: rgba(30, 27, 71, 0.6);
-      border: 2px solid #6b7280;
-      border-radius: 1.5rem;
-      overflow: hidden;
-
-      transition: all 0.3s;
-    }
-    .plan-card.pro { border-color: #10b981; }
-    .plan-card.platinum { border-color: #d4af37; background: rgba(59, 37, 89, 0.7); }
-    .plan-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-    .plan-badge { background: #d4af37; color: #1a0f2e; font-weight: bold; padding: 0.5rem 1rem; border-radius: 999px; }
     .menu-btn {
       padding: 0.6rem 1.25rem;
       border-radius: 9999px;
@@ -146,48 +27,7 @@
     .benefits-btn { background: linear-gradient(to right, #f59e0b, #d97706); color: white; }
     .pricing-btn { background: linear-gradient(to right, #ec4899, #db2777); color: white; }
     .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
-    .features-badge {
-      background: linear-gradient(135deg, #a855f7, #d946ef);
-      color: white;
-      font-weight: bold;
-      padding: 0.5rem 1.1rem;
-      border-radius: 9999px;
-      box-shadow: 0 4px 12px rgba(168,85,247,0.5);
-      transition: all 0.3s;
-      cursor: pointer;
-      user-select: none;
-    }
-    .features-badge:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 16px rgba(168,85,247,0.7);
-    }
-    .dropdown-menu {
-      position: absolute;
-      top: 100%;
-      right: 0;
-      margin-top: 0.5rem;
-      width: 280px;
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-      border: 1px solid #e5e7eb;
-      overflow: hidden;
-      z-index: 50;
-      display: none;
-    }
-    .dropdown-item {
-      padding: 0.85rem 1.5rem;
-      color: #1f2937;
-      font-weight: 500;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    .dropdown-item:hover {
-      background: #f3e8ff;
-      color: #7c3aed;
-    }
-  .style2 {color: #FF0000}
-  .style3 {color: #0000FF}
+    .merch-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -197,45 +37,31 @@
     <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
     <div>
       <h1 class="text-xl sm:text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
-      <p class="text-xs sm:text-sm text-gray-300">“Your complete music platform<br>
-                                                    — from idea to income.”</p>
+      <p class="text-xs sm:text-sm text-gray-300">“Your complete music platform — from idea to income.”</p>
     </div>
   </div>
   <nav class="flex flex-col items-end gap-4 sm:gap-3">
-  <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
-    <a href="index.html" class="menu-btn home-btn">Home</a>
-    <a href="about.html" class="menu-btn about-btn">About</a>
-    <a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
-    <a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
-    <a href="contact.html" class="menu-btn contact-btn">Contact</a>
-    <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
-    <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
-    <div class="relative ml-2">
-      <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
-      <div id="dropdownMenu" class="dropdown-menu">
-        <div class="dropdown-item" onClick="document.getElementById('free-vs-pro-section').scrollIntoView({behavior: 'smooth'});">FREE vs PRO</div>
-        <div class="dropdown-item" onClick="document.getElementById('platinum-pro-section').scrollIntoView({behavior: 'smooth'});">PLATINUM PRO</div>
-        <div class="dropdown-item" onClick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
-        <div class="dropdown-item" onClick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});">CORE FEATURES</div>
-        <div class="dropdown-item" onClick="document.getElementById('rhythm-vision-comparison-section').scrollIntoView({behavior: 'smooth'});">RHYTHM VISION PLANS COMPARISON</div>
-        <div class="dropdown-item" onClick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});">RHYTHM WAV PLAYLIST PLATFORM</div>
-        <div class="dropdown-item" onClick="document.getElementById('rhythm-deck-studio-section').scrollIntoView({behavior: 'smooth'});">RHYTHM DECK STUDIO</div>
-        <div class="dropdown-item" onClick="window.open('chord-engine.html', '_blank');">RHYTHM DECK CHORD ENGINE</div>
-        <div class="dropdown-item" onClick="window.open('lyricvid.html', '_blank');">RHYTHM DECK LYRICVID</div>
-        <div class="dropdown-item" onClick="document.getElementById('qa-section').scrollIntoView({behavior: 'smooth'});">Q&A</div>
-      </div>
+    <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
+      <a href="index.html" class="menu-btn home-btn">Home</a>
+      <a href="about.html" class="menu-btn about-btn">About</a>
+      <a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
+      <a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
+      <a href="contact.html" class="menu-btn contact-btn">Contact</a>
+      <a href="merch-admin.html" class="menu-btn merch-btn">Rhythm Deck Merch</a>
+      <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
+      <a href="early-signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
     </div>
-  </div>
-</nav>
+  </nav>
 </header>
+
 <!-- HERO -->
 <section class="relative hero-height bg-cover bg-center flex items-center justify-center" style="background-image: url('banner-cropped.jpg');">
   <div class="bg-black bg-opacity-60 p-6 sm:p-10 rounded-lg text-center max-w-4xl mx-auto">
     <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Where Music Meets Imagination</h2>
     <p class="text-base sm:text-lg text-white max-w-xl mx-auto">
-      Generate, share, and showcase your sound — all in one creative space<br class="hidden sm:block"><br class="hidden sm:block">
-      <a href="early-signup.html" class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-400 inline-block mt-4">Create Account</a>
+      Generate, share, and showcase your sound — all in one creative space
     </p>
+    <a href="early-signup.html" class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-400 inline-block mt-6">Create Account</a>
   </div>
 </section>
 
@@ -243,21 +69,10 @@
 <section class="bg-zinc-950 py-12 border-t-4 border-b-4 border-emerald-500">
   <div class="max-w-4xl mx-auto px-6 text-center">
     <h2 class="text-4xl font-bold text-white mb-6">Pre-Launch Special</h2>
-    
-    <div class="max-w-2xl mx-auto">
-      <p class="text-lg text-gray-300 leading-relaxed">
-        Sign up right now and get a <span class="text-emerald-400 font-semibold">Platinum Pro account completely FREE for Life</span> — normally $200 per year after launch.
-      </p>
-      <p align="justify" class="text-lg text-gray-300 mt-4 leading-relaxed">
-        Several core features are already live and fully functional, including your personalized artist profile pages, the ability to upload MP3 audio and MP4 video files, custom logo, banner, and bio, access to the collaboration network, and a public profile with your own unique link for fans. You’ll also have immediate access to our Radio Station Library and professional email templates designed to help get your music heard.</p>
-
-<p align="justify" class="text-lg text-gray-300 mt-4 leading-relaxed">Additional premium features — including full live streaming with chat, the Tip Bucket, Rhythm Deck Studio, personal analytics dashboard, Merch Store, advanced Rhythm Vision AI video generation, and enhanced collaboration tools — are currently in final development and will be released shortly after launch.</p>
-
-<p align="justify" class="text-lg text-gray-300 mt-4 leading-relaxed">As a Founding Member, you’ll receive early access to all available tools today, the opportunity to help shape the platform’s future, and lifetime Platinum Pro access completely free — a benefit that will never be offered again once we officially launch.      </p>
-    </div>
-
-    <a href="early-signup.html" 
-       class="mt-8 inline-block bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold text-xl px-10 py-4 rounded-xl hover:from-emerald-600 hover:to-green-600 transition shadow-xl">
+    <p class="text-lg text-gray-300 leading-relaxed">
+      Sign up right now and get a <span class="text-emerald-400 font-semibold">Platinum Pro account completely FREE for Life</span>.
+    </p>
+    <a href="early-signup.html" class="mt-8 inline-block bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold text-xl px-10 py-4 rounded-xl hover:from-emerald-600 hover:to-green-600 transition shadow-xl">
       Claim Your Free Lifetime Platinum Pro Account
     </a>
   </div>
@@ -266,601 +81,38 @@
 <!-- PROMO VIDEO -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
-    <video
-      id="promoVideo"
-      src="Rhythm-Deck-Promo-Video.mp4"
-      preload="metadata"
-      playsinline
-      class="w-full h-auto max-h-[50vh] sm:max-h-[70vh] object-contain"
-    >
-      Your browser does not support the video tag.
-    </video>
-    <!-- Overlay – always clickable when visible -->
-    <div id="playPauseOverlay" class="play-pause-overlay">
-      <button id="playPauseBtn" class="play-pause-btn">
-        <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-28 sm:w-28" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M8 5v14l11-7z"/>
-        </svg>
-        <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-28 sm:w-28 hidden" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-        </svg>
-      </button>
-    </div>
-    <!-- Controls -->
-    <div class="video-controls">
-      <div class="flex items-center gap-3 sm:gap-4">
-        <button id="muteBtn" class="bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm sm:text-base">
-          Mute
-        </button>
-      </div>
-      <div class="flex items-center gap-2 sm:gap-3 flex-grow">
-        <div class="volume-container">
-          <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.5" class="volume-slider w-24 sm:w-32">
-        </div>
-        <span id="currentTime" class="time-text text-xs sm:text-sm">0:00</span>
-        <div class="progress-bar flex-grow">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <span id="duration" class="time-text text-xs sm:text-sm">0:00</span>
-      </div>
-      <div></div>
-    </div>
-  </div>
-</section>
-<!-- ABOUT + MAIN STAGE FEATURE -->
-<section class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 grid md:grid-cols-2 gap-6 sm:gap-8 items-start">
-  <div>
-    <h3 class="text-2xl sm:text-3xl font-bold mb-4">Terry Sweet: <span class="style2">D</span>ays of Dyanna</h3>
-    <p class="text-sm sm:text-base text-gray-700 leading-relaxed mb-4">
-      <span class="style2">D</span>ays of Dyanna - A memory and a mystery. Dyanna was not my wife’s name but is the mythical version of her. Days of Dyanna follows the life long relationship journey and a life that ended tragically. It’s about secrets that she never shared - but I knew anyway.    </p>
-    <p class="text-sm sm:text-base text-gray-700 leading-relaxed mb-4">
-      Emmy-nominated composer, song writer, singer, pianist Terry Sweet has composed hundreds of radio and TV jingles such as Kellogg¹s Raisin Bran, Kraft, John Deere and many more winning many Addy Awards, Silver Microphones and Telly Awards. Terry has produced in studios across Nashville, Chicago, New York, Dallas, Salt Lake - working with musicians/singers from such bands as Faith Hill, Brooks and Dunn, Neil Young, Crosby Stills and Nash, Blood Sweat & Tears, Chicago, Amy Grant and many others.
-    </p>
-  </div>
-  <div>
-    <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-left">Main Stage Feature</h3>
-    <div class="relative w-full overflow-hidden rounded-lg shadow-lg cursor-pointer group featured-video" data-video="Dyanna.mp4">
-      <img src="Dyanna-title.png" alt="Main Stage Video" class="w-full object-cover h-64 sm:h-96">
-      <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 sm:h-16 sm:w-16 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M8 5v14l11-7z"/>
-        </svg>
-      </div>
-    </div>
-    <div class="bg-white text-center py-3 rounded-b-lg shadow">
-      <p class="font-semibold text-gray-800 text-base sm:text-lg">Written and Performed by Terry Sweet</p>
-    </div>
-  </div>
-</section>
-<!-- FEATURED CREATORS -->
-<section class="bg-gray-200 py-10 sm:py-12">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-    <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Featured Artists</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="relative group cursor-pointer featured-video" data-video="Chrome-and-Gasoline.mp4">
-          <img src="chrome-gasoline.jpg" alt="The Sound Makers" class="w-full object-cover aspect-video">
-          <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </div>
-        </div>
-        <div class="bg-white text-center py-3">
-          <p class="font-semibold text-gray-800 text-base">Silver Spoon</p>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="relative group cursor-pointer featured-video" data-video="Midnight-Highway-Roar.mp4">
-          <img src="Midnight-Highway-Roar-thumbnail.jpg" alt="Electric Avenue" class="w-full object-cover aspect-video">
-          <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </div>
-        </div>
-        <div class="bg-white text-center py-3">
-          <p class="font-semibold text-gray-800 text-base">Ricci Moore - Song Writer</p>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="relative group cursor-pointer featured-video" data-video="Riverboy-Video-Compressed-1.mp4">
-          <img src="riverboy-1.png" alt="Vibe Studio" class="w-full object-cover aspect-video">
-          <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </div>
-        </div>
-        <div class="bg-white text-center py-3">
-          <p class="font-semibold text-gray-800 text-base">Mrs R Audience For 1</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- FREE vs PRO -->
-<section id="free-vs-pro-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
-  <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Plans & Features</h3>
-  <div class="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
-    <div class="rounded-lg overflow-hidden h-48 sm:h-64">
-      <img src="image-13-cropped.jpg" alt="Free vs Pro Plans" class="w-full h-full object-cover">
-    </div>
-    <div class="grid gap-6">
-      <div class="bg-white rounded-lg shadow p-6 border-2 border-green-400">
-        <h4 class="text-xl sm:text-2xl font-bold mb-4 text-center">Free Plan</h4>
-        <ul class="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700">
-          <li>Upload & Share Unlimited Videos</li>
-          <li>Personalized Profile Page. Add your own banner, logo, bio and upload your video content you want to showcase on your personal public feed.</li>
-          <li>and much more</li>
-        </ul>
-        <div class="text-center mt-4">
-          <a href="pricing.html" class="bg-green-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-green-400 text-sm sm:text-base">Compare Plans</a>
-        </div>
-      </div>
-      <div class="bg-white rounded-lg shadow p-6 border-2 border-yellow-400">
-        <h4 class="text-xl sm:text-2xl font-bold mb-4 text-center text-yellow-500">Pro Plan</h4>
-        <ul class="list-disc list-inside space-y-2 text-sm sm:text-base text-gray-700">
-          <li>All Free Features +</li>
-          <li>Live Streaming</li>
-          <li>Rhythm Vision included</li>
-          <li>Cross-Platform Sharing (Facebook, YouTube, X and many more)</li>
-          <li>Eligibility for Featured & Main Stage</li>
-          <li>and much more</li>
-        </ul>
-        <div class="text-center mt-4">
-          <a href="pricing.html" class="bg-yellow-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-yellow-400 text-sm sm:text-base">Compare Plans</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- PLATINUM PRO -->
-<section id="platinum-pro-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
-  <div class="bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl shadow-2xl p-6 sm:p-10 text-white">
-    <div class="text-center mb-6 sm:mb-8">
-      <h3 class="text-3xl sm:text-4xl font-black mb-4">Platinum Pro Plan – Take Your Career to the Next Level</h3>
-      <p class="text-lg sm:text-xl">Everything in Pro + exclusive radio promotion & merch tools</p>
-      <strong class="text-yellow-400">SPECIAL OFFER</strong> – Pre launch signup 100% FREE for life. LImited time offer - Sign Up Today!
-    </div>
-    <div class="grid md:grid-cols-2 gap-6 sm:gap-10 items-start">
-      <div>
-        <h4 class="text-xl sm:text-2xl font-bold mb-4">All Pro Features + Exclusive Platinum Benefits</h4>
-        <ul class="space-y-4 text-gray-200 text-base sm:text-lg">
-          <li>All Platinum Pro Plan Features</li>
-          <li><strong class="text-yellow-300">Collaboration Network & Messaging</strong> – Connect with other artists, producers, and industry professionals, send messages, and collaborate on projects in real-time</li>
-          <li><strong class="text-yellow-300">Analytics Dashboard</strong> – Track plays, engagement, fan activity, and performance insights to grow your audience and make data-driven decisions</li> 
-          <li><strong class="text-yellow-300">Your Own Private Merch Store</strong> – Sell t-shirts, hoodies, hats, posters, etc. with zero upfront costs</li>
-          <li><strong class="text-yellow-300">Exclusive Access to Radio Station Database</strong> – Contact info for stations worldwide + professional email templates</li>
-          <li><strong class="text-yellow-300">Exclusive Access to our Industry Professionals Directory</strong> – Database of Music Producers, Distributors, Publishers and Supervisors with info on each and messaging capabilities</li>
-          <li><strong class="text-yellow-300">Rhythm Vision Platinum Pro</strong> - Create professional videos and audio with the click of a few buttons</li>
-        </ul>
-      </div>
-      <div class="text-center md:text-left">
-        <h4 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Pricing</h4>
-        <p class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">After Launch - $200.00 <span class="text-lg sm:text-xl font-normal">/ year</span></p>
-        <p class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6"><strong class="text-yellow-400">Pre Launch - $00.00</strong> <span class="text-lg sm:text-xl font-normal">/ for life</span></p>
-        <a href="early-signup.html" class="inline-block bg-white text-gray-800 px-6 sm:px-10 py-3 sm:py-4 rounded-md hover:bg-gray-200 font-bold text-lg sm:text-xl">
-          Sign Up Here
-        </a>
-        <div class="mt-6 sm:mt-10 flex flex-col items-center">
-          <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-2xl">
-            <img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist Badge" class="w-full h-full object-contain">
-          </div>
-          <p class="mt-3 sm:mt-4 text-lg sm:text-2xl font-bold">Platinum Pro Artist Badge</p>
-          <p class="text-center max-w-xs text-sm sm:text-base mt-2">
-            Prestigious platinum badge displayed on your profile — the ultimate status symbol
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- CORE FEATURES -->
-<section id="core-features-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
-  <h3 class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Our Core Features</h3>
-  <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
-    <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center border-2 border-green-500">
-      <h4 class="text-xl sm:text-2xl font-bold mb-4 text-green-600">Messaging</h4>
-      <p class="text-sm sm:text-base text-gray-700 leading-relaxed">
-        Direct, private messaging between artists, artists and fans, artists and producers/distributors. Stay connected, discuss ideas, and build relationships — all within the platform.
-      </p>
-      <p class="mt-4 sm:mt-6 text-xs sm:text-sm font-semibold text-gray-600">
-        Available exclusively with the <strong>Pro Plan</strong> and the <strong>Platinum Pro Plan</strong>
-      </p>
-      <div class="mt-4 sm:mt-6">
-        <a href="pricing.html" class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base">View Pricing</a>
-      </div>
-    </div>
-    <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center border-2 border-green-500">
-      <h4 class="text-xl sm:text-2xl font-bold mb-4 text-green-600">Collaboration</h4>
-      <p class="text-sm sm:text-base text-gray-700 leading-relaxed">
-        Work together with other creators. Share files, exchange feedback, and co-create music seamlessly in a dedicated collaboration space.
-      </p>
-      <p class="mt-4 sm:mt-6 text-xs sm:text-sm font-semibold text-gray-600">
-        Available exclusively with the <strong>Pro Plan</strong> and the <strong>Platinum Pro Plan</strong>
-      </p>
-      <div class="mt-4 sm:mt-6">
-        <a href="pricing.html" class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base">View Pricing</a>
-      </div>
-    </div>
-    <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center border-2 border-yellow-500">
-      <h4 class="text-xl sm:text-2xl font-bold mb-4 text-yellow-600">Rhythm Vision</h4>
-      <p class="text-sm sm:text-base text-gray-700 leading-relaxed">
-        Our powerful AI music video creator. Turn your lyrics and music into stunning visual videos with scenes, images, and timelines — all generated automatically.
-      </p>
-      <p class="mt-4 sm:mt-6 text-xs sm:text-sm font-semibold text-gray-600">
-        Included in the <strong>Pro Plan</strong> and the <strong>Platinum Pro Plan</strong> with more upgraded features or available as a <strong>stand-alone app</strong>
-      </p>
-      <div class="mt-4 sm:mt-6">
-        <a href="pricing.html" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base">View Pricing</a>
-      </div>
-    </div>
+    <video id="promoVideo" src="Rhythm-Deck-Promo-Video.mp4" preload="metadata" playsinline class="w-full h-auto max-h-[50vh] sm:max-h-[70vh] object-contain"></video>
   </div>
 </section>
 
-<!-- RHYTHM DECK STUDIO -->
-<section id="rhythm-deck-studio-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
-  <div class="bg-gradient-to-r from-emerald-500 via-purple-600 to-pink-500 rounded-2xl shadow-2xl p-6 sm:p-10 text-white">
-
-    <div class="text-center mb-6 sm:mb-8">
-      <h3 class="text-3xl sm:text-4xl font-black mb-4">
-        Rhythm Deck Studio <br> Create, Record & Produce Like a Pro
-      </h3>
-
-      <p class="text-lg sm:text-xl max-w-3xl mx-auto">
-        A full professional recording studio built directly into Rhythm Deck. 
-        No downloads. No expensive software. Just open your browser and start creating.
-      </p>
-
-      <p class="mt-4 text-yellow-300 font-semibold">
-        Produce complete songs from idea to final mix — all in one place.
-      </p>
-    </div>
-
-    <div class="grid md:grid-cols-2 gap-6 sm:gap-10 items-start">
-
-      <!-- LEFT SIDE FEATURES -->
-      <div>
-        <h4 class="text-xl sm:text-2xl font-bold mb-4">
-          Everything You Need to Make Music
-        </h4>
-
-        <ul class="space-y-4 text-gray-100 text-base sm:text-lg">
-
-          <li>
-            <strong class="text-yellow-200">Multi-Track Recording & Timeline</strong> –
-            Record vocals, instruments, and loops across multiple tracks with full control
-          </li>
-
-          <li>
-            <strong class="text-yellow-200">Built-In Instruments</strong> –
-            Guitar, drums, piano, bass, synths, and more ready to play instantly
-          </li>
-
-          <li>
-            <strong class="text-yellow-200">Piano Roll & Drum Sequencer</strong> –
-            Create melodies, chords, and beats visually with precision editing tools
-          </li>
-
-          <li>
-            <strong class="text-yellow-200">Professional Mixer & Effects Rack</strong> –
-            EQ, compression, reverb, delay, distortion, and more to shape your sound
-          </li>
-
-          <li>
-            <strong class="text-yellow-200">Loop Library & Drag-and-Drop Workflow</strong> –
-            Build tracks fast with preloaded loops or your own sounds
-          </li>
-
-          <li>
-            <strong class="text-yellow-200">Export Final Mix</strong> –
-            Download your finished song or stems ready for release
-          </li>
-
-          <li>
-            <strong class="text-yellow-200">Guitar → Keyboard Transformation</strong> –
-            Turn recorded guitar into piano, synths, and layered sounds instantly
-          </li>
-
-        </ul>
-      </div>
-
-      <!-- RIGHT SIDE CTA -->
-      <div class="text-center md:text-left">
-
-        <h4 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-          Your Studio. Anywhere. Anytime
-        </h4>
-        
-        <p class="text-base sm:text-lg text-gray-100 mb-6">
-          Our Rhythm Deck Studio is currently in pre-launch development and being carefully built to deliver a powerful, all-in-one music production experience directly in your browser. We are actively refining core features, optimizing performance, and integrating advanced creative tools to ensure a seamless workflow for artists at every level. Early users that sign up for our <a href="early-signup.html" target="_blank" class="style3"><u>Free for Life Platinum Pro Plan</u></a> will gain exclusive access to test and shape the platform, providing valuable feedback as we finalize the studio for full public release.        </p>
-
-        <p class="text-base sm:text-lg text-gray-100 mb-6">
-          Stop paying for multiple tools and complicated DAWs.  
-          Rhythm Deck Studio gives you everything in one powerful, easy-to-use platform — accessible from any device.
-        </p>
-
-        <p class="text-base sm:text-lg text-gray-100 mb-6">
-          Whether you're producing beats, recording vocals, or building full tracks, 
-          Rhythm Deck Studio puts professional production tools at your fingertips.
-        </p>
-
-        <a href="rhythm-deck-studio.html" target="_blank"
-          class="inline-block bg-white text-gray-900 px-8 py-4 rounded-full hover:bg-gray-200 font-bold text-lg sm:text-xl shadow-lg transition transform hover:scale-105">
-          Launch Demo Rhythm Deck Studio
-        </a>
-
-        <p class="mt-4 text-sm text-gray-200">
-          Opens in a new window
-        </p>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-<!-- RHYTHM VISION PLANS COMPARISON -->
-<section id="rhythm-vision-comparison-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-gray-900 to-black text-white rounded-3xl">
-  <h3 class="text-3xl sm:text-4xl font-black mb-10 text-center bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
-    Choose Your Rhythm Vision Experience
-  </h3>
-  <p class="text-center text-lg sm:text-xl text-gray-300 mb-12 max-w-4xl mx-auto">
-    Rhythm Vision Pro gives you powerful AI music video creation. Upgrade to Platinum for unlimited creative freedom, priority generation, and full commercial rights.
-  </p>
+<!-- PLANS -->
+<section class="max-w-6xl mx-auto py-12 px-6">
+  <h2 class="text-4xl font-bold text-center mb-10">Choose Your Plan</h2>
   <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-    <div class="plan-card pro p-8 flex flex-col h-full rounded-2xl">
-      <div class="text-center mb-6">
-        <h4 class="text-3xl font-bold text-emerald-400 mb-2">Rhythm Vision Pro</h4>
-        <p class="text-xl font-semibold text-emerald-300">Included in Rhythm Deck Pro Plan <br>
-        Stand Alone App</p>
-        <p class="text-xl font-semibold text-amber-300">$8.95/mo or $89.95/year (Save $17.00)</p>
-        <p class="text-sm text-gray-400 mt-2">Perfect for creators getting started</p>
-      </div>
-      <ul class="space-y-4 text-gray-200 flex-grow">
-        <li class="flex items-start gap-3">
-          <span class="text-emerald-400 text-2xl">✓</span>
-          <span>AI-generated music videos from lyrics & music</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-emerald-400 text-2xl">✓</span>
-          <span>Up to 6 high-quality images per scene</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-emerald-400 text-2xl">✓</span>
-          <span>Scene & timeline generation</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-emerald-400 text-2xl">✓</span>
-          <span>Full commercial rights</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-emerald-400 text-2xl">✓</span>
-          <span>Standard generation queue</span>
-        </li>
-      </ul>
-      <div class="mt-8 text-center">
-        <a href="pricing.html" class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl text-lg transition">
-          Get Pro Plan
-        </a>
-      </div>
-    </div>
-    <div class="plan-card platinum p-8 flex flex-col h-full relative overflow-hidden rounded-2xl">
-      <div class="absolute top-0 right-0 bg-yellow-500 text-black font-bold px-6 py-2 rounded-bl-xl">
-        Recommended
-      </div>
-      <div class="text-center mb-6">
-        <h4 class="text-3xl font-bold text-amber-400 mb-2">Rhythm Vision Platinum</h4>
-        <p class="text-xl font-semibold text-amber-300">Included in Platinum Pro Plan</p>
-        <p class="text-xl font-semibold text-amber-300">Stand Alone App<br>
-        $12.95/mo or $130.00/year (Save $25.00)</p>
-        <p class="text-sm text-amber-200 mt-2">Unlimited power for professional creators</p>
-      </div>
-      <ul class="space-y-4 text-gray-200 flex-grow">
-        <li class="flex items-start gap-3">
-          <span class="text-amber-400 text-2xl">★</span>
-          <span><strong>Unlimited scenes</strong> – no limits on how many you create</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-amber-400 text-2xl">★</span>
-          <span><strong>Up to 30 premium images per scene</strong> – ultra-detailed cinematic quality</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-amber-400 text-2xl">★</span>
-          <span><strong>Full commercial license</strong> – watermark-free, monetize anywhere</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-amber-400 text-2xl">★</span>
-          <span><strong>Priority generation queue</strong> – faster processing</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-amber-400 text-2xl">★</span>
-          <span>All Pro features + exclusive Platinum tools</span>
-        </li>
-      </ul>
-      <div class="mt-8 text-center">
-        <a href="pricing.html" class="inline-block bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-bold px-8 py-4 rounded-xl text-lg transition transform hover:scale-105 shadow-xl">
-          Upgrade to Platinum
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-<br><br>
-<!-- RHYTHM WAV PLAYLIST PLATFORM -->
-<section id="rhythm-wav-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-r from-purple-900 to-pink-900 rounded-2xl shadow-2xl text-white">
-  <div class="text-center mb-8 sm:mb-10">
-    <h3 class="text-3xl sm:text-4xl font-black mb-4">Discover Rhythm Wav</h3>
-    <p class="text-lg sm:text-xl max-w-4xl mx-auto">
-      Rhythm Wav is your personal music library inside Rhythm Deck. Build unlimited playlists from tracks and videos you've purchased or uploaded.
-      Play them anytime, anywhere — on desktop or mobile. Reorder tracks with drag & drop, share playlists with fans, and keep your favorite music organized in one place.
-    </p>
-    <p class="text-lg sm:text-xl mt-4 sm:mt-6 max-w-4xl mx-auto">
-      With Premium, enjoy ad-free listening, offline downloads, higher quality audio, and exclusive features like collaborative playlists and advanced analytics.
-    </p>
-  </div>
-  <div class="text-center">
-    <a href="rhythm-wav-pricing.html" class="inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl sm:text-2xl px-8 sm:px-12 py-4 sm:py-6 rounded-full transition transform hover:scale-105 shadow-2xl">
-      Compare Rhythm Wav Free vs Premium
-    </a>
-  </div>
-</section>
-<br><br>
-<!-- RHYTHM DECK VIDEO COMPRESSION TOOL -->
-<section id="video-compression-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-indigo-900 to-purple-900 text-white rounded-2xl shadow-2xl">
-  <div class="text-center mb-10">
-    <h3 class="text-3xl sm:text-4xl font-black mb-6">Rhythm Deck Video Compression Tool</h3>
-    <p class="text-lg sm:text-xl max-w-4xl mx-auto leading-relaxed">
-      Compress your videos quickly and smartly before uploading — keep quality high while slashing file sizes dramatically.
-      Our built-in tool optimizes MP4 files for faster uploads, lower bandwidth usage, and better playback on all devices.
-    </p>
-  </div>
-  <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-    <div class="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-purple-400/30">
-      <h4 class="text-2xl font-bold mb-6 text-purple-300">Key Features</h4>
-      <ul class="space-y-4 text-gray-200 text-lg">
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">★</span>
-          <span>Up to 70–80% smaller files without noticeable quality loss</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">★</span>
-          <span>Preserves 1080p/4K sharpness, color accuracy & audio quality</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">★</span>
-          <span>One-click compression — drag, drop, compress, download</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">★</span>
-          <span>Batch processing — compress multiple videos at once</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">★</span>
-          <span>Preview before/after side-by-side</span>
-        </li>
+    <!-- Free Plan -->
+    <div class="plan-card p-8 rounded-3xl">
+      <h3 class="text-3xl font-bold mb-4">Rhythm Deck Music - Free Plan</h3>
+      <ul class="space-y-4 text-gray-700">
+        <li>Basic profile</li>
+        <li>Upload music & videos</li>
+        <li>Community access</li>
       </ul>
     </div>
-    <div class="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-purple-400/30">
-      <h4 class="text-2xl font-bold mb-6 text-purple-300">Why Compress Before Uploading?</h4>
-      <ul class="space-y-4 text-gray-200 text-lg">
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">→</span>
-          <span>Upload 3–5× faster — no waiting forever on slow connections</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">→</span>
-          <span>Lower storage usage on our servers → more space for your content</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">→</span>
-          <span>Faster playback for fans — especially on mobile data</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">→</span>
-          <span>Avoid platform compression artifacts — control the quality yourself</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="text-purple-400 text-2xl">→</span>
-          <span>Pro move: pros compress before upload to look polished</span>
-        </li>
-      </ul>
-      <div class="mt-10 text-center">
-        <a href="compressor-signup.html" class="inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl px-10 py-5 rounded-full transition transform hover:scale-105 shadow-2xl">
-          Get the Compression Tool – Sign Up Now
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-<br><br>
-<!-- PRODUCERS & DISTRIBUTORS SECTION -->
-<section id="producers-distributors-section" class="max-w-6xl mx-auto py-20 sm:py-28 px-4 sm:px-6 bg-gradient-to-r from-emerald-900/80 via-teal-900/80 to-indigo-900/80 rounded-2xl shadow-2xl">
-  <div class="text-center mb-8 sm:mb-10">
-    <h3 class="text-3xl sm:text-4xl font-black mb-4 text-white">For Producers, Distributors, Publishers & Supervisors</h3>
-    <p class="text-lg sm:text-xl text-gray-200 max-w-4xl mx-auto">
-      Gain exclusive access to our growing directory of talented artists. View full profiles, uploaded videos, MP3s, use our message board to contact artists and more — all in one place.
-      <br><br>
-      Apply to join our trusted network. Once approved, you'll receive login credentials and full access to the artist database.
-    </p>
-  </div>
-  <div class="text-center">
-    <a href="producers-distributors.html"
-       class="inline-block bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xl sm:text-2xl px-10 sm:px-14 py-5 sm:py-6 rounded-full transition transform hover:scale-105 shadow-2xl">
-      Apply Now – Become a Verified Producer, Distributor, Publisher or Supervisor
-    </a>
-  </div>
-</section>
-<br><br>
 
-<!-- Q&A -->
-<section id="qa-section" class="bg-neutral-950 py-16 px-6">
-  <div class="max-w-6xl mx-auto">
-    <h3 class="text-3xl font-bold mb-8 text-center style1">Q&A</h3>
-    <div class="grid md:grid-cols-2 gap-6">
-      <div class="space-y-4">
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">What is Rhythm Deck?</summary>
-          <p class="text-gray-400 mt-2">Rhythm Deck Music is the ultimate destination for musicians, songwriters, bands, vocalists, producers, and music lovers of all genres to connect, share, and grow.</p>
-          <p class="text-gray-400 mt-2">Whether you’re creating original songs, producing beats, or shooting your own music videos, Rhythm Deck makes it easy to upload, share, and connect with an audience that truly appreciates the art of sound.</p>
-          <p class="text-gray-400 mt-2">Our mission is to empower independent creators with tools to shine — without the noise or limitations of mainstream platforms. Here, your music takes center stage. Join us, unleash your creativity, and be part of the next revolution in music sharing.</p>
-        </details>
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">Is it really free?</summary>
-          <p class="text-gray-400 mt-2">Yes! The Free Plan includes some creative tools and public uploads. The Platinum Pro Plan offers a full range of tools and is in pre-launch. For a limited time, any artist who signs up for our pre-launch special will have and keep Platinum Pro for life for FREE!</p>
-        </details>
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">What do I get with Pro?</summary>
-          <p class="text-gray-400 mt-2">Pro unlocks sharing tools, fan polls, live streaming, and eligibility for Main Stage & Featured Artist slots.</p>
-        </details>
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">How do I upgrade?</summary>
-          <p class="text-gray-400 mt-2">You can upgrade anytime from your profile admin page or during signup.</p>
-        </details>
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">How do I get on the Main Stage or Featured artist?</summary>
-          <p class="text-gray-400 mt-2">Artists can apply or be nominated. Criteria: originality, quality, engagement, and visuals. Final approval by staff. Updated monthly.</p>
-        </details>
-      </div>
-      <div class="space-y-4">
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">Can I collaborate with other artists?</summary>
-          <p class="text-gray-400 mt-2">Yes! Connect with others in the Rhythm Deck community to collaborate on music and visuals.</p>
-        </details>
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">Can fans interact with my music?</summary>
-          <p class="text-gray-400 mt-2">Pro users can host polls, Q&A, and fan shoutouts directly from their artist page.</p>
-        </details>
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">Are there limits to uploads?</summary>
-          <p class="text-gray-400 mt-2">Free users have limited file sizes, while Pro users get higher storage and priority uploads.</p>
-        </details>
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">When are new features added?</summary>
-          <p class="text-gray-400 mt-2">We release new AI and community features monthly based on user feedback.</p>
-        </details>
-        <details class="bg-neutral-900 rounded-lg p-4 cursor-pointer">
-          <summary class="font-semibold text-green-400">Can I monetize my content?</summary>
-          <p class="text-gray-400 mt-2">Pro users will soon be able to earn from fan tips and sponsorship integrations.</p>
-        </details>
-      </div>
+    <!-- Pro Plan -->
+    <div class="plan-card pro p-8 rounded-3xl border-emerald-500">
+      <h3 class="text-3xl font-bold mb-4">Rhythm Deck Music - Pro Plan</h3>
+      <ul class="space-y-4 text-gray-700">
+        <li>All Free Features Plus</li>
+        <li>Advanced tools</li>
+        <li>Live streaming</li>
+        <li>Merch Store</li>
+      </ul>
+      <a href="pricing.html" class="block mt-8 text-center bg-emerald-600 text-white py-4 rounded-xl font-bold">Upgrade to Pro</a>
     </div>
   </div>
 </section>
-<!-- VIDEO MODAL -->
-<div id="videoModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999] hidden">
-  <div class="relative w-full max-w-5xl px-4">
-    <video id="videoPlayer" class="w-full rounded-2xl shadow-2xl" controls autoplay playsinline>
-      <source id="videoSource" src="" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-    <button id="closeVideoBtn" class="absolute -top-6 right-4 bg-red-600 text-white w-12 h-12 rounded-full text-3xl font-bold flex items-center justify-center shadow-lg hover:bg-red-700">
-      ×
-    </button>
-  </div>
-</div>
+
 <!-- FOOTER -->
 <footer class="bg-black text-white mt-10 p-6 sm:p-8 text-center text-sm">
   <nav class="mb-4 space-x-4 flex flex-wrap justify-center gap-4">
@@ -870,144 +122,5 @@
   </nav>
   <p>© 2026 Rhythm Deck Music. All rights reserved.</p>
 </footer>
-<!-- FULL SCRIPT -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // PROMO VIDEO – SIMPLIFIED & ROBUST
-  const promoVideo = document.getElementById("promoVideo");
-  if (promoVideo) {
-    const overlay = document.getElementById("playPauseOverlay");
-    const playIcon = document.getElementById("playIcon");
-    const pauseIcon = document.getElementById("pauseIcon");
-    const muteBtn = document.getElementById("muteBtn");
-    const volumeSlider = document.getElementById("volumeSlider");
-    const progressFill = document.getElementById("progressFill");
-    const currentTimeEl = document.getElementById("currentTime");
-    const durationEl = document.getElementById("duration");
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
-    promoVideo.addEventListener("loadedmetadata", () => {
-      if (durationEl) durationEl.textContent = formatTime(promoVideo.duration || 0);
-    });
-    promoVideo.addEventListener("timeupdate", () => {
-      if (!promoVideo.duration) return;
-      const pct = (promoVideo.currentTime / promoVideo.duration) * 100;
-      if (progressFill) progressFill.style.width = pct + "%";
-      if (currentTimeEl) currentTimeEl.textContent = formatTime(promoVideo.currentTime);
-      if (!promoVideo.paused && !promoVideo.ended && overlay) {
-        overlay.classList.add("hidden");
-      }
-    });
-    promoVideo.addEventListener("pause", () => {
-      if (overlay) overlay.classList.remove("hidden");
-      if (playIcon) playIcon.classList.remove("hidden");
-      if (pauseIcon) pauseIcon.classList.add("hidden");
-    });
-    promoVideo.addEventListener("play", () => {
-      if (overlay) overlay.classList.add("hidden");
-      if (playIcon) playIcon.classList.add("hidden");
-      if (pauseIcon) pauseIcon.classList.remove("hidden");
-    });
-    function togglePlayPause(e) {
-      e.stopPropagation(); // prevent double-trigger
-      if (promoVideo.paused || promoVideo.ended) {
-        promoVideo.play().catch(err => {
-          console.log("Play failed (likely user gesture needed):", err);
-        });
-      } else {
-        promoVideo.pause();
-      }
-    }
-    // Make the **entire overlay** clickable
-    if (overlay) {
-      overlay.addEventListener("click", togglePlayPause);
-    }
-
-    // Button inside also triggers (redundant but safe)
-    const playBtn = document.getElementById("playPauseBtn");
-    if (playBtn) {
-      playBtn.addEventListener("click", togglePlayPause);
-    }
-
-    if (muteBtn) {
-      muteBtn.addEventListener("click", () => {
-        promoVideo.muted = !promoVideo.muted;
-        muteBtn.textContent = promoVideo.muted ? "Unmute" : "Mute";
-      });
-    }
-
-    if (volumeSlider) {
-      volumeSlider.addEventListener("input", e => {
-        promoVideo.volume = parseFloat(e.target.value);
-      });
-    }
-
-    // Start paused with overlay visible
-    promoVideo.pause();
-    if (overlay) overlay.classList.remove("hidden");
-  }
-
-  // DROPDOWN
-  const badge = document.getElementById('featuresBadge');
-  const menu = document.getElementById('dropdownMenu');
-  if (badge && menu) {
-    badge.addEventListener('click', e => {
-      e.stopPropagation();
-      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-    });
-    document.addEventListener('click', e => {
-      if (!badge.contains(e.target) && !menu.contains(e.target)) {
-        menu.style.display = 'none';
-      }
-    });
-  }
-
-  // LOGO
-  const logo = document.getElementById("logo");
-  if (logo) logo.classList.add("logo-intro");
-
-  // FEATURED MODAL VIDEOS
-  const videoModal = document.getElementById("videoModal");
-  const videoPlayer = document.getElementById("videoPlayer");
-  const videoSource = document.getElementById("videoSource");
-  const closeVideoBtn = document.getElementById("closeVideoBtn");
-
-  document.querySelectorAll('.featured-video').forEach(card => {
-    card.addEventListener('click', () => {
-      const src = card.getAttribute('data-video');
-      if (src && videoSource && videoPlayer && videoModal) {
-        videoSource.src = src;
-        videoPlayer.load();
-        videoModal.classList.remove('hidden');
-        videoModal.classList.add('active');
-        videoPlayer.play().catch(e => console.log("Modal play:", e));
-      }
-    });
-  });
-
-  if (closeVideoBtn) {
-    closeVideoBtn.addEventListener('click', () => {
-      videoModal.classList.add('hidden');
-      videoModal.classList.remove('active');
-      if (videoPlayer) videoPlayer.pause();
-      if (videoSource) videoSource.src = '';
-    });
-  }
-
-  if (videoModal) {
-    videoModal.addEventListener('click', e => {
-      if (e.target === videoModal) {
-        videoModal.classList.add('hidden');
-        videoModal.classList.remove('active');
-        if (videoPlayer) videoPlayer.pause();
-        if (videoSource) videoSource.src = '';
-      }
-    });
-  }
-});
-</script>
 </body>
 </html>
