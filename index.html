@@ -47,6 +47,17 @@
     .video-container:hover .video-controls, .video-controls:focus-within {
       opacity: 1;
     }
+    .play-pause-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.25s;
+      z-index: 10;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -85,7 +96,7 @@
   </div>
 </section>
 
-<!-- PROMO VIDEO (Fixed with Full Controls) -->
+<!-- PROMO VIDEO (Fully Working) -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
   <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl video-container bg-black">
     <video
@@ -97,7 +108,7 @@
     >
       Your browser does not support the video tag.
     </video>
-    <!-- Overlay -->
+    <!-- Overlay with Play Button -->
     <div id="playPauseOverlay" class="play-pause-overlay">
       <button id="playPauseBtn" class="play-pause-btn">
         <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 sm:h-28 sm:w-28" fill="currentColor" viewBox="0 0 24 24">
@@ -130,14 +141,12 @@
   </div>
 </section>
 
-<!-- PRE-LAUNCH SPECIAL (Bright Gradient + 2 Columns) -->
+<!-- PRE-LAUNCH SPECIAL -->
 <section class="py-12 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500">
   <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-8 items-center">
-    <!-- Left: Image -->
     <div class="text-center">
       <img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro" class="mx-auto rounded-2xl shadow-2xl max-w-xs">
     </div>
-    <!-- Right: Text -->
     <div>
       <h2 class="text-4xl font-bold text-white mb-6">Pre-Launch Special</h2>
       <p class="text-lg text-white leading-relaxed">
@@ -150,7 +159,7 @@
   </div>
 </section>
 
-<!-- PLATINUM PRO (Bright Gradient) -->
+<!-- PLATINUM PRO -->
 <section id="platinum-pro-section" class="max-w-6xl mx-auto py-12 sm:py-16 px-4 sm:px-6">
   <div class="bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl shadow-2xl p-6 sm:p-10 text-white">
     <div class="text-center mb-6 sm:mb-8">
@@ -248,7 +257,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // PROMO VIDEO – FULLY FUNCTIONAL
   const promoVideo = document.getElementById("promoVideo");
   if (promoVideo) {
     const overlay = document.getElementById("playPauseOverlay");
