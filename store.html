@@ -41,7 +41,7 @@
       transition: transform 0.4s ease;
     }
     .product-card:hover img {
-      transform: scale(1.08);
+      transform: scale(1.05);
     }
   </style>
 </head>
@@ -82,9 +82,13 @@
     Success! Thank you for your order!
   </div>
 
-  <!-- TALL BANNER -->
-  <section class="relative h-[320px] sm:h-[420px] md:h-[520px] lg:h-[580px] xl:h-[620px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('merch-banner.jpg');">
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+  <!-- FULL BANNER (no cropping) -->
+  <section class="relative bg-black overflow-hidden" style="aspect-ratio: 16 / 9; max-height: 700px;">
+    <div id="userBannerSection" 
+         class="w-full h-full bg-no-repeat bg-center" 
+         style="background-image: url('merch-banner.jpg'); background-size: contain;">
+    </div>
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/30">
       <h1 class="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-center drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)] px-4">MERCH STORE</h1>
     </div>
     <div class="absolute bottom-8 left-6 sm:left-8 z-10">
@@ -189,7 +193,6 @@
 
       const apparelGrid = document.getElementById('apparelGrid');
       const accessoriesGrid = document.getElementById('accessoriesGrid');
-
       apparelGrid.innerHTML = '';
       accessoriesGrid.innerHTML = '';
 
@@ -199,7 +202,7 @@
 
         const cardHTML = `
           <div class="product-card bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
-            <img src="${imgSrc}" alt="${product.name}" class="w-full h-80 object-cover">
+            <img src="${imgSrc}" alt="${product.name}" class="w-full h-80 object-contain bg-gray-100">
             <div class="p-6">
               <h3 class="font-bold text-2xl mb-2">${product.name}</h3>
               <p class="text-gray-600 mb-4 line-clamp-3">${product.description}</p>
