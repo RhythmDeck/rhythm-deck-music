@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Store Admin | Rhythm Deck</title>
+  <title>Merch Admin | Rhythm Deck</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://js.stripe.com/v3/"></script>
@@ -55,15 +55,15 @@
     </nav>
   </header>
 
-  <!-- BANNER -->
-  <section class="relative h-[300px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('banner-cropped.jpg');">
+  <!-- LARGE RESPONSIVE BANNER (1920x1080 optimized) -->
+  <section class="relative h-[280px] sm:h-[350px] md:h-[450px] lg:h-[500px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('merch-banner.jpg');">
     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <p class="text-white text-4xl md:text-5xl font-black text-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">Your Merch Store Admin</p>
+      <p class="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-center drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)] px-4">Your Merch Store Admin</p>
     </div>
-    <div class="absolute bottom-4 left-8 z-10">
-      <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Your Store Logo" class="w-36 h-36 rounded-full object-cover border-8 border-white shadow-2xl">
+    <div class="absolute bottom-6 left-6 sm:left-8 z-10">
+      <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Your Store Logo" class="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-8 border-white shadow-2xl">
     </div>
-    <div class="absolute bottom-4 left-52 z-20">
+    <div class="absolute bottom-6 left-40 sm:left-52 z-20">
       <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-2 px-4 text-sm rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -73,7 +73,7 @@
       </label>
       <p id="logoStatus" class="text-white font-bold mt-1 text-sm hidden">Updated!</p>
     </div>
-    <div class="absolute bottom-4 right-4 z-20">
+    <div class="absolute bottom-6 right-6 z-20">
       <label class="bg-white bg-opacity-90 hover:bg-opacity-100 text-black font-bold py-2 px-4 text-sm rounded-lg cursor-pointer transition shadow-lg flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -89,7 +89,7 @@
   <main class="flex-grow max-w-6xl mx-auto py-12 px-6">
     <!-- View Public Store Button -->
     <div class="mb-8 flex justify-end">
-      <a href="store.html" target="_blank" 
+      <a href="store.html" target="_blank"
          class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition">
         👁 View Public Store
       </a>
