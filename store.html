@@ -9,7 +9,6 @@
   <script src="https://js.stripe.com/v3/"></script>
   <style>
     .cart-item { border-bottom: 1px solid #e5e7eb; padding: 1rem 0; }
-    .badge-glow { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.7)); }
     .menu-btn {
       padding: 0.5rem 1rem;
       border-radius: 9999px;
@@ -29,10 +28,25 @@
     .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
     .merch-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
     .featured-btn { background: linear-gradient(to right, #8b5cf6, #6366f1); color: white; }
+    .category-btn {
+      padding: 0.75rem 2rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .apparel-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
+    .accessories-btn { background: linear-gradient(to right, #8b5cf6, #6366f1); color: white; }
+    .product-card img {
+      transition: transform 0.4s ease;
+    }
+    .product-card:hover img {
+      transform: scale(1.08);
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen">
-  <!-- HEADER with new menu -->
+  <!-- HEADER -->
   <header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-lg gap-4">
     <div class="flex items-center space-x-3">
       <img src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 rounded-full">
@@ -68,22 +82,35 @@
     Success! Thank you for your order!
   </div>
 
-  <!-- BANNER -->
-  <section class="relative h-[300px] md:h-[400px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('banner-cropped.jpg');">
+  <!-- TALL BANNER -->
+  <section class="relative h-[320px] sm:h-[420px] md:h-[520px] lg:h-[580px] xl:h-[620px] bg-cover bg-center overflow-hidden" id="userBannerSection" style="background-image: url('merch-banner.jpg');">
     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <h1 class="text-white text-5xl md:text-7xl font-black text-center drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)]">MERCH STORE</h1>
+      <h1 class="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-center drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)] px-4">MERCH STORE</h1>
     </div>
-    <div class="absolute top-6 right-8 z-20">
-      <img src="platinum-pro-artist-badge-transparent-1.png" alt="Platinum Pro Artist" class="w-36 h-36 md:w-48 md:h-48 object-contain badge-glow">
-    </div>
-    <div class="absolute bottom-4 left-8 z-10">
-      <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Store Logo" class="w-36 h-36 rounded-full object-cover border-8 border-white shadow-2xl">
+    <div class="absolute bottom-8 left-6 sm:left-8 z-10">
+      <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Store Logo" class="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full object-cover border-8 border-white shadow-2xl">
     </div>
   </section>
 
-  <!-- MAIN - Products -->
-  <main class="flex-grow max-w-7xl mx-auto py-12 px-6">
-    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+  <!-- CATEGORY BUTTONS -->
+  <div class="max-w-7xl mx-auto px-6 py-8 flex flex-wrap gap-4 justify-center">
+    <a href="#apparel-section" class="category-btn apparel-btn text-lg">👕 Apparel</a>
+    <a href="#accessories-section" class="category-btn accessories-btn text-lg">🕶️ Accessories</a>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-grow max-w-7xl mx-auto px-6 pb-12">
+    <!-- APPAREL SECTION -->
+    <section id="apparel-section" class="mb-16">
+      <h2 class="text-4xl font-black text-orange-800 mb-8">Apparel</h2>
+      <div id="apparelGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+    </section>
+
+    <!-- ACCESSORIES SECTION -->
+    <section id="accessories-section">
+      <h2 class="text-4xl font-black text-orange-800 mb-8">Accessories</h2>
+      <div id="accessoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+    </section>
   </main>
 
   <!-- FOOTER -->
@@ -155,21 +182,24 @@
         .eq('subdomain', subdomain)
         .single();
 
-      let query = supabase.from('merch_products').select('id, name, description, image_url, variants').order('created_at', { ascending: false });
+      let query = supabase.from('merch_products').select('id, name, description, image_url, variants, category').order('created_at', { ascending: false });
       if (profile) query = query.eq('user_id', profile.id);
 
       const { data: products } = await query;
 
-      const grid = document.getElementById('productsGrid');
-      grid.innerHTML = products.length === 0 ? '<p class="col-span-full text-center text-xl text-gray-500 py-20">No products available yet.</p>' : '';
+      const apparelGrid = document.getElementById('apparelGrid');
+      const accessoriesGrid = document.getElementById('accessoriesGrid');
+
+      apparelGrid.innerHTML = '';
+      accessoriesGrid.innerHTML = '';
 
       products.forEach(product => {
         const imgSrc = product.image_url ? supabase.storage.from('merch_images').getPublicUrl(product.image_url).data.publicUrl : 'https://placehold.co/600x400?text=No+Image';
         const variantOptions = (product.variants || []).map(v => `<option value="${v.price}|${v.option || 'Default'}">${v.option || 'Default'} - $${v.price.toFixed(2)}</option>`).join('');
 
-        grid.innerHTML += `
-          <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
-            <img src="${imgSrc}" alt="${product.name}" class="w-full h-64 object-cover">
+        const cardHTML = `
+          <div class="product-card bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
+            <img src="${imgSrc}" alt="${product.name}" class="w-full h-80 object-cover">
             <div class="p-6">
               <h3 class="font-bold text-2xl mb-2">${product.name}</h3>
               <p class="text-gray-600 mb-4 line-clamp-3">${product.description}</p>
@@ -185,6 +215,12 @@
             </div>
           </div>
         `;
+
+        if (product.category === 'accessories' || product.category?.toLowerCase() === 'accessory') {
+          accessoriesGrid.innerHTML += cardHTML;
+        } else {
+          apparelGrid.innerHTML += cardHTML;
+        }
       });
 
       document.querySelectorAll('.add-to-cart').forEach(btn => {
