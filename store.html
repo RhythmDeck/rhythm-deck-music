@@ -82,12 +82,9 @@
     Success! Thank you for your order!
   </div>
 
-  <!-- FULL BANNER (no cropping) -->
+  <!-- BANNER -->
   <section class="relative bg-black overflow-hidden" style="aspect-ratio: 16 / 9; max-height: 700px;">
-    <div id="userBannerSection" 
-         class="w-full h-full bg-no-repeat bg-center" 
-         style="background-image: url('merch-banner.jpg'); background-size: contain;">
-    </div>
+    <div id="userBannerSection" class="w-full h-full bg-no-repeat bg-center" style="background-image: url('merch-banner.jpg'); background-size: contain;"></div>
     <div class="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/30">
       <h1 class="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-center drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)] px-4">MERCH STORE</h1>
     </div>
@@ -104,13 +101,11 @@
 
   <!-- MAIN CONTENT -->
   <main class="flex-grow max-w-7xl mx-auto px-6 pb-12">
-    <!-- APPAREL SECTION -->
     <section id="apparel-section" class="mb-16">
       <h2 class="text-4xl font-black text-orange-800 mb-8">Apparel</h2>
       <div id="apparelGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
     </section>
 
-    <!-- ACCESSORIES SECTION -->
     <section id="accessories-section">
       <h2 class="text-4xl font-black text-orange-800 mb-8">Accessories</h2>
       <div id="accessoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
@@ -147,28 +142,11 @@
     const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-    function checkSuccessRedirect() {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('redirect_status') === 'succeeded') {
-        const successDiv = document.getElementById('successMessage');
-        successDiv.classList.remove('hidden');
-        cart = [];
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartCount();
-        window.history.replaceState({}, document.title, window.location.pathname);
-        setTimeout(() => successDiv.classList.add('hidden'), 10000);
-      }
-    }
-
     async function loadBranding() {
       const subdomain = window.location.hostname.split('.')[0];
       if (!subdomain || subdomain === 'www' || subdomain === 'rhythm-deck-music') return;
       try {
-        const { data } = await supabase
-          .from('profiles')
-          .select('logo_url, banner_url')
-          .eq('subdomain', subdomain)
-          .single();
+        const { data } = await supabase.from('profiles').select('logo_url, banner_url').eq('subdomain', subdomain).single();
         if (data) {
           if (data.logo_url) document.getElementById('currentLogoPreview').src = data.logo_url;
           if (data.banner_url) document.getElementById('userBannerSection').style.backgroundImage = `url('${data.banner_url}')`;
@@ -180,11 +158,7 @@
 
     async function loadProducts() {
       const subdomain = window.location.hostname.split('.')[0];
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('subdomain', subdomain)
-        .single();
+      const { data: profile } = await supabase.from('profiles').select('id').eq('subdomain', subdomain).single();
 
       let query = supabase.from('merch_products').select('id, name, description, image_url, variants, category').order('created_at', { ascending: false });
       if (profile) query = query.eq('user_id', profile.id);
@@ -202,7 +176,7 @@
 
         const cardHTML = `
           <div class="product-card bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
-            <img src="${imgSrc}" alt="${product.name}" class="w-full h-80 object-contain bg-gray-100">
+            <img src="${imgSrc}" alt="${product.name}" class="w-full h-80 object-contain bg-gray-100 p-4">
             <div class="p-6">
               <h3 class="font-bold text-2xl mb-2">${product.name}</h3>
               <p class="text-gray-600 mb-4 line-clamp-3">${product.description}</p>
@@ -298,23 +272,42 @@
 
     document.getElementById('checkoutBtn').addEventListener('click', async () => {
       if (cart.length === 0) return;
+
       const lineItems = cart.map(item => ({
         price_data: {
           currency: 'usd',
-          product_data: { name: `${item.name} - ${item.option}`, images: [item.image] },
+          product_data: {
+            name: `${item.name} - ${item.option}`,
+            images: [item.image]
+          },
           unit_amount: Math.round(item.price * 100)
         },
         quantity: item.quantity
       }));
+
       try {
         const response = await fetch(
           'https://bxoqhmfnseskwqkywppg.supabase.co/functions/v1/create-checkout-session',
-          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ line_items: lineItems }) }
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ line_items: lineItems })
+          }
         );
-        const { sessionId, error } = await response.json();
-        if (error) throw new Error(error);
-        stripe.redirectToCheckout({ sessionId });
+
+        const result = await response.json();
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        if (!result.sessionId) {
+          throw new Error("No session ID returned from server");
+        }
+
+        stripe.redirectToCheckout({ sessionId: result.sessionId });
       } catch (err) {
+        console.error(err);
         alert('Checkout error: ' + err.message);
       }
     });
