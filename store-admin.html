@@ -10,18 +10,8 @@
   <style>
     .spinner {border:4px solid #f3f3f3;border-top:4px solid #10b981;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin-left:8px;display:inline-block;}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-    .menu-btn {
-      padding: 0.5rem 1rem;
-      border-radius: 9999px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      font-size: 0.95rem;
-    }
-    .menu-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
-    }
+    .menu-btn { padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.25); font-size: 0.95rem; }
+    .menu-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
     .home-btn { background: linear-gradient(to right, #22c55e, #16a34a); color: white; }
     .about-btn { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; }
     .benefits-btn { background: linear-gradient(to right, #f59e0b, #d97706); color: white; }
@@ -94,19 +84,7 @@
       </a>
     </div>
 
-    <!-- INSTRUCTIONS -->
-    <section class="bg-white rounded-2xl shadow-2xl p-10 mb-12">
-      <h2 class="text-4xl font-black text-orange-800 mb-6">How to Use the Merch Admin Page</h2>
-      <p class="text-xl text-gray-800 leading-relaxed mb-6">Welcome to your Merch Admin!</p>
-      <ol class="list-decimal list-inside space-y-4 text-lg text-gray-700">
-        <li><strong>Product Name & Category</strong>: Choose Apparel or Accessories.</li>
-        <li><strong>Description</strong>: Write a compelling description.</li>
-        <li><strong>Image</strong>: Upload a high-quality photo.</li>
-        <li><strong>Sizes / Colors & Prices</strong>: Add variants below.</li>
-      </ol>
-    </section>
-
-    <!-- ADD/EDIT PRODUCT FORM -->
+    <!-- ADD/EDIT FORM -->
     <section class="bg-white rounded-2xl shadow-2xl p-10 mb-12">
       <h2 class="text-4xl font-black text-orange-800 mb-6" id="formTitle">Add New Product</h2>
       <form id="addProductForm" class="space-y-6">
@@ -114,12 +92,12 @@
 
         <div>
           <label class="block text-gray-700 font-bold mb-2">Product Name</label>
-          <input type="text" id="productName" required class="w-full border border-gray-300 rounded-lg p-3 focus:border-orange-500">
+          <input type="text" id="productName" required class="w-full border border-gray-300 rounded-lg p-3">
         </div>
 
         <div>
           <label class="block text-gray-700 font-bold mb-2">Category</label>
-          <select id="productCategory" required class="w-full border border-gray-300 rounded-lg p-3 focus:border-orange-500">
+          <select id="productCategory" required class="w-full border border-gray-300 rounded-lg p-3">
             <option value="apparel">👕 Apparel</option>
             <option value="accessories">🕶️ Accessories</option>
           </select>
@@ -127,34 +105,24 @@
 
         <div>
           <label class="block text-gray-700 font-bold mb-2">Description</label>
-          <textarea id="productDescription" required class="w-full border border-gray-300 rounded-lg p-3 h-32 focus:border-orange-500"></textarea>
+          <textarea id="productDescription" required class="w-full border border-gray-300 rounded-lg p-3 h-32"></textarea>
         </div>
 
         <div>
           <label class="block text-gray-700 font-bold mb-2">Main Product Image</label>
-          <input type="file" id="productImage" accept="image/*" class="w-full file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-orange-600 file:text-white">
-          <p class="text-sm text-gray-600 mt-2">Leave empty when editing if you don't want to change it.</p>
+          <input type="file" id="productImage" accept="image/*" class="w-full">
         </div>
 
-        <!-- SIZES / COLORS & PRICES -->
         <div class="space-y-6">
           <h3 class="text-2xl font-bold text-orange-700">Sizes / Colors & Prices</h3>
-          <p class="text-gray-700">Add each size/color variant with its own price.</p>
           <div id="variantsContainer" class="space-y-4"></div>
-          <button type="button" id="addVariantBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">
-            + Add Size/Color Variant
-          </button>
+          <button type="button" id="addVariantBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">+ Add Variant</button>
         </div>
 
-        <div class="flex gap-4">
-          <button type="submit" class="flex-1 bg-orange-600 text-white font-black py-4 rounded-lg hover:bg-orange-700 transition flex items-center justify-center">
-            <span id="submitText">Add Product</span>
-            <div id="uploadSpinner" class="spinner hidden"></div>
-          </button>
-          <button type="button" id="cancelEdit" class="hidden px-6 py-4 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition">
-            Cancel Edit
-          </button>
-        </div>
+        <button type="submit" class="w-full bg-orange-600 text-white font-black py-4 rounded-lg hover:bg-orange-700 flex items-center justify-center">
+          <span id="submitText">Add Product</span>
+          <div id="uploadSpinner" class="spinner hidden"></div>
+        </button>
       </form>
     </section>
 
@@ -165,58 +133,47 @@
     </section>
   </main>
 
-  <!-- FOOTER -->
   <footer class="bg-black text-white mt-auto p-6 text-center">
     <p class="text-sm">© 2026 Rhythm Deck Music. All rights reserved.</p>
   </footer>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const supabase = createClient(
-      'https://bxoqhmfnseskwqkywppg.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
-    );
+    const supabase = createClient('https://bxoqhmfnseskwqkywppg.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc');
+
     let currentUser = null;
     let editingProductId = null;
 
-    async function loadBranding() {
-      const { data } = await supabase.from('profiles').select('logo_url, banner_url').eq('id', currentUser.id).single();
-      if (data) {
-        if (data.logo_url) document.getElementById('currentLogoPreview').src = data.logo_url;
-        if (data.banner_url) document.getElementById('userBannerSection').style.backgroundImage = `url('${data.banner_url}')`;
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert("Please log in first");
+        window.location.href = "login.html";
+        return;
       }
+      currentUser = user;
+      loadProducts();
+      addVariant();
     }
 
-    document.getElementById('logoUpload').addEventListener('change', async (e) => { /* same as before */ });
-    document.getElementById('bannerUpload').addEventListener('change', async (e) => { /* same as before */ });
-
-    function createVariantHTML(variant = { option: '', price: '', stock: '' }) {
+    function createVariantHTML(variant = {}) {
       return `
-        <div class="variant-item">
-          <div class="grid md:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-gray-700 font-medium mb-1">Size/Color</label>
-              <input type="text" class="variant-option w-full border border-gray-300 rounded-lg p-3" value="${variant.option}" required>
-            </div>
-            <div>
-              <label class="block text-gray-700 font-medium mb-1">Price (USD)</label>
-              <input type="number" step="0.01" min="0" class="variant-price w-full border border-gray-300 rounded-lg p-3" value="${variant.price}" required>
-            </div>
-            <div>
-              <label class="block text-gray-700 font-medium mb-1">Stock (optional)</label>
-              <input type="number" min="0" class="variant-stock w-full border border-gray-300 rounded-lg p-3" value="${variant.stock}">
-            </div>
+        <div class="variant-item border p-4 rounded-lg">
+          <div class="grid grid-cols-3 gap-4">
+            <input type="text" class="variant-option border p-2 rounded" placeholder="Size/Color" value="${variant.option || ''}" required>
+            <input type="number" step="0.01" class="variant-price border p-2 rounded" placeholder="Price" value="${variant.price || ''}" required>
+            <input type="number" class="variant-stock border p-2 rounded" placeholder="Stock" value="${variant.stock || ''}">
           </div>
-          <button type="button" class="remove-variant mt-3 text-red-600 hover:text-red-800 font-medium">Remove</button>
+          <button type="button" class="remove-variant text-red-600 mt-2">Remove</button>
         </div>
       `;
     }
 
-    function addVariant(variant = null) {
+    function addVariant(variant = {}) {
       const container = document.getElementById('variantsContainer');
-      container.insertAdjacentHTML('beforeend', createVariantHTML(variant || { option: '', price: '', stock: '' }));
+      container.insertAdjacentHTML('beforeend', createVariantHTML(variant));
       container.lastElementChild.querySelector('.remove-variant').addEventListener('click', function() {
-        this.closest('.variant-item').remove();
+        this.parentElement.remove();
       });
     }
 
@@ -225,109 +182,15 @@
       document.querySelectorAll('.variant-item').forEach(item => {
         const option = item.querySelector('.variant-option').value.trim();
         const price = parseFloat(item.querySelector('.variant-price').value);
-        const stockInput = item.querySelector('.variant-stock').value;
-        const stock = stockInput === '' ? null : parseInt(stockInput);
-        if (option && !isNaN(price) && price >= 0) {
-          variants.push({ option, price, stock });
+        if (option && !isNaN(price)) {
+          variants.push({ option, price });
         }
       });
       return variants;
     }
 
-    async function loadProducts() {
-      const { data: products } = await supabase
-        .from('merch_products')
-        .select('id, name, description, image_url, variants, category')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
-
-      const container = document.getElementById('productList');
-      container.innerHTML = products.length === 0 ? '<p class="text-center text-gray-500 italic text-lg py-10">No products yet. Add one above!</p>' : '';
-
-      products.forEach(product => {
-        let imgSrc = product.image_url ? supabase.storage.from('merch_images').getPublicUrl(product.image_url).data.publicUrl : 'https://placehold.co/600x400?text=No+Image';
-        const variantList = (product.variants || []).map(v => `${v.option || 'N/A'} - $${v.price?.toFixed(2) || '0.00'}`).join('<br>') || 'No variants';
-
-        container.innerHTML += `
-          <div class="bg-gray-50 rounded-xl shadow-lg p-6">
-            <img src="${imgSrc}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4">
-            <h3 class="font-bold text-xl mb-2">${product.name}</h3>
-            <p class="text-sm text-gray-500 mb-1">Category: <span class="capitalize font-medium">${product.category || 'Apparel'}</span></p>
-            <p class="text-gray-600 mb-2">${product.description}</p>
-            <div class="text-sm text-gray-700 mb-4">
-              <strong>Variants:</strong><br>${variantList}
-            </div>
-            <div class="flex gap-3">
-              <button class="edit-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold"
-                      data-id="${product.id}"
-                      data-name="${product.name.replace(/'/g, "\\'")}"
-                      data-description="${product.description.replace(/'/g, "\\'")}"
-                      data-image="${product.image_url || ''}"
-                      data-variants='${JSON.stringify(product.variants || [])}'
-                      data-category="${product.category || 'apparel'}">Edit</button>
-              <button class="delete-btn flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold"
-                      data-id="${product.id}"
-                      data-image="${product.image_url || ''}">Delete</button>
-            </div>
-          </div>
-        `;
-      });
-
-      // Edit and Delete listeners...
-      document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        const name = btn.dataset.name;
-        const description = btn.dataset.description;
-        const imageUrl = btn.dataset.image;
-        const variants = JSON.parse(btn.dataset.variants);
-        const category = btn.dataset.category;
-        editProduct(id, name, description, imageUrl, variants, category);
-      }));
-
-      document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', () => {
-        deleteProduct(btn.dataset.id, btn.dataset.image);
-      }));
-    }
-
-    function editProduct(id, name, description, imageUrl, variants, category) {
-      editingProductId = id;
-      document.getElementById('formTitle').textContent = 'Edit Product';
-      document.getElementById('submitText').textContent = 'Update Product';
-      document.getElementById('productName').value = name;
-      document.getElementById('productDescription').value = description;
-      document.getElementById('productCategory').value = category || 'apparel';
-      document.getElementById('editProductId').value = id;
-      document.getElementById('variantsContainer').innerHTML = '';
-      variants.forEach(v => addVariant(v));
-      document.getElementById('cancelEdit').classList.remove('hidden');
-      window.scrollTo({ top: document.getElementById('addProductForm').offsetTop - 100, behavior: 'smooth' });
-    }
-
-    document.getElementById('cancelEdit').onclick = () => {
-      editingProductId = null;
-      document.getElementById('formTitle').textContent = 'Add New Product';
-      document.getElementById('submitText').textContent = 'Add Product';
-      document.getElementById('addProductForm').reset();
-      document.getElementById('editProductId').value = '';
-      document.getElementById('variantsContainer').innerHTML = '';
-      addVariant();
-      document.getElementById('cancelEdit').classList.add('hidden');
-    };
-
-    async function deleteProduct(id, imagePath) {
-      if (!confirm('Delete this product permanently?')) return;
-      try {
-        await supabase.from('merch_products').delete().eq('id', id);
-        if (imagePath) await supabase.storage.from('merch_images').remove([imagePath]);
-        alert('Product deleted');
-        loadProducts();
-      } catch (err) {
-        alert('Delete error: ' + err.message);
-      }
-    }
-
     document.getElementById('addProductForm').onsubmit = async (e) => {
-      e.preventDefault();   // ← This was missing in some versions
+      e.preventDefault();
 
       const name = document.getElementById('productName').value.trim();
       const description = document.getElementById('productDescription').value.trim();
@@ -336,7 +199,7 @@
       const variants = collectVariants();
 
       if (!name || !description || variants.length === 0) {
-        alert('Please fill product name, description, and add at least one variant.');
+        alert("Please fill all fields and add at least one variant.");
         return;
       }
 
@@ -345,19 +208,10 @@
 
       try {
         let imagePath = null;
-        if (file || editingProductId) {
-          if (editingProductId && !file) {
-            const { data } = await supabase.from('merch_products').select('image_url').eq('id', editingProductId).single();
-            imagePath = data.image_url;
-          } else {
-            if (editingProductId) {
-              const { data: old } = await supabase.from('merch_products').select('image_url').eq('id', editingProductId).single();
-              if (old?.image_url) await supabase.storage.from('merch_images').remove([old.image_url]);
-            }
-            imagePath = `merch/${currentUser.id}/${Date.now()}_${file.name}`;
-            const { error: uploadError } = await supabase.storage.from('merch_images').upload(imagePath, file);
-            if (uploadError) throw uploadError;
-          }
+        if (file) {
+          imagePath = `merch/${currentUser.id}/${Date.now()}_${file.name}`;
+          const { error } = await supabase.storage.from('merch_images').upload(imagePath, file);
+          if (error) throw error;
         }
 
         const productData = {
@@ -365,47 +219,44 @@
           description,
           category,
           image_url: imagePath,
-          variants
+          variants,
+          user_id: currentUser.id
         };
 
-        if (editingProductId) {
-          await supabase.from('merch_products').update(productData).eq('id', editingProductId);
-          alert('✅ Product updated successfully!');
-        } else {
-          productData.user_id = currentUser.id;
-          await supabase.from('merch_products').insert(productData);
-          alert('✅ Product added successfully!');
-        }
+        const { error } = await supabase.from('merch_products').insert(productData);
+        if (error) throw error;
 
-        // Reset form
+        alert("✅ Product added successfully!");
         document.getElementById('addProductForm').reset();
         document.getElementById('variantsContainer').innerHTML = '';
         addVariant();
-        document.getElementById('editProductId').value = '';
-        document.getElementById('cancelEdit').classList.add('hidden');
-        document.getElementById('formTitle').textContent = 'Add New Product';
-        document.getElementById('submitText').textContent = 'Add Product';
-        editingProductId = null;
         loadProducts();
       } catch (err) {
         console.error(err);
-        alert('Error: ' + err.message);
+        alert("Error: " + err.message);
       } finally {
         spinner.classList.add('hidden');
       }
     };
 
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        alert('Please log in');
-        window.location.href = 'login.html';
-        return;
-      }
-      currentUser = user;
-      loadBranding();
-      loadProducts();
-      addVariant();
+    async function loadProducts() {
+      const { data: products } = await supabase
+        .from('merch_products')
+        .select('*')
+        .eq('user_id', currentUser.id);
+
+      const container = document.getElementById('productList');
+      container.innerHTML = '';
+
+      products.forEach(p => {
+        container.innerHTML += `
+          <div class="border p-4 rounded-lg">
+            <h3 class="font-bold">${p.name}</h3>
+            <p class="text-sm">${p.category}</p>
+            <p>${p.description}</p>
+          </div>
+        `;
+      });
     }
 
     document.getElementById('addVariantBtn').onclick = () => addVariant();
