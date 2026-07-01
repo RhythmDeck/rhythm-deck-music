@@ -176,7 +176,7 @@
       'https://bxoqhmfnseskwqkywppg.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
     );
-    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
+    const stripe = Stripe('pk_test_51To9k9EKJ8nt65pkpZVtBuN4die3aGxftK7KcTbuxemAyXiRU071DGahDmoPMhm1nFTk3bF3xbe3zPb9OPnSDasH00w0pxlNuD');
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
     function checkSuccessRedirect() {
@@ -189,31 +189,6 @@
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
-
-    document.getElementById('shippingForm').onsubmit = async (e) => {
-      e.preventDefault();
-
-      const orderData = {
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        address: document.getElementById('address').value,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
-        zip: document.getElementById('zip').value,
-        phone: document.getElementById('phone').value,
-        items: cart,
-        total: cart.reduce((sum, i) => sum + i.price * i.quantity, 0),
-        date: new Date().toISOString()
-      };
-
-      try {
-        await supabase.from('merch_sales').insert(orderData);
-        alert("✅ Order confirmed! We will contact you soon for shipping.");
-        document.getElementById('successSection').classList.add('hidden');
-      } catch (err) {
-        alert("Error saving order: " + err.message);
-      }
-    };
 
     async function loadBranding() {
       const subdomain = window.location.hostname.split('.')[0];
@@ -234,22 +209,20 @@
     }
 
     async function loadProducts() {
-      const subdomain = window.location.hostname.split('.')[0];
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('subdomain', subdomain)
-        .single();
-
-      let query = supabase.from('merch_products').select('id, name, description, image_url, variants, category').order('created_at', { ascending: false });
-      if (profile) query = query.eq('user_id', profile.id);
-
-      const { data: products } = await query;
+      const { data: products } = await supabase
+        .from('merch_products')
+        .select('id, name, description, image_url, variants, category')
+        .order('created_at', { ascending: false });
 
       const apparelGrid = document.getElementById('apparelGrid');
       const accessoriesGrid = document.getElementById('accessoriesGrid');
       apparelGrid.innerHTML = '';
       accessoriesGrid.innerHTML = '';
+
+      if (products.length === 0) {
+        apparelGrid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-12">No products available yet.</p>';
+        return;
+      }
 
       products.forEach(product => {
         const imgSrc = product.image_url ? supabase.storage.from('merch_images').getPublicUrl(product.image_url).data.publicUrl : 'https://placehold.co/600x400?text=No+Image';
