@@ -138,13 +138,11 @@
 
   <!-- MAIN CONTENT -->
   <main class="flex-grow max-w-7xl mx-auto px-6 pb-12">
-    <!-- APPAREL SECTION -->
     <section id="apparel-section" class="mb-16">
       <h2 class="text-4xl font-black text-orange-800 mb-8">Apparel</h2>
       <div id="apparelGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
     </section>
 
-    <!-- ACCESSORIES SECTION -->
     <section id="accessories-section">
       <h2 class="text-4xl font-black text-orange-800 mb-8">Accessories</h2>
       <div id="accessoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
@@ -209,8 +207,8 @@
       };
 
       try {
-        await supabase.from('orders').insert(orderData);
-        alert("✅ Order confirmed! We will contact you soon for shipping details.");
+        await supabase.from('merch-sales').insert(orderData);
+        alert("✅ Order confirmed! We will contact you soon for shipping.");
         document.getElementById('successSection').classList.add('hidden');
       } catch (err) {
         alert("Error saving order: " + err.message);
