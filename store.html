@@ -9,8 +9,18 @@
   <script src="https://js.stripe.com/v3/"></script>
   <style>
     .cart-item { border-bottom: 1px solid #e5e7eb; padding: 1rem 0; }
-    .menu-btn { padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.25); font-size: 0.95rem; }
-    .menu-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
+    .menu-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      font-size: 0.95rem;
+    }
+    .menu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
     .home-btn { background: linear-gradient(to right, #22c55e, #16a34a); color: white; }
     .about-btn { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; }
     .benefits-btn { background: linear-gradient(to right, #f59e0b, #d97706); color: white; }
@@ -18,7 +28,13 @@
     .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
     .merch-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
     .featured-btn { background: linear-gradient(to right, #8b5cf6, #6366f1); color: white; }
-    .category-btn { padding: 0.75rem 2rem; border-radius: 9999px; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .category-btn {
+      padding: 0.75rem 2rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
     .apparel-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
     .accessories-btn { background: linear-gradient(to right, #8b5cf6, #6366f1); color: white; }
   </style>
@@ -55,9 +71,52 @@
     </div>
   </header>
 
-  <!-- SUCCESS MESSAGE -->
-  <div id="successMessage" class="hidden bg-green-600 text-white text-center py-6 font-bold text-2xl shadow-lg">
-    Success! Thank you for your order!
+  <!-- SUCCESS + SHIPPING FORM -->
+  <div id="successSection" class="hidden bg-green-600 text-white py-12">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <p class="text-3xl font-bold">🎉 Thank you for your purchase!</p>
+      <p class="mt-4 text-xl">Please provide your shipping details so we can prepare your order.</p>
+
+      <form id="shippingForm" class="mt-10 max-w-lg mx-auto bg-white text-gray-900 rounded-2xl p-8 shadow-2xl">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-medium mb-1">First Name</label>
+            <input type="text" id="firstName" required class="w-full border border-gray-300 rounded-lg p-3">
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Last Name</label>
+            <input type="text" id="lastName" required class="w-full border border-gray-300 rounded-lg p-3">
+          </div>
+        </div>
+        <div class="mt-4">
+          <label class="block font-medium mb-1">Street Address</label>
+          <input type="text" id="address" required class="w-full border border-gray-300 rounded-lg p-3">
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label class="block font-medium mb-1">City</label>
+            <input type="text" id="city" required class="w-full border border-gray-300 rounded-lg p-3">
+          </div>
+          <div>
+            <label class="block font-medium mb-1">State / Province</label>
+            <input type="text" id="state" required class="w-full border border-gray-300 rounded-lg p-3">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label class="block font-medium mb-1">ZIP / Postal Code</label>
+            <input type="text" id="zip" required class="w-full border border-gray-300 rounded-lg p-3">
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Phone Number</label>
+            <input type="tel" id="phone" required class="w-full border border-gray-300 rounded-lg p-3">
+          </div>
+        </div>
+        <button type="submit" class="w-full mt-8 bg-orange-600 text-white font-bold py-4 rounded-xl hover:bg-orange-700">
+          Submit Shipping Info & Confirm Order
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- BANNER -->
@@ -77,13 +136,15 @@
     <a href="#accessories-section" class="category-btn accessories-btn text-lg">🕶️ Accessories</a>
   </div>
 
-  <!-- MAIN -->
+  <!-- MAIN CONTENT -->
   <main class="flex-grow max-w-7xl mx-auto px-6 pb-12">
+    <!-- APPAREL SECTION -->
     <section id="apparel-section" class="mb-16">
       <h2 class="text-4xl font-black text-orange-800 mb-8">Apparel</h2>
       <div id="apparelGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
     </section>
 
+    <!-- ACCESSORIES SECTION -->
     <section id="accessories-section">
       <h2 class="text-4xl font-black text-orange-800 mb-8">Accessories</h2>
       <div id="accessoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
@@ -113,38 +174,74 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const supabase = createClient('https://bxoqhmfnseskwqkywppg.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc');
-    const stripe = Stripe('pk_test_51To9k9EKJ8nt65pkpZVtBuN4die3aGxftK7KcTbuxemAyXiRU071DGahDmoPMhm1nFTk3bF3xbe3zPb9OPnSDasH00w0pxlNuD');
+    const supabase = createClient(
+      'https://bxoqhmfnseskwqkywppg.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4b3FobWZuc2Vza3dxa3l3cHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mjk4MzgsImV4cCI6MjA3NjUwNTgzOH0.vnzlMkgkA0bOpFSw2JN_b3GjrxWK3S85yC1WGeoOUZc'
+    );
+    const stripe = Stripe('pk_test_51SKhZj2WyyY6hPDEpILctCkaS4KOIdG2HOY1FQCvH32Z4LJcDQcPYzunaQHczLu1qQM1mOMuLytHPWTyLmYDufMZ00JODfXiiW');
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
     function checkSuccessRedirect() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('redirect_status') === 'succeeded') {
-        const successDiv = document.getElementById('successMessage');
-        successDiv.classList.remove('hidden');
+        document.getElementById('successSection').classList.remove('hidden');
         cart = [];
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartCount();
         window.history.replaceState({}, document.title, window.location.pathname);
-        setTimeout(() => successDiv.classList.add('hidden'), 10000);
       }
     }
+
+    document.getElementById('shippingForm').onsubmit = async (e) => {
+      e.preventDefault();
+
+      const orderData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        zip: document.getElementById('zip').value,
+        phone: document.getElementById('phone').value,
+        items: cart,
+        total: cart.reduce((sum, i) => sum + i.price * i.quantity, 0),
+        date: new Date().toISOString()
+      };
+
+      try {
+        await supabase.from('orders').insert(orderData);
+        alert("✅ Order confirmed! We will contact you soon for shipping details.");
+        document.getElementById('successSection').classList.add('hidden');
+      } catch (err) {
+        alert("Error saving order: " + err.message);
+      }
+    };
 
     async function loadBranding() {
       const subdomain = window.location.hostname.split('.')[0];
       if (!subdomain || subdomain === 'www' || subdomain === 'rhythm-deck-music') return;
       try {
-        const { data } = await supabase.from('profiles').select('logo_url, banner_url').eq('subdomain', subdomain).single();
+        const { data } = await supabase
+          .from('profiles')
+          .select('logo_url, banner_url')
+          .eq('subdomain', subdomain)
+          .single();
         if (data) {
           if (data.logo_url) document.getElementById('currentLogoPreview').src = data.logo_url;
           if (data.banner_url) document.getElementById('userBannerSection').style.backgroundImage = `url('${data.banner_url}')`;
         }
-      } catch (err) { console.error(err); }
+      } catch (err) {
+        console.error('Branding load error:', err);
+      }
     }
 
     async function loadProducts() {
       const subdomain = window.location.hostname.split('.')[0];
-      const { data: profile } = await supabase.from('profiles').select('id').eq('subdomain', subdomain).single();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('subdomain', subdomain)
+        .single();
 
       let query = supabase.from('merch_products').select('id, name, description, image_url, variants, category').order('created_at', { ascending: false });
       if (profile) query = query.eq('user_id', profile.id);
@@ -170,7 +267,9 @@
                 ${variantOptions || '<option>No variants</option>'}
               </select>
               <button class="add-to-cart w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-bold py-3 rounded-lg transition"
-                      data-id="${product.id}" data-name="${product.name}" data-image="${imgSrc}">
+                      data-id="${product.id}"
+                      data-name="${product.name}"
+                      data-image="${imgSrc}">
                 Add to Cart
               </button>
             </div>
