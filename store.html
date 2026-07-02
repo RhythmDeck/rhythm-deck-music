@@ -28,6 +28,20 @@
     .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
     .merch-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
     .featured-btn { background: linear-gradient(to right, #8b5cf6, #6366f1); color: white; }
+    .category-btn {
+      padding: 0.75rem 2rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .apparel-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
+    .accessories-btn { background: linear-gradient(to right, #8b5cf6, #6366f1); color: white; }
+    .sticky-cart {
+      position: sticky;
+      top: 20px;
+      z-index: 40;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen">
@@ -114,35 +128,45 @@
     </div>
   </div>
 
-  <!-- BANNER -->
-  <section class="relative bg-black overflow-hidden" style="aspect-ratio: 16 / 9; max-height: 700px;">
-    <div id="userBannerSection" class="w-full h-full bg-no-repeat bg-center" style="background-image: url('merch-banner.jpg'); background-size: contain;"></div>
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/30">
-      <h1 class="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-center drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)] px-4">MERCH STORE</h1>
-    </div>
-    <div class="absolute bottom-8 left-6 sm:left-8 z-10">
-      <img id="currentLogoPreview" src="logo-1-sm.jpg" alt="Store Logo" class="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full object-cover border-8 border-white shadow-2xl">
-    </div>
-  </section>
+  <div class="flex max-w-7xl mx-auto px-6 gap-8">
+    <!-- PRODUCTS -->
+    <div class="flex-1">
+      <!-- CATEGORY BUTTONS -->
+      <div class="py-8 flex flex-wrap gap-4 justify-center">
+        <a href="#apparel-section" class="category-btn apparel-btn text-lg">👕 Apparel</a>
+        <a href="#accessories-section" class="category-btn accessories-btn text-lg">🕶️ Accessories</a>
+      </div>
 
-  <!-- CATEGORY BUTTONS -->
-  <div class="max-w-7xl mx-auto px-6 py-8 flex flex-wrap gap-4 justify-center">
-    <a href="#apparel-section" class="category-btn apparel-btn text-lg">👕 Apparel</a>
-    <a href="#accessories-section" class="category-btn accessories-btn text-lg">🕶️ Accessories</a>
+      <!-- APPAREL SECTION -->
+      <section id="apparel-section" class="mb-16">
+        <h2 class="text-4xl font-black text-orange-800 mb-8">Apparel</h2>
+        <div id="apparelGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+      </section>
+
+      <!-- ACCESSORIES SECTION -->
+      <section id="accessories-section">
+        <h2 class="text-4xl font-black text-orange-800 mb-8">Accessories</h2>
+        <div id="accessoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+      </section>
+    </div>
+
+    <!-- STICKY CART -->
+    <div class="w-80 hidden lg:block">
+      <div class="sticky-cart bg-white rounded-2xl shadow-xl p-6">
+        <h3 class="font-bold text-xl mb-4">Your Cart</h3>
+        <div id="stickyCartItems" class="space-y-4 mb-6 max-h-96 overflow-y-auto"></div>
+        <div class="border-t pt-4">
+          <div class="flex justify-between font-bold text-lg">
+            <span>Total:</span>
+            <span id="stickyCartTotal">$0.00</span>
+          </div>
+        </div>
+        <button onclick="document.getElementById('cartBtn').click()" class="w-full mt-6 bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-3 rounded-lg">
+          View Full Cart & Checkout
+        </button>
+      </div>
+    </div>
   </div>
-
-  <!-- MAIN CONTENT -->
-  <main class="flex-grow max-w-7xl mx-auto px-6 pb-12">
-    <section id="apparel-section" class="mb-16">
-      <h2 class="text-4xl font-black text-orange-800 mb-8">Apparel</h2>
-      <div id="apparelGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
-    </section>
-
-    <section id="accessories-section">
-      <h2 class="text-4xl font-black text-orange-800 mb-8">Accessories</h2>
-      <div id="accessoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
-    </section>
-  </main>
 
   <!-- FOOTER -->
   <footer class="bg-black text-white mt-auto p-6 text-center">
