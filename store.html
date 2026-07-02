@@ -185,8 +185,8 @@
       e.preventDefault();
 
       const orderData = {
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
+        firstname: document.getElementById('firstName').value,
+        lastname: document.getElementById('lastName').value,
         address: document.getElementById('address').value,
         city: document.getElementById('city').value,
         state: document.getElementById('state').value,
@@ -197,7 +197,7 @@
         date: new Date().toISOString()
       };
 
-      console.log("Saving order:", orderData); // Debug
+      console.log("Saving order:", orderData);
 
       try {
         const { data, error } = await supabase.from('merch_sales').insert(orderData).select();
