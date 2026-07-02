@@ -28,6 +28,11 @@
     .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
     .merch-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
     .featured-btn { background: linear-gradient(to right, #8b5cf6, #6366f1); color: white; }
+    .sticky-cart {
+      position: sticky;
+      top: 20px;
+      z-index: 40;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen">
@@ -80,6 +85,10 @@
           </div>
         </div>
         <div class="mt-4">
+          <label class="block font-medium mb-1">Email Address</label>
+          <input type="email" id="email" required class="w-full border border-gray-300 rounded-lg p-3">
+        </div>
+        <div class="mt-4">
           <label class="block font-medium mb-1">Street Address</label>
           <input type="text" id="address" required class="w-full border border-gray-300 rounded-lg p-3">
         </div>
@@ -121,24 +130,45 @@
     </div>
   </section>
 
-  <!-- CATEGORY BUTTONS -->
-  <div class="max-w-7xl mx-auto px-6 py-8 flex flex-wrap gap-4 justify-center">
-    <a href="#apparel-section" class="category-btn apparel-btn text-lg">👕 Apparel</a>
-    <a href="#accessories-section" class="category-btn accessories-btn text-lg">🕶️ Accessories</a>
+  <div class="flex max-w-7xl mx-auto px-6 gap-8">
+    <!-- PRODUCTS -->
+    <div class="flex-1">
+      <!-- CATEGORY BUTTONS -->
+      <div class="py-8 flex flex-wrap gap-4 justify-center">
+        <a href="#apparel-section" class="category-btn apparel-btn text-lg">👕 Apparel</a>
+        <a href="#accessories-section" class="category-btn accessories-btn text-lg">🕶️ Accessories</a>
+      </div>
+
+      <!-- APPAREL SECTION -->
+      <section id="apparel-section" class="mb-16">
+        <h2 class="text-4xl font-black text-orange-800 mb-8">Apparel</h2>
+        <div id="apparelGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+      </section>
+
+      <!-- ACCESSORIES SECTION -->
+      <section id="accessories-section">
+        <h2 class="text-4xl font-black text-orange-800 mb-8">Accessories</h2>
+        <div id="accessoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+      </section>
+    </div>
+
+    <!-- STICKY CART -->
+    <div class="w-80 hidden lg:block">
+      <div class="sticky-cart bg-white rounded-2xl shadow-xl p-6">
+        <h3 class="font-bold text-xl mb-4">Your Cart</h3>
+        <div id="stickyCartItems" class="space-y-4 mb-6 max-h-96 overflow-y-auto"></div>
+        <div class="border-t pt-4">
+          <div class="flex justify-between font-bold text-lg">
+            <span>Total:</span>
+            <span id="stickyCartTotal">$0.00</span>
+          </div>
+        </div>
+        <button onclick="document.getElementById('cartBtn').click()" class="w-full mt-6 bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-3 rounded-lg">
+          View Full Cart & Checkout
+        </button>
+      </div>
+    </div>
   </div>
-
-  <!-- MAIN CONTENT -->
-  <main class="flex-grow max-w-7xl mx-auto px-6 pb-12">
-    <section id="apparel-section" class="mb-16">
-      <h2 class="text-4xl font-black text-orange-800 mb-8">Apparel</h2>
-      <div id="apparelGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
-    </section>
-
-    <section id="accessories-section">
-      <h2 class="text-4xl font-black text-orange-800 mb-8">Accessories</h2>
-      <div id="accessoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
-    </section>
-  </main>
 
   <!-- FOOTER -->
   <footer class="bg-black text-white mt-auto p-6 text-center">
@@ -203,7 +233,7 @@
         const { data, error } = await supabase.from('merch_sales').insert(orderData).select();
         if (error) throw error;
         console.log("Order saved successfully:", data);
-        alert("✅ Order confirmed! Check merch_sales table.");
+        alert("✅ Order confirmed! We will contact you soon.");
         document.getElementById('successSection').classList.add('hidden');
       } catch (err) {
         console.error(err);
