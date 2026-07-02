@@ -9,8 +9,25 @@
   <script src="https://js.stripe.com/v3/"></script>
   <style>
     .cart-item { border-bottom: 1px solid #e5e7eb; padding: 1rem 0; }
-    .menu-btn { padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.25); font-size: 0.95rem; }
-    .menu-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
+    .menu-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      font-size: 0.95rem;
+    }
+    .menu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+    .home-btn { background: linear-gradient(to right, #22c55e, #16a34a); color: white; }
+    .about-btn { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; }
+    .benefits-btn { background: linear-gradient(to right, #f59e0b, #d97706); color: white; }
+    .pricing-btn { background: linear-gradient(to right, #ec4899, #db2777); color: white; }
+    .contact-btn { background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white; }
+    .merch-btn { background: linear-gradient(to right, #f97316, #ea580c); color: white; }
+    .featured-btn { background: linear-gradient(to right, #8b5cf6, #6366f1); color: white; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen">
@@ -180,11 +197,16 @@
         date: new Date().toISOString()
       };
 
+      console.log("Saving order:", orderData); // Debug
+
       try {
-        await supabase.from('merch_sales').insert(orderData);
-        alert("✅ Order confirmed! We will contact you soon for shipping.");
+        const { data, error } = await supabase.from('merch_sales').insert(orderData).select();
+        if (error) throw error;
+        console.log("Order saved successfully:", data);
+        alert("✅ Order confirmed! Check merch_sales table.");
         document.getElementById('successSection').classList.add('hidden');
       } catch (err) {
+        console.error(err);
         alert("Error saving order: " + err.message);
       }
     };
