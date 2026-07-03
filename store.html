@@ -213,7 +213,6 @@
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('redirect_status') === 'succeeded') {
         document.getElementById('successSection').classList.remove('hidden');
-        // Do NOT clear cart here - keep it for the shipping form
         updateCartCount();
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -225,6 +224,7 @@
       const orderData = {
         firstname: document.getElementById('firstName').value,
         lastname: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
         address: document.getElementById('address').value,
         city: document.getElementById('city').value,
         state: document.getElementById('state').value,
@@ -243,15 +243,15 @@
 
         // Send email
         try {
-          await supabase.functions.invoke('send-order-email', {
-            body: { orderData }
+          const emailResponse = await supabase.functions.invoke('send-order-email', {
+            body: JSON.stringify({ orderData })
           });
-          console.log("Email sent");
+          console.log("Email response:", emailResponse);
         } catch (emailErr) {
-          console.error("Email failed:", emailErr);
+          console.error("Email send failed:", emailErr);
         }
 
-        alert("✅ Order confirmed! Check merch_sales table.");
+        alert("✅ Order confirmed! Check your email for confirmation.");
         document.getElementById('successSection').classList.add('hidden');
         cart = [];
         localStorage.setItem('cart', JSON.stringify(cart));
