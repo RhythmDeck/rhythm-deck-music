@@ -213,8 +213,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('redirect_status') === 'succeeded') {
         document.getElementById('successSection').classList.remove('hidden');
-        cart = [];
-        localStorage.setItem('cart', JSON.stringify(cart));
+        // Do NOT clear cart here - keep it for the shipping form
         updateCartCount();
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -241,7 +240,6 @@
       try {
         const { data, error } = await supabase.from('merch_sales').insert(orderData).select();
         if (error) throw error;
-        console.log("Order saved successfully:", data);
 
         // Send email
         try {
@@ -250,11 +248,14 @@
           });
           console.log("Email sent");
         } catch (emailErr) {
-          console.error("Email send failed:", emailErr);
+          console.error("Email failed:", emailErr);
         }
 
         alert("✅ Order confirmed! Check merch_sales table.");
         document.getElementById('successSection').classList.add('hidden');
+        cart = [];
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
       } catch (err) {
         console.error(err);
         alert("Error saving order: " + err.message);
