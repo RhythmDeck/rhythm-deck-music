@@ -242,6 +242,17 @@
         const { data, error } = await supabase.from('merch_sales').insert(orderData).select();
         if (error) throw error;
         console.log("Order saved successfully:", data);
+
+        // Send email
+        try {
+          await supabase.functions.invoke('send-order-email', {
+            body: { orderData }
+          });
+          console.log("Email sent");
+        } catch (emailErr) {
+          console.error("Email send failed:", emailErr);
+        }
+
         alert("✅ Order confirmed! Check merch_sales table.");
         document.getElementById('successSection').classList.add('hidden');
       } catch (err) {
